@@ -248,7 +248,6 @@ class NetMngr(threading.Thread):
                                 while True:
                                     outBuffer = self.outBufferQue.get(block = False)
                                     self.logger.debug('Sending: {}'.format(outBuffer))
-                                    print(outBuffer)
                                     self.srvSock.sendall(outBuffer)
                             except queue.Empty:
                                 pass #No more data to send in queue

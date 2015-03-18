@@ -104,12 +104,12 @@ try:
                 print('Receiving: {}'.format(receivedBytes))
         
                 if receivedBytes.startswith(EVT):
-                    response = REVT + b'OK' + END
+                    response = REVT + b'OKE' + END
                     print('Sending: {}'.format(response))
                     devSocket.sendall(response)
 
                 elif receivedBytes.startswith(EVS):
-                    response = REVS + b'OK' + END
+                    response = REVS + b'OKE' + END
                     print('Sending: {}'.format(response))
                     devSocket.sendall(response)
 

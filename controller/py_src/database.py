@@ -91,8 +91,6 @@ class DataBase(object):
         Save events in database when no connection to server.
         '''
 
-        print(event)
-
         if event['personId']:
             personId = event['personId']
         else:

@@ -89,11 +89,21 @@ class EventMngr(threading.Thread):
                 self.checkExit()
                 self.netMngr.sendEvent(event)
                 try:
+                    eventResponse = None
                     eventResponse = self.netToEvent.get(timeout=WAIT_RESP_TIME)
-                    #We should check the response
-                    print('Getting Event Response: {}.'.format(eventResponse))
+                    if eventResponse == 'OK':
+                        self.logger.debug('The server confirms the reception of the event.')
+                    else:
+                        raise queue.Empty
                 except queue.Empty:
-                    self.logger.warning('No response from server, saving event in local DB')
+                
+                    if eventResponse:
+                        logMsg = 'The server could not save the event, '
+                    else:
+                        logMsg = 'No response from server, '
+                    logMsg += 'saving event in local DB'
+
+                    self.logger.warning(logMsg)
                     self.dataBase.saveEvent(event)
                     self.checkExit()
                     
@@ -174,10 +184,16 @@ class ReSender(threading.Thread):
                 self.netMngr.reSendEvents(eventList)
                 try:
                     eventsResponse = self.netToReSnd.get(timeout=WAIT_RESP_TIME)
-                    #We should check the response here
-                    print('Getting Events Response: {}.'.format(eventsResponse))
-                    self.dataBase.delEvents(eventIdList)
-                    noConnection = False
+                    if eventsResponse == 'OK':
+                        self.logger.debug('The server confirms the reception of the events.')
+                        self.dataBase.delEvents(eventIdList)
+                        noConnection = False
+                    else:
+                        logMsg = ('The server could not save the events correctly, '
+                                  'saving the event in local DB.'
+                                 )
+                        self.logger.warning(logMsg)
+
                 except queue.Empty:
                     logMsg = ("Sleeping for {} secs to retry sending events."
                               "".format(self.REAL_RE_SEND_TIME)
