@@ -89,10 +89,11 @@ class EventMngr(threading.Thread):
                 self.checkExit()
                 self.netMngr.sendEvent(event)
                 try:
-                    eventResponse = self.netToEvent.get(timeout=EXIT_CHECK_TIME)
+                    eventResponse = self.netToEvent.get(timeout=WAIT_RESP_TIME)
+                    #We should check the response
                     print('Getting Event Response: {}.'.format(eventResponse))
                 except queue.Empty:
-                    print('As no response from server, saving event in DB.')
+                    self.logger.warning('No response from server, saving event in local DB')
                     self.dataBase.saveEvent(event)
                     self.checkExit()
                     
@@ -100,9 +101,6 @@ class EventMngr(threading.Thread):
                         self.resenderAlive.set()
                         reSender = ReSender(self.netMngr, self.netToReSnd, self.resenderAlive, self.exitFlag)
                         reSender.start()
-
-                    
-
     
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
@@ -147,6 +145,13 @@ class ReSender(threading.Thread):
         self.logger = logging.getLogger('Controller')
 
 
+        #Calculating turns to sleep EXIT_CHECK_TIME
+        self.SLEEP_TURNS = RE_SEND_TIME // EXIT_CHECK_TIME
+
+        #Calculating real resend time
+        self.REAL_RE_SEND_TIME = self.SLEEP_TURNS * EXIT_CHECK_TIME
+
+
     def checkExit(self):
         '''
         Check if the main thread ask this thread to exit using exitFlag
@@ -168,16 +173,19 @@ class ReSender(threading.Thread):
             while noConnection:
                 self.netMngr.reSendEvents(eventList)
                 try:
-                    eventsResponse = self.netToReSnd.get(timeout=EXIT_CHECK_TIME)
+                    eventsResponse = self.netToReSnd.get(timeout=WAIT_RESP_TIME)
+                    #We should check the response here
                     print('Getting Events Response: {}.'.format(eventsResponse))
                     self.dataBase.delEvents(eventIdList)
                     noConnection = False
                 except queue.Empty:
-                    print('As no response sleeping...zzz')
-                    for i in range(5):
+                    logMsg = ("Sleeping for {} secs to retry sending events."
+                              "".format(self.REAL_RE_SEND_TIME)
+                             )
+                    self.logger.info(logMsg) 
+                    for i in range(self.SLEEP_TURNS):
                         self.checkExit()
-                        time.sleep(1)
-
+                        time.sleep(EXIT_CHECK_TIME)
 
         self.resenderAlive.clear()
         sys.exit(self.exitCode)
