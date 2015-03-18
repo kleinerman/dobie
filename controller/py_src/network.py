@@ -191,10 +191,14 @@ class NetMngr(threading.Thread):
         '''
         #Event response
         if msg.startswith(REVT):
-            self.netToEvent.put(msg)
+            response = msg.strip(REVT+END)
+            response = response.decode('utf8')
+            self.netToEvent.put(response)
 
         elif msg.startswith(REVS):
-            self.netToReSnd.put(msg)
+            response = msg.strip(REVS+END)
+            response = response.decode('utf8')
+            self.netToReSnd.put(response)
         
 
 
