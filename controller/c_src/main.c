@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     // array with all system threads: two thread per card reader, one per button and one per pin state
     thread = (pthread_t *) malloc(sizeof(pthread_t) * (number_of_readers + 1 + number_of_state));
 
-    /* array of door struct. Each struct store the pin numbers. 
+    /* array of door struct. Each struct store the pin numbers.
      * The array is filled with the parser function
      */
     door = (door_t *)malloc(sizeof(door_t) * number_of_doors);
@@ -60,5 +60,4 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-
 

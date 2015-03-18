@@ -17,9 +17,9 @@
 int get_number_of(int argc, char** argv, const char *str) {
     int i;
     int count = 0;
-    
+
     for (i=1; i<argc; i++) {
-        if ( strcmp(argv[i], str) == 0 )         
+        if ( strcmp(argv[i], str) == 0 )
             count++;
     }
 
@@ -27,13 +27,13 @@ int get_number_of(int argc, char** argv, const char *str) {
 }
 
 
-/*  
+/*
  * Parses the command-line arguments (GPIO pins) and fill the door structures
  * A negative attribute means that it is not in use
  */
 int parser(int argc, char **argv, door_t *door) {
     int i, j, number_of_doors;
-   
+
     // the arguments should start with door ID
     if ( strcmp(argv[1], "--door") != 0 ) {
         printf("Error: You should declare a door ID before declaring GPIO pins\n");
@@ -53,7 +53,7 @@ int parser(int argc, char **argv, door_t *door) {
         door[i].button = -1;
         door[i].state = -1;
     }
-    
+
     // parses the arguments and fills the door structures
     j = -1;
     for (i=1; i<argc; i=i+2) { // argument(i) value(i+1) argument(i+2)
@@ -65,7 +65,7 @@ int parser(int argc, char **argv, door_t *door) {
              door[j].i0 = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--i1") == 0 )
              door[j].i1 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--o0") == 0 ) 
+         if ( strcmp(argv[i], "--o0") == 0 )
              door[j].o0 = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--o1") == 0 )
              door[j].o1 = atoi(argv[i+1]);
@@ -79,7 +79,7 @@ int parser(int argc, char **argv, door_t *door) {
 }
 
 
-/* 
+/*
  * Export the GPIO to userspace. On success it returns 0, else returns -1
  * In a near future, this function will be implemented in Python
  */
@@ -94,7 +94,7 @@ int export_gpio(unsigned int gpio) {
 
     // get the length of the gpio string
     len = sprintf(str_gpio, "%d", gpio);
-    
+
     if ( write(fd, str_gpio, len) == 0) {
         fprintf(stderr,"Error(%d) writing /sys/class/gpio/export: %s\n", errno, strerror(errno));
         return -1;
@@ -106,7 +106,7 @@ int export_gpio(unsigned int gpio) {
 }
 
 
-/* 
+/*
  * Set the gpio direction: IN(1) or OUT(0)
  * It returns 0 on success
  * ++ In a near future, this function will be implemented in Python ++
@@ -127,8 +127,8 @@ int gpio_set_direction(unsigned int gpio, unsigned int direction) {
         fprintf(stderr,"Error(%d) writing %s: %s\n", errno, filename, strerror(errno));
         return -1;
     }
-    
-    close(fd);   
+
+    close(fd);
     return 0;
 }
 
@@ -300,7 +300,7 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
             args->mq = mq;
 
             pthread_create(thread, NULL, read_card, (void *)args);
-            
+
             thread++;
             args++;
         }
