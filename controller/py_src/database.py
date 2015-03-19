@@ -147,9 +147,10 @@ class DataBase(object):
                            'latchType' : evtTuple[4],
                            'personId' : evtTuple[5],
                            'side' : evtTuple[6],
-                           'allowed' : evtTuple[7],
+                           'allowed' : bool(evtTuple[7]),
                            'notReason' : evtTuple[8]
                           }
+
                 evtDictList.append(evtDict)
                 evtIdList.append(evtTuple[0])
             

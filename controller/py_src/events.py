@@ -193,7 +193,7 @@ class ReSender(threading.Thread):
                                   'saving the event in local DB.'
                                  )
                         self.logger.warning(logMsg)
-
+                        raise queue.Empty
                 except queue.Empty:
                     logMsg = ("Sleeping for {} secs to retry sending events."
                               "".format(self.REAL_RE_SEND_TIME)
