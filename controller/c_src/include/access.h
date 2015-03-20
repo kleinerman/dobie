@@ -37,5 +37,6 @@ int parser(int argc, char **argv, door_t *door);
 int get_number_of(int argc, char** argv, const char *str);
 void* read_card (void *args);
 int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthread_t *thread , mqd_t mq);
+int buttons (int number_of_doors, door_t *door, pthread_t *thread, mqd_t mq);
 
 #endif

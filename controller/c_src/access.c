@@ -310,3 +310,22 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
     return 0;
 }
 
+
+int buttons (int number_of_doors, door_t *door, pthread_t *thread, mqd_t mq) {
+    int i;
+    int j;
+    struct button_t *button, *aux_index;
+
+    button = (struct button_t *)malloc(sizeof(struct button_t) * number_of_buttons);
+
+    for (i=0 ; i<number_of_doors; i++) {
+        if (door[i].button != -1) {
+            button[j].door_id = door[i].id;
+            button[j].gpio = door[i].button;
+            j++;
+        }
+    }
+
+    return 0;
+}
+
