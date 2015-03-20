@@ -76,8 +76,49 @@ class Controller(object):
         #By default our exit code will be success
         self.exitCode = 0
 
+        self.doorsParams = self.dataBase.getDoorsParams()
 
         print(self.dataBase.getDoorsParams())
+
+
+    def getDoorIfaceArgs(self):
+        '''
+        fsfsdfds
+        '''
+
+
+        doorIfaceArgs = ''
+
+        for doorParams in self.doorsParams:
+
+            if doorTuple[0]: 
+                doorIfaceArgs += '--door {} '.format(doorTuple[0])
+            else:
+                self.logger.error('Invalid row in Door table, skiping to the next row.')
+                continue
+
+            if doorTuple[1]:
+                doorIfaceArgs += '--i0 {} '.format(doorTuple[1])
+
+            if doorTuple[2]:
+                doorIfaceArgs += '--i1 {} '.format(doorTuple[2])
+
+            if doorTuple[3]:
+                doorIfaceArgs += '--o0 {} '.format(doorTuple[3])
+
+            if doorTuple[4]:
+                doorIfaceArgs += '--o1 {} '.format(doorTuple[4])
+
+            if doorTuple[5]:
+                doorIfaceArgs += '--btnIn {} '.format(doorTuple[5])
+
+            if doorTuple[6]:
+                doorIfaceArgs += '--stateIn {} '.format(doorTuple[6])
+
+
+
+    
+
 
 
     def sigtermHandler(self, signal, frame):
