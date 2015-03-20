@@ -39,16 +39,16 @@ for cardNum in cardNumList:
 
 
 
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Door(i0In, i1In, o0In, o1In, iBtnIn, oBtnIn, mgntOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, btnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
 
 
 

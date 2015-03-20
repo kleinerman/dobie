@@ -77,6 +77,7 @@ class Controller(object):
         self.exitCode = 0
 
 
+        print(self.dataBase.getDoorsParams())
 
 
     def sigtermHandler(self, signal, frame):
