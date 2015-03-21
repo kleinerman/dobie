@@ -311,8 +311,9 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
 }
 
 
-int buttons (int number_of_doors, door_t *door, pthread_t *thread, mqd_t mq) {
+int buttons (int number_of_doors, door_t *door, int number_of_buttons, pthread_t *thread, mqd_t mq) {
     char filename[40];
+    char message[50];
     int **bttn_tbl;
     int i;
     int j=0;
@@ -330,7 +331,13 @@ int buttons (int number_of_doors, door_t *door, pthread_t *thread, mqd_t mq) {
     for (i=0; i<number_of_buttons; i++)
         bttn_tbl[i] = (int *) malloc(sizeof(int) * 2);
 
-    //
+    // create a new epool instance
+    epfd = epoll_create(1);
+    if (epfd == -1) {
+        fprintf(stderr,"Error(%d) creating the epoll: %s\n", errno, strerror(errno));
+        exit(1);
+    }
+
     for (i=0; i<number_of_doors; i++) {
         if (door[i].button != -1) {     // if the door has button
 
@@ -353,23 +360,27 @@ int buttons (int number_of_doors, door_t *door, pthread_t *thread, mqd_t mq) {
 
             ev[j].events = EPOLLIN | EPOLLET | EPOLLPRI;
             ev[j].data.fd = bttn_tbl[j][1];
-            // Add the file descriptors to the interest list for epfd
+            // Add the file descriptor to the interest list for epfd
             epoll_ctl(epfd, EPOLL_CTL_ADD, bttn_tbl[j][1], &ev[j]); 
 
+            j++;
+
+        }
+    }
+ 
+    epoll_wait(epfd, events, number_of_buttons, -1);  // first time it triggers with current state, so ignore it
+    while(1) {
+        epoll_wait(epfd, events, number_of_buttons, -1); // wait for an evente. Only fetch up one event
+        for (j=0; j< number_of_buttons; j++) {
+            if (bttn_tbl[j][1] == events[0].data.fd) {
+                sprintf(message, "%d;button_pressed", bttn_tbl[j][0]);
+                // put the message into the queue
+                mq_send(mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
+                break;
+            }
         }
 
-        // create a new epool instance
-        epfd = epoll_create(1);
-        if (epfd == -1) {
-            fprintf(stderr,"Error(%d) creating the epoll: %s\n", errno, strerror(errno));
-            exit(1);
-        }
-
-        epoll_wait(epfd, events, number_of_buttons, -1);  // first time it triggers with current state, so ignore it
-
-
-
-
+    }
 
     return 0;
 }
