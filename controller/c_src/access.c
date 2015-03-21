@@ -312,19 +312,64 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
 
 
 int buttons (int number_of_doors, door_t *door, pthread_t *thread, mqd_t mq) {
+    char filename[40];
+    int **bttn_tbl;
     int i;
-    int j;
-    struct button_t *button, *aux_index;
+    int j=0;
+    int epfd; // epool file descriptor
+    struct epoll_event *ev;
+    struct epoll_event *events;
 
-    button = (struct button_t *)malloc(sizeof(struct button_t) * number_of_buttons);
+    ev = (struct epoll_event *)malloc(sizeof(struct epoll_event) * number_of_buttons);
+    events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * number_of_buttons);
 
-    for (i=0 ; i<number_of_doors; i++) {
-        if (door[i].button != -1) {
-            button[j].door_id = door[i].id;
-            button[j].gpio = door[i].button;
-            j++;
+    /* Allocate memory for a table. The table has 2 columns and many rows as the number of buttons.
+     * The 2 columns: the door_ID and file descriptor of the button.
+     */
+    bttn_tbl = (int **) malloc(sizeof(int *) * number_of_buttons);
+    for (i=0; i<number_of_buttons; i++)
+        bttn_tbl[i] = (int *) malloc(sizeof(int) * 2);
+
+    //
+    for (i=0; i<number_of_doors; i++) {
+        if (door[i].button != -1) {     // if the door has button
+
+            bttn_tbl[j][0] = door[i].id; // save the door id in the first col of the table
+
+            // export the gpio to the filesystem
+            if (export_gpio(door[i].button) == -1) exit(1);
+            // set the gpio as an input
+            if (gpio_set_direction(door[i].button, IN) == -1 ) exit(1);
+            // set the edge to wait for
+            if ( gpio_set_edge(door[i].button, FALLING) == -1 ) exit(1);
+
+            // save the button fd in the second col of the table
+            sprintf(filename, "/sys/class/gpio/gpio%d/value", door[i].button);
+            bttn_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
+            if (bttn_tbl[j][1] == -1) {
+                fprintf(stderr,"Error(%d) opening %s: %s\n", errno, filename, strerror(errno));
+                exit(1);
+            }
+
+            ev[j].events = EPOLLIN | EPOLLET | EPOLLPRI;
+            ev[j].data.fd = bttn_tbl[j][1];
+            // Add the file descriptors to the interest list for epfd
+            epoll_ctl(epfd, EPOLL_CTL_ADD, bttn_tbl[j][1], &ev[j]); 
+
         }
-    }
+
+        // create a new epool instance
+        epfd = epoll_create(1);
+        if (epfd == -1) {
+            fprintf(stderr,"Error(%d) creating the epoll: %s\n", errno, strerror(errno));
+            exit(1);
+        }
+
+        epoll_wait(epfd, events, number_of_buttons, -1);  // first time it triggers with current state, so ignore it
+
+
+
+
 
     return 0;
 }
