@@ -186,83 +186,33 @@ class DataBase(object):
         '''
         Get the arguments of doors to call doorIface external program.
         '''
+
+        doorParams = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'btnIn', 
+                        'stateIn', 'rlseOut', 'bzzrOut']
         
-        sqlSentence = ("SELECT id, i0In, i1In, o0In, o1In, btnIn, stateIn, "
-                       "rlseOut, bzzrOut FROM Door"
+        sqlSentence = ("SELECT {}, {}, {}, {}, {}, {}, {}, {}, {} "
+                       "FROM Door".format(*doorParams)
                       )
 
         self.cursor.execute(sqlSentence)
         doorTupleList = self.cursor.fetchall()
         self.connection.commit()
 
-        #doorIfaceArgs = ''
 
         doorsParamsList = []
 
         for doorTuple in doorTupleList:
             
-            doorParamDict = {}
+            doorParamsDict = {}
 
-            '''    
+            for i, doorParam in enumerate(doorParams):
 
-            if doorTuple[0]: 
-                doorIfaceArgs += '--door {} '.format(doorTuple[0])
-            else:
-                self.logger.error('Invalid row in Door table, skiping to the next row.')
-                continue
+                doorParamsDict[doorParam] = doorTuple[i]
 
-            if doorTuple[1]:
-                doorIfaceArgs += '--i0 {} '.format(doorTuple[1])
 
-            if doorTuple[2]:
-                doorIfaceArgs += '--i1 {} '.format(doorTuple[2])
-
-            if doorTuple[3]:
-                doorIfaceArgs += '--o0 {} '.format(doorTuple[3])
-
-            if doorTuple[4]:
-                doorIfaceArgs += '--o1 {} '.format(doorTuple[4])
-
-            if doorTuple[5]:
-                doorIfaceArgs += '--btnIn {} '.format(doorTuple[5])
-
-            if doorTuple[6]:
-                doorIfaceArgs += '--stateIn {} '.format(doorTuple[6])
-
-            '''
+                #self.logger.error('Invalid row in Door table, skiping to the next row.')
             
-            if doorTuple[0]:
-                doorParamDict['id'] = format(doorTuple[0])
-            else:
-                self.logger.error('Invalid row in Door table, skiping to the next row.')
-                continue
-
-            if doorTuple[1]:
-                doorParamDict['i0In'] = format(doorTuple[1])
-
-            if doorTuple[2]:
-                doorParamDict['i1In'] = format(doorTuple[2])
-
-            if doorTuple[3]:
-                doorParamDict['o0In'] = format(doorTuple[3])
-
-            if doorTuple[4]:
-                doorParamDict['o1In'] = format(doorTuple[4])
-
-            if doorTuple[5]:
-                doorParamDict['btnIn'] = format(doorTuple[5])
-
-            if doorTuple[6]:
-                doorParamDict['stateIn'] = format(doorTuple[6])
-
-            if doorTuple[7]:
-                doorParamDict['rlseOut'] = format(doorTuple[7])
-
-            if doorTuple[8]:
-                doorParamDict['bzzrOut'] = format(doorTuple[8])
-
-            
-            doorsParamsList.append(doorParamDict)
+            doorsParamsList.append(doorParamsDict)
 
         return doorsParamsList
 
