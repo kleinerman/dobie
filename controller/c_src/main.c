@@ -15,6 +15,7 @@
 int main(int argc, char** argv) {
     door_t *door; // array of pointers to door type structures
     pthread_t *thread; // array of pointers to all threads created by this program
+    pthread_t b_thread; //
     int i; // auxiliar variable used in for cicles
     int number_of_doors = 0;
     int number_of_readers = 0;
@@ -55,14 +56,14 @@ int main(int argc, char** argv) {
     /* start listening the card readers and send to the main process a message with
      * door ID + card reader ID + card number
      */
-    start_readers(number_of_doors, number_of_readers, door, &thread, mq);
+    start_readers(number_of_doors, number_of_readers, door, thread, mq);
 
     /* start listening button pushes */
     b_args.number_of_doors = number_of_doors;
     b_args.number_of_buttons = number_of_buttons;
     b_args.door = door;
     b_args.mq = mq;
-    pthread_create(thread, NULL, buttons, (void *)&b_args);
+    pthread_create(&b_thread, NULL, buttons, (void *)&b_args);
 
 
     // waits  for  the  threads  to  terminate

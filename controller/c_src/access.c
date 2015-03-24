@@ -69,7 +69,7 @@ int parser(int argc, char **argv, door_t *door) {
              door[j].o0 = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--o1") == 0 )
              door[j].o1 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--button1") == 0 )
+         if ( strcmp(argv[i], "--button") == 0 )
              door[j].button = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--state") == 0 )
              door[j].state = atoi(argv[i+1]);
@@ -274,7 +274,7 @@ void *read_card (void *args) {
  * Each thread reads the card reader lines (D0 and D1), form the card number and
  * sends to the queue a message with the card number.
  */
-int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthread_t **thread, mqd_t mq) {
+int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthread_t *thread, mqd_t mq) {
     int i; // array index
     struct read_card_args *args; // thread arguments
 
@@ -288,8 +288,8 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
             args->side = 'i';
             args->mq = mq;
 
-            pthread_create(*thread, NULL, read_card, (void *)args);
-            *thread++;
+            pthread_create(thread, NULL, read_card, (void *)args);
+            thread++;
             args++;
         }
         if (door[i].o0 != -1 && door[i].o1 != -1 ) { // if the door has output card reader
@@ -299,9 +299,9 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
             args->side = 'o';
             args->mq = mq;
 
-            pthread_create(*thread, NULL, read_card, (void *)args);
+            pthread_create(thread, NULL, read_card, (void *)args);
 
-            *thread++;
+            thread++;
             args++;
         }
 
