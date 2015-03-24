@@ -29,14 +29,22 @@ struct read_card_args {
     mqd_t mq;                   // message queue descriptor
 };
 
+struct buttons_args {
+    int number_of_doors;
+    int number_of_buttons;
+    door_t *door;
+    mqd_t mq;
+};
+
+
 // function prototypes
 int export_gpio(unsigned int gpio);
 int gpio_set_direction(unsigned int gpio, unsigned int direction);
 int gpio_set_edge(unsigned int gpio, unsigned int edge);
 int parser(int argc, char **argv, door_t *door);
 int get_number_of(int argc, char** argv, const char *str);
-void* read_card (void *args);
-int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthread_t *thread , mqd_t mq);
-int buttons (int number_of_doors, door_t *door, int number_of_buttons, pthread_t *thread, mqd_t mq);
+void *read_card (void *args);
+int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthread_t **thread , mqd_t mq);
+void *buttons (void *b_args);
 
 #endif

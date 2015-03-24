@@ -20,7 +20,9 @@ int main(int argc, char** argv) {
     int number_of_readers = 0;
     int number_of_buttons = 0;
     int number_of_state = 0;
+    int number_of_threads;
     mqd_t mq; // message queue
+    struct buttons_args b_args;
 
     // open the message queue only for sending message to the main process
     // It must be created by the main process
@@ -37,10 +39,12 @@ int main(int argc, char** argv) {
     number_of_buttons = get_number_of(argc, argv, "--button");
     // get number of state pins
     number_of_state = get_number_of(argc, argv, "--state");
+    // number of thread: one thread per card reader, one for all button and one for all state pins
+    number_of_threads = number_of_readers + 1 + 1;
 
 
-    // array with all system threads: one thread per card reader, one per button and one per pin state
-    thread = (pthread_t *) malloc(sizeof(pthread_t) * (number_of_readers + 1 + 1));
+    // array with all system threads
+    thread = (pthread_t *) malloc(sizeof(pthread_t) * number_of_threads);
 
     /* array of door struct. Each struct store the pin numbers.
      * The array is filled with the parser function
@@ -51,11 +55,18 @@ int main(int argc, char** argv) {
     /* start listening the card readers and send to the main process a message with
      * door ID + card reader ID + card number
      */
-    start_readers(number_of_doors, number_of_readers, door, thread, mq);
+    start_readers(number_of_doors, number_of_readers, door, &thread, mq);
+
+    /* start listening button pushes */
+    b_args.number_of_doors = number_of_doors;
+    b_args.number_of_buttons = number_of_buttons;
+    b_args.door = door;
+    b_args.mq = mq;
+    pthread_create(thread, NULL, buttons, (void *)&b_args);
 
 
     // waits  for  the  threads  to  terminate
-    for (i = 0; i < (number_of_readers * 2 + number_of_buttons + number_of_state); i++)
+    for (i = 0; i < number_of_threads; i++)
         pthread_join(thread[i], NULL);
 
     return 0;
