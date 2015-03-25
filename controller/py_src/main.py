@@ -81,6 +81,9 @@ class Controller(object):
         print(self.dataBase.getDoorsParams())
 
 
+        print(self.dataBase.getDoorParamsNames())
+
+
     def getDoorIfaceArgs(self):
         '''
         fsfsdfds
