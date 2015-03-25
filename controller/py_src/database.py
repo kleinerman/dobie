@@ -185,34 +185,36 @@ class DataBase(object):
     def getDoorsParams(self):
         '''
         Get the arguments of doors to call doorIface external program.
+        dps = Door Parametters
+
         '''
 
-        doorParams = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'btnIn', 
+        dpsNames = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'btnIn', 
                         'stateIn', 'rlseOut', 'bzzrOut']
         
         sqlSentence = ("SELECT {}, {}, {}, {}, {}, {}, {}, {}, {} "
-                       "FROM Door".format(*doorParams)
+                       "FROM Door".format(*dpsNames)
                       )
 
         self.cursor.execute(sqlSentence)
-        doorTupleList = self.cursor.fetchall()
+        dpsTuplesList = self.cursor.fetchall()
         self.connection.commit()
 
 
-        doorsParamsList = []
+        dpsDictsList = []
 
-        for doorTuple in doorTupleList:
+        for dpsTuple in dpsTuplesList:
             
-            doorParamsDict = {}
+            dpsDict = {}
 
-            for i, doorParam in enumerate(doorParams):
+            for i, dpName in enumerate(dpsNames):
 
-                doorParamsDict[doorParam] = doorTuple[i]
+                dpsDict[dpName] = dpsTuple[i]
 
 
                 #self.logger.error('Invalid row in Door table, skiping to the next row.')
             
-            doorsParamsList.append(doorParamsDict)
+            dpsDictsList.append(dpsDict)
 
-        return doorsParamsList
+        return dpsNames, dpsDictsList
 
