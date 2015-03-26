@@ -35,21 +35,21 @@ int parser(int argc, char **argv, door_t *door) {
     int i, j, number_of_doors;
 
     // the arguments should start with door ID
-    if ( strcmp(argv[1], "--door") != 0 ) {
+    if ( strcmp(argv[1], "--id") != 0 ) {
         printf("Error: You should declare a door ID before declaring GPIO pins\n");
         return -1;
     }
 
     // number of door in this controller
-    number_of_doors = get_number_of(argc, argv, "--door");
+    number_of_doors = get_number_of(argc, argv, "--id");
 
     // initialization: a negative value means not in use.
     for (i = 0; i < number_of_doors; i++) {
         door[i].id = -1;
-        door[i].i0 = -1;
-        door[i].i1 = -1;
-        door[i].o0 = -1;
-        door[i].o1 = -1;
+        door[i].i0In = -1;
+        door[i].i1In = -1;
+        door[i].o0In = -1;
+        door[i].o1In = -1;
         door[i].button = -1;
         door[i].state = -1;
     }
@@ -57,21 +57,21 @@ int parser(int argc, char **argv, door_t *door) {
     // parses the arguments and fills the door structures
     j = -1;
     for (i=1; i<argc; i=i+2) { // argument(i) value(i+1) argument(i+2)
-         if ( strcmp(argv[i], "--door") == 0 ) {
+         if ( strcmp(argv[i], "--id") == 0 ) {
              j++; // increase the index for each door
              door[j].id = atoi(argv[i+1]);
          }
-         if ( strcmp(argv[i], "--i0") == 0 )
-             door[j].i0 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--i1") == 0 )
-             door[j].i1 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--o0") == 0 )
-             door[j].o0 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--o1") == 0 )
-             door[j].o1 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--button") == 0 )
+         if ( strcmp(argv[i], "--i0In") == 0 )
+             door[j].i0In = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--i1In") == 0 )
+             door[j].i1In = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--o0In") == 0 )
+             door[j].o0In = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--o1In") == 0 )
+             door[j].o1In = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--bttnIn") == 0 )
              door[j].button = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--state") == 0 )
+         if ( strcmp(argv[i], "--stateIn") == 0 )
              door[j].state = atoi(argv[i+1]);
     }
 
@@ -281,10 +281,10 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
     args = (struct read_card_args *)malloc(sizeof(struct read_card_args) * number_of_readers);
 
     for (i=0 ; i<number_of_doors; i++) {
-        if (door[i].i0 != -1 && door[i].i1 != -1 ) { // if the door has input card reader
+        if (door[i].i0In != -1 && door[i].i1In != -1 ) { // if the door has input card reader
             args->door_id = door[i].id;
-            args->d0 = door[i].i0;
-            args->d1 = door[i].i1;
+            args->d0 = door[i].i0In;
+            args->d1 = door[i].i1In;
             args->side = 'i';
             args->mq = mq;
 
@@ -292,10 +292,10 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
             thread++;
             args++;
         }
-        if (door[i].o0 != -1 && door[i].o1 != -1 ) { // if the door has output card reader
+        if (door[i].o0In != -1 && door[i].o1In != -1 ) { // if the door has output card reader
             args->door_id = door[i].id;
-            args->d0 = door[i].o0;
-            args->d1 = door[i].o1;
+            args->d0 = door[i].o0In;
+            args->d1 = door[i].o1In;
             args->side = 'o';
             args->mq = mq;
 

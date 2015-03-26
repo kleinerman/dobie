@@ -13,10 +13,10 @@
 // door gpio map
 typedef struct {
     int id;                     // door identification
-    int i0;                     // GPIO for data D0 (reader 1)
-    int i1;                     // GPIO for data D1 (reader 1)
-    int o0;                     // GPIO for data D0 (reader 2)
-    int o1;                     // GPIO for data D1 (reader 2)
+    int i0In;                     // GPIO for data D0 (reader 1)
+    int i1In;                     // GPIO for data D1 (reader 1)
+    int o0In;                     // GPIO for data D0 (reader 2)
+    int o1In;                     // GPIO for data D1 (reader 2)
     int button;                 // GPIO for open door button 1
     int state;                  // GPIO for state of the door (output)
 } door_t;
