@@ -9,6 +9,7 @@ import socket
 import datetime
 import sys
 import select
+import subprocess
 
 import queue
 import threading
@@ -73,10 +74,13 @@ class Controller(object):
         signal.signal(signal.SIGTERM, self.sigtermHandler)
         signal.signal(signal.SIGINT, self.sigtermHandler)
 
+        #Dictionary indexed by doorId. Each door has a dictionry with all the door parametters indexed
+        #by door parametters names
+        self.doorsParams = self.dataBase.getDoorsParams()
+
         #By default our exit code will be success
         self.exitCode = 0
 
-        self.doorsParams = self.dataBase.getDoorsParams()
 
 
 
@@ -99,6 +103,28 @@ class Controller(object):
                     doorIfaceArgs += '--{} {} '.format(doorParamName, doorParamValue)
 
         return doorIfaceArgs
+
+
+
+    def launchDoorIface(self):
+        '''
+        Launch Door Iface binary.
+        Return a process object
+        '''
+
+        doorIfaceCmd = '{} {}'.format(DOOR_IFACE_BIN, self.getDoorIfaceArgs())
+
+        logMsg = 'Launching Door Interface with the following command: {}'.format(doorIfaceCmd)
+        self.logger.debug(logMsg)
+
+        doorIfaceProc = subprocess.Popen(doorIfaceCmd, shell=True, 
+                                         stdout=subprocess.PIPE, 
+                                         stderr=subprocess.STDOUT
+                                        )
+
+        return doorIfaceProc
+        
+
 
 
     def sigtermHandler(self, signal, frame):
@@ -155,15 +181,11 @@ class Controller(object):
     def run(self):
 
 
-        print(self.doorsParams)
-
-        print('-------------------')
-
-        print('{} {}'.format(DOOR_IFACE_BIN,self.getDoorIfaceArgs()))
-
-
-
         self.logger.debug('Starting Controller')
+        
+        #Launching Door Iface binary
+        self.launchDoorIface()
+
         #Starting the "Event Manager" thread
         self.eventMngr.start()
 
