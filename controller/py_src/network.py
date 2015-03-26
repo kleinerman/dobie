@@ -45,6 +45,16 @@ END  = bytes([int_END])
 
 
 class Unblocker(object):
+    '''
+    This class declares a pipe in its constructor.
+    It stores read and write file descriptor as attributes.
+    -The getFd method returns the read file descriptor which is registered to be monitored 
+    by poll().
+    -The unblock method write a dummy byte (0) to generate a event to wake up the poll()
+    -The receive method reads this dummy byte because if it is not read, the next call
+    to poll(), will wake up again(). We are reading more than one byte (ten bytes), 
+    for the case of two consecutives calls generates two wake ups. (Not sure if it has sense)
+    '''
     
     def __init__(self):
         self.readPipe, self.writePipe = os.pipe()
@@ -108,9 +118,6 @@ class NetMngr(threading.Thread):
 
         #Socket server
         self.srvSock = None
-
-        #Registering the socket in the network poller object
-#        self.netPoller = None
  
         #Flag to know when the Main thread ask as to finish
         self.exitFlag = exitFlag
