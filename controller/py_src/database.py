@@ -228,7 +228,7 @@ class DataBase(object):
 
                 #self.logger.error('Invalid row in Door table, skiping to the next row.')
             
-            dpsDictsDict[dpsDict.pop('id')] = dpsDict
+            dpsDictsDict[dpsDict['id']] = dpsDict
 
         return dpsDictsDict
 

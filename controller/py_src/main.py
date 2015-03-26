@@ -78,50 +78,27 @@ class Controller(object):
 
         self.doorsParams = self.dataBase.getDoorsParams()
 
-        print(self.dataBase.getDoorsParams())
-
-
-        print(self.dataBase.getDoorParamsNames())
 
 
     def getDoorIfaceArgs(self):
         '''
-        fsfsdfds
+        This method return a string with all arguments for the door-iface
+        binary.
+        They are got from Door table of local DataBase
         '''
 
 
         doorIfaceArgs = ''
 
-        for doorParams in self.doorsParams:
 
-            if doorTuple[0]: 
-                doorIfaceArgs += '--door {} '.format(doorTuple[0])
-            else:
-                self.logger.error('Invalid row in Door table, skiping to the next row.')
-                continue
+        for doorId in self.doorsParams:
 
-            if doorTuple[1]:
-                doorIfaceArgs += '--i0 {} '.format(doorTuple[1])
+            for doorParamName in self.dataBase.getDoorParamsNames():
+                doorParamValue = self.doorsParams[doorId][doorParamName]
+                if doorParamValue:
+                    doorIfaceArgs += '--{} {} '.format(doorParamName, doorParamValue)
 
-            if doorTuple[2]:
-                doorIfaceArgs += '--i1 {} '.format(doorTuple[2])
-
-            if doorTuple[3]:
-                doorIfaceArgs += '--o0 {} '.format(doorTuple[3])
-
-            if doorTuple[4]:
-                doorIfaceArgs += '--o1 {} '.format(doorTuple[4])
-
-            if doorTuple[5]:
-                doorIfaceArgs += '--btnIn {} '.format(doorTuple[5])
-
-            if doorTuple[6]:
-                doorIfaceArgs += '--stateIn {} '.format(doorTuple[6])
-
-
-
-    
-
+        return doorIfaceArgs
 
 
     def sigtermHandler(self, signal, frame):
@@ -176,6 +153,14 @@ class Controller(object):
 
 
     def run(self):
+
+
+        print(self.doorsParams)
+
+        print('-------------------')
+
+        print('{} {}'.format(DOOR_IFACE_BIN,self.getDoorIfaceArgs()))
+
 
 
         self.logger.debug('Starting Controller')

@@ -3,6 +3,7 @@ import logging
 SIM_PERSON_QUANT = 5000
 SIM_LIM_ACCESS_QUANT = 500
 
+DOOR_IFACE_BIN = '/usr/local/sbin/door-iface'
 
 DB_FILE = 'access.db'
 QUEUE_FILE = '/door_iface_queue'
