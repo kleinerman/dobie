@@ -20,20 +20,20 @@ import sys
 
 
 
-doorIfaceQue=posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
+pssgIfaceQue=posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
 
 
 if sys.argv[1]:
 
-    doorIfaceData = sys.argv[1]
-    doorIfaceQue.send(doorIfaceData)
+    pssgIfaceData = sys.argv[1]
+    pssgIfaceQue.send(pssgIfaceData)
 
 else:
 
 
     while True:
-        doorIfaceData = input('Enter simulated door iface data: ')
-        doorIfaceQue.send(doorIfaceData)
+        pssgIfaceData = input('Enter simulated pssg iface data: ')
+        pssgIfaceQue.send(pssgIfaceData)
 
 
 

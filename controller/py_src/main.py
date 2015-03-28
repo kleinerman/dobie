@@ -42,7 +42,7 @@ class Controller(object):
         self.logger.addHandler(loggingHandler)
 
         self.dataBase = database.DataBase(DB_FILE)
-        self.doorIfaceQue=posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
+        self.pssgIfaceQue=posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
 
         self.handlers = { 'card'   : self.procCard,
                           'buttom' : self.procButtom,
@@ -74,9 +74,9 @@ class Controller(object):
         signal.signal(signal.SIGTERM, self.sigtermHandler)
         signal.signal(signal.SIGINT, self.sigtermHandler)
 
-        #Dictionary indexed by doorId. Each door has a dictionry with all the door parametters indexed
-        #by door parametters names
-        self.doorsParams = self.dataBase.getDoorsParams()
+        #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
+        #by pssg parametters names
+        self.pssgsParams = self.dataBase.getPssgsParams()
 
         #By default our exit code will be success
         self.exitCode = 0
@@ -84,45 +84,45 @@ class Controller(object):
 
 
 
-    def getDoorIfaceArgs(self):
+    def getPssgIfaceArgs(self):
         '''
-        This method return a string with all arguments for the door-iface
+        This method return a string with all arguments for the pssg-iface
         binary.
-        They are got from Door table of local DataBase
+        They are got from Passage table of local DataBase
         '''
 
 
-        doorIfaceArgs = ''
+        pssgIfaceArgs = ''
 
 
-        for doorId in self.doorsParams:
+        for pssgId in self.pssgsParams:
 
-            for doorParamName in self.dataBase.getDoorParamsNames():
-                doorParamValue = self.doorsParams[doorId][doorParamName]
-                if doorParamValue:
-                    doorIfaceArgs += '--{} {} '.format(doorParamName, doorParamValue)
+            for pssgParamName in self.dataBase.getPssgParamsNames():
+                pssgParamValue = self.pssgsParams[pssgId][pssgParamName]
+                if pssgParamValue:
+                    pssgIfaceArgs += '--{} {} '.format(pssgParamName, pssgParamValue)
 
-        return doorIfaceArgs
+        return pssgIfaceArgs
 
 
 
-    def launchDoorIface(self):
+    def launchPssgIface(self):
         '''
-        Launch Door Iface binary.
+        Launch Pssg Iface binary.
         Return a process object
         '''
 
-        doorIfaceCmd = '{} {}'.format(DOOR_IFACE_BIN, self.getDoorIfaceArgs())
+        pssgIfaceCmd = '{} {}'.format(PSSG_IFACE_BIN, self.getPssgIfaceArgs())
 
-        logMsg = 'Launching Door Interface with the following command: {}'.format(doorIfaceCmd)
+        logMsg = 'Launching Passage Interface with the following command: {}'.format(pssgIfaceCmd)
         self.logger.debug(logMsg)
 
-        doorIfaceProc = subprocess.Popen(doorIfaceCmd, shell=True, 
+        pssgIfaceProc = subprocess.Popen(pssgIfaceCmd, shell=True, 
                                          stdout=subprocess.PIPE, 
                                          stderr=subprocess.STDOUT
                                         )
 
-        return doorIfaceProc
+        return pssgIfaceProc
         
 
 
@@ -131,8 +131,8 @@ class Controller(object):
 
         try:
             self.logger.info('Getting SIGTERM.')
-            self.doorIfaceQue.unlink()
-            self.doorIfaceQue.close()
+            self.pssgIfaceQue.unlink()
+            self.pssgIfaceQue.close()
         
         except posix_ipc.ExistentialError:
             self.logger.info('An earlier SIGTERM signal is being processed.')
@@ -141,21 +141,21 @@ class Controller(object):
 
 
 
-    def procCard(self, doorId, side, cardNumber):
+    def procCard(self, pssgId, side, cardNumber):
         '''
         This method is called each time somebody put a card in a card reader
         '''
 
-        allowed, personId, notReason = self.dataBase.canAccess(doorId, side, cardNumber)
+        allowed, personId, notReason = self.dataBase.canAccess(pssgId, side, cardNumber)
 
         if allowed:
-            #Open the door as soon as posible
-            print('Opening the door...')
+            #Open the pssg as soon as posible
+            print('Opening the pssg...')
 
 
         dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         
-        event = {'doorId' : doorId, 
+        event = {'pssgId' : pssgId, 
                  'eventType' : 1,
                  'dateTime' : dateTime,
                  'latchType' : 1,
@@ -169,12 +169,12 @@ class Controller(object):
         self.mainToEvent.put(event)
 
 
-    def procButtom(self, doorId, state):
-        print('procButtom', doorId, state)
+    def procButtom(self, pssgId, state):
+        print('procButtom', pssgId, state)
 
 
-    def procState(self, doorId, state):
-        print('procState', doorId, state)
+    def procState(self, pssgId, state):
+        print('procState', pssgId, state)
 
 
 
@@ -183,8 +183,8 @@ class Controller(object):
 
         self.logger.debug('Starting Controller')
         
-        #Launching Door Iface binary
-        self.launchDoorIface()
+        #Launching Pssg Iface binary
+        self.launchPssgIface()
 
         #Starting the "Event Manager" thread
         self.eventMngr.start()
@@ -194,14 +194,14 @@ class Controller(object):
         
         try:
             while True:
-                doorIfaceData = self.doorIfaceQue.receive()
-                doorIfaceData = doorIfaceData[0].decode('utf8')
-                doorId, side, varField = doorIfaceData.split(';')
+                pssgIfaceData = self.pssgIfaceQue.receive()
+                pssgIfaceData = pssgIfaceData[0].decode('utf8')
+                pssgId, side, varField = pssgIfaceData.split(';')
                 command, value  = varField.split('=')
-                self.handlers[command](doorId, side, value)
+                self.handlers[command](pssgId, side, value)
             
         except posix_ipc.SignalError:
-            self.logger.debug('Door Interface Queue was interrupted by a OS signal.')
+            self.logger.debug('Passage Interface Queue was interrupted by a OS signal.')
 
         except Exception as exception:
             logMsg = 'The following exception occurred: {}'.format(exception)

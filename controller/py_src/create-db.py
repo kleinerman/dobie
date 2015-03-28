@@ -28,11 +28,11 @@ cursor.execute('''CREATE UNIQUE INDEX cardNumberIndex
 )
 
 
-#----------------Door Table-----------------#
+#----------------Passage Table-----------------#
 
 
 cursor.execute('''
-    CREATE TABLE Door (
+    CREATE TABLE Passage (
         id       INTEGER PRIMARY KEY, 
         i0In     INTEGER, 
         i1In     INTEGER,
@@ -52,7 +52,7 @@ cursor.execute('''
 cursor.execute('''
     CREATE TABLE Access (
         id          INTEGER PRIMARY KEY,
-        doorId      INTEGER,
+        pssgId      INTEGER,
         personId    INTEGER,
         allWeek     BOOLEAN,
         iSide       BOOLEAN,
@@ -61,14 +61,14 @@ cursor.execute('''
         endTime     DATETIME,
         expireDate  DATETIME,
         FOREIGN KEY(personId) REFERENCES Person(id),
-        FOREIGN KEY(doorId) REFERENCES Door(id)
+        FOREIGN KEY(pssgId) REFERENCES Passage(id)
     )
     '''
 )
 
 
-cursor.execute('''CREATE UNIQUE INDEX doorPersonIndex
-                  ON Access (doorId, personId)
+cursor.execute('''CREATE UNIQUE INDEX pssgPersonIndex
+                  ON Access (pssgId, personId)
                '''
 )
 
@@ -76,7 +76,7 @@ cursor.execute('''CREATE UNIQUE INDEX doorPersonIndex
 cursor.execute('''
     CREATE TABLE LimitedAccess (
         id         INTEGER PRIMARY KEY,
-        doorId     INTEGER,
+        pssgId     INTEGER,
         personId   INTEGER,
         iSide      BOOLEAN,
         oSide      BOOLEAN,
@@ -91,7 +91,7 @@ cursor.execute('''
 cursor.execute('''
     CREATE TABLE Events (
         id          INTEGER PRIMARY KEY,
-        doorId      INTEGER,
+        pssgId      INTEGER,
         eventType   INTEGER,
         dateTime    DATETIME,
         latchType   INTEGER,   

@@ -3,10 +3,10 @@ import logging
 SIM_PERSON_QUANT = 5000
 SIM_LIM_ACCESS_QUANT = 500
 
-DOOR_IFACE_BIN = '../c_src/main'
+PSSG_IFACE_BIN = '../c_src/main'
 
 DB_FILE = 'access.db'
-QUEUE_FILE = '/door_iface_queue'
+QUEUE_FILE = '/pssg_iface_queue'
 
 
 LOGGING_FILE ='logevents.log'

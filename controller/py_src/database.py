@@ -20,7 +20,7 @@ class DataBase(object):
 
 
 
-    def canAccess(self, doorId, side, cardNumber):
+    def canAccess(self, pssgId, side, cardNumber):
         '''
         This method
         '''
@@ -28,9 +28,9 @@ class DataBase(object):
         sqlSentence = ("SELECT person.id, access.allWeek, access.startTime, "
                        "access.endTime, access.expireDate "
                        "FROM Access access JOIN Person person ON (access.personId = person.id) "
-                       "WHERE access.doorId = '{}' AND access.{}Side = 1 " 
+                       "WHERE access.pssgId = '{}' AND access.{}Side = 1 " 
                        "AND person.cardNumber = '{}'"
-                       "".format(doorId, side, cardNumber)
+                       "".format(pssgId, side, cardNumber)
                       )
 
         self.cursor.execute(sqlSentence)
@@ -56,8 +56,8 @@ class DataBase(object):
                     nowWeekDay = datetime.datetime.now().isoweekday()
 
                     sqlSentence = ("SELECT startTime, endTime FROM LimitedAccess "
-                                   "WHERE doorId = {} AND personId = {} AND "
-                                   "weekDay = {}".format(doorId, personId, nowWeekDay)
+                                   "WHERE pssgId = {} AND personId = {} AND "
+                                   "weekDay = {}".format(pssgId, personId, nowWeekDay)
                                   )
 
                     self.cursor.execute(sqlSentence)
@@ -83,7 +83,7 @@ class DataBase(object):
 
         else:
             return (False, None, 1)
-            print("This person has not access on this door/side")
+            print("This person has not access on this pssg/side")
 
 
         print(params)
@@ -110,10 +110,10 @@ class DataBase(object):
             
 
         sqlSentence = ("INSERT INTO Events"
-                       "(doorId, eventType, dateTime, latchType, "
+                       "(pssgId, eventType, dateTime, latchType, "
                        "personId, side, allowed, notReason) "
                        "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
-                       "".format(event['doorId'], event['eventType'], 
+                       "".format(event['pssgId'], event['eventType'], 
                                  event['dateTime'], event['latchType'], 
                                  personId, side, allowed, notReason)
                       )
@@ -128,7 +128,7 @@ class DataBase(object):
         "evtsQtty" events 
         '''
         
-        sqlSentence = ("SELECT id, doorId, eventType, dateTime, latchType, "
+        sqlSentence = ("SELECT id, pssgId, eventType, dateTime, latchType, "
                        "personId, side, allowed, notReason FROM Events "
                        "LIMIT {}".format(evtsQtty)
                       )
@@ -144,7 +144,7 @@ class DataBase(object):
             evtDictList = []
             evtIdList = []
             for evtTuple in evtTupleList:
-                evtDict = {'doorId' : evtTuple[1],
+                evtDict = {'pssgId' : evtTuple[1],
                            'eventType' : evtTuple[2],
                            'dateTime' : evtTuple[3],
                            'latchType' : evtTuple[4],
@@ -182,12 +182,12 @@ class DataBase(object):
 
 
 
-    def getDoorParamsNames(self):
+    def getPssgParamsNames(self):
         '''
-        Getting Door Params Names from SQL database
+        Getting Passage Params Names from SQL database
         '''
 
-        sqlSentence = "SELECT * FROM Door"
+        sqlSentence = "SELECT * FROM Passage"
         self.cursor.execute(sqlSentence)
         self.connection.commit()
 
@@ -196,39 +196,39 @@ class DataBase(object):
 
 
 
-    def getDoorsParams(self):
+    def getPssgsParams(self):
         '''
-        Get the arguments of doors to call doorIface external program.
-        dps = Door Parametters
+        Get the arguments of pssgs to call pssgIface external program.
+        pps = Passage Parametters
 
         '''
 
-        dpsNames = self.getDoorParamsNames()
+        ppsNames = self.getPssgParamsNames()
 
         
         sqlSentence = ("SELECT {}, {}, {}, {}, {}, {}, {}, {}, {} "
-                       "FROM Door".format(*dpsNames)
+                       "FROM Passage".format(*ppsNames)
                       )
 
         self.cursor.execute(sqlSentence)
-        dpsTuplesList = self.cursor.fetchall()
+        ppsTuplesList = self.cursor.fetchall()
         self.connection.commit()
 
 
-        dpsDictsDict = {}
+        ppsDictsDict = {}
 
-        for dpsTuple in dpsTuplesList:
+        for ppsTuple in ppsTuplesList:
             
-            dpsDict = {}
+            ppsDict = {}
 
-            for i, dpName in enumerate(dpsNames):
+            for i, ppName in enumerate(ppsNames):
 
-                dpsDict[dpName] = dpsTuple[i]
+                ppsDict[ppName] = ppsTuple[i]
 
 
-                #self.logger.error('Invalid row in Door table, skiping to the next row.')
+                #self.logger.error('Invalid row in Passage table, skiping to the next row.')
             
-            dpsDictsDict[dpsDict['id']] = dpsDict
+            ppsDictsDict[ppsDict['id']] = ppsDict
 
-        return dpsDictsDict
+        return ppsDictsDict
 
