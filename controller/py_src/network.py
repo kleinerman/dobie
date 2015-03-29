@@ -149,6 +149,9 @@ class NetMngr(threading.Thread):
 
     def sendEvent(self, event):
         '''
+        This method is called by "EventMngr" thread.
+        It receives a dictionary as an event which is converted to a json bytes.
+        
         '''
 
         if self.connected.is_set():
