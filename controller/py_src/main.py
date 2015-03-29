@@ -42,7 +42,7 @@ class Controller(object):
         self.logger.addHandler(loggingHandler)
 
         self.dataBase = database.DataBase(DB_FILE)
-        self.pssgIfaceQue=posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
+        self.ioIfaceQue=posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
 
         self.handlers = { 'card'   : self.procCard,
                           'buttom' : self.procButtom,
@@ -84,7 +84,7 @@ class Controller(object):
 
 
 
-    def getPssgIfaceArgs(self):
+    def getIoIfaceArgs(self):
         '''
         This method return a string with all arguments for the pssg-iface
         binary.
@@ -92,7 +92,7 @@ class Controller(object):
         '''
 
 
-        pssgIfaceArgs = ''
+        ioIfaceArgs = ''
 
 
         for pssgId in self.pssgsParams:
@@ -100,29 +100,29 @@ class Controller(object):
             for pssgParamName in self.dataBase.getPssgParamsNames():
                 pssgParamValue = self.pssgsParams[pssgId][pssgParamName]
                 if pssgParamValue:
-                    pssgIfaceArgs += '--{} {} '.format(pssgParamName, pssgParamValue)
+                    ioIfaceArgs += '--{} {} '.format(pssgParamName, pssgParamValue)
 
-        return pssgIfaceArgs
+        return ioIfaceArgs
 
 
 
-    def launchPssgIface(self):
+    def launchIoIface(self):
         '''
         Launch Pssg Iface binary.
         Return a process object
         '''
 
-        pssgIfaceCmd = '{} {}'.format(PSSG_IFACE_BIN, self.getPssgIfaceArgs())
+        ioIfaceCmd = '{} {}'.format(IOIFACE_BIN, self.getIoIfaceArgs())
 
-        logMsg = 'Launching Passage Interface with the following command: {}'.format(pssgIfaceCmd)
+        logMsg = 'Launching IO Interface with the following command: {}'.format(ioIfaceCmd)
         self.logger.debug(logMsg)
 
-        pssgIfaceProc = subprocess.Popen(pssgIfaceCmd, shell=True, 
+        ioIfaceProc = subprocess.Popen(ioIfaceCmd, shell=True, 
                                          stdout=subprocess.PIPE, 
                                          stderr=subprocess.STDOUT
                                         )
 
-        return pssgIfaceProc
+        return ioIfaceProc
         
 
 
@@ -131,8 +131,8 @@ class Controller(object):
 
         try:
             self.logger.info('Getting SIGTERM.')
-            self.pssgIfaceQue.unlink()
-            self.pssgIfaceQue.close()
+            self.ioIfaceQue.unlink()
+            self.ioIfaceQue.close()
         
         except posix_ipc.ExistentialError:
             self.logger.info('An earlier SIGTERM signal is being processed.')
@@ -184,7 +184,7 @@ class Controller(object):
         self.logger.debug('Starting Controller')
         
         #Launching Pssg Iface binary
-        self.launchPssgIface()
+        self.launchIoIface()
 
         #Starting the "Event Manager" thread
         self.eventMngr.start()
@@ -194,14 +194,14 @@ class Controller(object):
         
         try:
             while True:
-                pssgIfaceData = self.pssgIfaceQue.receive()
-                pssgIfaceData = pssgIfaceData[0].decode('utf8')
-                pssgId, side, varField = pssgIfaceData.split(';')
+                ioIfaceData = self.ioIfaceQue.receive()
+                ioIfaceData = ioIfaceData[0].decode('utf8')
+                pssgId, side, varField = ioIfaceData.split(';')
                 command, value  = varField.split('=')
                 self.handlers[command](pssgId, side, value)
             
         except posix_ipc.SignalError:
-            self.logger.debug('Passage Interface Queue was interrupted by a OS signal.')
+            self.logger.debug('IO Interface Queue was interrupted by a OS signal.')
 
         except Exception as exception:
             logMsg = 'The following exception occurred: {}'.format(exception)

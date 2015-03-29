@@ -20,20 +20,20 @@ import sys
 
 
 
-pssgIfaceQue=posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
+ioIfaceQue=posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
 
 
 if sys.argv[1]:
 
-    pssgIfaceData = sys.argv[1]
-    pssgIfaceQue.send(pssgIfaceData)
+    ioIfaceData = sys.argv[1]
+    ioIfaceQue.send(ioIfaceData)
 
 else:
 
 
     while True:
-        pssgIfaceData = input('Enter simulated pssg iface data: ')
-        pssgIfaceQue.send(pssgIfaceData)
+        ioIfaceData = input('Enter simulated pssg iface data: ')
+        ioIfaceQue.send(ioIfaceData)
 
 
 

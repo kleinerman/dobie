@@ -12,7 +12,7 @@ import sys
 import queue
 import threading
 
-from configserver import *
+from config_sim_srv import *
 
 
 

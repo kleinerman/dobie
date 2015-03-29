@@ -198,7 +198,7 @@ class DataBase(object):
 
     def getPssgsParams(self):
         '''
-        Get the arguments of pssgs to call pssgIface external program.
+        Get the arguments of passages to call ioiface external program.
         pps = Passage Parametters
 
         '''
