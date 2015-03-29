@@ -377,6 +377,7 @@ void *buttons (void *b_args) {
                 sprintf(message, "%d;button_pressed", bttn_tbl[j][0]);
                 // put the message into the queue
                 mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
+                printf("%s\n", message);
                 break;
             }
         }
