@@ -128,7 +128,11 @@ class NetMngr(threading.Thread):
         #Getting the logger
         self.logger = logging.getLogger('Controller')
 
-        self.connected = False
+
+        #This is a flag to know when we are connected to server.
+        #it is needed a Event, because multiple threads can check it
+        #The flag is initially False.
+        self.connected = threading.Event()
 
 
 
@@ -147,7 +151,7 @@ class NetMngr(threading.Thread):
         '''
         '''
 
-        if self.connected:
+        if self.connected.is_set():
 
             jsonEvent = json.dumps(event).encode('utf8')
             outMsg = EVT + jsonEvent + END
@@ -162,7 +166,7 @@ class NetMngr(threading.Thread):
                     self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
             
         else:
-            print('Raising exception')
+            self.logger.debug('Can not send event, server is disconnected.')
 
 
 
@@ -170,7 +174,7 @@ class NetMngr(threading.Thread):
         '''
         '''
 
-        if self.connected:
+        if self.connected.is_set():
 
             outMsg = b''
             for event in eventList:
@@ -187,7 +191,7 @@ class NetMngr(threading.Thread):
                     self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
 
         else:
-            print('Raising exception')
+            self.logger.debug('Can not re-send event, server is disconnected.')
 
 
 
@@ -224,10 +228,10 @@ class NetMngr(threading.Thread):
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
                 #Registering the socket in the network poller object
                 self.netPoller.register(self.srvSock, select.POLLIN)
-                self.connected = True
+                self.connected.set()
                 self.logger.info('Connected to server. IP: {}, PORT: {}'.format(SERVER_IP, SERVER_PORT))
 
-                while self.connected:
+                while self.connected.is_set():
 
                     for fd, pollEvnt in self.netPoller.poll(NET_POLL_MSEC):
 
@@ -271,7 +275,7 @@ class NetMngr(threading.Thread):
                                 self.netPoller.unregister(fd)
                                 #self.netPoller = None
                             #self.srvSock = None
-                            self.connected = False
+                            self.connected.clear()
 
                     #Cheking if Main thread ask as to finish.
                     self.checkExit()
