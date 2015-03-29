@@ -17,9 +17,9 @@
 int get_number_of(int argc, char** argv, const char *str) {
     int i;
     int count = 0;
-    
+
     for (i=1; i<argc; i++) {
-        if ( strcmp(argv[i], str) == 0 )         
+        if ( strcmp(argv[i], str) == 0 )
             count++;
     }
 
@@ -27,51 +27,51 @@ int get_number_of(int argc, char** argv, const char *str) {
 }
 
 
-/*  
+/*
  * Parses the command-line arguments (GPIO pins) and fill the door structures
  * A negative attribute means that it is not in use
  */
 int parser(int argc, char **argv, door_t *door) {
     int i, j, number_of_doors;
-   
+
     // the arguments should start with door ID
-    if ( strcmp(argv[1], "--door") != 0 ) {
+    if ( strcmp(argv[1], "--id") != 0 ) {
         printf("Error: You should declare a door ID before declaring GPIO pins\n");
         return -1;
     }
 
     // number of door in this controller
-    number_of_doors = get_number_of(argc, argv, "--door");
+    number_of_doors = get_number_of(argc, argv, "--id");
 
     // initialization: a negative value means not in use.
     for (i = 0; i < number_of_doors; i++) {
         door[i].id = -1;
-        door[i].i0 = -1;
-        door[i].i1 = -1;
-        door[i].o0 = -1;
-        door[i].o1 = -1;
+        door[i].i0In = -1;
+        door[i].i1In = -1;
+        door[i].o0In = -1;
+        door[i].o1In = -1;
         door[i].button = -1;
         door[i].state = -1;
     }
-    
+
     // parses the arguments and fills the door structures
     j = -1;
     for (i=1; i<argc; i=i+2) { // argument(i) value(i+1) argument(i+2)
-         if ( strcmp(argv[i], "--door") == 0 ) {
+         if ( strcmp(argv[i], "--id") == 0 ) {
              j++; // increase the index for each door
              door[j].id = atoi(argv[i+1]);
          }
-         if ( strcmp(argv[i], "--i0") == 0 )
-             door[j].i0 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--i1") == 0 )
-             door[j].i1 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--o0") == 0 ) 
-             door[j].o0 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--o1") == 0 )
-             door[j].o1 = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--button1") == 0 )
+         if ( strcmp(argv[i], "--i0In") == 0 )
+             door[j].i0In = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--i1In") == 0 )
+             door[j].i1In = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--o0In") == 0 )
+             door[j].o0In = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--o1In") == 0 )
+             door[j].o1In = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--bttnIn") == 0 )
              door[j].button = atoi(argv[i+1]);
-         if ( strcmp(argv[i], "--state") == 0 )
+         if ( strcmp(argv[i], "--stateIn") == 0 )
              door[j].state = atoi(argv[i+1]);
     }
 
@@ -79,7 +79,7 @@ int parser(int argc, char **argv, door_t *door) {
 }
 
 
-/* 
+/*
  * Export the GPIO to userspace. On success it returns 0, else returns -1
  * In a near future, this function will be implemented in Python
  */
@@ -94,7 +94,7 @@ int export_gpio(unsigned int gpio) {
 
     // get the length of the gpio string
     len = sprintf(str_gpio, "%d", gpio);
-    
+
     if ( write(fd, str_gpio, len) == 0) {
         fprintf(stderr,"Error(%d) writing /sys/class/gpio/export: %s\n", errno, strerror(errno));
         return -1;
@@ -106,7 +106,7 @@ int export_gpio(unsigned int gpio) {
 }
 
 
-/* 
+/*
  * Set the gpio direction: IN(1) or OUT(0)
  * It returns 0 on success
  * ++ In a near future, this function will be implemented in Python ++
@@ -127,8 +127,8 @@ int gpio_set_direction(unsigned int gpio, unsigned int direction) {
         fprintf(stderr,"Error(%d) writing %s: %s\n", errno, filename, strerror(errno));
         return -1;
     }
-    
-    close(fd);   
+
+    close(fd);
     return 0;
 }
 
@@ -165,7 +165,7 @@ int gpio_set_edge(unsigned int gpio, unsigned int edge) {
  * fill the register with the last incoming bit (number 26) is responsible to form the card number
  * and restart the register.
  */
-void* read_card (void *args) {
+void *read_card (void *args) {
     char filename[40];
     char str_card_number[8];
     char message[50];
@@ -281,10 +281,10 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
     args = (struct read_card_args *)malloc(sizeof(struct read_card_args) * number_of_readers);
 
     for (i=0 ; i<number_of_doors; i++) {
-        if (door[i].i0 != -1 && door[i].i1 != -1 ) { // if the door has input card reader
+        if (door[i].i0In != -1 && door[i].i1In != -1 ) { // if the door has input card reader
             args->door_id = door[i].id;
-            args->d0 = door[i].i0;
-            args->d1 = door[i].i1;
+            args->d0 = door[i].i0In;
+            args->d1 = door[i].i1In;
             args->side = 'i';
             args->mq = mq;
 
@@ -292,15 +292,15 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
             thread++;
             args++;
         }
-        if (door[i].o0 != -1 && door[i].o1 != -1 ) { // if the door has output card reader
+        if (door[i].o0In != -1 && door[i].o1In != -1 ) { // if the door has output card reader
             args->door_id = door[i].id;
-            args->d0 = door[i].o0;
-            args->d1 = door[i].o1;
+            args->d0 = door[i].o0In;
+            args->d1 = door[i].o1In;
             args->side = 'o';
             args->mq = mq;
 
             pthread_create(thread, NULL, read_card, (void *)args);
-            
+
             thread++;
             args++;
         }
@@ -308,5 +308,82 @@ int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthr
     }
 
     return 0;
+}
+
+
+void *buttons (void *b_args) {
+    char filename[40];
+    char message[50];
+    int **bttn_tbl;
+    int i;
+    int j=0;
+    int epfd; // epool file descriptor
+    struct epoll_event *ev;
+    struct epoll_event *events;
+    struct buttons_args *args = (struct buttons_args*) b_args;
+
+    ev = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_buttons);
+    events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_buttons);
+
+    /* Allocate memory for a table. The table has 2 columns and many rows as the number of buttons.
+     * The 2 columns: the door_ID and file descriptor of the button.
+     */
+    bttn_tbl = (int **) malloc(sizeof(int *) * args->number_of_buttons);
+    for (i=0; i<(args->number_of_buttons); i++)
+        bttn_tbl[i] = (int *) malloc(sizeof(int) * 2);
+
+    // create a new epool instance
+    epfd = epoll_create(1);
+    if (epfd == -1) {
+        fprintf(stderr,"Error(%d) creating the epoll: %s\n", errno, strerror(errno));
+        exit(1);
+    }
+
+    for (i=0; i<(args->number_of_doors); i++) {
+        if (args->door[i].button != -1) {     // if the door has button
+
+            bttn_tbl[j][0] = args->door[i].id; // save the door id in the first col of the table
+
+            // export the gpio to the filesystem
+            if (export_gpio(args->door[i].button) == -1) exit(1);
+            // set the gpio as an input
+            if (gpio_set_direction(args->door[i].button, IN) == -1 ) exit(1);
+            // set the edge to wait for
+            if ( gpio_set_edge(args->door[i].button, FALLING) == -1 ) exit(1);
+
+            // save the button fd in the second col of the table
+            sprintf(filename, "/sys/class/gpio/gpio%d/value", args->door[i].button);
+            bttn_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
+            if (bttn_tbl[j][1] == -1) {
+                fprintf(stderr,"Error(%d) opening %s: %s\n", errno, filename, strerror(errno));
+                exit(1);
+            }
+
+            ev[j].events = EPOLLIN | EPOLLET | EPOLLPRI;
+            ev[j].data.fd = bttn_tbl[j][1];
+            // Add the file descriptor to the interest list for epfd
+            epoll_ctl(epfd, EPOLL_CTL_ADD, bttn_tbl[j][1], &ev[j]); 
+
+            j++;
+
+        }
+    }
+ 
+    epoll_wait(epfd, events, args->number_of_buttons, -1);  // first time it triggers with current state, so ignore it
+    while(1) {
+        epoll_wait(epfd, events, args->number_of_buttons, -1); // wait for an evente. Only fetch up one event
+        for (j=0; j< args->number_of_buttons; j++) {
+            if (events[0].data.fd == bttn_tbl[j][1]) {
+                sprintf(message, "%d;button_pressed", bttn_tbl[j][0]);
+                // put the message into the queue
+                mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
+                printf("%s\n", message);
+                break;
+            }
+        }
+
+    }
+
+    return NULL;
 }
 

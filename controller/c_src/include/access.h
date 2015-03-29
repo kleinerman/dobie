@@ -13,10 +13,10 @@
 // door gpio map
 typedef struct {
     int id;                     // door identification
-    int i0;                     // GPIO for data D0 (reader 1)
-    int i1;                     // GPIO for data D1 (reader 1)
-    int o0;                     // GPIO for data D0 (reader 2)    
-    int o1;                     // GPIO for data D1 (reader 2)
+    int i0In;                     // GPIO for data D0 (reader 1)
+    int i1In;                     // GPIO for data D1 (reader 1)
+    int o0In;                     // GPIO for data D0 (reader 2)
+    int o1In;                     // GPIO for data D1 (reader 2)
     int button;                 // GPIO for open door button 1
     int state;                  // GPIO for state of the door (output)
 } door_t;
@@ -29,13 +29,22 @@ struct read_card_args {
     mqd_t mq;                   // message queue descriptor
 };
 
+struct buttons_args {
+    int number_of_doors;
+    int number_of_buttons;
+    door_t *door;
+    mqd_t mq;
+};
+
+
 // function prototypes
 int export_gpio(unsigned int gpio);
 int gpio_set_direction(unsigned int gpio, unsigned int direction);
 int gpio_set_edge(unsigned int gpio, unsigned int edge);
 int parser(int argc, char **argv, door_t *door);
 int get_number_of(int argc, char** argv, const char *str);
-void* read_card (void *args);
+void *read_card (void *args);
 int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthread_t *thread , mqd_t mq);
+void *buttons (void *b_args);
 
 #endif
