@@ -139,7 +139,7 @@ class ReSender(genmngr.GenericMngr):
         '''
         self.dataBase = database.DataBase(DB_FILE)
 
-        for eventIdList, eventList in self.dataBase.getNEvents(3):
+        for eventIdList, eventList in self.dataBase.getNEvents(RE_SEND_EVTS_QUANT):
             noConnection = True
             while noConnection:
                 self.netMngr.reSendEvents(eventList)
