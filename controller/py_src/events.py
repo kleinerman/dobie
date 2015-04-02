@@ -7,12 +7,14 @@ import sys
 import database
 import queue
 
+import genmngr
 from config import *
 
 
 
 
-class EventMngr(threading.Thread):
+
+class EventMngr(genmngr.GenericMngr):
 
     '''
     This thread receives the events from the main thread, tries to send them to the server.
@@ -23,7 +25,7 @@ class EventMngr(threading.Thread):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__(name = 'EventMngr', daemon = True)
+        super().__init__('EventMngr', exitFlag)
 
         #Database connection should be created in run method
         self.dataBase = None
@@ -40,31 +42,9 @@ class EventMngr(threading.Thread):
         #Queue used by ReSender thread to receive message from the Network thread.
         self.netToReSnd = netToReSnd
         
-        #Flag to see know when the Main thread ask as to finish
-        self.exitFlag = exitFlag
-
         #Flag to know if Resender Thread is alive
         self.resenderAlive = threading.Event()
 
-        #Thread exit code
-        self.exitCode = 0
-
-        #Getting the logger
-        self.logger = logging.getLogger('Controller')
-
-
-
-
-
-
-    def checkExit(self):
-        '''
-        Check if the main thread ask this thread to exit using exitFlag
-        If true, call sys.exit and finish this thread
-        '''
-        if self.exitFlag.is_set():
-            self.logger.info('Event thread exiting.')
-            sys.exit(self.exitCode)
 
 
 
@@ -122,7 +102,7 @@ class EventMngr(threading.Thread):
 
 
 
-class ReSender(threading.Thread):
+class ReSender(genmngr.GenericMngr):
 
     '''
     This thread tries to resend events when there is no connection to server.
@@ -133,7 +113,7 @@ class ReSender(threading.Thread):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__(name = 'ReSender', daemon = True)
+        super().__init__('ReSender', exitFlag)
 
         self.netMngr = netMngr
 
@@ -145,31 +125,12 @@ class ReSender(threading.Thread):
         #Flag to know if Resender Thread is alive
         self.resenderAlive = resenderAlive
 
-        #Flag to know when the Main thread ask as to finish
-        self.exitFlag = exitFlag
-
-        #Thread exit code
-        self.exitCode = 0
-
-        #Getting the logger
-        self.logger = logging.getLogger('Controller')
-
-
         #Calculating turns to sleep EXIT_CHECK_TIME
         self.SLEEP_TURNS = RE_SEND_TIME // EXIT_CHECK_TIME
 
         #Calculating real resend time
         self.REAL_RE_SEND_TIME = self.SLEEP_TURNS * EXIT_CHECK_TIME
 
-
-    def checkExit(self):
-        '''
-        Check if the main thread ask this thread to exit using exitFlag
-        If true, call sys.exit and finish this thread
-        '''
-        if self.exitFlag.is_set():
-            self.logger.info('ReSender thread exiting.')
-            sys.exit(self.exitCode)
 
 
 
@@ -178,7 +139,7 @@ class ReSender(threading.Thread):
         '''
         self.dataBase = database.DataBase(DB_FILE)
 
-        for eventIdList, eventList in self.dataBase.getNEvents(3):
+        for eventIdList, eventList in self.dataBase.getNEvents(RE_SEND_EVTS_QUANT):
             noConnection = True
             while noConnection:
                 self.netMngr.reSendEvents(eventList)

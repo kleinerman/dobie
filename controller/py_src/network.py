@@ -11,7 +11,9 @@ import json
 import database
 import queue
 
+import genmngr
 from config import *
+
 
 import sys
 
@@ -72,7 +74,7 @@ class Unblocker(object):
 
 
 
-class NetMngr(threading.Thread):
+class NetMngr(genmngr.GenericMngr):
 
     '''
     This thread receives the events from the main thread, tries to send them to the server.
@@ -83,7 +85,7 @@ class NetMngr(threading.Thread):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__(name = 'NetMngr', daemon = True)
+        super().__init__('NetMngr', exitFlag)
 
         #Buffer to receive bytes from server
         self.inBuffer = b''
@@ -119,58 +121,77 @@ class NetMngr(threading.Thread):
         #Socket server
         self.srvSock = None
  
-        #Flag to know when the Main thread ask as to finish
-        self.exitFlag = exitFlag
-
-        #Thread exit code
-        self.exitCode = 0
-
-        #Getting the logger
-        self.logger = logging.getLogger('Controller')
-
-        self.connected = False
+        #This is a flag to know when we are connected to server.
+        #it is needed a Event, because multiple threads can check it
+        #The flag is initially False.
+        self.connected = threading.Event()
 
 
 
-    def checkExit(self):
-        '''
-        Check if the main thread ask this thread to exit using exitFlag
-        If true, call sys.exit and finish this thread
-        '''
-        if self.exitFlag.is_set():
-            self.logger.info('Network thread exiting.')
-            sys.exit(self.exitCode) 
-
-
+    #---------------------------------------------------------------------------#
 
     def sendEvent(self, event):
         '''
+        This method is called by the "eventMngr" thread each time it receives 
+        an event from the "main" thread.
+        It receives a dictionary as an event which is converted to a JSON bytes
+        to create the event message to send to the server.
+        The sequence of bytes is stored in a queue, the "netPoller" is modified
+        to tell the "netMngr" there is bytes to send and the "netMngr" thread is
+        unblocked from the "poll()" method using the "unblocker" object. 
+        Once this happens, the "netMngr" thread pulls the message from queue and 
+        send them to the server.       
         '''
 
-        if self.connected:
+        if self.connected.is_set():
 
+            #Converting dictionary to JSON bytes
             jsonEvent = json.dumps(event).encode('utf8')
+            #Adding headers at beggining and end
             outMsg = EVT + jsonEvent + END
-            #Writing the msgs in a queue because we can not assure the method sendEvent
-            #will not be called again before the poll() wake up to send the bytes
+
+            #Writing the messages in a queue because we can not assure the method
+            #"sendEvent()" will not be called again before the "poll()" method wakes
+            #up to send the bytes. If we do not do this, we would end up with a mess
+            #of bytes in the out buffer.
+            #(Not sure if this is necessary or it is the best way to do it)
             self.outBufferQue.put(outMsg)
+
             with self.lockNetPoller:
                 try:
+                    #Modifying "netPoller" to notify there is a message to send.
                     self.netPoller.modify(self.srvSock, select.POLLOUT)
+                    #Unblocking the "netMngr" thread from the "poll()" method.
                     self.unblocker.unblock()
                 except FileNotFoundError:
+                    #This exception could happen if it is received a null byte (b'')
+                    #in POLLIN evnt, the socket is closed and "eventMngr" calls this
+                    #method before POLLNVAL evnt happens to clean "self.connected".
+                    #(Not sure if this can occur)                    
                     self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
             
         else:
-            print('Raising exception')
+            self.logger.debug('Can not send event, server is disconnected.')
 
 
+
+    #---------------------------------------------------------------------------#
 
     def reSendEvents(self, eventList):
         '''
+        This method is called by the "reSender" thread.
+        It receives a list of dictionaries as an events. Each event is converted
+        to a JSON bytes delimitted by headers to create the events message to send
+        to the server.
+        The sequence of bytes is stored in a queue, the "netPoller" is modified
+        to tell the "netMngr" there is bytes to send and the "netMngr" thread is
+        unblocked from the "poll()" method using the "unblocker" object. 
+        Once this happens, the "netMngr" thread pulls the message from queue and 
+        send them to the server.
+        See the comments in "SendEvent" message. 
         '''
 
-        if self.connected:
+        if self.connected.is_set():
 
             outMsg = b''
             for event in eventList:
@@ -187,21 +208,29 @@ class NetMngr(threading.Thread):
                     self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
 
         else:
-            print('Raising exception')
+            self.logger.debug('Can not re-send event, server is disconnected.')
 
 
 
+    #---------------------------------------------------------------------------#
 
     def procRecMsg(self, msg):
         '''
-        Analyzes the messages received from the server. If a reply
+        This method is called by the main "run()" method when it receives bytes
+        from the server. This happens in POLLIN evnts branch.
+        It process the message and delivers it to the corresponding thread 
+        according to the headers of the message.
         '''
-        #Event response
+
+        #This is a response to an event sent to the server
+        #It should be delivered to "eventMngr" thread.
         if msg.startswith(REVT):
             response = msg.strip(REVT+END)
             response = response.decode('utf8')
             self.netToEvent.put(response)
 
+        #This is a response to a set of re-sent events sent to the server
+        #It should be delivered to "reSender" thread.
         elif msg.startswith(REVS):
             response = msg.strip(REVS+END)
             response = response.decode('utf8')
@@ -209,6 +238,7 @@ class NetMngr(threading.Thread):
         
 
 
+    #---------------------------------------------------------------------------#
 
     def run(self):
         '''
@@ -224,10 +254,10 @@ class NetMngr(threading.Thread):
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
                 #Registering the socket in the network poller object
                 self.netPoller.register(self.srvSock, select.POLLIN)
-                self.connected = True
+                self.connected.set()
                 self.logger.info('Connected to server. IP: {}, PORT: {}'.format(SERVER_IP, SERVER_PORT))
 
-                while self.connected:
+                while self.connected.is_set():
 
                     for fd, pollEvnt in self.netPoller.poll(NET_POLL_MSEC):
 
@@ -271,13 +301,10 @@ class NetMngr(threading.Thread):
                                 self.netPoller.unregister(fd)
                                 #self.netPoller = None
                             #self.srvSock = None
-                            self.connected = False
+                            self.connected.clear()
 
                     #Cheking if Main thread ask as to finish.
                     self.checkExit()
-
-
-
 
 
             except (ConnectionRefusedError, ConnectionResetError):
