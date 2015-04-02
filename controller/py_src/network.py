@@ -11,7 +11,9 @@ import json
 import database
 import queue
 
+import genmngr
 from config import *
+
 
 import sys
 
@@ -72,7 +74,7 @@ class Unblocker(object):
 
 
 
-class NetMngr(threading.Thread):
+class NetMngr(genmngr.GenericMngr):
 
     '''
     This thread receives the events from the main thread, tries to send them to the server.
@@ -83,7 +85,7 @@ class NetMngr(threading.Thread):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__(name = 'NetMngr', daemon = True)
+        super().__init__('NetMngr', exitFlag)
 
         #Buffer to receive bytes from server
         self.inBuffer = b''
@@ -119,33 +121,10 @@ class NetMngr(threading.Thread):
         #Socket server
         self.srvSock = None
  
-        #Flag to know when the Main thread ask as to finish
-        self.exitFlag = exitFlag
-
-        #Thread exit code
-        self.exitCode = 0
-
-        #Getting the logger
-        self.logger = logging.getLogger('Controller')
-
-
         #This is a flag to know when we are connected to server.
         #it is needed a Event, because multiple threads can check it
         #The flag is initially False.
         self.connected = threading.Event()
-
-
-
-    #---------------------------------------------------------------------------#
-
-    def checkExit(self):
-        '''
-        Check if the main thread ask this thread to exit using exitFlag
-        If true, call sys.exit and finish this thread
-        '''
-        if self.exitFlag.is_set():
-            self.logger.info('Network thread exiting.')
-            sys.exit(self.exitCode) 
 
 
 
