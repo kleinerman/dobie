@@ -242,15 +242,20 @@ class NetMngr(genmngr.GenericMngr):
 
     def run(self):
         '''
-        This is the main method of the thread. Most of the time it is blocked waiting 
-        for queue messages coming from the "Main" thread.
+        This is the main method of the thread.
+        When the controller is connected to the server, this method is blocked most of
+        the time in "poll()" method waiting for bytes to go out or incoming bytes from 
+        the server or  a event produced when the socket is broken or disconnect.
+        When there is no connection to the server, this method tries to reconnect to 
+        the server every "RECONNECT_TIME"
         '''
 
         while True:
 
             try:
-                #Connecting to server
+                #Creating the socket to connect the to the server
                 self.srvSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                #If there is no connection to the server, an exception will happen here
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
                 #Registering the socket in the network poller object
                 self.netPoller.register(self.srvSock, select.POLLIN)
@@ -262,6 +267,9 @@ class NetMngr(genmngr.GenericMngr):
                     for fd, pollEvnt in self.netPoller.poll(NET_POLL_MSEC):
 
 
+                        #This situation will happen when the "event" thread or "reSender"
+                        #thread puts bytes in the "outBufferQue" and they want to notify
+                        #this thread to wake up from "poll()"
                         if fd == self.unBlkrFd:
                             self.unblocker.receive()
                             continue
