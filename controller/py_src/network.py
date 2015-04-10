@@ -82,16 +82,17 @@ class NetMngr(genmngr.GenericMngr):
     '''
     def __init__(self, netToEvent, netToReSnd, exitFlag):
 
-
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
 
         #Buffer to receive bytes from server
+        #It is used in POLLIN event
         self.inBuffer = b''
-        #Buffer to send bytes to server
-        self.outBuffer = b''
 
+        #Buffer to send bytes to server
+        #It is used in POLLOUT event
+        self.outBuffer = b''
 
         #Queue to send responses to Event Thread
         self.netToEvent = netToEvent
@@ -99,19 +100,22 @@ class NetMngr(genmngr.GenericMngr):
         #Queue to send responses to ReSender Thread
         self.netToReSnd = netToReSnd
 
-
-        #Queue used to send events from event thread to network thread
+        #In this queue, "event" and "reSender" threads put the messages
+        #and "netMngr" gets them to send to the server.
+        #We are using a queue because we can not assure the method
+        #"sendEvent()" will not be called again before the "poll()" method wakes
+        #up to send the bytes. If we do not do this, we would end up with a mess
+        #of bytes in the out buffer.
+        #(Not sure if this is necessary or it is the best way to do it)
         self.outBufferQue = queue.Queue()
 
-        #Lock to protect access to above dictionary 
-        self.lockNetPoller = threading.Lock()
-
-        #Poll Network Object
+        #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
 
-        #Pipe to wake up the thread blocked in poll() call
-        #self.readPipe, self.writePipe = os.pipe()
+        #Lock to protect access to "netPoller" 
+        self.lockNetPoller = threading.Lock()
 
+        #Unblocker object to wake up the thread blocked in poll() call
         self.unblocker = Unblocker()
         self.unBlkrFd = self.unblocker.getFd()
 
@@ -122,8 +126,8 @@ class NetMngr(genmngr.GenericMngr):
         self.srvSock = None
  
         #This is a flag to know when we are connected to server.
-        #it is needed a Event, because multiple threads can check it
-        #The flag is initially False.
+        #it is needed an threading.event object because "netMngr",
+        #"event" and "reSender" threads can access to it simultaneously
         self.connected = threading.Event()
 
 
@@ -291,9 +295,9 @@ class NetMngr(genmngr.GenericMngr):
                         elif pollEvnt & select.POLLOUT:
                             try:
                                 while True:
-                                    outBuffer = self.outBufferQue.get(block = False)
-                                    self.logger.debug('Sending: {}'.format(outBuffer))
-                                    self.srvSock.sendall(outBuffer)
+                                    self.outBuffer = self.outBufferQue.get(block = False)
+                                    self.logger.debug('Sending: {}'.format(self.outBuffer))
+                                    self.srvSock.sendall(self.outBuffer)
                             except queue.Empty:
                                 pass #No more data to send in queue
                             #No se bien por que tengo que hacer esto pero sino lo hago
