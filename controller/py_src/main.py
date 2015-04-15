@@ -197,6 +197,7 @@ class Controller(object):
                 ioIfaceData = self.ioIfaceQue.receive()
                 ioIfaceData = ioIfaceData[0].decode('utf8')
                 pssgId, side, varField = ioIfaceData.split(';')
+                side = int(side)
                 command, value  = varField.split('=')
                 self.handlers[command](pssgId, side, value)
             

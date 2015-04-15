@@ -3,9 +3,6 @@ import datetime
 import logging
 
 
-boolSide = {'o':0, 'i':1}
-
-
 class DataBase(object):
 
     def __init__(self, dbFile):
@@ -25,12 +22,14 @@ class DataBase(object):
         This method
         '''
 
+        sideColumn = {0:'oSide', 1:'iSide'}[side]
+
         sqlSentence = ("SELECT person.id, access.allWeek, access.startTime, "
                        "access.endTime, access.expireDate "
                        "FROM Access access JOIN Person person ON (access.personId = person.id) "
-                       "WHERE access.pssgId = '{}' AND access.{}Side = 1 " 
+                       "WHERE access.pssgId = '{}' AND access.{} = 1 " 
                        "AND person.cardNumber = '{}'"
-                       "".format(pssgId, side, cardNumber)
+                       "".format(pssgId, sideColumn, cardNumber)
                       )
 
         self.cursor.execute(sqlSentence)
@@ -57,7 +56,8 @@ class DataBase(object):
 
                     sqlSentence = ("SELECT startTime, endTime FROM LimitedAccess "
                                    "WHERE pssgId = {} AND personId = {} AND "
-                                   "weekDay = {}".format(pssgId, personId, nowWeekDay)
+                                   "weekDay = {} AND {} = 1"
+                                   "".format(pssgId, personId, nowWeekDay, sideColumn)
                                   )
 
                     self.cursor.execute(sqlSentence)
@@ -74,16 +74,16 @@ class DataBase(object):
                             return (False, personId, 3)
 
                     else:
-                        print("Error. Card number not in LimitedAccess table")
-                        return (False, None, 9)
+                        print("This person has not access on this pssg/side")
+                        return (False, None, 1)
 
             else:
                 return (False, None, 2)
                 print("Can NOT access (expired card)")
 
         else:
-            return (False, None, 1)
             print("This person has not access on this pssg/side")
+            return (False, None, 1)
 
 
         print(params)
@@ -99,7 +99,7 @@ class DataBase(object):
         else:
             personId = 'NULL'
 
-        side = boolSide[event['side']]
+        side = event['side']
 
         allowed = int(event['allowed'])
 
