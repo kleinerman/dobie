@@ -20,10 +20,11 @@ int main(int argc, char** argv) {
     int number_of_pssgs = 0;
     int number_of_readers = 0;
     int number_of_buttons = 0;
-    int number_of_state = 0;
+    int number_of_states = 0;
     int number_of_threads;
     mqd_t mq; // message queue
     struct buttons_args b_args;
+    struct state_args s_args;
 
     // open the message queue only for sending message to the main process
     // It must be created by the main process
@@ -39,7 +40,7 @@ int main(int argc, char** argv) {
     // get number of buttons
     number_of_buttons = get_number_of(argc, argv, "--bttnIn");
     // get number of state pins
-    number_of_state = get_number_of(argc, argv, "--stateIn");
+    number_of_states = get_number_of(argc, argv, "--stateIn");
     // number of thread: one thread per card reader, one for all button and one for all state pins
     number_of_threads = number_of_readers + 1 + 1;
 
@@ -65,6 +66,12 @@ int main(int argc, char** argv) {
     b_args.mq = mq;
     pthread_create(&b_thread, NULL, buttons, (void *)&b_args);
 
+    /* start listening state pins */
+    s_args.number_of_pssgs = number_of_pssgs;
+    s_args.number_of_states = number_of_states;
+    s_args.pssg = pssg;
+    s_args.mq = mq;
+    pthread_create(&b_thread, NULL, state, (void *)&s_args);
 
     // waits  for  the  threads  to  terminate
     for (i = 0; i < number_of_threads; i++)
