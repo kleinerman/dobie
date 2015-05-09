@@ -1,8 +1,8 @@
 CC=gcc
 IDIR=./include
 CFLAGS=-I $(IDIR) -pthread -lrt
-OBJ=main.o access.o
-_DEPS=access.h
+OBJ=main.o libioiface.o
+_DEPS=libioiface.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
 main: $(OBJ)

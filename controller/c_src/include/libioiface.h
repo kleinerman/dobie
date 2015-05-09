@@ -1,5 +1,5 @@
-#ifndef ACCESS_H
-#define ACCESS_H
+#ifndef LIBIOIFACE_H
+#define LIBIOIFACE_H
 #include <mqueue.h>
 #define IN 1
 #define OUT 0
@@ -10,19 +10,19 @@
 #define RISING 2
 #define BOTH 3
 
-// door gpio map
+// pssg gpio map
 typedef struct {
-    int id;                     // door identification
+    int id;                     // pssg identification
     int i0In;                     // GPIO for data D0 (reader 1)
     int i1In;                     // GPIO for data D1 (reader 1)
     int o0In;                     // GPIO for data D0 (reader 2)
     int o1In;                     // GPIO for data D1 (reader 2)
-    int button;                 // GPIO for open door button 1
-    int state;                  // GPIO for state of the door (output)
-} door_t;
+    int button;                 // GPIO for open pssg button 1
+    int state;                  // GPIO for state of the pssg (output)
+} pssg_t;
 
 struct read_card_args {
-    int door_id;
+    int pssg_id;
     int d0;                     // GPIO for D0
     int d1;                     // GPIO for D1
     char side;                  // Door side: in / out
@@ -30,9 +30,16 @@ struct read_card_args {
 };
 
 struct buttons_args {
-    int number_of_doors;
+    int number_of_pssgs;
     int number_of_buttons;
-    door_t *door;
+    pssg_t *pssg;
+    mqd_t mq;
+};
+
+struct state_args {
+    int number_of_pssgs;
+    int number_of_states;
+    pssg_t *pssg;
     mqd_t mq;
 };
 
@@ -41,10 +48,11 @@ struct buttons_args {
 int export_gpio(unsigned int gpio);
 int gpio_set_direction(unsigned int gpio, unsigned int direction);
 int gpio_set_edge(unsigned int gpio, unsigned int edge);
-int parser(int argc, char **argv, door_t *door);
+int parser(int argc, char **argv, pssg_t *pssg);
 int get_number_of(int argc, char** argv, const char *str);
 void *read_card (void *args);
-int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthread_t *thread , mqd_t mq);
+int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *thread , mqd_t mq);
 void *buttons (void *b_args);
+void *state (void *s_args);
 
 #endif
