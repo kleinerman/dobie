@@ -7,6 +7,7 @@
 #include <sys/epoll.h>
 #include <pthread.h>
 #include <mqueue.h>
+#include <unistd.h>
 #include <libioiface.h>
 
 
@@ -122,6 +123,7 @@ int gpio_set_direction(unsigned int gpio, unsigned int direction) {
         fprintf(stderr,"Error(%d) opening %s: %s\n", errno, filename, strerror(errno));
         return -1;
     }
+
 
     if ( write(fd, str_direction[direction], strlen(str_direction[direction])) == 0 ) {
         fprintf(stderr,"Error(%d) writing %s: %s\n", errno, filename, strerror(errno));
@@ -391,7 +393,7 @@ void *buttons (void *b_args) {
 void *state (void *s_args) {
     char filename[40];
     char message[50];
-    char value[1];
+    char value[2] = {0,'\0'};
     int **state_tbl;
     int i;
     int j=0;
@@ -419,7 +421,6 @@ void *state (void *s_args) {
 
     for (i=0; i<(args->number_of_pssgs); i++) {
         if (args->pssg[i].state != -1) {     // if the pssg has state
-
             state_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
 
             // export the gpio to the filesystem
@@ -430,7 +431,7 @@ void *state (void *s_args) {
             if ( gpio_set_edge(args->pssg[i].state, BOTH) == -1 ) exit(1);
 
             // save the button fd in the second col of the table
-            sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].button);
+            sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].state);
             state_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
             if (state_tbl[j][1] == -1) {
                 fprintf(stderr,"Error(%d) opening %s: %s\n", errno, filename, strerror(errno));
@@ -450,10 +451,11 @@ void *state (void *s_args) {
     epoll_wait(epfd, events, args->number_of_states, -1);  // first time it triggers with current state, so ignore it
     while(1) {
         epoll_wait(epfd, events, args->number_of_states, -1); // wait for an evente. Only fetch up one event
-        for (j=0; j< args->number_of_states; j++) {
+        for (j=0; j < args->number_of_states; j++) {
             if (events[0].data.fd == state_tbl[j][1]) {
                 read(state_tbl[j][1], value, 1);
-                sprintf(message, "%d;state=%c", state_tbl[j][0], value);
+                lseek(state_tbl[j][1],0,SEEK_SET);
+                sprintf(message, "%d;state=%s", state_tbl[j][0], value);
                 // put the message into the queue
                 mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
                 printf("%s\n", message);
