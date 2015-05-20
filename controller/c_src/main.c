@@ -12,7 +12,8 @@
 #include <mqueue.h>
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
     pssg_t *pssg; // array of pointers to pssg type structures
     pthread_t *thread; // array of pointers to all threads created by this program
     pthread_t b_thread; //

@@ -15,7 +15,8 @@
  * Returns the number of occurrences of the string str found in
  * the program arguments.
  */
-int get_number_of(int argc, char** argv, const char *str) {
+int get_number_of(int argc, char** argv, const char *str)
+{
     int i;
     int count = 0;
 
@@ -32,7 +33,8 @@ int get_number_of(int argc, char** argv, const char *str) {
  * Parses the command-line arguments (GPIO pins) and fill the pssg structures
  * A negative attribute means that it is not in use
  */
-int parser(int argc, char **argv, pssg_t *pssg) {
+int parser(int argc, char **argv, pssg_t *pssg)
+{
     int i, j, number_of_pssgs;
 
     // the arguments should start with pssg ID
@@ -84,7 +86,8 @@ int parser(int argc, char **argv, pssg_t *pssg) {
  * Export the GPIO to userspace. On success it returns 0, else returns -1
  * In a near future, this function will be implemented in Python
  */
-int export_gpio(unsigned int gpio) {
+int export_gpio(unsigned int gpio) 
+{
     int fd, len;
     char str_gpio[10];
     
@@ -112,7 +115,8 @@ int export_gpio(unsigned int gpio) {
  * It returns 0 on success
  * ++ In a near future, this function will be implemented in Python ++
  */
-int gpio_set_direction(unsigned int gpio, unsigned int direction) {
+int gpio_set_direction(unsigned int gpio, unsigned int direction)
+{
     int fd;
     char filename[40];
     char *str_direction[2] = { "out" , "in" };
@@ -139,7 +143,8 @@ int gpio_set_direction(unsigned int gpio, unsigned int direction) {
  * It returns 0 on success
  * ++ In a near future, this function will be implemented in Python ++
  */
-int gpio_set_edge(unsigned int gpio, unsigned int edge) {
+int gpio_set_edge(unsigned int gpio, unsigned int edge) 
+{
     int fd;
     char filename[40];
     char *str_edge[4] = {"none", "falling", "rising", "both"};
@@ -167,7 +172,8 @@ int gpio_set_edge(unsigned int gpio, unsigned int edge) {
  * fill the register with the last incoming bit (number 26) is responsible to form the card number
  * and restart the register.
  */
-void *read_card (void *args) {
+void *read_card (void *args) 
+{
     char filename[40];
     char str_card_number[8];
     char message[50];
@@ -276,7 +282,8 @@ void *read_card (void *args) {
  * Each thread reads the card reader lines (D0 and D1), form the card number and
  * sends to the queue a message with the card number.
  */
-int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *thread, mqd_t mq) {
+int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *thread, mqd_t mq) 
+{
     int i; // array index
     struct read_card_args *args; // thread arguments
 
@@ -313,7 +320,8 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
 }
 
 
-void *buttons (void *b_args) {
+void *buttons (void *b_args) 
+{
     char filename[40];
     char message[50];
     int **bttn_tbl;
@@ -390,7 +398,8 @@ void *buttons (void *b_args) {
 }
 
 
-void *state (void *s_args) {
+void *state (void *s_args)
+{
     char filename[40];
     char message[50];
     char value[2] = {0,'\0'};
