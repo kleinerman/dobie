@@ -128,7 +128,6 @@ int gpio_set_direction(unsigned int gpio, unsigned int direction)
         return -1;
     }
 
-
     if ( write(fd, str_direction[direction], strlen(str_direction[direction])) == 0 ) {
         fprintf(stderr,"Error(%d) writing %s: %s\n", errno, filename, strerror(errno));
         return -1;
@@ -164,6 +163,46 @@ int gpio_set_edge(unsigned int gpio, unsigned int edge)
     return 0;
 }
 
+
+int set_gpio (pssg_t *pssg, int number_of_pssgs)
+{
+    int i;
+
+    for (i = 0; i < number_of_pssgs; i++) {
+        if (pssg[i].i0In != -1) {
+            if ( export_gpio(pssg[i].i0In) == -1 ) exit(1);
+            if ( gpio_set_direction(pssg[i].i0In, IN) == -1 ) exit(1);
+            if ( gpio_set_edge(pssg[i].i0In, FALLING) == -1 ) exit(1);
+        }
+        if (pssg[i].i1In != -1) {
+            if ( export_gpio(pssg[i].i1In) == -1 ) exit(1);
+            if ( gpio_set_direction(pssg[i].i1In, IN) == -1 ) exit(1);
+            if ( gpio_set_edge(pssg[i].i1In, FALLING) == -1 ) exit(1);
+        }
+        if (pssg[i].o0In != -1) {
+            if ( export_gpio(pssg[i].o0In) == -1 ) exit(1);
+            if ( gpio_set_direction(pssg[i].o0In, IN) == -1 ) exit(1);
+            if ( gpio_set_edge(pssg[i].o0In, FALLING) == -1 ) exit(1);
+        }
+        if (pssg[i].o1In != -1) {
+            if ( export_gpio(pssg[i].o1In) == -1 ) exit(1);
+            if ( gpio_set_direction(pssg[i].o1In, IN) == -1 ) exit(1);
+            if ( gpio_set_edge(pssg[i].o1In, FALLING) == -1 ) exit(1);
+        }
+        if (pssg[i].button != -1) {
+            if ( export_gpio(pssg[i].button) == -1 ) exit(1);
+            if ( gpio_set_direction(pssg[i].button, IN) == -1 ) exit(1);
+            if ( gpio_set_edge(pssg[i].button, FALLING) == -1 ) exit(1);
+        }
+        if (pssg[i].state != -1) {
+            if ( export_gpio(pssg[i].state) == -1 ) exit(1);
+            if ( gpio_set_direction(pssg[i].state, IN) == -1 ) exit(1);
+            if ( gpio_set_edge(pssg[i].state, BOTH) == -1 ) exit(1);
+        }
+    }
+
+
+}
 
 /*
  * This function is usead in a thread. It is resposible to write 0 in a register if it is listening
