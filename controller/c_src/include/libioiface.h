@@ -13,12 +13,14 @@
 // pssg gpio map
 typedef struct {
     int id;                     // pssg identification
-    int i0In;                     // GPIO for data D0 (reader 1)
-    int i1In;                     // GPIO for data D1 (reader 1)
-    int o0In;                     // GPIO for data D0 (reader 2)
-    int o1In;                     // GPIO for data D1 (reader 2)
+    int i0In;                   // GPIO for data D0 (reader input side)
+    int i1In;                   // GPIO for data D1 (reader input side)
+    int o0In;                   // GPIO for data D0 (reader output side)
+    int o1In;                   // GPIO for data D1 (reader output side)
     int button;                 // GPIO for open pssg button 1
     int state;                  // GPIO for state of the pssg (output)
+    int buzzer;			// GPIO for buzzer of the pssg (output)
+    int release;		// GPIO for release of the pssg (output)
 } pssg_t;
 
 struct read_card_args {
@@ -48,6 +50,7 @@ struct state_args {
 int export_gpio(unsigned int gpio);
 int gpio_set_direction(unsigned int gpio, unsigned int direction);
 int gpio_set_edge(unsigned int gpio, unsigned int edge);
+int set_gpio (pssg_t *pssg, int number_of_pssgs);
 int parser(int argc, char **argv, pssg_t *pssg);
 int get_number_of(int argc, char** argv, const char *str);
 void *read_card (void *args);

@@ -76,6 +76,10 @@ int parser(int argc, char **argv, pssg_t *pssg)
              pssg[j].button = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--stateIn") == 0 )
              pssg[j].state = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--bzzrOut") == 0 )
+             pssg[j].buzzer = atoi(argv[i+1]);
+         if ( strcmp(argv[i], "--rlseOut") == 0 )
+             pssg[j].release = atoi(argv[i+1]);
     }
 
     return 0;
@@ -199,9 +203,18 @@ int set_gpio (pssg_t *pssg, int number_of_pssgs)
             if ( gpio_set_direction(pssg[i].state, IN) == -1 ) exit(1);
             if ( gpio_set_edge(pssg[i].state, BOTH) == -1 ) exit(1);
         }
+        if (pssg[i].buzzer != -1) {
+            if ( export_gpio(pssg[i].buzzer) == -1 ) exit(1);
+            if ( gpio_set_direction(pssg[i].buzzer, OUT) == -1 ) exit(1);
+        }
+        if (pssg[i].release != -1) {
+            if ( export_gpio(pssg[i].release) == -1 ) exit(1);
+            if ( gpio_set_direction(pssg[i].release, OUT) == -1 ) exit(1);
+        }
+
     }
 
-
+    return 0;
 }
 
 /*
@@ -228,14 +241,14 @@ void *read_card (void *args)
 
     // GPIOs initialization
     // export the gpio to the filesystem
-    if ( export_gpio(arg->d0) == -1 ) exit(1);
-    if ( export_gpio(arg->d1) == -1 ) exit(1);
+//    if ( export_gpio(arg->d0) == -1 ) exit(1);
+//    if ( export_gpio(arg->d1) == -1 ) exit(1);
     // set the gpio as an input
-    if ( gpio_set_direction(arg->d0, IN) == -1 ) exit(1);
-    if ( gpio_set_direction(arg->d1, IN) == -1 ) exit(1);
+//    if ( gpio_set_direction(arg->d0, IN) == -1 ) exit(1);
+//    if ( gpio_set_direction(arg->d1, IN) == -1 ) exit(1);
     // set the edge to wait for
-    if ( gpio_set_edge(arg->d0, FALLING) == -1 ) exit(1);
-    if ( gpio_set_edge(arg->d1, FALLING) == -1 ) exit(1);
+//    if ( gpio_set_edge(arg->d0, FALLING) == -1 ) exit(1);
+//    if ( gpio_set_edge(arg->d1, FALLING) == -1 ) exit(1);
 
     // create a new epool instance
     epfd = epoll_create(1);
@@ -394,11 +407,11 @@ void *buttons (void *b_args)
             bttn_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
 
             // export the gpio to the filesystem
-            if (export_gpio(args->pssg[i].button) == -1) exit(1);
+//            if (export_gpio(args->pssg[i].button) == -1) exit(1);
             // set the gpio as an input
-            if (gpio_set_direction(args->pssg[i].button, IN) == -1 ) exit(1);
+//            if (gpio_set_direction(args->pssg[i].button, IN) == -1 ) exit(1);
             // set the edge to wait for
-            if ( gpio_set_edge(args->pssg[i].button, FALLING) == -1 ) exit(1);
+//            if ( gpio_set_edge(args->pssg[i].button, FALLING) == -1 ) exit(1);
 
             // save the button fd in the second col of the table
             sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].button);
@@ -425,7 +438,7 @@ void *buttons (void *b_args)
             if (events[0].data.fd == bttn_tbl[j][1]) {
                 sprintf(message, "%d;button_pressed", bttn_tbl[j][0]);
                 // put the message into the queue
-                mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
+                mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
                 printf("%s\n", message);
                 break;
             }
@@ -453,7 +466,7 @@ void *state (void *s_args)
     ev = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_states);
     events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_states);
 
-    /* Allocate memory for a table. The table has 2 columns and many rows as the number of states.
+    /* Allocate memory for a table. The table has 2 columns and many rows as number of states.
      * The 2 columns: the pssg_ID and file descriptor of the state gpio.
      */
     state_tbl = (int **) malloc(sizeof(int *) * args->number_of_states);
@@ -472,11 +485,11 @@ void *state (void *s_args)
             state_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
 
             // export the gpio to the filesystem
-            if (export_gpio(args->pssg[i].state) == -1) exit(1);
+//            if (export_gpio(args->pssg[i].state) == -1) exit(1);
             // set the gpio as an input
-            if (gpio_set_direction(args->pssg[i].state, IN) == -1 ) exit(1);
+//            if (gpio_set_direction(args->pssg[i].state, IN) == -1 ) exit(1);
             // set the edge to wait for
-            if ( gpio_set_edge(args->pssg[i].state, BOTH) == -1 ) exit(1);
+//            if ( gpio_set_edge(args->pssg[i].state, BOTH) == -1 ) exit(1);
 
             // save the button fd in the second col of the table
             sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].state);
