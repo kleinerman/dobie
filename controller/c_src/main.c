@@ -55,6 +55,13 @@ int main(int argc, char** argv)
     pssg = (pssg_t *)malloc(sizeof(pssg_t) * number_of_pssgs);
     parser(argc, argv, pssg);
 
+
+    /* set all GPIO pins */
+    if ( set_gpio(pssg, number_of_pssgs) == -1 ) {
+        printf("Error setting GPIO pins. Program aborted");
+        exit(1);
+    }
+
     /* start listening the card readers and send to the main process a message with
      * pssg ID + card reader ID + card number
      */
