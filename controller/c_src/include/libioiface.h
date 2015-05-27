@@ -48,9 +48,11 @@ struct state_args {
 
 // function prototypes
 int export_gpio(unsigned int gpio);
+int unexport_gpio(unsigned int gpio);
 int gpio_set_direction(unsigned int gpio, unsigned int direction);
 int gpio_set_edge(unsigned int gpio, unsigned int edge);
-int set_gpio (pssg_t *pssg, int number_of_pssgs);
+int set_gpio_pins (pssg_t *pssg, int number_of_pssgs);
+int unset_gpio_pins (pssg_t *pssg, int number_of_pssgs);
 int parser(int argc, char **argv, pssg_t *pssg);
 int get_number_of(int argc, char** argv, const char *str);
 void *read_card (void *args);

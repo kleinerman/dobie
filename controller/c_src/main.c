@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 
 
     /* set all GPIO pins */
-    if ( set_gpio(pssg, number_of_pssgs) == -1 ) {
+    if ( set_gpio_pins(pssg, number_of_pssgs) == -1 ) {
         printf("Error setting GPIO pins. Program aborted");
         exit(1);
     }

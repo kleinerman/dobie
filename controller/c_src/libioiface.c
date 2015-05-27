@@ -88,7 +88,6 @@ int parser(int argc, char **argv, pssg_t *pssg)
 
 /*
  * Export the GPIO to userspace. On success it returns 0, else returns -1
- * In a near future, this function will be implemented in Python
  */
 int export_gpio(unsigned int gpio) 
 {
@@ -109,7 +108,35 @@ int export_gpio(unsigned int gpio)
     }
 
     close(fd);
-    return 0; // success GPIO export
+    return 0; // success GPIO exported
+
+}
+
+
+/*
+ * Reverses the effect of exporting the GPIO to userspace.
+ * On success it returns 0, else returns -1
+ */
+int unexport_gpio(unsigned int gpio) 
+{
+    int fd, len;
+    char str_gpio[10];
+    
+    if ((fd = open("/sys/class/gpio/unexport", O_WRONLY )) < 0 ) {
+        fprintf(stderr,"Error(%d) opening /sys/class/gpio/export: %s\n", errno, strerror(errno));
+        return -1;
+    }
+
+    // get the length of the gpio string
+    len = sprintf(str_gpio, "%d", gpio);
+
+    if ( write(fd, str_gpio, len) == 0) {
+        fprintf(stderr,"Error(%d) writing /sys/class/gpio/uexport: %s\n", errno, strerror(errno));
+        return -1;
+    }
+
+    close(fd);
+    return 0; // success GPIO removed from userspace
 
 }
 
@@ -168,7 +195,8 @@ int gpio_set_edge(unsigned int gpio, unsigned int edge)
 }
 
 
-int set_gpio (pssg_t *pssg, int number_of_pssgs)
+/* Export used GPIOs to the userspace, set direction and trigger edge */
+int set_gpio_pins (pssg_t *pssg, int number_of_pssgs)
 {
     int i;
 
@@ -216,6 +244,34 @@ int set_gpio (pssg_t *pssg, int number_of_pssgs)
 
     return 0;
 }
+
+/* Remove all GPIOs from userspace */
+int unset_gpio_pins (pssg_t *pssg, int number_of_pssgs)
+{
+    int i;
+   
+    for (i = 0; i < number_of_pssgs; i++) {
+        if (pssg[i].i0In != -1)
+            if ( unexport_gpio(pssg[i].i0In) == -1 ) return 1;
+        if (pssg[i].i1In != -1)
+            if ( unexport_gpio(pssg[i].i1In) == -1 ) return 1;
+        if (pssg[i].o0In != -1)
+            if ( unexport_gpio(pssg[i].o0In) == -1 ) return 1;
+        if (pssg[i].o1In != -1)
+            if ( unexport_gpio(pssg[i].o1In) == -1 ) return 1;
+        if (pssg[i].button != -1)
+            if ( unexport_gpio(pssg[i].button) == -1 ) return 1;
+        if (pssg[i].state != -1)
+            if ( unexport_gpio(pssg[i].state) == -1 ) return 1;
+        if (pssg[i].buzzer != -1)
+            if ( unexport_gpio(pssg[i].buzzer) == -1 ) return 1;
+        if (pssg[i].release != -1)
+            if ( unexport_gpio(pssg[i].release) == -1 ) return 1;
+    }
+
+    return 0;
+}
+
 
 /*
  * This function is usead in a thread. It is resposible to write 0 in a register if it is listening
