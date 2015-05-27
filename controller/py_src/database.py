@@ -140,9 +140,14 @@ class DataBase(object):
 
         while evtTupleList:
 
-
+            #List with a dictionary for each event
             evtDictList = []
+            #List with events id of the database
             evtIdList = []
+
+            #Creating a dictionary for each row retrieved from the DB
+            #and appending it to "evtDictList".
+            #Apending the event id of DB to "evtIdList"
             for evtTuple in evtTupleList:
                 evtDict = {'pssgId' : evtTuple[1],
                            'eventType' : evtTuple[2],
@@ -156,7 +161,8 @@ class DataBase(object):
 
                 evtDictList.append(evtDict)
                 evtIdList.append(evtTuple[0])
-            
+
+            #This commit is to avoid leaving the database locked. (Not sure if necessary)            
             self.connection.commit()
             yield evtIdList, evtDictList
             self.cursor.execute(sqlSentence)
