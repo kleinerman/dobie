@@ -4,12 +4,18 @@ import logging
 
 
 class DataBase(object):
+    '''
+    This object connects the database in the constructor.
+    It implements differents methods to query the database, 
+    save events and delete them
+    '''
 
     def __init__(self, dbFile):
 
-        #self.connection = sqlite3.connect(dbFile, check_same_thread=False)
+        #Connecting to the database
         self.connection = sqlite3.connect(dbFile)
         self.cursor = self.connection.cursor()
+        #Enabling foreing keys
         self.cursor.execute('PRAGMA foreign_keys = ON')
 
         #Getting the logger
@@ -17,22 +23,31 @@ class DataBase(object):
 
 
 
+    #---------------------------------------------------------------------------#
+
     def canAccess(self, pssgId, side, cardNumber):
         '''
-        This method
+        This method is called by the main thread. It checks if the user identified
+        by "cardNumber" is authorized to pass the passage identified by "pssgId" on
+        this "side" of the passage.
+        It returns three values. The first one is a boolean which tells if the person
+        is authorized to pass. The second is the "personId" corresponding to this
+        "cardNumber", used to create the event. The last one is the reason of not
+        allowing the access in case the access is not permitted.
         '''
 
+        #Dictionary to convert 0 to 'oSide' and 1 'iSide'
         sideColumn = {0:'oSide', 1:'iSide'}[side]
 
-        sqlSentence = ("SELECT person.id, access.allWeek, access.startTime, "
-                       "access.endTime, access.expireDate "
-                       "FROM Access access JOIN Person person ON (access.personId = person.id) "
-                       "WHERE access.pssgId = '{}' AND access.{} = 1 " 
-                       "AND person.cardNumber = '{}'"
-                       "".format(pssgId, sideColumn, cardNumber)
-                      )
+        sql = ("SELECT person.id, access.allWeek, access.startTime, "
+               "access.endTime, access.expireDate "
+               "FROM Access access JOIN Person person ON (access.personId = person.id) "
+               "WHERE access.pssgId = '{}' AND access.{} = 1 " 
+               "AND person.cardNumber = '{}'"
+               "".format(pssgId, sideColumn, cardNumber)
+               )
 
-        self.cursor.execute(sqlSentence)
+        self.cursor.execute(sql)
         params = self.cursor.fetchone()
 
         if params:
@@ -54,13 +69,13 @@ class DataBase(object):
                 else:
                     nowWeekDay = datetime.datetime.now().isoweekday()
 
-                    sqlSentence = ("SELECT startTime, endTime FROM LimitedAccess "
-                                   "WHERE pssgId = {} AND personId = {} AND "
-                                   "weekDay = {} AND {} = 1"
-                                   "".format(pssgId, personId, nowWeekDay, sideColumn)
-                                  )
+                    sql = ("SELECT startTime, endTime FROM LimitedAccess "
+                           "WHERE pssgId = {} AND personId = {} AND "
+                           "weekDay = {} AND {} = 1"
+                           "".format(pssgId, personId, nowWeekDay, sideColumn)
+                          )
 
-                    self.cursor.execute(sqlSentence)
+                    self.cursor.execute(sql)
                     params = self.cursor.fetchone()
 
                     if params:
@@ -88,7 +103,10 @@ class DataBase(object):
 
         print(params)
 
+
     
+    #---------------------------------------------------------------------------#
+
     def saveEvent(self, event):
         '''
         Save events in database when no connection to server.
@@ -109,34 +127,34 @@ class DataBase(object):
             notReason = 'NULL'
             
 
-        sqlSentence = ("INSERT INTO Events"
-                       "(pssgId, eventType, dateTime, latchType, "
-                       "personId, side, allowed, notReason) "
-                       "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
-                       "".format(event['pssgId'], event['eventType'], 
-                                 event['dateTime'], event['latchType'], 
-                                 personId, side, allowed, notReason)
-                      )
-        self.cursor.execute(sqlSentence)
+        sql = ("INSERT INTO Events"
+               "(pssgId, eventType, dateTime, latchType, "
+               "personId, side, allowed, notReason) "
+               "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
+               "".format(event['pssgId'], event['eventType'], 
+                         event['dateTime'], event['latchType'], 
+                         personId, side, allowed, notReason)
+              )
+        self.cursor.execute(sql)
         self.connection.commit()
 
 
 
+    #---------------------------------------------------------------------------#
+
     def getNEvents(self, evtsQtty):
         '''
         On each iteration over this method, it returns a list with
-        "evtsQtty" events 
+        "evtsQtty" events.
         '''
         
-        sqlSentence = ("SELECT id, pssgId, eventType, dateTime, latchType, "
-                       "personId, side, allowed, notReason FROM Events "
-                       "LIMIT {}".format(evtsQtty)
-                      )
+        sql = ("SELECT id, pssgId, eventType, dateTime, latchType, "
+               "personId, side, allowed, notReason FROM Events "
+               "LIMIT {}".format(evtsQtty)
+              )
 
-        self.cursor.execute(sqlSentence)
+        self.cursor.execute(sql)
         evtTupleList = self.cursor.fetchall()
-
-
 
         while evtTupleList:
 
@@ -163,44 +181,51 @@ class DataBase(object):
                 evtIdList.append(evtTuple[0])
 
             #This commit is to avoid leaving the database locked. (Not sure if necessary)            
-            self.connection.commit()
+            #self.connection.commit()
             yield evtIdList, evtDictList
-            self.cursor.execute(sqlSentence)
+            self.cursor.execute(sql)
             evtTupleList = self.cursor.fetchall()
 
-        self.connection.commit()
+        #self.connection.commit()
 
 
+
+    #---------------------------------------------------------------------------#
 
     def delEvents(self, evtIdList):
         '''
-        Delete Events with
+        Delete event rows from database.
+        The method receives a list with database event ids.
         '''
 
-        evtIdStrList = [str(evtId) for evtId in evtIdList]
-
-        evtIdsStr = '({})'.format(','.join(evtIdStrList))
+        #Converting the ids to string type to write the sql statement
+        evtIdList = [str(evtId) for evtId in evtIdList]
+        #Creating a single string with all ids comma separated
+        evtIds = ', '.join(evtIdList)
         
-        sqlSentence = "DELETE FROM Events WHERE id IN {}".format(evtIdsStr)
+        sql = "DELETE FROM Events WHERE id IN ({})".format(evtIds)
 
-        self.cursor.execute(sqlSentence)
+        self.cursor.execute(sql)
         self.connection.commit()
 
 
+
+    #---------------------------------------------------------------------------#
 
     def getPssgParamsNames(self):
         '''
         Getting Passage Params Names from SQL database
         '''
 
-        sqlSentence = "SELECT * FROM Passage"
-        self.cursor.execute(sqlSentence)
+        sql = "SELECT * FROM Passage"
+        self.cursor.execute(sql)
         self.connection.commit()
 
         return [i[0] for i in self.cursor.description]
 
 
 
+    #---------------------------------------------------------------------------#
 
     def getPssgsParams(self):
         '''
@@ -208,32 +233,28 @@ class DataBase(object):
         pps = Passage Parametters
 
         '''
-
+        #Getting the list with all Passage Parametters
         ppsNames = self.getPssgParamsNames()
+        #Joining it in a string separated by ','
+        ppsNamesStr = ', '.join(ppsNames)
 
-        
-        sqlSentence = ("SELECT {}, {}, {}, {}, {}, {}, {}, {}, {} "
-                       "FROM Passage".format(*ppsNames)
-                      )
-
-        self.cursor.execute(sqlSentence)
+        sql = "SELECT {} FROM Passage".format(ppsNamesStr)
+                      
+        self.cursor.execute(sql)
         ppsTuplesList = self.cursor.fetchall()
         self.connection.commit()
 
-
+        #Dictionary containing dictionaries with all the pps indexed by the pps name.
+        #This dictionary is indexed by the passage id
         ppsDictsDict = {}
 
         for ppsTuple in ppsTuplesList:
-            
+            #Dictionary with all the pps for each passage indexed by the name of parametters.
             ppsDict = {}
 
             for i, ppName in enumerate(ppsNames):
-
                 ppsDict[ppName] = ppsTuple[i]
-
-
-                #self.logger.error('Invalid row in Passage table, skiping to the next row.')
-            
+            #Each dictionary is indexed in the master dictionary "ppsDictsDict" by the passage id 
             ppsDictsDict[ppsDict['id']] = ppsDict
 
         return ppsDictsDict
