@@ -10,7 +10,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <mqueue.h>
-
+#include <signal.h>
 
 int main(int argc, char** argv) 
 {
@@ -26,6 +26,8 @@ int main(int argc, char** argv)
     mqd_t mq; // message queue
     struct buttons_args b_args;
     struct state_args s_args;
+
+    signal(SIGINT, sigintHandler);
 
     // open the message queue only for sending message to the main process
     // It must be created by the main process
@@ -84,6 +86,11 @@ int main(int argc, char** argv)
     // waits  for  the  threads  to  terminate
     for (i = 0; i < number_of_threads; i++)
         pthread_join(thread[i], NULL);
+
+    if ( unset_gpio_pins(pssg, number_of_pssgs) == -1 ) {
+        printf("Error removing GPIO pins from userspace");
+        exit(1);
+    }
 
     return 0;
 }

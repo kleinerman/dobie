@@ -9,6 +9,15 @@
 #include <mqueue.h>
 #include <unistd.h>
 #include <libioiface.h>
+#include <signal.h>
+
+int run = 1;
+
+/* Signal Handler for SIGINT */
+void sigintHandler(int sig_num)
+{
+    run = 0;
+}
 
 
 /*
@@ -295,18 +304,7 @@ void *read_card (void *args)
     struct read_card_args *arg = (struct read_card_args*) args; //arguments passed to the thread
     int gpio[] = {arg->d0, arg->d1};
 
-    // GPIOs initialization
-    // export the gpio to the filesystem
-//    if ( export_gpio(arg->d0) == -1 ) exit(1);
-//    if ( export_gpio(arg->d1) == -1 ) exit(1);
-    // set the gpio as an input
-//    if ( gpio_set_direction(arg->d0, IN) == -1 ) exit(1);
-//    if ( gpio_set_direction(arg->d1, IN) == -1 ) exit(1);
-    // set the edge to wait for
-//    if ( gpio_set_edge(arg->d0, FALLING) == -1 ) exit(1);
-//    if ( gpio_set_edge(arg->d1, FALLING) == -1 ) exit(1);
-
-    // create a new epool instance
+    /* create a new epool instance */
     epfd = epoll_create(1);
     if (epfd == -1) {
         fprintf(stderr,"Error(%d) creating the epoll: %s\n", errno, strerror(errno));
@@ -322,13 +320,13 @@ void *read_card (void *args)
         }
         ev[i].events = EPOLLIN | EPOLLET | EPOLLPRI;
         ev[i].data.fd = fd[i];
-        // Add the file descriptors to the interest list for epfd
+        /* Add the file descriptors to the interest list for epfd */
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd[i], &ev[i]);
     }
 
     epoll_wait(epfd, events, 2, -1);  // first time it triggers with current state, so ignore it
 
-    while (1) {
+    while (run) {
         mask = 33554432; // mask initialitation: 00000010000000000000000000000000
         card_number = 0; // initialize the card number
 
@@ -377,10 +375,11 @@ void *read_card (void *args)
         epoll_wait(epfd, events, 2, -1);  // first time it triggers with current state, so ignore it
     }
 
-    // this part of the code should never be executed
-    close(epfd);
+    /* execute this code when the program exits */
+    /* close all opened descriptors */
     for (i=0; i<2; i++) 
         close(fd[i]);
+    
     return NULL;
 }
 
@@ -462,13 +461,6 @@ void *buttons (void *b_args)
 
             bttn_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
 
-            // export the gpio to the filesystem
-//            if (export_gpio(args->pssg[i].button) == -1) exit(1);
-            // set the gpio as an input
-//            if (gpio_set_direction(args->pssg[i].button, IN) == -1 ) exit(1);
-            // set the edge to wait for
-//            if ( gpio_set_edge(args->pssg[i].button, FALLING) == -1 ) exit(1);
-
             // save the button fd in the second col of the table
             sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].button);
             bttn_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
@@ -488,7 +480,7 @@ void *buttons (void *b_args)
     }
  
     epoll_wait(epfd, events, args->number_of_buttons, -1);  // first time it triggers with current state, so ignore it
-    while(1) {
+    while(run) {
         epoll_wait(epfd, events, args->number_of_buttons, -1); // wait for an evente. Only fetch up one event
         for (j=0; j< args->number_of_buttons; j++) {
             if (events[0].data.fd == bttn_tbl[j][1]) {
@@ -540,13 +532,6 @@ void *state (void *s_args)
         if (args->pssg[i].state != -1) {     // if the pssg has state
             state_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
 
-            // export the gpio to the filesystem
-//            if (export_gpio(args->pssg[i].state) == -1) exit(1);
-            // set the gpio as an input
-//            if (gpio_set_direction(args->pssg[i].state, IN) == -1 ) exit(1);
-            // set the edge to wait for
-//            if ( gpio_set_edge(args->pssg[i].state, BOTH) == -1 ) exit(1);
-
             // save the button fd in the second col of the table
             sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].state);
             state_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
@@ -566,7 +551,7 @@ void *state (void *s_args)
     }
  
     epoll_wait(epfd, events, args->number_of_states, -1);  // first time it triggers with current state, so ignore it
-    while(1) {
+    while(run) {
         epoll_wait(epfd, events, args->number_of_states, -1); // wait for an evente. Only fetch up one event
         for (j=0; j < args->number_of_states; j++) {
             if (events[0].data.fd == state_tbl[j][1]) {

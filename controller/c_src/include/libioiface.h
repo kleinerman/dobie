@@ -47,6 +47,7 @@ struct state_args {
 
 
 // function prototypes
+void sigintHandler(int sig_num);
 int export_gpio(unsigned int gpio);
 int unexport_gpio(unsigned int gpio);
 int gpio_set_direction(unsigned int gpio, unsigned int direction);
