@@ -39,12 +39,6 @@ RCUD = bytes([int_RCUD])
 END  = bytes([int_END])
 
 
-#EVT  = b'#'
-#REVT = b'$'
-#CUD  = b'%'
-#RCUD = b'&'
-#END  = b'.\n'
-
 
 class Unblocker(object):
     '''
@@ -80,52 +74,57 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, netToEvent, netToReSnd, exitFlag):
-
+    def __init__(self, netToDb, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
 
-        #Buffer to receive bytes from server
+        #Buffer to receive bytes from server (should be changed to dict for each connection)
+        #It is used in POLLIN event
         self.inBuffer = b''
-        #Buffer to send bytes to server
+
+        #Buffer to send bytes to server (should be changed to dict for each connection)
+        #It is used in POLLOUT event
         self.outBuffer = b''
 
+        #Queue used to send Events and CRUD confirmation to dbMngr
+        self.netToDb = netToDb
 
-        #Queue to send responses to Event Thread
-        self.netToEvent = netToEvent
-
-        #Queue to send responses to ReSender Thread
-        self.netToReSnd = netToReSnd
-
-
-        #Queue used to send events from event thread to network thread
+        #In this queue, "event" and "reSender" threads put the messages
+        #and "netMngr" gets them to send to the server.
+        #We are using a queue because we can not assure the method
+        #"sendEvent()" will not be called again before the "poll()" method wakes
+        #up to send the bytes. If we do not do this, we would end up with a mess
+        #of bytes in the out buffer.
+        #(Not sure if this is necessary or it is the best way to do it)
         self.outBufferQue = queue.Queue()
 
-        #Lock to protect access to above dictionary 
-        self.lockNetPoller = threading.Lock()
-
-        #Poll Network Object
+        #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
 
-        #Pipe to wake up the thread blocked in poll() call
-        #self.readPipe, self.writePipe = os.pipe()
+        #Lock to protect access to "netPoller" 
+        self.lockNetPoller = threading.Lock()
 
+        #Unblocker object to wake up the thread blocked in poll() call
         self.unblocker = Unblocker()
         self.unBlkrFd = self.unblocker.getFd()
 
         #Registering above pipe in netPoller object
         self.netPoller.register(self.unBlkrFd)
 
-        #Socket server
-        self.srvSock = None
- 
-        #This is a flag to know when we are connected to server.
-        #it is needed a Event, because multiple threads can check it
-        #The flag is initially False.
-        self.connected = threading.Event()
+        #Creating the socket listener
+        self.listenerSckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.listenerSckt.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.listenerSckt.bind((BIND_IP, BIND_PORT))
+        self.listenerSckt.listen(SIM_CONNECTIONS)
+        #Saving the listener socket file descriptor
+        self.listenerScktFd = self.listenerSckt.fileno()
 
+
+        #Dic
+        self.ctrllerConns = {}
+ 
 
 
     #---------------------------------------------------------------------------#
@@ -242,15 +241,20 @@ class NetMngr(genmngr.GenericMngr):
 
     def run(self):
         '''
-        This is the main method of the thread. Most of the time it is blocked waiting 
-        for queue messages coming from the "Main" thread.
+        This is the main method of the thread.
+        When the controller is connected to the server, this method is blocked most of
+        the time in "poll()" method waiting for bytes to go out or incoming bytes from 
+        the server or  a event produced when the socket is broken or disconnect.
+        When there is no connection to the server, this method tries to reconnect to 
+        the server every "RECONNECT_TIME"
         '''
 
         while True:
 
             try:
-                #Connecting to server
+                #Creating the socket to connect the to the server
                 self.srvSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                #If there is no connection to the server, an exception will happen here
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
                 #Registering the socket in the network poller object
                 self.netPoller.register(self.srvSock, select.POLLIN)
@@ -261,46 +265,81 @@ class NetMngr(genmngr.GenericMngr):
 
                     for fd, pollEvnt in self.netPoller.poll(NET_POLL_MSEC):
 
-
+                        #This will happen when the "event" thread or "reSender"
+                        #thread puts bytes in the "outBufferQue" and they want to notify
+                        #this thread to wake up from "poll()"
                         if fd == self.unBlkrFd:
                             self.unblocker.receive()
                             continue
 
+
+                        if fd == self.listenerScktFd:
+                            socket, address = self.listenerSckt.accept()
+                            self.logger.info('Accepting connection from: {}'.format(address))
+                            socketFd = socket.fileno()
+                            self.ctrllerConns[socketFd] = {'socket': socket, 
+                                                           'inBuffer': '',
+                                                           
+
+                                                          }
+
+
+
+
+
+                        #This will happen when the server sends to us bytes.
                         if pollEvnt & select.POLLIN:
-                            moreData = self.srvSock.recv(REC_BYTES)
-                            self.logger.debug('Receiving: {}'.format(moreData))
-                            if not moreData:         # end-of-file
-                                self.srvSock.close() # next poll() will POLLNVAL, and thus clean up
-                                continue                # Continue to the next pollEvnt if any
-                            msg = self.inBuffer + moreData
+                            recBytes = self.srvSock.recv(REC_BYTES)
+                            self.logger.debug('Receiving: {}'.format(recBytes))
+
+                            #Receiving b'' means the server closed the connection
+                            #On this situation we should close the socket and the
+                            #next call to "poll()" will throw a POLLNVAL event
+                            if not recBytes:
+                                self.srvSock.close()
+                                continue
+
+                            #We should receive bytes until we receive the end of
+                            #the message
+                            msg = self.inBuffer + recBytes
                             if msg.endswith(END):
                                 self.procRecMsg(msg)
                             else:
                                 self.inBuffer = msg
 
 
-
+                        #This will happen when "event" thread or "reSender" thread
+                        #puts bytes in "outBufferQue", modifying the "netPoller"
+                        #to send bytes.
                         elif pollEvnt & select.POLLOUT:
                             try:
+                                #We can have more than one message in the "outBufferQue"
+                                #to send, because we can have more than one call to
+                                #"sendEvent()" or "reSendEvents()" before the POLLOUT event
+                                #happens. For this reason we should empty the "outBufferQue"
+                                #sending all the messages. Then, if we have another POLLOUT
+                                #event and the queue is empty, nothing will happen.
                                 while True:
-                                    outBuffer = self.outBufferQue.get(block = False)
-                                    self.logger.debug('Sending: {}'.format(outBuffer))
-                                    self.srvSock.sendall(outBuffer)
+                                    self.outBuffer = self.outBufferQue.get(block = False)
+                                    self.logger.debug('Sending: {}'.format(self.outBuffer))
+                                    self.srvSock.sendall(self.outBuffer)
                             except queue.Empty:
-                                pass #No more data to send in queue
-                            #No se bien por que tengo que hacer esto pero sino lo hago
-                            #la proxima llamada a netPoller.poll se bloquea por siempre
+                                #No more messages to send in "outBufferQue"
+                                pass
+                            #Once we finished sending all the messages, we should modify the
+                            #"netPoller" object to be able to receive bytes again.
                             with self.lockNetPoller:
                                 self.netPoller.modify(self.srvSock, select.POLLIN)
 
 
-
+                        #This will happen when the server closes the socket or the 
+                        #connection with the server is broken
                         elif pollEvnt & (select.POLLHUP | select.POLLERR | select.POLLNVAL):
                             self.logger.info('The connection with server was broken.')
                             with self.lockNetPoller:
+                                #Unregistering the socket from the "netPoller" object
                                 self.netPoller.unregister(fd)
-                                #self.netPoller = None
-                            #self.srvSock = None
+                            #Setting "connected" to False (this will break the while loop)
                             self.connected.clear()
 
                     #Cheking if Main thread ask as to finish.
@@ -310,7 +349,7 @@ class NetMngr(genmngr.GenericMngr):
             except (ConnectionRefusedError, ConnectionResetError):
                 #Cheking if Main thread ask as to finish.
                 self.checkExit()
-                self.logger.info('Reconnecting to server in {} seconds..'.format(RECONNECT_TIME))
+                self.logger.info('Reconnecting to server in {} seconds...'.format(RECONNECT_TIME))
                 time.sleep(RECONNECT_TIME)
 
     
