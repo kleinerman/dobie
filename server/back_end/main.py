@@ -35,7 +35,7 @@ class BackEndSrvr(object):
         loggingFormatter = logging.Formatter(loggingFormat, dateFormat)
         loggingHandler.setFormatter(loggingFormatter)
 
-        self.logger = logging.getLogger('BackEndSrvr')
+        self.logger = logging.getLogger(LOGGER_NAME)
         self.logger.setLevel(loggingLevel)
         self.logger.addHandler(loggingHandler)
 

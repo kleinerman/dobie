@@ -31,7 +31,7 @@ class GenericMngr(threading.Thread):
         self.exitCode = 0
 
         #Getting the logger
-        self.logger = logging.getLogger('Controller')
+        self.logger = logging.getLogger(LOGGER_NAME)
 
 
 

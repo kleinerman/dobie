@@ -277,10 +277,9 @@ class NetMngr(genmngr.GenericMngr):
                                               'inBuffer': '',
                                               'outBufferQue': queue.Queue()
                                              }
-                    self.addrFd = {address: socketFd}
+                    self.addrFd = {address[0]: socketFd}
             
                     self.netPoller.register(socket, select.POLLIN)
-
 
 
                 #This will happen when the server sends to us bytes.

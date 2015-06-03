@@ -1,5 +1,6 @@
 import logging
 
+LOGGER_NAME = 'BackEndSrvr'
 
 LOGGING_FILE ='logevents.log'
 
