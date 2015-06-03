@@ -47,7 +47,7 @@ class BackEndSrvr(object):
         netToDb = queue.Queue()
 
         #Creating the Net Manager Thread 
-        #self.netMngr = network.NetMngr(netToDb, self.exitFlag)        
+        self.netMngr = network.NetMngr(netToDb, self.exitFlag)        
 
 
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
@@ -61,7 +61,8 @@ class BackEndSrvr(object):
 
 
     def sigtermHandler(self, signal, frame):
-        pass
+        self.logger.debug('Notifying all threads to finish.')
+        self.exitFlag.set()
 
 
 
@@ -73,12 +74,8 @@ class BackEndSrvr(object):
         self.logger.debug('Starting Server Back End')
         
         #Starting the "Event Manager" thread
-        #self.netMngr.start()
+        self.netMngr.start()
         
-
-        self.logger.debug('Notifying all threads to finish.')
-        self.exitFlag.set()
-        self.logger.info('Waiting to finish all threads...')
 
         for thread in threading.enumerate():
             if thread is not threading.currentThread():
