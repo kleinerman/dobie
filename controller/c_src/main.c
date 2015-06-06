@@ -27,7 +27,8 @@ int main(int argc, char** argv)
     struct buttons_args b_args;
     struct state_args s_args;
 
-    signal(SIGINT, sigintHandler);
+    signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
 
     // open the message queue only for sending message to the main process
     // It must be created by the main process

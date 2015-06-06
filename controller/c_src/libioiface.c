@@ -14,9 +14,12 @@
 int run = 1;
 
 /* Signal Handler for SIGINT */
-void sigintHandler(int sig_num)
+void sigHandler(int signo)
 {
     run = 0;
+    printf("\nshutting down the program...\n");
+    signal(SIGINT,SIG_DFL);
+    signal(SIGTERM,SIG_DFL);
 }
 
 
