@@ -227,10 +227,11 @@ class NetMngr(genmngr.GenericMngr):
         It process the message and delivers it to the corresponding thread 
         according to the headers of the message.
         '''
-
+        print('Entering')
         #This is a response to an event sent to the server
         #It should be delivered to "eventMngr" thread.
         if msg.startswith(REVT):
+            print('1')
             response = msg.strip(REVT+END)
             response = response.decode('utf8')
             self.netToEvent.put(response)
@@ -238,6 +239,7 @@ class NetMngr(genmngr.GenericMngr):
         #This is a response to a set of re-sent events sent to the server
         #It should be delivered to "reSender" thread.
         elif msg.startswith(REVS):
+            print('2')
             response = msg.strip(REVS+END)
             response = response.decode('utf8')
             self.netToReSnd.put(response)
@@ -269,38 +271,41 @@ class NetMngr(genmngr.GenericMngr):
 
 
                 if fd == self.listenerScktFd:
-                    socket, address = self.listenerSckt.accept()
+                    ctrlSckt, address = self.listenerSckt.accept()
                     self.logger.info('Accepting connection from: {}'.format(address))
-                    socketFd = socket.fileno()
+                    ctrlScktFd = ctrlSckt.fileno()
                             
-                    self.fdConns[socketFd] = {'socket': socket, 
-                                              'inBuffer': '',
-                                              'outBufferQue': queue.Queue()
-                                             }
-                    self.addrFd = {address[0]: socketFd}
+                    self.fdConns[ctrlScktFd] = {'socket': ctrlSckt, 
+                                                'inBuffer': b'',
+                                                'outBufferQue': queue.Queue()
+                                               }
+                    self.addrFd = {address[0]: ctrlScktFd}
             
-                    self.netPoller.register(socket, select.POLLIN)
+                    self.netPoller.register(ctrlSckt, select.POLLIN)
 
 
                 #This will happen when the server sends to us bytes.
                 elif pollEvnt & select.POLLIN:
-                    recBytes = self.srvSock.recv(REC_BYTES)
+                    ctrlSckt = self.fdConns[fd]['socket']
+                    recBytes = ctrlSckt.recv(REC_BYTES)
                     self.logger.debug('Receiving: {}'.format(recBytes))
 
-                    #Receiving b'' means the server closed the connection
+                    #Receiving b'' means the controller closed the connection
                     #On this situation we should close the socket and the
                     #next call to "poll()" will throw a POLLNVAL event
                     if not recBytes:
-                        self.srvSock.close()
+                        ctrlSckt.close()
                         continue
 
                     #We should receive bytes until we receive the end of
                     #the message
-                    msg = self.inBuffer + recBytes
+
+
+                    msg = self.fdConns[fd]['inBuffer'] + recBytes
                     if msg.endswith(END):
                         self.procRecMsg(msg)
                     else:
-                        self.inBuffer = msg
+                        self.fdConns[fd]['inBuffer'] = msg
 
 
                 #This will happen when "event" thread or "reSender" thread
