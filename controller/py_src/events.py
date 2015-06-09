@@ -128,7 +128,7 @@ class ReSender(genmngr.GenericMngr):
         #Calculating turns to sleep EXIT_CHECK_TIME
         self.SLEEP_TURNS = RE_SEND_TIME // EXIT_CHECK_TIME
 
-        #Calculating real resend time
+        #Calculating real resend time just for logging purposes
         self.REAL_RE_SEND_TIME = self.SLEEP_TURNS * EXIT_CHECK_TIME
 
 
