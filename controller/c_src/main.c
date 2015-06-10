@@ -15,18 +15,19 @@
 int main(int argc, char** argv) 
 {
     pssg_t *pssg; // array of pointers to pssg type structures
-    pthread_t *thread; // array of pointers to all threads created by this program
+    pthread_t *r_thread; // array of pointers to all threads created by this program
     pthread_t b_thread; //
+    pthread_t s_thread; //
     int i; // auxiliar variable used in for cicles
     int number_of_pssgs = 0;
     int number_of_readers = 0;
     int number_of_buttons = 0;
     int number_of_states = 0;
-    int number_of_threads;
     mqd_t mq; // message queue
     struct buttons_args b_args;
     struct state_args s_args;
 
+    //
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
@@ -45,12 +46,10 @@ int main(int argc, char** argv)
     number_of_buttons = get_number_of(argc, argv, "--bttnIn");
     // get number of state pins
     number_of_states = get_number_of(argc, argv, "--stateIn");
-    // number of thread: one thread per card reader, one for all button and one for all state pins
-    number_of_threads = number_of_readers + 1 + 1;
 
 
     // array with all system threads
-    thread = (pthread_t *) malloc(sizeof(pthread_t) * number_of_threads);
+    r_thread = (pthread_t *) malloc(sizeof(pthread_t) * number_of_readers);
 
     /* array of pssg struct. Each struct store the pin numbers.
      * The array is filled with the parser function
@@ -68,7 +67,7 @@ int main(int argc, char** argv)
     /* start listening the card readers and send to the main process a message with
      * pssg ID + card reader ID + card number
      */
-    start_readers(number_of_pssgs, number_of_readers, pssg, thread, mq);
+    start_readers(number_of_pssgs, number_of_readers, pssg, r_thread, mq);
 
     /* start listening button pushes */
     b_args.number_of_pssgs = number_of_pssgs;
@@ -82,11 +81,13 @@ int main(int argc, char** argv)
     s_args.number_of_states = number_of_states;
     s_args.pssg = pssg;
     s_args.mq = mq;
-    pthread_create(&b_thread, NULL, state, (void *)&s_args);
+    pthread_create(&s_thread, NULL, state, (void *)&s_args);
 
     // waits  for  the  threads  to  terminate
-    for (i = 0; i < number_of_threads; i++)
-        pthread_join(thread[i], NULL);
+    for (i = 0; i < number_of_readers; i++)
+        pthread_join(r_thread[i], NULL);
+    pthread_join(b_thread, NULL);
+    pthread_join(s_thread, NULL);
 
     if ( unset_gpio_pins(pssg, number_of_pssgs) == -1 ) {
         printf("Error removing GPIO pins from userspace");

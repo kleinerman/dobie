@@ -333,12 +333,12 @@ void *read_card (void *args)
         mask = 33554432; // mask initialitation: 00000010000000000000000000000000
         card_number = 0; // initialize the card number
 
-        while (mask != 0) {
-            epoll_wait(epfd, events, 2, -1); // wait for an evente. Only fetch up one event
-            if (events[0].data.fd == fd[1]) { // if the event was a D1, add 1 to the card number buffer and shift the mask
-                card_number = card_number | mask;
+        while (mask != 0 && run) {
+            if ( epoll_wait(epfd, events, 2, 2000) ) { // wait for an evente. Only fetch up one event
+                if (events[0].data.fd == fd[1])  // if the event was a D1, add 1 to the card number buffer and shift the mask
+                    card_number = card_number | mask;
+                mask = mask >> 1; // if the event was D0, only shift the mask 
             }
-            mask = mask >> 1; // if the event was D0, only shift the mask 
         }
 
         /* If the mask is 0, the mask has been shifted 26 time, therefore the card has been read.
@@ -392,7 +392,7 @@ void *read_card (void *args)
  * Each thread reads the card reader lines (D0 and D1), form the card number and
  * sends to the queue a message with the card number.
  */
-int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *thread, mqd_t mq) 
+int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *r_thread, mqd_t mq) 
 {
     int i; // array index
     struct read_card_args *args; // thread arguments
@@ -407,8 +407,8 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
             args->side = 'i';
             args->mq = mq;
 
-            pthread_create(thread, NULL, read_card, (void *)args);
-            thread++;
+            pthread_create(r_thread, NULL, read_card, (void *)args);
+            r_thread++;
             args++;
         }
         if (pssg[i].o0In != -1 && pssg[i].o1In != -1 ) { // if the pssg has output card reader
@@ -418,9 +418,9 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
             args->side = 'o';
             args->mq = mq;
 
-            pthread_create(thread, NULL, read_card, (void *)args);
+            pthread_create(r_thread, NULL, read_card, (void *)args);
 
-            thread++;
+            r_thread++;
             args++;
         }
 
@@ -484,17 +484,17 @@ void *buttons (void *b_args)
  
     epoll_wait(epfd, events, args->number_of_buttons, -1);  // first time it triggers with current state, so ignore it
     while(run) {
-        epoll_wait(epfd, events, args->number_of_buttons, -1); // wait for an evente. Only fetch up one event
-        for (j=0; j< args->number_of_buttons; j++) {
-            if (events[0].data.fd == bttn_tbl[j][1]) {
-                sprintf(message, "%d;button_pressed", bttn_tbl[j][0]);
-                // put the message into the queue
-                mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
-                printf("%s\n", message);
-                break;
+        if (epoll_wait(epfd, events, args->number_of_buttons, 2000)) { // wait for an evente. Only fetch up one event
+            for (j=0; j < args->number_of_buttons; j++) {
+                if (events[0].data.fd == bttn_tbl[j][1]) {
+                    sprintf(message, "%d;button_pressed", bttn_tbl[j][0]);
+                    // put the message into the queue
+                    mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
+                    printf("%s\n", message);
+                    break;
+                }
             }
         }
-
     }
 
     return NULL;
@@ -555,19 +555,19 @@ void *state (void *s_args)
  
     epoll_wait(epfd, events, args->number_of_states, -1);  // first time it triggers with current state, so ignore it
     while(run) {
-        epoll_wait(epfd, events, args->number_of_states, -1); // wait for an evente. Only fetch up one event
-        for (j=0; j < args->number_of_states; j++) {
-            if (events[0].data.fd == state_tbl[j][1]) {
-                read(state_tbl[j][1], value, 1);
-                lseek(state_tbl[j][1],0,SEEK_SET);
-                sprintf(message, "%d;state=%s", state_tbl[j][0], value);
-                // put the message into the queue
-                mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
-                printf("%s\n", message);
-                break;
+        if (epoll_wait(epfd, events, args->number_of_states, 2000)) { // wait for an evente. Only fetch up one event
+            for (j=0; j < args->number_of_states; j++) {
+                if (events[0].data.fd == state_tbl[j][1]) {
+                    read(state_tbl[j][1], value, 1);
+                    lseek(state_tbl[j][1],0,SEEK_SET);
+                    sprintf(message, "%d;state=%s", state_tbl[j][0], value);
+                    // put the message into the queue
+                    mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
+                    printf("%s\n", message);
+                    break;
+                }
             }
         }
-
     }
 
     return NULL;

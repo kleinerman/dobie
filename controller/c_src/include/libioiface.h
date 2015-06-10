@@ -57,7 +57,7 @@ int unset_gpio_pins (pssg_t *pssg, int number_of_pssgs);
 int parser(int argc, char **argv, pssg_t *pssg);
 int get_number_of(int argc, char** argv, const char *str);
 void *read_card (void *args);
-int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *thread , mqd_t mq);
+int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *r_thread , mqd_t mq);
 void *buttons (void *b_args);
 void *state (void *s_args);
 
