@@ -72,8 +72,8 @@ int main(int argc, char** argv)
      */
     start_readers(number_of_pssgs, number_of_readers, pssg, r_thread, mq);
 
-    /* start listening button pushes
-     * one thread for all system buttons
+    /* Catch button pushes.
+     * One thread for all system buttons
      */
     b_args.number_of_pssgs = number_of_pssgs;
     b_args.number_of_buttons = number_of_buttons;
@@ -81,24 +81,28 @@ int main(int argc, char** argv)
     b_args.mq = mq;
     pthread_create(&b_thread, NULL, buttons, (void *)&b_args);
 
-    /* start listening state pins */
+    /* Catch the state changes. The passage could change its state from closed to open
+     * or vice versa. One thread listen for all passages */
     s_args.number_of_pssgs = number_of_pssgs;
     s_args.number_of_states = number_of_states;
     s_args.pssg = pssg;
     s_args.mq = mq;
     pthread_create(&s_thread, NULL, state, (void *)&s_args);
 
-    // waits  for  the  threads  to  terminate
+    /* This part of the code should run only if the application is closed
+     *  wait  for  the  threads  to  terminate
+     */
     for (i = 0; i < number_of_readers; i++)
         pthread_join(r_thread[i], NULL);
     pthread_join(b_thread, NULL);
     pthread_join(s_thread, NULL);
 
+    // uset used GPIOs
     if ( unset_gpio_pins(pssg, number_of_pssgs) == -1 ) {
         printf("Error removing GPIO pins from userspace");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    return 0;
+    return RETURN_SUCCESS;
 }
 

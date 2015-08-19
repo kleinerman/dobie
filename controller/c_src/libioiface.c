@@ -539,7 +539,7 @@ void *state (void *s_args)
     events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_states);
 
     /* Allocate memory for a table. The table has 2 columns and many rows as number of states.
-     * The 2 columns: the pssg_ID and file descriptor of the state gpio.
+     * Column 1: the pssg_ID; Column 2: file descriptor of the GPIO value.
      */
     state_tbl = (int **) malloc(sizeof(int *) * args->number_of_states);
     for (i=0; i<(args->number_of_states); i++)
@@ -552,8 +552,8 @@ void *state (void *s_args)
         exit(1);
     }
 
-    for (i=0; i<(args->number_of_pssgs); i++) {
-        if (args->pssg[i].state != -1) {     // if the pssg has state
+    for (i=0; i < (args->number_of_pssgs); i++) {
+        if (args->pssg[i].state != UNDEFINED) {     // if the pssg has state
             state_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
 
             // save the button fd in the second col of the table
@@ -561,7 +561,7 @@ void *state (void *s_args)
             state_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
             if (state_tbl[j][1] == -1) {
                 fprintf(stderr,"Error(%d) opening %s: %s\n", errno, filename, strerror(errno));
-                exit(1);
+                exit(EXIT_FAILURE);
             }
 
             ev[j].events = EPOLLIN | EPOLLET | EPOLLPRI;
@@ -575,8 +575,9 @@ void *state (void *s_args)
     }
  
     epoll_wait(epfd, events, args->number_of_states, -1);  // first time it triggers with current state, so ignore it
-    while(run) {
-        if (epoll_wait(epfd, events, args->number_of_states, 2000)) { // wait for an evente. Only fetch up one event
+   
+    while (run) {
+        if (epoll_wait(epfd, events, args->number_of_states, EPOLL_WAIT_TIME)) { // wait for an event
             for (j=0; j < args->number_of_states; j++) {
                 if (events[0].data.fd == state_tbl[j][1]) {
                     read(state_tbl[j][1], value, 1);
