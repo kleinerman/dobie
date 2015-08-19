@@ -18,7 +18,7 @@ int main(int argc, char** argv)
     pthread_t *r_thread; // array of pointers to all threads created by this program
     pthread_t b_thread; //
     pthread_t s_thread; //
-    int i; // auxiliar variable used in for cicles
+    int i; // auxiliar variable used in cicles
     int number_of_pssgs = 0;
     int number_of_readers = 0;
     int number_of_buttons = 0;
@@ -48,17 +48,19 @@ int main(int argc, char** argv)
     number_of_states = get_number_of(argc, argv, "--stateIn");
 
 
-    // array with all system threads
+    // array with all reader threads
     r_thread = (pthread_t *) malloc(sizeof(pthread_t) * number_of_readers);
 
-    /* array of pssg struct. Each struct store the pin numbers.
+    /* Array of pssg struct. Each struct stores the GPIO numbers used in the passage.
      * The array is filled with the parser function
      */
     pssg = (pssg_t *)malloc(sizeof(pssg_t) * number_of_pssgs);
-    parser(argc, argv, pssg);
+    if ( parser(argc, argv, pssg) == -1 ) {
+        printf("Error: You should declare a pssg ID before declaring GPIO pins\n");
+        exit(1);
+    }
 
-
-    /* set all GPIO pins */
+    // set all GPIO pins
     if ( set_gpio_pins(pssg, number_of_pssgs) == -1 ) {
         printf("Error setting GPIO pins. Program aborted");
         exit(1);

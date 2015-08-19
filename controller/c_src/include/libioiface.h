@@ -17,7 +17,7 @@ typedef struct {
     int i1In;                   // GPIO for data D1 (reader input side)
     int o0In;                   // GPIO for data D0 (reader output side)
     int o1In;                   // GPIO for data D1 (reader output side)
-    int button;                 // GPIO for open pssg button 1
+    int button;                 // GPIO for open pssg button
     int state;                  // GPIO for state of the pssg (output)
     int buzzer;			// GPIO for buzzer of the pssg (output)
     int release;		// GPIO for release of the pssg (output)

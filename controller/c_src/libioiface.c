@@ -44,6 +44,7 @@ int get_number_of(int argc, char** argv, const char *str)
 /*
  * Parses the command-line arguments (GPIO pins) and fill the pssg structures
  * A negative attribute means that it is not in use
+ * It returns a negative value if there are wrong arguments
  */
 int parser(int argc, char **argv, pssg_t *pssg)
 {
@@ -51,7 +52,6 @@ int parser(int argc, char **argv, pssg_t *pssg)
 
     // the arguments should start with pssg ID
     if ( strcmp(argv[1], "--id") != 0 ) {
-        printf("Error: You should declare a pssg ID before declaring GPIO pins\n");
         return -1;
     }
 
@@ -69,11 +69,20 @@ int parser(int argc, char **argv, pssg_t *pssg)
         pssg[i].state = -1;
     }
 
-    // parses the arguments and fills the pssg structures
-    j = -1;
-    for (i=1; i<argc; i=i+2) { // argument(i) value(i+1) argument(i+2)
+    /* Parse the arguments and fills the pssg structures.
+     *
+     * Each "--id" determines different passages
+     * Arguments preceding the "--id" are related to the passage GPIOs
+     *
+     * 'j' is the pssg structure index. Each "--id" found in the arguments,
+     * should increase the index because it means another passage
+     */
+    j = -1; // 'j' is the pssg struct index
+
+    for (i=1; i<argc; i+=2) { // argument(i) value(i+1) argument(i+2)
          if ( strcmp(argv[i], "--id") == 0 ) {
-             j++; // increase the index for each pssg
+             j++; // increase the index for each pssg.
+                  // whenever it finds an "id" is another passage
              pssg[j].id = atoi(argv[i+1]);
          }
          if ( strcmp(argv[i], "--i0In") == 0 )
