@@ -298,11 +298,6 @@ int unset_gpio_pins (pssg_t *pssg, int number_of_pssgs)
  * in a register if it is listening the line D0, or ir writes 1 if it is listening D1. It counts
  * 26bits acording to the wiegand protocol.
  */
-/* cambios a probar:
- * probar el primer primer epoll_wait con tiempo 0
- * epoll_event events que no sea un vector, sino uno solo
- *
- */
 void *read_card (void *args) 
 {
     char filename[40];
@@ -340,7 +335,7 @@ void *read_card (void *args)
         epoll_ctl(epfd, EPOLL_CTL_ADD, fd[i], &ev[i]);
     }
 
-    epoll_wait(epfd, events, 2, -1);  // first time it triggers with current state, so ignore it
+    epoll_wait(epfd, events, 2, 0);  // first time it triggers with current state, so ignore it
 
     while (run) {
         mask = 33554432;    // mask initialitation: 00000010000000000000000000000000
@@ -356,41 +351,44 @@ void *read_card (void *args)
             }
         }
 
-        /* If the mask is 0, the mask has been shifted 26 time, therefore the card has been read completely.
-         * It is time to generate the card number, put this number in the OS queue, wait a short
-         * time and clean the mask and the card number buffer. 
-         */
+        if(run) {
 
-        // deregister the target file descriptors from the epoll instance referred by epfd. Future events will be ignored
-        for (i=0; i<2; i++)  {
-            epoll_ctl(epfd, EPOLL_CTL_DEL, fd[i], &ev[i]);
+            /* If the mask is 0, the mask has been shifted 26 time, therefore the card has been read completely.
+             * It is time to generate the card number, put this number in the OS queue, wait a short
+             * time and clean the mask and the card number buffer. 
+             */
+
+            // deregister the target file descriptors from the epoll instance referred by epfd. Future events will be ignored
+            for (i=0; i<2; i++)  {
+                epoll_ctl(epfd, EPOLL_CTL_DEL, fd[i], &ev[i]);
+            }
+
+            /* generate the card number
+             * card number = (xxxxxxxxxxxxxxxxxxxxxxxxxx AND 01111111111111111111111110) >> 1
+             */
+            card_number = (card_number & 33554430) >> 1;
+        
+            // preparing the queue message for sending
+            sprintf(message, "%d;%c;card=%08d", arg->pssg_id, arg->side, card_number);
+
+            // put the message into the queue
+            mq_send(arg->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
+        
+            //just for testing propuse
+            printf("%s\n", message);
+
+            /* most devices transmit and recieve pulses around 50uS wide and with a gap of 5000uS between
+             * pulses, so wait at least 26 times 5050uS (5000uS pulse gap + 50us pulse ) to avoid out of 
+             * phase pulses
+             */
+            usleep(132000);
+
+            // register again the file descriptors in the epoll epfd
+            for (i=0; i<2; +i++) 
+                epoll_ctl(epfd, EPOLL_CTL_ADD, fd[i], &ev[i]);
+
+            epoll_wait(epfd, events, 2, 0);  // first time it triggers with current state, so ignore it
         }
-
-        /* generate the card number
-         * card number = (xxxxxxxxxxxxxxxxxxxxxxxxxx AND 01111111111111111111111110) >> 1
-         */
-        card_number = (card_number & 33554430) >> 1;
-        
-        // preparing the queue message for sending
-        sprintf(message, "%d;%c;card=%08d", arg->pssg_id, arg->side, card_number);
-
-        // put the message into the queue
-        mq_send(arg->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
-        
-        //just for testing propuse
-        printf("%s\n", message);
-
-        /* most devices transmit and recieve pulses around 50uS wide and with a gap of 5000uS between
-         * pulses, so wait at least 26 times 5050uS (5000uS pulse gap + 50us pulse ) to avoid out of 
-         * phase pulses
-         */
-        usleep(132000);
-
-        // register again the file descriptors in the epoll epfd
-        for (i=0; i<2; +i++) 
-            epoll_ctl(epfd, EPOLL_CTL_ADD, fd[i], &ev[i]);
-
-        epoll_wait(epfd, events, 2, -1);  // first time it triggers with current state, so ignore it
     }
 
     /* execute this code when the program exits */
