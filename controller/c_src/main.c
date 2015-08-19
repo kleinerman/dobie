@@ -31,11 +31,12 @@ int main(int argc, char** argv)
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    // open the message queue only for sending message to the main process
-    // It must be created by the main process
-    if ( (mq = mq_open("/pssg_iface_queue", O_WRONLY)) == -1 ) {
+    /* open the message queue only for sending message to the main process
+     * It must be created by the main process
+     */
+    if ( (mq = mq_open("/pssg_iface_queue", O_WRONLY)) == RETURN_FAILURE ) {
         printf("Error opening the message queue: %s\n", strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // get number of pssgs from arguments
@@ -55,23 +56,25 @@ int main(int argc, char** argv)
      * The array is filled with the parser function
      */
     pssg = (pssg_t *)malloc(sizeof(pssg_t) * number_of_pssgs);
-    if ( parser(argc, argv, pssg) == -1 ) {
+    if ( parser(argc, argv, pssg) == RETURN_FAILURE ) {
         printf("Error: You should declare a pssg ID before declaring GPIO pins\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // set all GPIO pins
-    if ( set_gpio_pins(pssg, number_of_pssgs) == -1 ) {
-        printf("Error setting GPIO pins. Program aborted");
-        exit(1);
+    if ( set_gpio_pins(pssg, number_of_pssgs) == RETURN_FAILURE ) {
+        printf("Error setting GPIO pins. Program aborted\n");
+        exit(EXIT_FAILURE);
     }
 
-    /* start listening the card readers and send to the main process a message with
-     * pssg ID + card reader ID + card number
+    /* Start listening the card readers.
+     * Threads send to the main process a message with pssg ID + card reader ID + card number
      */
     start_readers(number_of_pssgs, number_of_readers, pssg, r_thread, mq);
 
-    /* start listening button pushes */
+    /* start listening button pushes
+     * one thread for all system buttons
+     */
     b_args.number_of_pssgs = number_of_pssgs;
     b_args.number_of_buttons = number_of_buttons;
     b_args.pssg = pssg;

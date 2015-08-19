@@ -52,7 +52,7 @@ int parser(int argc, char **argv, pssg_t *pssg)
 
     // the arguments should start with pssg ID
     if ( strcmp(argv[1], "--id") != 0 ) {
-        return -1;
+        return RETURN_FAILURE;
     }
 
     // number of pssg in this controller
@@ -60,13 +60,13 @@ int parser(int argc, char **argv, pssg_t *pssg)
 
     // initialization: a negative value means not in use.
     for (i = 0; i < number_of_pssgs; i++) {
-        pssg[i].id = -1;
-        pssg[i].i0In = -1;
-        pssg[i].i1In = -1;
-        pssg[i].o0In = -1;
-        pssg[i].o1In = -1;
-        pssg[i].button = -1;
-        pssg[i].state = -1;
+        pssg[i].id = UNDEFINED;
+        pssg[i].i0In = UNDEFINED;
+        pssg[i].i1In = UNDEFINED;
+        pssg[i].o0In = UNDEFINED;
+        pssg[i].o1In = UNDEFINED;
+        pssg[i].button = UNDEFINED;
+        pssg[i].state = UNDEFINED;
     }
 
     /* Parse the arguments and fills the pssg structures.
@@ -103,7 +103,7 @@ int parser(int argc, char **argv, pssg_t *pssg)
              pssg[j].release = atoi(argv[i+1]);
     }
 
-    return 0;
+    return RETURN_SUCCESS;
 }
 
 
@@ -117,7 +117,7 @@ int export_gpio(unsigned int gpio)
     
     if ((fd = open("/sys/class/gpio/export", O_WRONLY )) < 0 ) {
         fprintf(stderr,"Error(%d) opening /sys/class/gpio/export: %s\n", errno, strerror(errno));
-        return -1;
+        return RETURN_FAILURE;
     }
 
     // get the length of the gpio string
@@ -125,11 +125,11 @@ int export_gpio(unsigned int gpio)
 
     if ( write(fd, str_gpio, len) == 0) {
         fprintf(stderr,"Error(%d) writing /sys/class/gpio/export: %s\n", errno, strerror(errno));
-        return -1;
+        return RETURN_FAILURE;
     }
 
     close(fd);
-    return 0; // success GPIO exported
+    return RETURN_SUCCESS; // success GPIO exported
 
 }
 
@@ -145,7 +145,7 @@ int unexport_gpio(unsigned int gpio)
     
     if ((fd = open("/sys/class/gpio/unexport", O_WRONLY )) < 0 ) {
         fprintf(stderr,"Error(%d) opening /sys/class/gpio/export: %s\n", errno, strerror(errno));
-        return -1;
+        return RETURN_FAILURE;
     }
 
     // get the length of the gpio string
@@ -153,11 +153,11 @@ int unexport_gpio(unsigned int gpio)
 
     if ( write(fd, str_gpio, len) == 0) {
         fprintf(stderr,"Error(%d) writing /sys/class/gpio/uexport: %s\n", errno, strerror(errno));
-        return -1;
+        return RETURN_FAILURE;
     }
 
     close(fd);
-    return 0; // success GPIO removed from userspace
+    return RETURN_SUCCESS; // success GPIO removed from userspace
 
 }
 
@@ -165,7 +165,6 @@ int unexport_gpio(unsigned int gpio)
 /*
  * Set the gpio direction: IN(1) or OUT(0)
  * It returns 0 on success
- * ++ In a near future, this function will be implemented in Python ++
  */
 int gpio_set_direction(unsigned int gpio, unsigned int direction)
 {
@@ -222,48 +221,48 @@ int set_gpio_pins (pssg_t *pssg, int number_of_pssgs)
     int i;
 
     for (i = 0; i < number_of_pssgs; i++) {
-        if (pssg[i].i0In != -1) {
-            if ( export_gpio(pssg[i].i0In) == -1 ) return 1;
-            if ( gpio_set_direction(pssg[i].i0In, IN) == -1 ) return 1;
-            if ( gpio_set_edge(pssg[i].i0In, FALLING) == -1 ) return 1;
+        if (pssg[i].i0In != UNDEFINED) {
+            if ( export_gpio(pssg[i].i0In) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(pssg[i].i0In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(pssg[i].i0In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
-        if (pssg[i].i1In != -1) {
-            if ( export_gpio(pssg[i].i1In) == -1 ) return 1;
-            if ( gpio_set_direction(pssg[i].i1In, IN) == -1 ) return 1;
-            if ( gpio_set_edge(pssg[i].i1In, FALLING) == -1 ) return 1;
+        if (pssg[i].i1In != UNDEFINED) {
+            if ( export_gpio(pssg[i].i1In) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(pssg[i].i1In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(pssg[i].i1In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
-        if (pssg[i].o0In != -1) {
-            if ( export_gpio(pssg[i].o0In) == -1 ) return 1;
-            if ( gpio_set_direction(pssg[i].o0In, IN) == -1 ) return 1;
-            if ( gpio_set_edge(pssg[i].o0In, FALLING) == -1 ) return 1;
+        if (pssg[i].o0In != UNDEFINED) {
+            if ( export_gpio(pssg[i].o0In) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(pssg[i].o0In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(pssg[i].o0In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
-        if (pssg[i].o1In != -1) {
-            if ( export_gpio(pssg[i].o1In) == -1 ) return 1;
-            if ( gpio_set_direction(pssg[i].o1In, IN) == -1 ) return 1;
-            if ( gpio_set_edge(pssg[i].o1In, FALLING) == -1 ) return 1;
+        if (pssg[i].o1In != UNDEFINED) {
+            if ( export_gpio(pssg[i].o1In) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(pssg[i].o1In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(pssg[i].o1In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
-        if (pssg[i].button != -1) {
-            if ( export_gpio(pssg[i].button) == -1 ) return 1;
-            if ( gpio_set_direction(pssg[i].button, IN) == -1 ) return 1;
-            if ( gpio_set_edge(pssg[i].button, FALLING) == -1 ) return 1;
+        if (pssg[i].button != UNDEFINED) {
+            if ( export_gpio(pssg[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(pssg[i].button, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(pssg[i].button, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
-        if (pssg[i].state != -1) {
-            if ( export_gpio(pssg[i].state) == -1 ) return 1;
-            if ( gpio_set_direction(pssg[i].state, IN) == -1 ) return 1;
-            if ( gpio_set_edge(pssg[i].state, BOTH) == -1 ) return 1;
+        if (pssg[i].state != UNDEFINED) {
+            if ( export_gpio(pssg[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(pssg[i].state, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(pssg[i].state, BOTH) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
-        if (pssg[i].buzzer != -1) {
-            if ( export_gpio(pssg[i].buzzer) == -1 ) return 1;
-            if ( gpio_set_direction(pssg[i].buzzer, OUT) == -1 ) return 1;
+        if (pssg[i].buzzer != UNDEFINED) {
+            if ( export_gpio(pssg[i].buzzer) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(pssg[i].buzzer, OUT) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
-        if (pssg[i].release != -1) {
-            if ( export_gpio(pssg[i].release) == -1 ) return 1;
-            if ( gpio_set_direction(pssg[i].release, OUT) == -1 ) return 1;
+        if (pssg[i].release != UNDEFINED) {
+            if ( export_gpio(pssg[i].release) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(pssg[i].release, OUT) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
 
     }
 
-    return 0;
+    return RETURN_SUCCESS;
 }
 
 /* Remove all GPIOs from userspace */
@@ -272,22 +271,22 @@ int unset_gpio_pins (pssg_t *pssg, int number_of_pssgs)
     int i;
    
     for (i = 0; i < number_of_pssgs; i++) {
-        if (pssg[i].i0In != -1)
-            if ( unexport_gpio(pssg[i].i0In) == -1 ) return 1;
-        if (pssg[i].i1In != -1)
-            if ( unexport_gpio(pssg[i].i1In) == -1 ) return 1;
-        if (pssg[i].o0In != -1)
-            if ( unexport_gpio(pssg[i].o0In) == -1 ) return 1;
-        if (pssg[i].o1In != -1)
-            if ( unexport_gpio(pssg[i].o1In) == -1 ) return 1;
-        if (pssg[i].button != -1)
-            if ( unexport_gpio(pssg[i].button) == -1 ) return 1;
-        if (pssg[i].state != -1)
-            if ( unexport_gpio(pssg[i].state) == -1 ) return 1;
-        if (pssg[i].buzzer != -1)
-            if ( unexport_gpio(pssg[i].buzzer) == -1 ) return 1;
-        if (pssg[i].release != -1)
-            if ( unexport_gpio(pssg[i].release) == -1 ) return 1;
+        if (pssg[i].i0In != UNDEFINED)
+            if ( unexport_gpio(pssg[i].i0In) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (pssg[i].i1In != UNDEFINED)
+            if ( unexport_gpio(pssg[i].i1In) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (pssg[i].o0In != UNDEFINED)
+            if ( unexport_gpio(pssg[i].o0In) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (pssg[i].o1In != UNDEFINED)
+            if ( unexport_gpio(pssg[i].o1In) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (pssg[i].button != UNDEFINED)
+            if ( unexport_gpio(pssg[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (pssg[i].state != UNDEFINED)
+            if ( unexport_gpio(pssg[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (pssg[i].buzzer != UNDEFINED)
+            if ( unexport_gpio(pssg[i].buzzer) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (pssg[i].release != UNDEFINED)
+            if ( unexport_gpio(pssg[i].release) == RETURN_FAILURE ) return RETURN_FAILURE;
     }
 
     return 0;
@@ -295,40 +294,45 @@ int unset_gpio_pins (pssg_t *pssg, int number_of_pssgs)
 
 
 /*
- * This function is usead in a thread. It is resposible to write 0 in a register if it is listening
- * the line D0, or write 1 if it is listening D1. There are two thread per card reader: one for D0
- * and other for D1. Together will count 26bits acording to the wiegand protocol. The thread that
- * fill the register with the last incoming bit (number 26) is responsible to form the card number
- * and restart the register.
+ * This function runs as a thread and is lunched by "start_readers" function. It writes 0
+ * in a register if it is listening the line D0, or ir writes 1 if it is listening D1. It counts
+ * 26bits acording to the wiegand protocol.
+ */
+/* cambios a probar:
+ * probar el primer primer epoll_wait con tiempo 0
+ * epoll_event events que no sea un vector, sino uno solo
+ *
  */
 void *read_card (void *args) 
 {
     char filename[40];
     char str_card_number[8];
     char message[50];
-    int i; // index for for cicle
-    int fd[2]; // file descriptors
+    int i; // for cicle index
+    int fd[2]; // array of GPIO value file descriptors
     int epfd; // epool file descriptor
     int card_number;
     int mask;
     struct epoll_event ev[2];
-    struct epoll_event events[2];
-    struct read_card_args *arg = (struct read_card_args*) args; //arguments passed to the thread
+    struct epoll_event events[2];   // 
+    struct read_card_args *arg = (struct read_card_args*) args; // arguments passed to the thread
+                                                                // It needs to be casted
     int gpio[] = {arg->d0, arg->d1};
 
-    /* create a new epool instance */
+    /* create a new epool instance and store the epool descriptor in epfd*/
     epfd = epoll_create(1);
     if (epfd == -1) {
         fprintf(stderr,"Error(%d) creating the epoll: %s\n", errno, strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
+    /* get the two GPIO value file descriptors and register them the epoll instance referred to by the file descriptor epfd*/
     for (i=0; i<2; i++) {
         sprintf(filename, "/sys/class/gpio/gpio%d/value", gpio[i]);
         fd[i] = open(filename, O_RDWR | O_NONBLOCK);
         if (fd[i] == -1) {
             fprintf(stderr,"Error(%d) opening %s: %s\n", errno, filename, strerror(errno));
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         ev[i].events = EPOLLIN | EPOLLET | EPOLLPRI;
         ev[i].data.fd = fd[i];
@@ -339,29 +343,31 @@ void *read_card (void *args)
     epoll_wait(epfd, events, 2, -1);  // first time it triggers with current state, so ignore it
 
     while (run) {
-        mask = 33554432; // mask initialitation: 00000010000000000000000000000000
-        card_number = 0; // initialize the card number
+        mask = 33554432;    // mask initialitation: 00000010000000000000000000000000
+                            // It will be shifted to the right 26 times (one per bit)
+
+        card_number = 0;    // card number initialization
 
         while (mask != 0 && run) {
-            if ( epoll_wait(epfd, events, 2, 2000) ) { // wait for an evente. Only fetch up one event
-                if (events[0].data.fd == fd[1])  // if the event was a D1, add 1 to the card number buffer and shift the mask
+            if ( epoll_wait(epfd, events, 2, EPOLL_WAIT_TIME) ) {   // wait for an evente. Only fetch up one event
+                if (events[0].data.fd == fd[1]) // if the event was a D1, add 1 to the card number buffer and shift the mask
                     card_number = card_number | mask;
-                mask = mask >> 1; // if the event was D0, only shift the mask 
+                mask = mask >> 1;   // if the event was D0, only shift the mask 
             }
         }
 
-        /* If the mask is 0, the mask has been shifted 26 time, therefore the card has been read.
+        /* If the mask is 0, the mask has been shifted 26 time, therefore the card has been read completely.
          * It is time to generate the card number, put this number in the OS queue, wait a short
          * time and clean the mask and the card number buffer. 
          */
 
-        // deregister the target file descriptors from the epoll instance referred by epfd. Events are ignored
-        for (i=0;i<2;i++)  {
+        // deregister the target file descriptors from the epoll instance referred by epfd. Future events will be ignored
+        for (i=0; i<2; i++)  {
             epoll_ctl(epfd, EPOLL_CTL_DEL, fd[i], &ev[i]);
         }
 
         /* generate the card number
-         * card number = (xxxxxxxxxxxxxxxxxxxxxxxxxx AND 01111111111111111111111110) one left shift
+         * card number = (xxxxxxxxxxxxxxxxxxxxxxxxxx AND 01111111111111111111111110) >> 1
          */
         card_number = (card_number & 33554430) >> 1;
         
@@ -399,34 +405,39 @@ void *read_card (void *args)
 /*
  * This function starts one thread per reader.
  * Each thread reads the card reader lines (D0 and D1), form the card number and
- * sends to the queue a message with the card number.
+ * put into the queue a message with: pssgID+reader+card number
  */
 int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *r_thread, mqd_t mq) 
 {
     int i; // array index
     struct read_card_args *args; // thread arguments
 
+    /* Define an array of arguments. One argument struct per card reader */
     args = (struct read_card_args *)malloc(sizeof(struct read_card_args) * number_of_readers);
 
     for (i=0 ; i<number_of_pssgs; i++) {
-        if (pssg[i].i0In != -1 && pssg[i].i1In != -1 ) { // if the pssg has input card reader
+        if (pssg[i].i0In != UNDEFINED && pssg[i].i1In != UNDEFINED ) { // if the pssg has input card reader
+            /* fill the structure */
             args->pssg_id = pssg[i].id;
             args->d0 = pssg[i].i0In;
             args->d1 = pssg[i].i1In;
             args->side = 'i';
             args->mq = mq;
 
+            /* and launch the thread */
             pthread_create(r_thread, NULL, read_card, (void *)args);
             r_thread++;
             args++;
         }
-        if (pssg[i].o0In != -1 && pssg[i].o1In != -1 ) { // if the pssg has output card reader
+        if (pssg[i].o0In != UNDEFINED && pssg[i].o1In != UNDEFINED ) { // if the pssg has output card reader
+            /* fill the structure */
             args->pssg_id = pssg[i].id;
             args->d0 = pssg[i].o0In;
             args->d1 = pssg[i].o1In;
             args->side = 'o';
             args->mq = mq;
 
+            /* and launch the thread */
             pthread_create(r_thread, NULL, read_card, (void *)args);
 
             r_thread++;
@@ -435,7 +446,7 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
 
     }
 
-    return 0;
+    return RETURN_SUCCESS;
 }
 
 
@@ -444,8 +455,8 @@ void *buttons (void *b_args)
     char filename[40];
     char message[50];
     int **bttn_tbl;
-    int i;
-    int j=0;
+    int i;  // for cicle index
+    int j=0;    // table row index: max value is the (number_of_buttons - 1)
     int epfd; // epool file descriptor
     struct epoll_event *ev;
     struct epoll_event *events;
@@ -455,7 +466,7 @@ void *buttons (void *b_args)
     events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_buttons);
 
     /* Allocate memory for a table. The table has 2 columns and many rows as the number of buttons.
-     * The 2 columns: the pssg_ID and file descriptor of the button.
+     * Column 1: pssg_ID; Column 2: file descriptor of the GPIO button
      */
     bttn_tbl = (int **) malloc(sizeof(int *) * args->number_of_buttons);
     for (i=0; i<(args->number_of_buttons); i++)
@@ -465,20 +476,20 @@ void *buttons (void *b_args)
     epfd = epoll_create(1);
     if (epfd == -1) {
         fprintf(stderr,"Error(%d) creating the epoll: %s\n", errno, strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    for (i=0; i<(args->number_of_pssgs); i++) {
-        if (args->pssg[i].button != -1) {     // if the pssg has button
+    /* fill the table with pssg id and the file descriptor of button GPIO */
+    for (i=0; i < (args->number_of_pssgs); i++) {
+        if (args->pssg[i].button != UNDEFINED) {    // if the pssg has button
+            bttn_tbl[j][0] = args->pssg[i].id;      // save the pssg id in the first col of the table
 
-            bttn_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
-
-            // save the button fd in the second col of the table
+            // save the button fd in the second column of the table
             sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].button);
             bttn_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
             if (bttn_tbl[j][1] == -1) {
                 fprintf(stderr,"Error(%d) opening %s: %s\n", errno, filename, strerror(errno));
-                exit(1);
+                exit(EXIT_FAILURE);
             }
 
             ev[j].events = EPOLLIN | EPOLLET | EPOLLPRI;
@@ -492,8 +503,9 @@ void *buttons (void *b_args)
     }
  
     epoll_wait(epfd, events, args->number_of_buttons, -1);  // first time it triggers with current state, so ignore it
-    while(run) {
-        if (epoll_wait(epfd, events, args->number_of_buttons, 2000)) { // wait for an evente. Only fetch up one event
+
+    while (run) {
+        if (epoll_wait(epfd, events, args->number_of_buttons, EPOLL_WAIT_TIME)) { // wait for an evente. Only fetch up one event
             for (j=0; j < args->number_of_buttons; j++) {
                 if (events[0].data.fd == bttn_tbl[j][1]) {
                     sprintf(message, "%d;button_pressed", bttn_tbl[j][0]);

@@ -9,6 +9,10 @@
 #define FALLING 1
 #define RISING 2
 #define BOTH 3
+#define RETURN_FAILURE -1
+#define RETURN_SUCCESS 0
+#define UNDEFINED -1
+#define EPOLL_WAIT_TIME 2000
 
 // pssg gpio map
 typedef struct {
