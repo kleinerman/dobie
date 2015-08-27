@@ -16,20 +16,23 @@ from config import *
 
 
 import sys
+import uuid
 
 
 
-
-
-int_EVT  = 0x01
-int_REVT = 0x02
-int_EVS  = 0x03
-int_REVS = 0x04
-int_CUD  = 0x05
-int_RCUD = 0x06
+int_CON  = 0x01
+int_RCON = 0x02
+int_EVT  = 0x03
+int_REVT = 0x04
+int_EVS  = 0x05
+int_REVS = 0x06
+int_CUD  = 0x07
+int_RCUD = 0x08
 int_END  = 0x1F
 
 
+CON  = bytes([int_CON])
+RCON = bytes([int_RCON])
 EVT  = bytes([int_EVT])
 REVT = bytes([int_REVT])
 EVS  = bytes([int_EVS])
@@ -261,6 +264,14 @@ class NetMngr(genmngr.GenericMngr):
                 self.srvSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 #If there is no connection to the server, an exception will happen here
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
+
+                conMsg = CON + str(uuid.getnode()).encode('utf8') + END
+                self.logger.info('Sending connection message {} to server'.format(conMsg))
+                self.srvSock.sendall(conMsg)
+
+                b=self.srvSock.recv(REC_BYTES)
+                self.logger.info('Receiving connection message {} to server'.format(b))
+
                 #Registering the socket in the network poller object
                 self.netPoller.register(self.srvSock, select.POLLIN)
                 self.connected.set()

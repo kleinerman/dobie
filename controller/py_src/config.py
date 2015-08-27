@@ -11,7 +11,8 @@ QUEUE_FILE = '/ioiface_queue'
 
 LOGGING_FILE ='logevents.log'
 
-SERVER_IP = '192.168.122.35'
+#SERVER_IP = '192.168.122.35'
+SERVER_IP = '127.0.0.1'
 SERVER_PORT = 7979
 
 EXIT_CHECK_TIME = 2
