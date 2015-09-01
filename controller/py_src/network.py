@@ -262,6 +262,10 @@ class NetMngr(genmngr.GenericMngr):
             try:
                 #Creating the socket to connect the to the server
                 self.srvSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            
+                #Esto solo tendra valor para cuando esperamos la respuesta a la conexion inicial
+                self.srvSock.settimeout(WAIT_RESP_TIME)
+
                 #If there is no connection to the server, an exception will happen here
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
 
@@ -269,8 +273,15 @@ class NetMngr(genmngr.GenericMngr):
                 self.logger.info('Sending connection message {} to server'.format(conMsg))
                 self.srvSock.sendall(conMsg)
 
-                b=self.srvSock.recv(REC_BYTES)
-                self.logger.info('Receiving connection message {} to server'.format(b))
+                respConMsg = self.srvSock.recv(REC_BYTES)
+                self.logger.info('Receiving connection message {} from server'.format(respConMsg))
+                contRespConMsg = respConMsg.strip(RCON+END)
+                
+                if contRespConMsg != b'OK':
+                    self.logger.info('The server does not respond OK to connection message')
+                    #Using continue we will jump to finally block
+                    #There we will close the socket
+                    continue
 
                 #Registering the socket in the network poller object
                 self.netPoller.register(self.srvSock, select.POLLIN)
@@ -348,8 +359,14 @@ class NetMngr(genmngr.GenericMngr):
                     self.checkExit()
 
 
-            except (ConnectionRefusedError, ConnectionResetError):
-                #Cheking if Main thread ask as to finish.
+            except socket.timeout:
+                self.logger.info('The server does not answer to Connect message.')
+
+            except (OSError, ConnectionRefusedError, ConnectionResetError):
+                self.logger.info('Could not establish connection with server.')
+
+            finally:
+                self.srvSock.close()
                 self.checkExit()
                 self.logger.info('Reconnecting to server in {} seconds...'.format(RECONNECT_TIME))
                 time.sleep(RECONNECT_TIME)
