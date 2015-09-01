@@ -4,8 +4,10 @@ LOGGER_NAME = 'BackEndSrvr'
 
 LOGGING_FILE ='logevents.log'
 
-
-
+DB_HOST = 'localhost'
+DB_USER = 'conpass_usr'
+DB_PASSWD = 'qwe123qwe'
+DB_DATABASE = 'conpass_db'
 
 
 EXIT_CHECK_TIME = 2

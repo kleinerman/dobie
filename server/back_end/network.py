@@ -183,6 +183,14 @@ class NetMngr(genmngr.GenericMngr):
 
     #---------------------------------------------------------------------------#
 
+
+    def ackEvent(self):
+        '''
+        This method answer to a event sent by a controller with an OK
+        '''
+        pass
+
+
     def reSendEvents(self, eventList):
         '''
         This method is called by the "reSender" thread.
@@ -230,9 +238,9 @@ class NetMngr(genmngr.GenericMngr):
         print('Entering')
         #This is a response to an event sent to the server
         #It should be delivered to "eventMngr" thread.
-        if msg.startswith(REVT):
+        if msg.startswith(EVT):
             print('1')
-            response = msg.strip(REVT+END)
+            response = msg.strip(EVT+END)
             response = response.decode('utf8')
             self.netToEvent.put(response)
 

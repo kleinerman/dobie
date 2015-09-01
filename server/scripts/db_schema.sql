@@ -26,6 +26,7 @@ CREATE TABLE `Person` (
 CREATE TABLE `Controller` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `boardModel` varchar(40) NOT NULL,
+    `macAddress` varchar(12) NOT NULL,
     `ipAddress` varchar(39) NOT NULL
 )
 ;
