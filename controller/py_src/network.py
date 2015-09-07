@@ -245,6 +245,45 @@ class NetMngr(genmngr.GenericMngr):
         
 
 
+
+    def sendConMsg(self):
+        '''
+        '''
+        if not self.srvSock:
+            raise ServerNotConnected
+    
+        conMsg = CON + str(uuid.getnode()).encode('utf8') + END
+        self.logger.info('Sending connection message {} to server'.format(conMsg))
+        self.srvSock.sendall(conMsg)
+
+
+
+    def recvRespConMsg(self, timeToWait):
+        '''
+        This method receive the response to Connection Message.
+        It waits until all response comes
+        '''
+        if not self.srvSock:
+            raise ServerNotConnected
+
+        self.srvSock.settimeout(WAIT_RESP_TIME)
+   
+        completeResp = b'' 
+        completed = False
+        while not completed:
+            resp = self.srvSock.recv(REC_BYTES)
+            self.logger.debug('The server respond to CON message with: {}'.format(resp))
+            self.checkExit()
+            completeResp += resp
+            if completeResp.endswith(END):
+                completed = True
+            
+        respContent = completeResp.strip(RCON+END)
+        return respContent
+
+
+
+
     #---------------------------------------------------------------------------#
 
     def run(self):
@@ -263,21 +302,13 @@ class NetMngr(genmngr.GenericMngr):
                 #Creating the socket to connect the to the server
                 self.srvSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             
-                #Esto solo tendra valor para cuando esperamos la respuesta a la conexion inicial
-                self.srvSock.settimeout(WAIT_RESP_TIME)
-
                 #If there is no connection to the server, an exception will happen here
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
 
-                conMsg = CON + str(uuid.getnode()).encode('utf8') + END
-                self.logger.info('Sending connection message {} to server'.format(conMsg))
-                self.srvSock.sendall(conMsg)
+                self.sendConMsg()
+                respConMsg = self.recvRespConMsg(WAIT_RESP_TIME)
 
-                respConMsg = self.srvSock.recv(REC_BYTES)
-                self.logger.info('Receiving connection message {} from server'.format(respConMsg))
-                contRespConMsg = respConMsg.strip(RCON+END)
-                
-                if contRespConMsg != b'OK':
+                if respConMsg != b'OK':
                     self.logger.info('The server does not respond OK to connection message')
                     #Using continue we will jump to finally block
                     #There we will close the socket
