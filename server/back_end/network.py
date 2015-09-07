@@ -19,17 +19,19 @@ import sys
 
 
 
-
-
-int_EVT  = 0x01
-int_REVT = 0x02
-int_EVS  = 0x03
-int_REVS = 0x04
-int_CUD  = 0x05
-int_RCUD = 0x06
+int_CON  = 0x01
+int_RCON = 0x02
+int_EVT  = 0x03
+int_REVT = 0x04
+int_EVS  = 0x05
+int_REVS = 0x06
+int_CUD  = 0x07
+int_RCUD = 0x08
 int_END  = 0x1F
 
 
+CON  = bytes([int_CON])
+RCON = bytes([int_RCON])
 EVT  = bytes([int_EVT])
 REVT = bytes([int_REVT])
 EVS  = bytes([int_EVS])
@@ -37,6 +39,7 @@ REVS = bytes([int_REVS])
 CUD  = bytes([int_CUD])
 RCUD = bytes([int_RCUD])
 END  = bytes([int_END])
+
 
 
 
@@ -280,6 +283,13 @@ class NetMngr(genmngr.GenericMngr):
 
                 if fd == self.listenerScktFd:
                     ctrlSckt, address = self.listenerSckt.accept()
+
+                    
+                    recB = ctrlSckt.recv(REC_BYTES)
+                    print(recB)
+
+                    ctrlSckt.sendall(RCON + b'OK' + END)
+
                     self.logger.info('Accepting connection from: {}'.format(address))
                     ctrlScktFd = ctrlSckt.fileno()
                             
@@ -294,6 +304,7 @@ class NetMngr(genmngr.GenericMngr):
 
                 #This will happen when the server sends to us bytes.
                 elif pollEvnt & select.POLLIN:
+                    print('PLLIN')
                     ctrlSckt = self.fdConns[fd]['socket']
                     recBytes = ctrlSckt.recv(REC_BYTES)
                     self.logger.debug('Receiving: {}'.format(recBytes))
@@ -343,6 +354,7 @@ class NetMngr(genmngr.GenericMngr):
                 #This will happen when the server closes the socket or the 
                 #connection with the server is broken
                 elif pollEvnt & (select.POLLHUP | select.POLLERR | select.POLLNVAL):
+                    print('planvll')
                     self.logger.info('The connection with server was broken.')
                     with self.lockNetPoller:
                         #Unregistering the socket from the "netPoller" object
