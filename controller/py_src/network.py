@@ -49,6 +49,19 @@ END  = bytes([int_END])
 #END  = b'.\n'
 
 
+
+class ServerNotConnected(Exception):
+    pass
+
+
+class InvalidConnectionResponse(Exception):
+    pass
+
+
+class TimeOutConnectionResponse(Exception):
+    pass
+
+
 class Unblocker(object):
     '''
     This class declares a pipe in its constructor.
@@ -271,15 +284,22 @@ class NetMngr(genmngr.GenericMngr):
         completeResp = b'' 
         completed = False
         while not completed:
-            resp = self.srvSock.recv(REC_BYTES)
-            self.logger.debug('The server respond to CON message with: {}'.format(resp))
-            self.checkExit()
+
+            try:
+                resp = self.srvSock.recv(REC_BYTES)
+                self.logger.debug('The server respond to CON message with: {}'.format(resp))
+                self.checkExit()
+            except socket.timeout:
+                raise TimeOutConnectionResponse
+
             completeResp += resp
             if completeResp.endswith(END):
                 completed = True
             
         respContent = completeResp.strip(RCON+END)
-        return respContent
+
+        if respContent != b'OK':
+            raise InvalidConnectionResponse
 
 
 
@@ -305,14 +325,11 @@ class NetMngr(genmngr.GenericMngr):
                 #If there is no connection to the server, an exception will happen here
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
 
+                #Sending the Connection message to server
                 self.sendConMsg()
-                respConMsg = self.recvRespConMsg(WAIT_RESP_TIME)
-
-                if respConMsg != b'OK':
-                    self.logger.info('The server does not respond OK to connection message')
-                    #Using continue we will jump to finally block
-                    #There we will close the socket
-                    continue
+                #Receiving the response from server. The below method checks the
+                #if the server response is correct. If not it will raise "InvalidConnectionResponse"
+                self.recvRespConMsg(WAIT_RESP_TIME)
 
                 #Registering the socket in the network poller object
                 self.netPoller.register(self.srvSock, select.POLLIN)
@@ -390,11 +407,18 @@ class NetMngr(genmngr.GenericMngr):
                     self.checkExit()
 
 
-            except socket.timeout:
-                self.logger.info('The server does not answer to Connect message.')
-
             except (OSError, ConnectionRefusedError, ConnectionResetError):
                 self.logger.info('Could not establish connection with server.')
+
+            except TimeOutConnectionResponse:
+                self.logger.info('The server does not answer to Connect message.')
+
+            except InvalidConnectionResponse:
+                self.logger.info('The server does not respond OK to connection message')
+
+
+
+
 
             finally:
                 self.srvSock.close()
