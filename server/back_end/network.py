@@ -259,6 +259,59 @@ class NetMngr(genmngr.GenericMngr):
 
     #---------------------------------------------------------------------------#
 
+
+
+
+
+
+    def recvConMsg(self, ctrlSckt, timeToWait):
+        '''
+        This method receive the response to Connection Message.
+        It waits until all response comes
+        '''
+        if not ctrlSckt:
+            raise ControllerNotConnected
+
+        ctrlSckt.settimeout(timeToWait)
+
+        completeMsg = b''
+        completed = False
+        while not completed:
+
+            try:
+                msg = ctrlSckt.recv(REC_BYTES)
+                self.logger.debug('The controller send {} as CON message'.format(msg))
+                self.checkExit()
+            except socket.timeout:
+                raise TimeOutConnectionResponse
+
+            completeMsg += msg
+            if completeMsg.endswith(END):
+                completed = True
+
+        msgContent = completeMsg.strip(CON+END)
+
+        return msgContent
+
+
+
+    def sendRespConMsg(self, ctrlSckt, ctrlMac):
+        '''
+        '''
+
+        ctrlSckt.sendall(RCON + b'OK' + END)
+
+
+
+
+
+
+
+
+
+
+
+
     def run(self):
         '''
         This is the main method of the thread.
@@ -284,11 +337,15 @@ class NetMngr(genmngr.GenericMngr):
                 if fd == self.listenerScktFd:
                     ctrlSckt, address = self.listenerSckt.accept()
 
-                    
-                    recB = ctrlSckt.recv(REC_BYTES)
-                    print(recB)
 
-                    ctrlSckt.sendall(RCON + b'OK' + END)
+                    ctrlMac = self.recvConMsg(ctrlSckt, WAIT_RESP_TIME)
+                    
+                    #recB = ctrlSckt.recv(REC_BYTES)
+                    #print(recB)
+
+                    self.sendRespConMsg(ctrlSckt, ctrlMac)
+
+                    #ctrlSckt.sendall(RCON + b'OK' + END)
 
                     self.logger.info('Accepting connection from: {}'.format(address))
                     ctrlScktFd = ctrlSckt.fileno()
