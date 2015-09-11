@@ -43,6 +43,19 @@ END  = bytes([int_END])
 
 
 
+
+class CtrllerDisconnected(Exception):
+    pass
+
+
+class TimeOutConnectionMsg(Exception):
+    pass
+
+
+
+
+
+
 class Unblocker(object):
     '''
     This class declares a pipe in its constructor.
@@ -280,10 +293,12 @@ class NetMngr(genmngr.GenericMngr):
 
             try:
                 msg = ctrlSckt.recv(REC_BYTES)
+                if not msg:
+                    raise CtrllerDisconnected
                 self.logger.debug('The controller send {} as CON message'.format(msg))
                 self.checkExit()
             except socket.timeout:
-                raise TimeOutConnectionResponse
+                raise TimeOutConnectionMsg
 
             completeMsg += msg
             if completeMsg.endswith(END):
@@ -337,26 +352,33 @@ class NetMngr(genmngr.GenericMngr):
                 if fd == self.listenerScktFd:
                     ctrlSckt, address = self.listenerSckt.accept()
 
+                    try:
+                        ctrlMac = self.recvConMsg(ctrlSckt, WAIT_RESP_TIME)
+                        self.sendRespConMsg(ctrlSckt, ctrlMac)
 
-                    ctrlMac = self.recvConMsg(ctrlSckt, WAIT_RESP_TIME)
-                    
-                    #recB = ctrlSckt.recv(REC_BYTES)
-                    #print(recB)
+                        self.logger.info('Accepting connection from: {}'.format(address))
+                        ctrlScktFd = ctrlSckt.fileno()
 
-                    self.sendRespConMsg(ctrlSckt, ctrlMac)
-
-                    #ctrlSckt.sendall(RCON + b'OK' + END)
-
-                    self.logger.info('Accepting connection from: {}'.format(address))
-                    ctrlScktFd = ctrlSckt.fileno()
-                            
-                    self.fdConns[ctrlScktFd] = {'socket': ctrlSckt, 
+                        self.fdConns[ctrlScktFd] = {'socket': ctrlSckt,
                                                 'inBuffer': b'',
                                                 'outBufferQue': queue.Queue()
                                                }
-                    self.addrFd = {address[0]: ctrlScktFd}
-            
-                    self.netPoller.register(ctrlSckt, select.POLLIN)
+                        self.addrFd = {address[0]: ctrlScktFd}
+    
+                        self.netPoller.register(ctrlSckt, select.POLLIN)
+
+
+
+                    except CtrllerDisconnected:
+                        self.logger.warning('The controller at: {} disconnected'.format(address))
+                        ctrlSckt.close()
+
+
+                    except TimeOutConnectionMsg:
+                        self.logger.warning('The controller does not complete CON message.')
+                        ctrlSckt.close()
+
+
 
 
                 #This will happen when the server sends to us bytes.
