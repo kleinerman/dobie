@@ -264,8 +264,11 @@ class NetMngr(genmngr.GenericMngr):
         '''
         if not self.srvSock:
             raise ServerNotConnected
-    
-        conMsg = CON + str(uuid.getnode()).encode('utf8') + END
+   
+        macAsInt = uuid.getnode()
+        mac = ('{0:0{1}x}'.format(macAsInt, 12)).encode('utf8')
+ 
+        conMsg = CON + mac + END
         self.logger.info('Sending connection message {} to server'.format(conMsg))
         self.srvSock.sendall(conMsg)
 
