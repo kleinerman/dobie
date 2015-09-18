@@ -52,6 +52,10 @@ class TimeOutConnectionMsg(Exception):
     pass
 
 
+class UnknownController(Exception):
+    pass
+
+
 
 
 
@@ -90,7 +94,7 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, netToDb, exitFlag):
+    def __init__(self, dbMngr, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
@@ -105,7 +109,8 @@ class NetMngr(genmngr.GenericMngr):
         self.outBuffer = b''
 
         #Queue used to send Events and CRUD confirmation to dbMngr
-        self.netToDb = netToDb
+        self.dbMngr = dbMngr
+        #self.netToDb = netToDb
 
         #In this queue, "event" and "reSender" threads put the messages
         #and "netMngr" gets them to send to the server.
@@ -304,19 +309,21 @@ class NetMngr(genmngr.GenericMngr):
             if completeMsg.endswith(END):
                 completed = True
 
-        msgContent = completeMsg.strip(CON+END)
+        msgContent = completeMsg.strip(CON+END).decode('utf8')
 
         return msgContent
 
 
 
-    def sendRespConMsg(self, ctrlSckt, ctrlMac):
+    def sendRespConMsg(self, ctrlSckt, ctrllerMac):
         '''
         '''
 
-        ctrlSckt.sendall(RCON + b'OK' + END)
-
-
+        if self.dbMngr.isValidCtrller(ctrllerMac):
+            ctrlSckt.sendall(RCON + b'OK' + END)
+        else:
+            ctrlSckt.sendall(RCON + b'NO' + END)
+            raise UnknownController
 
 
 
@@ -353,17 +360,18 @@ class NetMngr(genmngr.GenericMngr):
                     ctrlSckt, address = self.listenerSckt.accept()
 
                     try:
-                        ctrlMac = self.recvConMsg(ctrlSckt, WAIT_RESP_TIME)
-                        self.sendRespConMsg(ctrlSckt, ctrlMac)
+                        ctrllerMac = self.recvConMsg(ctrlSckt, WAIT_RESP_TIME)
+                        self.sendRespConMsg(ctrlSckt, ctrllerMac)
 
                         self.logger.info('Accepting connection from: {}'.format(address))
                         ctrlScktFd = ctrlSckt.fileno()
 
                         self.fdConns[ctrlScktFd] = {'socket': ctrlSckt,
-                                                'inBuffer': b'',
-                                                'outBufferQue': queue.Queue()
-                                               }
-                        self.addrFd = {address[0]: ctrlScktFd}
+                                                    'inBuffer': b'',
+                                                    'outBufferQue': queue.Queue()
+                                                   }
+                        self.addrFd = {ctrllerMac: ctrlScktFd}
+                        print(self.addrFd)
     
                         self.netPoller.register(ctrlSckt, select.POLLIN)
 
@@ -373,9 +381,12 @@ class NetMngr(genmngr.GenericMngr):
                         self.logger.warning('The controller at: {} disconnected'.format(address))
                         ctrlSckt.close()
 
-
                     except TimeOutConnectionMsg:
                         self.logger.warning('The controller does not complete CON message.')
+                        ctrlSckt.close()
+
+                    except UnknownController:
+                        self.logger.warning('Unknown controller trying to connect.')
                         ctrlSckt.close()
 
 

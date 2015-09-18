@@ -39,15 +39,17 @@ class BackEndSrvr(object):
         self.logger.setLevel(loggingLevel)
         self.logger.addHandler(loggingHandler)
 
-
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
+        #DataBase object 
+        self.dbMngr = database.DbMngr(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+
         #Queue used to send Events and CRUD confirmation to dbMngr
-        netToDb = queue.Queue()
+        #netToDb = queue.Queue()
 
         #Creating the Net Manager Thread 
-        self.netMngr = network.NetMngr(netToDb, self.exitFlag)        
+        self.netMngr = network.NetMngr(self.dbMngr, self.exitFlag)        
 
 
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
