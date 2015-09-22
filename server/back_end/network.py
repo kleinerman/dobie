@@ -157,98 +157,6 @@ class NetMngr(genmngr.GenericMngr):
 
     #---------------------------------------------------------------------------#
 
-    def sendEvent(self, event):
-        '''
-        This method is called by the "eventMngr" thread each time it receives 
-        an event from the "main" thread.
-        It receives a dictionary as an event which is converted to a JSON bytes
-        to create the event message to send to the server.
-        The sequence of bytes is stored in a queue, the "netPoller" is modified
-        to tell the "netMngr" there is bytes to send and the "netMngr" thread is
-        unblocked from the "poll()" method using the "unblocker" object. 
-        Once this happens, the "netMngr" thread pulls the message from queue and 
-        send them to the server.       
-        '''
-
-        if self.connected.is_set():
-
-            #Converting dictionary to JSON bytes
-            jsonEvent = json.dumps(event).encode('utf8')
-            #Adding headers at beggining and end
-            outMsg = EVT + jsonEvent + END
-
-            #Writing the messages in a queue because we can not assure the method
-            #"sendEvent()" will not be called again before the "poll()" method wakes
-            #up to send the bytes. If we do not do this, we would end up with a mess
-            #of bytes in the out buffer.
-            #(Not sure if this is necessary or it is the best way to do it)
-            self.outBufferQue.put(outMsg)
-
-            with self.lockNetPoller:
-                try:
-                    #Modifying "netPoller" to notify there is a message to send.
-                    self.netPoller.modify(self.srvSock, select.POLLOUT)
-                    #Unblocking the "netMngr" thread from the "poll()" method.
-                    self.unblocker.unblock()
-                except FileNotFoundError:
-                    #This exception could happen if it is received a null byte (b'')
-                    #in POLLIN evnt, the socket is closed and "eventMngr" calls this
-                    #method before POLLNVAL evnt happens to clean "self.connected".
-                    #(Not sure if this can occur)                    
-                    self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
-            
-        else:
-            self.logger.debug('Can not send event, server is disconnected.')
-
-
-
-    #---------------------------------------------------------------------------#
-
-
-    def ackEvent(self):
-        '''
-        This method answer to a event sent by a controller with an OK
-        '''
-        pass
-
-
-    def reSendEvents(self, eventList):
-        '''
-        This method is called by the "reSender" thread.
-        It receives a list of dictionaries as an events. Each event is converted
-        to a JSON bytes delimitted by headers to create the events message to send
-        to the server.
-        The sequence of bytes is stored in a queue, the "netPoller" is modified
-        to tell the "netMngr" there is bytes to send and the "netMngr" thread is
-        unblocked from the "poll()" method using the "unblocker" object. 
-        Once this happens, the "netMngr" thread pulls the message from queue and 
-        send them to the server.
-        See the comments in "SendEvent" message. 
-        '''
-
-        if self.connected.is_set():
-
-            outMsg = b''
-            for event in eventList:
-                jsonEvent = json.dumps(event).encode('utf8')
-                outMsg += EVS + jsonEvent
-            outMsg += END
-
-            self.outBufferQue.put(outMsg)
-            with self.lockNetPoller:
-                try:
-                    self.netPoller.modify(self.srvSock, select.POLLOUT)
-                    self.unblocker.unblock()
-                except FileNotFoundError:
-                    self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
-
-        else:
-            self.logger.debug('Can not re-send event, server is disconnected.')
-
-
-
-    #---------------------------------------------------------------------------#
-
     def procRecMsg(self, msg):
         '''
         This method is called by the main "run()" method when it receives bytes
@@ -261,9 +169,9 @@ class NetMngr(genmngr.GenericMngr):
         #It should be delivered to "eventMngr" thread.
         if msg.startswith(EVT):
             print('1')
-            response = msg.strip(EVT+END)
-            response = response.decode('utf8')
-            self.netToEvent.put(response)
+            event = msg.strip(EVT+END).decode('utf8')
+            event = json.loads(event)
+            self.dbMngr.saveEvent(event)
 
         #This is a response to a set of re-sent events sent to the server
         #It should be delivered to "reSender" thread.
