@@ -146,18 +146,19 @@ class NetMngr(genmngr.GenericMngr):
         self.netPoller.register(self.listenerSckt, select.POLLIN)
 
         #Dictionary indexed by socket controller file descriptors. Each element
-        #of this dictionary is another dictionary with the socket,
-        self.fdConns = {}
+        #of this dictionary is another dictionary with the controller socket and
+        #buffers to send and receive messages
+        self.fdConnObjects = {}
 
-        #Dictionary to get the socket file descriptor with the ip address
-        self.addrFd = {}
+        #Dictionary to get the socket file descriptor with the MAC address
+        self.macConnObjects = {}
         
  
 
 
     #---------------------------------------------------------------------------#
 
-    def procRecMsg(self, msg):
+    def procRecMsg(self, fd, msg):
         '''
         This method is called by the main "run()" method when it receives bytes
         from the server. This happens in POLLIN evnts branch.
@@ -168,7 +169,9 @@ class NetMngr(genmngr.GenericMngr):
         #This is a response to an event sent to the server
         #It should be delivered to "eventMngr" thread.
         if msg.startswith(EVT):
-            print('1')
+            response = REVT + b'OK' + END
+            self.fdConnObjects[fd]['outBufferQue'].put(response)
+            print(self.fdConnObjects[fd]['outBufferQue'])
             event = msg.strip(EVT+END).decode('utf8')
             event = json.loads(event)
             self.dbMngr.saveEvent(event)
@@ -190,22 +193,22 @@ class NetMngr(genmngr.GenericMngr):
 
 
 
-    def recvConMsg(self, ctrlSckt, timeToWait):
+    def recvConMsg(self, ctrllerSckt, timeToWait):
         '''
         This method receive the response to Connection Message.
         It waits until all response comes
         '''
-        if not ctrlSckt:
+        if not ctrllerSckt:
             raise ControllerNotConnected
 
-        ctrlSckt.settimeout(timeToWait)
+        ctrllerSckt.settimeout(timeToWait)
 
         completeMsg = b''
         completed = False
         while not completed:
 
             try:
-                msg = ctrlSckt.recv(REC_BYTES)
+                msg = ctrllerSckt.recv(REC_BYTES)
                 if not msg:
                     raise CtrllerDisconnected
                 self.logger.debug('The controller send {} as CON message'.format(msg))
@@ -223,14 +226,14 @@ class NetMngr(genmngr.GenericMngr):
 
 
 
-    def sendRespConMsg(self, ctrlSckt, ctrllerMac):
+    def sendRespConMsg(self, ctrllerSckt, ctrllerMac):
         '''
         '''
 
         if self.dbMngr.isValidCtrller(ctrllerMac):
-            ctrlSckt.sendall(RCON + b'OK' + END)
+            ctrllerSckt.sendall(RCON + b'OK' + END)
         else:
-            ctrlSckt.sendall(RCON + b'NO' + END)
+            ctrllerSckt.sendall(RCON + b'NO' + END)
             raise UnknownController
 
 
@@ -265,37 +268,42 @@ class NetMngr(genmngr.GenericMngr):
 
 
                 if fd == self.listenerScktFd:
-                    ctrlSckt, address = self.listenerSckt.accept()
+                    ctrllerSckt, address = self.listenerSckt.accept()
 
                     try:
-                        ctrllerMac = self.recvConMsg(ctrlSckt, WAIT_RESP_TIME)
-                        self.sendRespConMsg(ctrlSckt, ctrllerMac)
+                        ctrllerMac = self.recvConMsg(ctrllerSckt, WAIT_RESP_TIME)
+                        self.sendRespConMsg(ctrllerSckt, ctrllerMac)
 
                         self.logger.info('Accepting connection from: {}'.format(address))
-                        ctrlScktFd = ctrlSckt.fileno()
+                        ctrllerScktFd = ctrllerSckt.fileno()
 
-                        self.fdConns[ctrlScktFd] = {'socket': ctrlSckt,
-                                                    'inBuffer': b'',
-                                                    'outBufferQue': queue.Queue()
-                                                   }
-                        self.addrFd = {ctrllerMac: ctrlScktFd}
-                        print(self.addrFd)
+
+                        connObjects = {'socket': ctrllerSckt,
+                                       'inBuffer': b'',
+                                       'outBufferQue': queue.Queue()
+                                      }
+
+                        self.fdConnObjects[ctrllerScktFd] = connObjects
+
+                        self.macConnObjects[ctrllerMac] = connObjects
+
+                        print(self.macConnObjects)
     
-                        self.netPoller.register(ctrlSckt, select.POLLIN)
+                        self.netPoller.register(ctrllerSckt, select.POLLIN)
 
 
 
                     except CtrllerDisconnected:
                         self.logger.warning('The controller at: {} disconnected'.format(address))
-                        ctrlSckt.close()
+                        ctrllerSckt.close()
 
                     except TimeOutConnectionMsg:
                         self.logger.warning('The controller does not complete CON message.')
-                        ctrlSckt.close()
+                        ctrllerSckt.close()
 
                     except UnknownController:
                         self.logger.warning('Unknown controller trying to connect.')
-                        ctrlSckt.close()
+                        ctrllerSckt.close()
 
 
 
@@ -303,26 +311,26 @@ class NetMngr(genmngr.GenericMngr):
                 #This will happen when the server sends to us bytes.
                 elif pollEvnt & select.POLLIN:
                     print('PLLIN')
-                    ctrlSckt = self.fdConns[fd]['socket']
-                    recBytes = ctrlSckt.recv(REC_BYTES)
+                    ctrllerSckt = self.fdConnObjects[fd]['socket']
+                    recBytes = ctrllerSckt.recv(REC_BYTES)
                     self.logger.debug('Receiving: {}'.format(recBytes))
 
                     #Receiving b'' means the controller closed the connection
                     #On this situation we should close the socket and the
                     #next call to "poll()" will throw a POLLNVAL event
                     if not recBytes:
-                        ctrlSckt.close()
+                        ctrllerSckt.close()
                         continue
 
                     #We should receive bytes until we receive the end of
                     #the message
 
 
-                    msg = self.fdConns[fd]['inBuffer'] + recBytes
+                    msg = self.fdConnObjects[fd]['inBuffer'] + recBytes
                     if msg.endswith(END):
-                        self.procRecMsg(msg)
+                        self.procRecMsg(fd, msg)
                     else:
-                        self.fdConns[fd]['inBuffer'] = msg
+                        self.fdConnObjects[fd]['inBuffer'] = msg
 
 
                 #This will happen when "event" thread or "reSender" thread
