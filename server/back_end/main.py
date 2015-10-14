@@ -43,7 +43,7 @@ class BackEndSrvr(object):
         self.exitFlag = threading.Event()
 
         #DataBase object 
-        self.dbMngr = database.DbMngr(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+        self.dbMngr = database.DbMngr(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self.exitFlag)
 
         #Queue used to send Events and CRUD confirmation to dbMngr
         #netToDb = queue.Queue()
@@ -77,6 +77,9 @@ class BackEndSrvr(object):
         
         #Starting the "Event Manager" thread
         self.netMngr.start()
+        
+        #Starting the "DataBase Manager" thread
+        self.dbMngr.start()
         
 
         for thread in threading.enumerate():

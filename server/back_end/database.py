@@ -2,20 +2,18 @@ import pymysql
 import queue
 import logging
 
-
+import genmngr
 from config import *
 
 
 
-class DbMngr(object):
+class DbMngr(genmngr.GenericMngr):
 
-    def __init__(self, host, user, passwd, dataBase):
+    def __init__(self, host, user, passwd, dataBase, exitFlag):
 
-
-
-        #Getting the logger
-        self.logger = logging.getLogger(LOGGER_NAME)
-
+        #Invoking the parent class constructor, specifying the thread name, 
+        #to have a understandable log file.
+        super().__init__('DbMngr', exitFlag)
 
         self.host = host
         self.user = user
@@ -48,8 +46,38 @@ class DbMngr(object):
 
 
 
+
     def saveEvent(self, event):
-        print(event)
+        '''
+        '''
+        self.netToDb.put(event)
+
+
+
+
+
+
+    def run(self):
+        '''
+        This is the main method of the thread. Most of the time it is blocked waiting 
+        for queue messages coming from the "Network" thread.
+        '''
+
+        while True:
+            try:
+                #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
+                event = self.netToDb.get(timeout=EXIT_CHECK_TIME)
+                self.checkExit()
+                print(event)
+
+            except queue.Empty:
+                #Cheking if Main thread ask as to finish.
+                self.checkExit()
+
+
+
+
+
 
 
 

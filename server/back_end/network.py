@@ -100,26 +100,9 @@ class NetMngr(genmngr.GenericMngr):
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
 
-        #Buffer to receive bytes from server (should be changed to dict for each connection)
-        #It is used in POLLIN event
-        self.inBuffer = b''
-
-        #Buffer to send bytes to server (should be changed to dict for each connection)
-        #It is used in POLLOUT event
-        self.outBuffer = b''
-
         #Queue used to send Events and CRUD confirmation to dbMngr
         self.dbMngr = dbMngr
         #self.netToDb = netToDb
-
-        #In this queue, "event" and "reSender" threads put the messages
-        #and "netMngr" gets them to send to the server.
-        #We are using a queue because we can not assure the method
-        #"sendEvent()" will not be called again before the "poll()" method wakes
-        #up to send the bytes. If we do not do this, we would end up with a mess
-        #of bytes in the out buffer.
-        #(Not sure if this is necessary or it is the best way to do it)
-        self.outBufferQue = queue.Queue()
 
         #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
@@ -165,13 +148,15 @@ class NetMngr(genmngr.GenericMngr):
         It process the message and delivers it to the corresponding thread 
         according to the headers of the message.
         '''
-        print('Entering')
         #This is a response to an event sent to the server
         #It should be delivered to "eventMngr" thread.
         if msg.startswith(EVT):
             response = REVT + b'OK' + END
             self.fdConnObjects[fd]['outBufferQue'].put(response)
-            print(self.fdConnObjects[fd]['outBufferQue'])
+            ctrllerSckt = self.fdConnObjects[fd]['socket']
+            with self.lockNetPoller:
+                self.netPoller.modify(ctrllerSckt, select.POLLOUT)
+
             event = msg.strip(EVT+END).decode('utf8')
             event = json.loads(event)
             self.dbMngr.saveEvent(event)
@@ -286,8 +271,6 @@ class NetMngr(genmngr.GenericMngr):
                         self.fdConnObjects[ctrllerScktFd] = connObjects
 
                         self.macConnObjects[ctrllerMac] = connObjects
-
-                        print(self.macConnObjects)
     
                         self.netPoller.register(ctrllerSckt, select.POLLIN)
 
@@ -310,7 +293,6 @@ class NetMngr(genmngr.GenericMngr):
 
                 #This will happen when the server sends to us bytes.
                 elif pollEvnt & select.POLLIN:
-                    print('PLLIN')
                     ctrllerSckt = self.fdConnObjects[fd]['socket']
                     recBytes = ctrllerSckt.recv(REC_BYTES)
                     self.logger.debug('Receiving: {}'.format(recBytes))
@@ -344,17 +326,18 @@ class NetMngr(genmngr.GenericMngr):
                         #happens. For this reason we should empty the "outBufferQue"
                         #sending all the messages. Then, if we have another POLLOUT
                         #event and the queue is empty, nothing will happen.
+                        ctrllerSckt = self.fdConnObjects[fd]['socket']
                         while True:
-                            self.outBuffer = self.outBufferQue.get(block = False)
-                            self.logger.debug('Sending: {}'.format(self.outBuffer))
-                            self.srvSock.sendall(self.outBuffer)
+                            outBuffer = self.fdConnObjects[fd]['outBufferQue'].get(block = False)
+                            self.logger.debug('Sending: {}'.format(outBuffer))
+                            ctrllerSckt.sendall(outBuffer)
                     except queue.Empty:
                         #No more messages to send in "outBufferQue"
                         pass
                     #Once we finished sending all the messages, we should modify the
                     #"netPoller" object to be able to receive bytes again.
                     with self.lockNetPoller:
-                        self.netPoller.modify(self.srvSock, select.POLLIN)
+                        self.netPoller.modify(ctrllerSckt, select.POLLIN)
 
 
                 #This will happen when the server closes the socket or the 
