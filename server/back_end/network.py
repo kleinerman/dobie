@@ -152,23 +152,29 @@ class NetMngr(genmngr.GenericMngr):
         #It should be delivered to "eventMngr" thread.
         if msg.startswith(EVT):
             response = REVT + b'OK' + END
-            self.fdConnObjects[fd]['outBufferQue'].put(response)
-            ctrllerSckt = self.fdConnObjects[fd]['socket']
-            with self.lockNetPoller:
-                self.netPoller.modify(ctrllerSckt, select.POLLOUT)
 
             event = msg.strip(EVT+END).decode('utf8')
             event = json.loads(event)
             self.dbMngr.saveEvent(event)
 
-        #This is a response to a set of re-sent events sent to the server
-        #It should be delivered to "reSender" thread.
-        elif msg.startswith(REVS):
-            print('2')
-            response = msg.strip(REVS+END)
-            response = response.decode('utf8')
-            self.netToReSnd.put(response)
-        
+
+
+        elif msg.startswith(EVS):
+            response = REVS + b'OK' + END
+
+            events = msg[1:-1].split(EVS)
+            events = [json.loads(i.decode('utf8')) for i in events]
+            self.dbMngr.saveEvent(events)
+            
+
+            
+
+        self.fdConnObjects[fd]['outBufferQue'].put(response)
+        ctrllerSckt = self.fdConnObjects[fd]['socket']
+        with self.lockNetPoller:
+            self.netPoller.modify(ctrllerSckt, select.POLLOUT)
+
+
 
 
     #---------------------------------------------------------------------------#
