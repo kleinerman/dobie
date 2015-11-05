@@ -47,10 +47,26 @@ class DbMngr(genmngr.GenericMngr):
 
 
 
-    def saveEvent(self, event):
+    def putEvents(self, events):
         '''
         '''
-        self.netToDb.put(event)
+        self.netToDb.put(events)
+
+
+
+
+
+
+    def saveEvents(self, events):
+        '''
+        It receives a list of events and saves them in the database
+
+        {'pssgId': 7, 'notReason': None, 'side': 1, 'latchType': 1, 'personId': 1619, 'dateTime': '2015-11-05 15:46', 'eventType': 1, 'allowed': True}
+        '''
+
+
+        for event in events:
+            print(event)
 
 
 
@@ -66,9 +82,9 @@ class DbMngr(genmngr.GenericMngr):
         while True:
             try:
                 #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
-                event = self.netToDb.get(timeout=EXIT_CHECK_TIME)
+                events = self.netToDb.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
-                print(event)
+                self.saveEvents(events)
 
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.

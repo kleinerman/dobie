@@ -155,7 +155,8 @@ class NetMngr(genmngr.GenericMngr):
 
             event = msg.strip(EVT+END).decode('utf8')
             event = json.loads(event)
-            self.dbMngr.saveEvent(event)
+            events = [event]
+            self.dbMngr.putEvents(events)
 
 
 
@@ -163,12 +164,11 @@ class NetMngr(genmngr.GenericMngr):
             response = REVS + b'OK' + END
 
             events = msg[1:-1].split(EVS)
-            events = [json.loads(i.decode('utf8')) for i in events]
-            self.dbMngr.saveEvent(events)
+            events = [json.loads(evnt.decode('utf8')) for evnt in events]
+            self.dbMngr.putEvents(events)
             
 
             
-
         self.fdConnObjects[fd]['outBufferQue'].put(response)
         ctrllerSckt = self.fdConnObjects[fd]['socket']
         with self.lockNetPoller:
