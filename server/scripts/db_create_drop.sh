@@ -8,6 +8,24 @@ if [[ $1 == --create ]]; then
 
     mysql -u conpass_usr -pqwe123qwe conpass_db < db_schema.sql   
 
+
+
+    mysql -u conpass_usr -pqwe123qwe conpass_db -e "
+
+
+        INSERT INTO RowState(id, description) VALUES (1, 'To Add'), (2, 'Added'), (3, 'To Delete'), (4, 'Deleted');
+        INSERT INTO Controller(boardModel, macAddress) VALUES ('Raspberry PI','b80305508c9b');
+        INSERT INTO Organization(id, name) VALUES(1, 'Kleinernet');
+        INSERT INTO Person(id, name, cardNumber, orgId, rowStateId) VALUES(1619, 'Jorge Kleinerman', 43242432, 1, 1);
+        INSERT INTO EventType(id, description, rowStateId) VALUES(1, 'Access with card', 1);
+        INSERT INTO Latch(id, description, rowStateId) VALUES(1, 'Card Reader', 1);
+        INSERT INTO Zone (id, name) VALUES(1, 'Ingreso Principal');
+        INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, zoneId, controllerId, rowStateId) VALUES(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, zoneId, controllerId, rowStateId) VALUES(7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+                                                 
+                                                   "
+    
+
                    
 elif [[ $1 == --drop ]]; then
 
