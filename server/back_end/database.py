@@ -60,14 +60,30 @@ class DbMngr(genmngr.GenericMngr):
     def saveEvents(self, events):
         '''
         It receives a list of events and saves them in the database
-
-        {'pssgId': 7, 'notReason': None, 'side': 1, 'latchType': 1, 'personId': 1619, 'dateTime': '2015-11-05 15:46', 'eventType': 1, 'allowed': True}
         '''
 
 
         for event in events:
-            print(event)
 
+            if event['notReason']:
+                notReason = event['notReason']
+            else:
+                notReason = 'NULL'
+
+
+            sql = ("INSERT INTO "
+                   "Event(eventTypeId, pssgId, dateTime, latchId, personId, side, allowed, notReason) "
+                   "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
+                   "".format(event['eventType'], event['pssgId'], event['dateTime'],
+                             event['latchType'], event['personId'], event['side'],
+                             event['allowed'], notReason
+                            ) 
+
+                  )
+
+
+            self.cursor.execute(sql)
+            self.connection.commit()
 
 
 
