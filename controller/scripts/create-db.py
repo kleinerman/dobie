@@ -38,10 +38,13 @@ cursor.execute('''
         i1In     INTEGER,
         o0In     INTEGER,
         o1In     INTEGER,
-        bttnIn    INTEGER,
+        bttnIn   INTEGER,
         stateIn  INTEGER,
         rlseOut  INTEGER,
-        bzzrOut  INTEGER
+        bzzrOut  INTEGER,
+        rlseTime INTEGER,
+        bzzrTime INTEGER,
+        alrmTime INTEGER
     )
     '''
 )

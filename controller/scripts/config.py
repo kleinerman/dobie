@@ -5,6 +5,8 @@ SIM_LIM_ACCESS_QUANT = 500
 
 IOIFACE_BIN = '../c_src/main'
 
+IOIFACE_ARGS = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut']
+
 DB_FILE = 'access.db'
 QUEUE_FILE = '/ioiface_queue'
 

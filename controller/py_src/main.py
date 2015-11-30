@@ -19,6 +19,7 @@ import signal
 import database
 import events
 import network
+import passage
 from config import *
 
 
@@ -110,9 +111,12 @@ class Controller(object):
         for pssgId in self.pssgsParams:
 
             for pssgParamName in self.dataBase.getPssgParamsNames():
-                pssgParamValue = self.pssgsParams[pssgId][pssgParamName]
-                if pssgParamValue:
-                    ioIfaceArgs += '--{} {} '.format(pssgParamName, pssgParamValue)
+                #Since not all the columns names of Passage table are parameters of 
+                #ioiface binary, they should be checked if they are in the IOFACE_ARGS list
+                if pssgParamName in IOIFACE_ARGS:
+                    pssgParamValue = self.pssgsParams[pssgId][pssgParamName]
+                    if pssgParamValue:
+                        ioIfaceArgs += '--{} {} '.format(pssgParamName, pssgParamValue)
 
         return ioIfaceArgs
 
@@ -149,6 +153,10 @@ class Controller(object):
         allowed, personId, notReason = self.dataBase.canAccess(pssgId, side, cardNumber)
 
         if allowed:
+
+            pssg = passage.Passage(self.pssgsParams[pssgId])
+            pssg.release(True)
+
             #Open the passage as soon as posible
             print('Opening the passage...')
 

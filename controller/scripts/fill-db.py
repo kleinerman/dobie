@@ -39,16 +39,16 @@ for cardNum in cardNumList:
 
 
 
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(1, 2, null, null, 5, 6, 7, 8)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(1, 2, null, null, 5, 6, 7, 8)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(null, null, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(null, null, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, 5, 6, 7, 8)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, null, 6, 7, 8)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) values(1, 2, 3, 4, null, 6, 7, 8)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, null, null, 5, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, null, null, 5, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(null, null, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(null, null, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, null, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, null, 6, 7, 8, 7, 3, 10)")
 
 
 
