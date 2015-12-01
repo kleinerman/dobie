@@ -13,6 +13,8 @@
 #define RETURN_SUCCESS 0
 #define UNDEFINED -1
 #define EPOLL_WAIT_TIME 2000
+#define QUEUE_NAME "/ioiface_queue"
+
 
 // pssg gpio map
 typedef struct {

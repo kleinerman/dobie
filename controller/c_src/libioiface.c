@@ -419,7 +419,7 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
             args->pssg_id = pssg[i].id;
             args->d0 = pssg[i].i0In;
             args->d1 = pssg[i].i1In;
-            args->side = 'i';
+            args->side = '1';
             args->mq = mq;
 
             /* and launch the thread */
@@ -432,7 +432,7 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
             args->pssg_id = pssg[i].id;
             args->d0 = pssg[i].o0In;
             args->d1 = pssg[i].o1In;
-            args->side = 'o';
+            args->side = '0';
             args->mq = mq;
 
             /* and launch the thread */

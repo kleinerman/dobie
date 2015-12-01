@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     /* open the message queue only for sending message to the main process
      * It must be created by the main process
      */
-    if ( (mq = mq_open("/pssg_iface_queue", O_WRONLY)) == RETURN_FAILURE ) {
+    if ( (mq = mq_open(QUEUE_NAME, O_WRONLY)) == RETURN_FAILURE ) {
         printf("Error opening the message queue: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
