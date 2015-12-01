@@ -1,17 +1,17 @@
 CC=gcc
 IDIR=./include
 CFLAGS=-I $(IDIR) -pthread -lrt
-OBJ=main.o access.o
-_DEPS=access.h
+OBJ=main.o libioiface.o
+_DEPS=libioiface.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
 main: $(OBJ)
-	        $(CC) -o main $(OBJ) $(CFLAGS)
+	        $(CC) -o ioiface $(OBJ) $(CFLAGS)
 
 
 %.o: %.c $(DEPS)
 	        $(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
-	        rm *.o main
+	        rm *.o ioiface
 
