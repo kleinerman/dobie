@@ -79,6 +79,19 @@ class Controller(object):
         #by pssg parametters names
         self.pssgsParams = self.dataBase.getPssgsParams()
 
+        self.pssgsControl = {}
+        for pssgId in self.pssgsParams.keys():
+            self.pssgsControl[pssgId] = {'pssgObj': passage.Passage(self.pssgsParams[pssgId]),
+                                         'accessPermit': threading.Event(), 
+                                         'timeAccessPermit': None,
+                                         'closerPssgThrdAlive': threading.Event(),
+                                         'openPssg': threading.Event(),
+                                         'starterBzzrThrdAlive': threading.Event()
+                                        }
+
+        print(self.pssgsControl)
+
+
         #By default our exit code will be success
         self.exitCode = 0
 
@@ -154,8 +167,10 @@ class Controller(object):
 
         if allowed:
 
-            pssg = passage.Passage(self.pssgsParams[pssgId])
-            pssg.release(True)
+            self.pssgsControl[pssgId]['pssgObj'].release(True)
+            self.pssgsControl[pssgId]['accessPermit'].set()
+            self.pssgsControl[pssgId]['timeAccessPermit'].datetime.datetime.now()
+
 
             #Open the passage as soon as posible
             print('Opening the passage...')
