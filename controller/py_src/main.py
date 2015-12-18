@@ -169,7 +169,7 @@ class Controller(object):
 
             self.pssgsControl[pssgId]['pssgObj'].release(True)
             self.pssgsControl[pssgId]['accessPermit'].set()
-            self.pssgsControl[pssgId]['timeAccessPermit'].datetime.datetime.now()
+            self.pssgsControl[pssgId]['timeAccessPermit'] = datetime.datetime.now()
 
 
             #Open the passage as soon as posible
