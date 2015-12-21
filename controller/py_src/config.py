@@ -30,6 +30,9 @@ NET_POLL_MSEC = 1000
 
 RE_SEND_EVTS_QUANT = 4
 
+#This parametter should be put in db for each pssg
+PSSG_OPEN_TIME = 10
+
 
 BIND_IP = '0.0.0.0'
 BIND_PORT = 4440

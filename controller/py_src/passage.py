@@ -37,13 +37,10 @@ class Passage(object):
         gpioValue = {True: '1', False: '0'}[trueOrFalse]
         
         if gpioNumber:
-            try:
-                gpioFd = open('/sys/class/gpio/gpio{}/value'.format(gpioNumber),'w')
-                gpioFd.write(gpioValue + '\n')
-                gpioFd.flush()
-                gpioFd.close()
-            except Exception:
-                print('Exception')
+            gpioFd = open('/sys/class/gpio/gpio{}/value'.format(gpioNumber),'w')
+            gpioFd.write(gpioValue + '\n')
+            gpioFd.flush()
+            gpioFd.close()
 
         else:
             raise UnspecifiedGpio
@@ -52,40 +49,26 @@ class Passage(object):
 
 
 
-class EventMngr(genmngr.GenericMngr):
+class CloserPssgMngr(genmngr.GenericMngr):
 
     '''
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
 
-    def __init__(self, mainToEvent, netMngr, netToEvent, netToReSnd, exitFlag):
+    def __init__(self, pssgId, closerPssgMngrAlive, lockTimeAccessPermit, timeAccessPermit, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('PassageMngr', exitFlag)
+        super().__init__('CloserPssgMngr_{}'.format(pssgId), exitFlag)
 
-        #Database connection should be created in run method
-        self.dataBase = None
+        self.closerPssgMngrAlive = closerPssgMngrAlive
 
-        #Queue to receive message from the Main thread.
-        self.mainToEvent = mainToEvent
+        self.lockTimeAccessPermit = lockTimeAccessPermit
 
-        #Queue to send messages to net.
-        self.netMngr = netMngr
+        self.timeAccessPermit = timeAccessPermit
 
-        #Queue to receive message from the Network thread.
-        self.netToEvent = netToEvent
-
-        #Queue used by ReSender thread to receive message from the Network thread.
-        self.netToReSnd = netToReSnd
-        
-        #Flag to know if Resender Thread is alive
-        self.resenderAlive = threading.Event()
-
-
-
-
+        self.SLEEP_TURNS = PSSG_OPEN_TIME // EXIT_CHECK_TIME
 
 
     def run(self):

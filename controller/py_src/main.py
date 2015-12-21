@@ -82,11 +82,12 @@ class Controller(object):
         self.pssgsControl = {}
         for pssgId in self.pssgsParams.keys():
             self.pssgsControl[pssgId] = {'pssgObj': passage.Passage(self.pssgsParams[pssgId]),
-                                         'accessPermit': threading.Event(), 
+                                         'accessPermit': threading.Event(),
+                                         'lockTimeAccessPermit': threading.Lock(),
                                          'timeAccessPermit': None,
-                                         'closerPssgThrdAlive': threading.Event(),
+                                         'closerPssgMngrAlive': threading.Event(),
                                          'openPssg': threading.Event(),
-                                         'starterBzzrThrdAlive': threading.Event()
+                                         'starterBzzrMngrAlive': threading.Event()
                                         }
 
         print(self.pssgsControl)
@@ -170,6 +171,9 @@ class Controller(object):
             self.pssgsControl[pssgId]['pssgObj'].release(True)
             self.pssgsControl[pssgId]['accessPermit'].set()
             self.pssgsControl[pssgId]['timeAccessPermit'] = datetime.datetime.now()
+            
+            if not self.pssgsControl[pssgId]['closerPssgMngrAlive'].is_set():
+                pass
 
 
             #Open the passage as soon as posible
