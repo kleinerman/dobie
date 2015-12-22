@@ -78,7 +78,7 @@ class Controller(object):
         #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
         #by pssg parametters names
         self.pssgsParams = self.dataBase.getPssgsParams()
-
+    
         self.pssgsControl = {}
         for pssgId in self.pssgsParams.keys():
             self.pssgsControl[pssgId] = {'pssgObj': passage.Passage(self.pssgsParams[pssgId]),
@@ -89,8 +89,6 @@ class Controller(object):
                                          'openPssg': threading.Event(),
                                          'starterBzzrMngrAlive': threading.Event()
                                         }
-
-        print(self.pssgsControl)
 
 
         #By default our exit code will be success
@@ -168,11 +166,14 @@ class Controller(object):
 
         if allowed:
 
-            self.pssgsControl[pssgId]['pssgObj'].release(True)
-            self.pssgsControl[pssgId]['accessPermit'].set()
-            self.pssgsControl[pssgId]['timeAccessPermit'] = datetime.datetime.now()
+            pssgControl = self.pssgsControl[pssgId]
+
+            pssgControl['pssgObj'].release(True)
+            pssgControl['accessPermit'].set()
+            pssgControl['timeAccessPermit'] = datetime.datetime.now()
+
             
-            if not self.pssgsControl[pssgId]['closerPssgMngrAlive'].is_set():
+            if not self.pssgControl['closerPssgMngrAlive'].is_set():
                 pass
 
 
