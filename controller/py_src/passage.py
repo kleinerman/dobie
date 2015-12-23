@@ -23,6 +23,9 @@ class Passage(object):
     '''
 
     def __init__(self, pssgParams):
+
+        #Getting the logger
+        self.logger = logging.getLogger('Controller')
         
         self.pssgParams = pssgParams
 
@@ -37,13 +40,19 @@ class Passage(object):
         gpioValue = {True: '1', False: '0'}[trueOrFalse]
         
         if gpioNumber:
-            gpioFd = open('/sys/class/gpio/gpio{}/value'.format(gpioNumber),'w')
-            gpioFd.write(gpioValue + '\n')
-            gpioFd.flush()
-            gpioFd.close()
+
+            try:
+                gpioFd = open('/sys/class/gpio/gpio{}/value'.format(gpioNumber),'w')
+                gpioFd.write(gpioValue + '\n')
+                gpioFd.flush()
+                gpioFd.close()
+           
+            except FileNotFoundError as fileNotFoundError:
+                self.logger.error(fileNotFoundError)
+
 
         else:
-            raise UnspecifiedGpio
+            self.logger.error('There is not GPIO set in DB to release the passage.')
 
 
 
@@ -56,19 +65,28 @@ class CloserPssgMngr(genmngr.GenericMngr):
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
 
-    def __init__(self, pssgParams, pssgControl, exitFlag):
+    def __init__(self, pssgControl, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('CloserPssgMngr_{}'.format(pssgParams['id']), exitFlag)
+
+        self.pssgControl = pssgControl
+
+        pssgId = pssgControl['pssgObj'].pssgParams['id']        
+
+        super().__init__('CloserPssgMngr_{}'.format(pssgId), exitFlag)
+
+        self.pssgObj = pssgControl['pssgObj']
 
         self.closerPssgMngrAlive = pssgControl['closerPssgMngrAlive']
 
         self.lockTimeAccessPermit = pssgControl['lockTimeAccessPermit']
 
-        self.timeAccessPermit = pssgControl['timeAccessPermit']
+        #We can't do that because datetime type is inmmutable
+#        self.timeAccessPermit = pssgControl['timeAccessPermit']
 
-#        self.sleepTurns = pssgParams['rlseTime'] // EXIT_CHECK_TIME
+        self.rlseTime = pssgControl['pssgObj'].pssgParams['rlseTime']
+
 
 
     def run(self):
@@ -82,11 +100,18 @@ class CloserPssgMngr(genmngr.GenericMngr):
             self.checkExit()
             
             with self.lockTimeAccessPermit:
-                elapsedTime = datetime.datetime.now() - self.timeAccessPermit
+                elapsedTime = datetime.datetime.now() - self.pssgControl['timeAccessPermit']
                 
             elapsedTime = int(elapsedTime.total_seconds())
-            if elapsedTime > pssgParams['rlseTime']:
+            print(elapsedTime, self.rlseTime)
+            if elapsedTime >= self.rlseTime:
                 alive = False
+        
+
+        self.pssgObj.release(False)
+
+        self.closerPssgMngrAlive.clear()
+        
 
 
         

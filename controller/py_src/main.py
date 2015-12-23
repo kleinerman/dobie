@@ -173,8 +173,11 @@ class Controller(object):
             pssgControl['timeAccessPermit'] = datetime.datetime.now()
 
             
-            if not self.pssgControl['closerPssgMngrAlive'].is_set():
-                pass
+            if not pssgControl['closerPssgMngrAlive'].is_set():
+                pssgControl['closerPssgMngrAlive'].set()
+                closerPssgMngr = passage.CloserPssgMngr(pssgControl, self.exitFlag)
+                closerPssgMngr.start()
+                
 
 
             #Open the passage as soon as posible
@@ -241,10 +244,10 @@ class Controller(object):
         except posix_ipc.SignalError:
             self.logger.debug('IO Interface Queue was interrupted by a OS signal.')
 
-        except Exception as exception:
-            logMsg = 'The following exception occurred: {}'.format(exception)
-            self.logger.debug(logMsg)
-            self.exitCode = 1
+#        except Exception as exception:
+#            logMsg = 'The following exception occurred: {}'.format(exception)
+#            self.logger.debug(logMsg)
+#            self.exitCode = 1
 
         self.logger.debug('Notifying all threads to finish.')
         self.exitFlag.set()
