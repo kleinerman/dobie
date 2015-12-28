@@ -28,32 +28,62 @@ class Passage(object):
         self.logger = logging.getLogger('Controller')
         
         self.pssgParams = pssgParams
+        self.pssgId = pssgParams['id']
 
 
-    def release(self, trueOrFalse):
+
+
+    def changeGpioState(self, gpioNumber, gpioState):
         '''
         It sends the signal to the corresponding GPIO to release the door
         '''
 
+        gpioState = {True: '1', False: '0'}[gpioState]
+
+        try:
+            gpioFd = open('/sys/class/gpio/gpio{}/value'.format(gpioNumber),'w')
+            gpioFd.write(gpioValue + '\n')
+            gpioFd.flush()
+            gpioFd.close()
+
+        except FileNotFoundError as fileNotFoundError:
+            self.logger.error(fileNotFoundError)
+
+
+
+    def release(self, trueOrFalse):
+        '''
+        It sends the signal to the corresponding GPIO to release or close the passage
+        '''
+
         gpioNumber = self.pssgParams['rlseOut']
 
-        gpioValue = {True: '1', False: '0'}[trueOrFalse]
-        
         if gpioNumber:
-
-            try:
-                gpioFd = open('/sys/class/gpio/gpio{}/value'.format(gpioNumber),'w')
-                gpioFd.write(gpioValue + '\n')
-                gpioFd.flush()
-                gpioFd.close()
-           
-            except FileNotFoundError as fileNotFoundError:
-                self.logger.error(fileNotFoundError)
-
-
+            self.changeGpioState(gpioNumber, trueOrFalse)
         else:
-            self.logger.error('There is not GPIO set in DB to release the passage.')
+            logMsg = ('There is not GPIO set in DB to release or close the passage: {}.'
+                      ''.format(self.pssgId)
+                     )
+            self.logger.error(logMsg)
 
+
+
+
+    def startBzzr(self, trueOrFalse):
+        '''
+        It sends the signal to the corresponding GPIO to start or stop the buzzer
+        '''
+
+        gpioNumber = self.pssgParams['bzzrOut']
+
+        if gpioNumber:
+            self.changeGpioState(gpioNumber, trueOrFalse)
+        else:
+
+            logMsg = ('There is not GPIO set in DB to start or stop the buzzer in passage: {}.'
+                      ''.format(self.pssgId)
+                     )
+            self.logger.error(logMsg)
 
 
 
