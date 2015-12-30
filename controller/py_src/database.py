@@ -59,7 +59,7 @@ class DataBase(object):
 
                 if allWeek:
 
-                    if startTime < nowTime < endTime:
+                    if startTime <= nowTime <= endTime:
                         print("Can access!!")
                         return (True, personId, None)
                     else:
@@ -81,7 +81,7 @@ class DataBase(object):
                     if params:
                         startTime, endTime = params
 
-                        if startTime < nowTime < endTime:
+                        if startTime <= nowTime <= endTime:
                             print("Can access!!!")
                             return (True, personId, None)
                         else:
@@ -93,8 +93,8 @@ class DataBase(object):
                         return (False, None, 1)
 
             else:
-                return (False, None, 2)
                 print("Can NOT access (expired card)")
+                return (False, None, 2)
 
         else:
             print("This person has not access on this pssg/side")

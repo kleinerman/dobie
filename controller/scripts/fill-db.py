@@ -96,7 +96,7 @@ for pssgIdPersonId in pssgIdsPersonIds:
     pssgId, personId, allWeek = pssgIdPersonId
         
     sqlSentence = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, endTime, expireDate) "
-                   "VALUES({}, {}, {}, 1, 1, '12:20', '23:30', '2015-12-30')".format(pssgId, personId, allWeek)
+                   "VALUES({}, {}, {}, 1, 1, '12:20', '23:30', '2016-12-30')".format(pssgId, personId, allWeek)
                   )
 
     cursor.execute(sqlSentence)

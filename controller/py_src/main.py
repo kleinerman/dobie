@@ -85,9 +85,9 @@ class Controller(object):
                                          'accessPermit': threading.Event(),
                                          'lockTimeAccessPermit': threading.Lock(),
                                          'timeAccessPermit': None,
-                                         'closerPssgMngrAlive': threading.Event(),
+                                         'cleanerPssgMngrAlive': threading.Event(),
                                          'openPssg': threading.Event(),
-                                         'starterBzzrMngrAlive': threading.Event()
+                                         'starterAlrmMngrAlive': threading.Event()
                                         }
 
 
@@ -169,14 +169,17 @@ class Controller(object):
             pssgControl = self.pssgsControl[pssgId]
 
             pssgControl['pssgObj'].release(True)
+            self.logger.debug("Releasing the passage {}.".format(pssgId))
+            pssgControl['pssgObj'].startBzzr(True)
+            self.logger.debug("Starting the buzzer on passage {}.".format(pssgId))
             pssgControl['accessPermit'].set()
             pssgControl['timeAccessPermit'] = datetime.datetime.now()
 
             
-            if not pssgControl['closerPssgMngrAlive'].is_set():
-                pssgControl['closerPssgMngrAlive'].set()
-                closerPssgMngr = passage.CloserPssgMngr(pssgControl, self.exitFlag)
-                closerPssgMngr.start()
+            if not pssgControl['cleanerPssgMngrAlive'].is_set():
+                pssgControl['cleanerPssgMngrAlive'].set()
+                cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
+                cleanerPssgMngr.start()
                 
 
 

@@ -88,7 +88,7 @@ class Passage(object):
 
 
 
-class CloserPssgMngr(genmngr.GenericMngr):
+class CleanerPssgMngr(genmngr.GenericMngr):
 
     '''
     This thread receives the events from the main thread, tries to send them to the server.
@@ -102,13 +102,13 @@ class CloserPssgMngr(genmngr.GenericMngr):
 
         self.pssgControl = pssgControl
 
-        pssgId = pssgControl['pssgObj'].pssgParams['id']        
+        self.pssgId = pssgControl['pssgObj'].pssgParams['id']        
 
-        super().__init__('CloserPssgMngr_{}'.format(pssgId), exitFlag)
+        super().__init__('CleanerPssgMngr_{}'.format(self.pssgId), exitFlag)
 
         self.pssgObj = pssgControl['pssgObj']
 
-        self.closerPssgMngrAlive = pssgControl['closerPssgMngrAlive']
+        self.cleanerPssgMngrAlive = pssgControl['cleanerPssgMngrAlive']
 
         self.lockTimeAccessPermit = pssgControl['lockTimeAccessPermit']
 
@@ -117,6 +117,7 @@ class CloserPssgMngr(genmngr.GenericMngr):
 
         self.rlseTime = pssgControl['pssgObj'].pssgParams['rlseTime']
 
+        self.bzzrTime = pssgControl['pssgObj'].pssgParams['bzzrTime']
 
 
     def run(self):
@@ -124,6 +125,9 @@ class CloserPssgMngr(genmngr.GenericMngr):
         '''
 
         alive = True
+        pssgReleased = True
+        bzzrStarted = True
+
         while alive:
 
             time.sleep(EXIT_CHECK_TIME)
@@ -134,13 +138,21 @@ class CloserPssgMngr(genmngr.GenericMngr):
                 
             elapsedTime = int(elapsedTime.total_seconds())
             print(elapsedTime, self.rlseTime)
-            if elapsedTime >= self.rlseTime:
+            if pssgReleased and elapsedTime >= self.rlseTime:
+                self.logger.debug("Unreleasing the passage {}.".format(self.pssgId))
+                self.pssgObj.release(False)
+                pssgReleased = False
+
+            if bzzrStarted and elapsedTime >= self.bzzrTime:
+                self.logger.debug("Stopping the buzzer on passage {}.".format(self.pssgId))
+                self.pssgObj.startBzzr(False)
+                bzzrStarted = False
+
+            if not pssgReleased and not bzzrStarted:
+                self.logger.debug("Finishing CleanerPssgMngr on passage {}".format(self.pssgId))
                 alive = False
-        
 
-        self.pssgObj.release(False)
-
-        self.closerPssgMngrAlive.clear()
+        self.cleanerPssgMngrAlive.clear()
         
 
 
