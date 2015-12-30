@@ -42,7 +42,7 @@ class Passage(object):
 
         try:
             gpioFd = open('/sys/class/gpio/gpio{}/value'.format(gpioNumber),'w')
-            gpioFd.write(gpioValue + '\n')
+            gpioFd.write(gpioState + '\n')
             gpioFd.flush()
             gpioFd.close()
 
