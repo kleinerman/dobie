@@ -35,7 +35,8 @@ class Passage(object):
 
     def changeGpioState(self, gpioNumber, gpioState):
         '''
-        It sends the signal to the corresponding GPIO to release the door
+        This method change a GPIO state. It receives the GPIO number and
+        the state to put in the GPIO. The state can be True = 1 or False = 0
         '''
 
         gpioState = {True: '1', False: '0'}[gpioState]
@@ -47,17 +48,21 @@ class Passage(object):
             gpioFd.close()
 
         except FileNotFoundError as fileNotFoundError:
+            #When the GPIO doesn't exist, for example running it on standar PC,
+            #this exception will happen and it will print a error log.
             self.logger.error(fileNotFoundError)
 
 
 
     def release(self, trueOrFalse):
         '''
-        It sends the signal to the corresponding GPIO to release or close the passage
+        This method release or unrelase the passage. For example the magnet of a door.
         '''
-
+        
         gpioNumber = self.pssgParams['rlseOut']
 
+        #If the corresponding GPIO was not charged in database, "gpioNumber" will
+        #be None and the method will print a log.
         if gpioNumber:
             self.changeGpioState(gpioNumber, trueOrFalse)
         else:
@@ -71,11 +76,13 @@ class Passage(object):
 
     def startBzzr(self, trueOrFalse):
         '''
-        It sends the signal to the corresponding GPIO to start or stop the buzzer
+        This method start or stop the buzzer passage.
         '''
 
         gpioNumber = self.pssgParams['bzzrOut']
 
+        #If the corresponding GPIO was not charged in database, "gpioNumber" will
+        #be None and the method will print a log.        
         if gpioNumber:
             self.changeGpioState(gpioNumber, trueOrFalse)
         else:
