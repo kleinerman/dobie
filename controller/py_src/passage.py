@@ -96,39 +96,42 @@ class Passage(object):
 
 
 class CleanerPssgMngr(genmngr.GenericMngr):
-
     '''
-    This thread receives the events from the main thread, tries to send them to the server.
-    When it doesn't receive confirmation from the server, it stores them in database.
+    This thread stops the buzzer and close the passage. 
+    It is created when the passage is opened. 
+    It receives the times from the database.
+    When the passage is opened more than once consecutively, the time is prolonged.    
     '''
 
     def __init__(self, pssgControl, exitFlag):
 
-        #Invoking the parent class constructor, specifying the thread name, 
-        #to have a understandable log file.
-
+        #Dictionary with variables to control the passage
         self.pssgControl = pssgControl
 
+        #Getting the pssgId for logging purpouses. It is got in this way 
+        #to avoid passing it in constructor of the class.
         self.pssgId = pssgControl['pssgObj'].pssgParams['id']        
 
+        #Invoking the parent class constructor, specifying the thread name, 
+        #to have a understandable log file.
         super().__init__('CleanerPssgMngr_{}'.format(self.pssgId), exitFlag)
 
+        #The following attributes are to manage this variables in a cleaner way.
         self.pssgObj = pssgControl['pssgObj']
-
         self.cleanerPssgMngrAlive = pssgControl['cleanerPssgMngrAlive']
-
         self.lockTimeAccessPermit = pssgControl['lockTimeAccessPermit']
-
-        #We can't do that because datetime type is inmmutable
-#        self.timeAccessPermit = pssgControl['timeAccessPermit']
-
+        #We can't do the following, because datetime type is inmmutable
+        #self.timeAccessPermit = pssgControl['timeAccessPermit']
         self.rlseTime = pssgControl['pssgObj'].pssgParams['rlseTime']
-
         self.bzzrTime = pssgControl['pssgObj'].pssgParams['bzzrTime']
 
 
     def run(self):
         '''
+        This is the main method of the thread.
+        It sleeps "EXIT_CHECK_TIME". Each time it awakes it calculates the time happened
+        from the last access in the passage. According with that time, it stops the buzzer
+        and/or close the passage. When both conditions happen, the thread finishes.
         '''
 
         alive = True
@@ -159,6 +162,7 @@ class CleanerPssgMngr(genmngr.GenericMngr):
                 self.logger.debug("Finishing CleanerPssgMngr on passage {}".format(self.pssgId))
                 alive = False
 
+        #Notifying that this thread has died
         self.cleanerPssgMngrAlive.clear()
         
 

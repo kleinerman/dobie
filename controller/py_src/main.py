@@ -78,15 +78,26 @@ class Controller(object):
         #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
         #by pssg parametters names
         self.pssgsParams = self.dataBase.getPssgsParams()
-    
+
+        #Dictionary indexed by pssgId containing dictionaries with objects to control the passages 
         self.pssgsControl = {}
         for pssgId in self.pssgsParams.keys():
-            self.pssgsControl[pssgId] = {'pssgObj': passage.Passage(self.pssgsParams[pssgId]),
+            self.pssgsControl[pssgId] = { #Passage object to manage the passage
+                                         'pssgObj': passage.Passage(self.pssgsParams[pssgId]),
+                                          #Event object to know when a passage was opened 
+                                          #in a correct way by someone who has access
                                          'accessPermit': threading.Event(),
+                                          #Lock and datetime object to know when the access
+                                          #was opened
                                          'lockTimeAccessPermit': threading.Lock(),
                                          'timeAccessPermit': None,
+                                          #Event object to know when the "cleanerPssgMngr" thread is alive
+                                          #to avoid creating more than once
                                          'cleanerPssgMngrAlive': threading.Event(),
+                                          #Event to know when the passage was opened
                                          'openPssg': threading.Event(),
+                                          #Event object to know when the "starterAlrmMngrMngr" thread
+                                          #is alive to avoid creating more than once
                                          'starterAlrmMngrAlive': threading.Event()
                                         }
 
