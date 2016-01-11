@@ -49,7 +49,7 @@ class Controller(object):
 
         #Dictionary containing functions to be launched according to the messages received by the ioiface
         self.handlers = { 'card'   : self.procCard,
-                          'buttom' : self.procButtom,
+                          'button' : self.procButton,
                           'state'  : self.procState
                         }
 
@@ -164,6 +164,29 @@ class Controller(object):
                                        )
         return ioIfaceProc
 
+    #----------------------------------------------------------------------------#
+
+    def openPssg(self, pssgId):
+        '''
+        '''
+
+        pssgControl = self.pssgsControl[pssgId]
+
+        pssgControl['pssgObj'].release(True)
+        self.logger.debug("Releasing the passage {}.".format(pssgId))
+        pssgControl['pssgObj'].startBzzr(True)
+        self.logger.debug("Starting the buzzer on passage {}.".format(pssgId))
+        pssgControl['accessPermit'].set()
+        pssgControl['timeAccessPermit'] = datetime.datetime.now()
+
+
+        if not pssgControl['cleanerPssgMngrAlive'].is_set():
+            pssgControl['cleanerPssgMngrAlive'].set()
+            cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
+            cleanerPssgMngr.start()
+
+
+
 
 
     #---------------------------------------------------------------------------#
@@ -176,25 +199,7 @@ class Controller(object):
         allowed, personId, notReason = self.dataBase.canAccess(pssgId, side, cardNumber)
 
         if allowed:
-
-            pssgControl = self.pssgsControl[pssgId]
-
-            pssgControl['pssgObj'].release(True)
-            self.logger.debug("Releasing the passage {}.".format(pssgId))
-            pssgControl['pssgObj'].startBzzr(True)
-            self.logger.debug("Starting the buzzer on passage {}.".format(pssgId))
-            pssgControl['accessPermit'].set()
-            pssgControl['timeAccessPermit'] = datetime.datetime.now()
-
-            
-            if not pssgControl['cleanerPssgMngrAlive'].is_set():
-                pssgControl['cleanerPssgMngrAlive'].set()
-                cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
-                cleanerPssgMngr.start()
-                
-
-
-            #Open the passage as soon as posible
+            self.openPssg(pssgId)
             print('Opening the passage...')
 
 
@@ -217,15 +222,42 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def procButtom(self, pssgId, state):
-        print('procButtom', pssgId, state)
+    def procButton(self, pssgId, side, value):
+        '''
+        '''
+        #self.dataBase.canAccess(pssgId, side, 13883057)
+
+        self.dataBase.test()
+
+        self.openPssg(pssgId)
+        print('Opening the passage...')
+
+        dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
+
+        event = {'pssgId' : pssgId,
+                 'eventType' : 2,
+                 'dateTime' : dateTime,
+                 'latchType' : 3,
+                 'personId' : 1,
+                 'side' : side,
+                 'allowed' : True,
+                 'notReason' : None
+                }
+
+        #Sending the event to the "Event Manager" thread
+        self.mainToEvent.put(event)
+
+
+
+
 
 
 
     #---------------------------------------------------------------------------#
 
     def procState(self, pssgId, state):
-        print('procState', pssgId, state)
+        print('procState', pssgId, side, value)
 
 
 

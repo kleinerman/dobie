@@ -167,7 +167,9 @@ cursor.execute(sqlSentence)
 
 #Filling Event Table
 sqlSentence = ("INSERT INTO Event(id, description) "
-               "VALUES (1, 'Person opening a pssg'), (2, 'The passage remains opened')"
+               "VALUES (1, 'Person opening a passage with card'), " 
+                      "(2, 'Person opening a passage with button'), "
+                      "(3, 'The passage remains opened')"
               )
 cursor.execute(sqlSentence)
 
