@@ -147,7 +147,7 @@ class CleanerPssgMngr(genmngr.GenericMngr):
                 elapsedTime = datetime.datetime.now() - self.pssgControl['timeAccessPermit']
                 
             elapsedTime = int(elapsedTime.total_seconds())
-            print(elapsedTime, self.rlseTime)
+
             if pssgReleased and elapsedTime >= self.rlseTime:
                 self.logger.debug("Unreleasing the passage {}.".format(self.pssgId))
                 self.pssgObj.release(False)

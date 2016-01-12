@@ -13,7 +13,7 @@ class DataBase(object):
     def __init__(self, dbFile):
 
         #Connecting to the database
-        self.connection = sqlite3.connect(dbFile, check_same_thread=False)
+        self.connection = sqlite3.connect(dbFile)
         self.cursor = self.connection.cursor()
         #Enabling foreing keys
         self.cursor.execute('PRAGMA foreign_keys = ON')
@@ -136,7 +136,6 @@ class DataBase(object):
                          personId, side, allowed, notReason)
               )
 
-        print(sql)
         self.cursor.execute(sql)
         self.connection.commit()
 
@@ -221,6 +220,10 @@ class DataBase(object):
 
         sql = "SELECT * FROM Passage"
         self.cursor.execute(sql)
+
+        #To leave the DB unlocked for other threads, it is necesary to
+        #fetch all the rows from the cursor
+        self.cursor.fetchall()
         self.connection.commit()
 
         return [i[0] for i in self.cursor.description]
@@ -262,20 +265,3 @@ class DataBase(object):
         return ppsDictsDict
 
 
-
-
-    def test(self):
-#        sql = ("SELECT person.id, access.allWeek, access.startTime, "
-#               "access.endTime, access.expireDate "
-#               "FROM Access access JOIN Person person ON (access.personId = person.id) "
-#               "WHERE access.pssgId = '1' AND access.iSide = 1 "
-#               "AND person.cardNumber = '11806997'"
-#               )
-
-        sql = "SELECT * from Events"
-
-        self.cursor.execute(sql)
- #       self.connection.close()
-#        self.connection.commit()
-        
-        params = self.cursor.fetchone()

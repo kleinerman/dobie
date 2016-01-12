@@ -168,6 +168,9 @@ class Controller(object):
 
     def openPssg(self, pssgId):
         '''
+        This method is called by "procCard" and "procButton" methods to release
+        the passage and start the buzzer.
+        It also creates a thread to close the passage and buzzer
         '''
 
         pssgControl = self.pssgsControl[pssgId]
@@ -200,8 +203,6 @@ class Controller(object):
 
         if allowed:
             self.openPssg(pssgId)
-            print('Opening the passage...')
-
 
         dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         
@@ -224,13 +225,11 @@ class Controller(object):
 
     def procButton(self, pssgId, side, value):
         '''
+        This method is called each time somebody press the button to release
+        the passage
         '''
-        #self.dataBase.canAccess(pssgId, side, 13883057)
-
-        self.dataBase.test()
 
         self.openPssg(pssgId)
-        print('Opening the passage...')
 
         dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
