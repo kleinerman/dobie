@@ -169,5 +169,42 @@ class CleanerPssgMngr(genmngr.GenericMngr):
 
         
 
+class StarterAlrmMngr(genmngr.GenericMngr):
+    '''
+    This thread stops the buzzer and close the passage. 
+    It is created when the passage is opened. 
+    It receives the times from the database.
+    When the passage is opened more than once consecutively, the time is prolonged.    
+    '''
+
+    def __init__(self, pssgControl, exitFlag):
+
+        #Dictionary with variables to control the passage
+        self.pssgControl = pssgControl
+
+        #Getting the pssgId for logging purpouses. It is got in this way 
+        #to avoid passing it in constructor of the class.
+        self.pssgId = pssgControl['pssgObj'].pssgParams['id']
+
+        #Invoking the parent class StarterAlrmMngurecifying the thread name, 
+        #to have a understandable log file.
+        super().__init__('StarterAlrmMngr_{}'.format(self.pssgId), exitFlag)
+
+        #The following attributes are to manage this variables in a cleaner way.
+        self.pssgObj = pssgControl['pssgObj']
+        self.cleanerPssgMngrAlive = pssgControl['cleanerPssgMngrAlive']
+        self.lockTimeAccessPermit = pssgControl['lockTimeAccessPermit']
+        #We can't do the following, because datetime type is inmmutable
+        #self.timeAccessPermit = pssgControl['timeAccessPermit']
+        self.rlseTime = pssgControl['pssgObj'].pssgParams['rlseTime']
+        self.bzzrTime = pssgControl['pssgObj'].pssgParams['bzzrTime']
+
+
+    def run(self):
+        '''
+        This is the main method of the 
+        '''
+
+
 
 

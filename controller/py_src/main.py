@@ -255,7 +255,41 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def procState(self, pssgId, state):
+    def procState(self, pssgId, side, value):
+        '''
+        This method is called each time a passage change its state. (It is opened or closed)
+        '''
+
+        pssgControl = self.pssgsControl[pssgId]
+
+        pssgControl['openPssg'].set()
+
+        if pssgControl['accessPermit'].is_set():
+
+            if pssgControl['starterAlrmMngrAlive'].is_set():
+                pass
+
+        else:
+            pssgControl['pssgObj'].startBzzr(True)
+
+        
+
+        pssgControl['pssgObj'].release(True)
+        self.logger.debug("Releasing the passage {}.".format(pssgId))
+        pssgControl['pssgObj'].startBzzr(True)
+        self.logger.debug("Starting the buzzer on passage {}.".format(pssgId))
+        pssgControl['accessPermit'].set()
+        pssgControl['timeAccessPermit'] = datetime.datetime.now()
+
+
+        if not pssgControl['cleanerPssgMngrAlive'].is_set():
+            pssgControl['cleanerPssgMngrAlive'].set()
+            cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
+            cleanerPssgMngr.start()
+
+
+
+
         print('procState', pssgId, side, value)
 
 
