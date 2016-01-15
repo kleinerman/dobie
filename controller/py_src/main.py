@@ -255,42 +255,40 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def procState(self, pssgId, side, value):
+    def procState(self, pssgId, side, openOrClose):
         '''
         This method is called each time a passage change its state. (It is opened or closed)
         '''
-
         pssgControl = self.pssgsControl[pssgId]
 
-        pssgControl['openPssg'].set()
+        #Converting "openOrClose" to int type to evaluete it on if statement
+        openOrClose = int(openOrClose)
+        #The state of the passage indicates that was opened
+        if openOrClose:
+            pssgControl['openPssg'].set()
+            #If the passage was open in a permitted way
+            if pssgControl['accessPermit'].is_set():
+                #Creates a StarterAlrmMngrAlive if not was previously created by other access
+                if not pssgControl['starterAlrmMngrAlive'].is_set():
+                    starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, self.exitFlag)
+                    starterAlrmMngr.start()
 
-        if pssgControl['accessPermit'].is_set():
+            #If the passage was not opened in a permitted way, start the alarm
+            else:
+                logMsg = ("Unpermitted access on passage: {}, "
+                          "Starting the alarm.".format(pssgId)
+                         )
+                self.logger.warning(logMsg)
+                pssgControl['pssgObj'].startBzzr(True)
 
-            if pssgControl['starterAlrmMngrAlive'].is_set():
-                pass
-
+        #The state of the passage indicates that was closed
         else:
-            pssgControl['pssgObj'].startBzzr(True)
-
-        
-
-        pssgControl['pssgObj'].release(True)
-        self.logger.debug("Releasing the passage {}.".format(pssgId))
-        pssgControl['pssgObj'].startBzzr(True)
-        self.logger.debug("Starting the buzzer on passage {}.".format(pssgId))
-        pssgControl['accessPermit'].set()
-        pssgControl['timeAccessPermit'] = datetime.datetime.now()
-
-
-        if not pssgControl['cleanerPssgMngrAlive'].is_set():
-            pssgControl['cleanerPssgMngrAlive'].set()
-            cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
-            cleanerPssgMngr.start()
-
-
-
-
-        print('procState', pssgId, side, value)
+            logMsg = ("The state of the passage: {}, indicates that was closed"
+                          "Stopping the alarm.".format(pssgId)
+                     )
+            self.logger.info(logMsg)
+            pssgControl['openPssg'].clear()
+            pssgControl['pssgObj'].startBzzr(False)
 
 
 

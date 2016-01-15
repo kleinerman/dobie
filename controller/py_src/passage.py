@@ -171,8 +171,8 @@ class CleanerPssgMngr(genmngr.GenericMngr):
 
 class StarterAlrmMngr(genmngr.GenericMngr):
     '''
-    This thread stops the buzzer and close the passage. 
-    It is created when the passage is opened. 
+    This thread starts the buzzer when the passage remains opened  
+    for more than 
     It receives the times from the database.
     When the passage is opened more than once consecutively, the time is prolonged.    
     '''
@@ -186,24 +186,47 @@ class StarterAlrmMngr(genmngr.GenericMngr):
         #to avoid passing it in constructor of the class.
         self.pssgId = pssgControl['pssgObj'].pssgParams['id']
 
-        #Invoking the parent class StarterAlrmMngurecifying the thread name, 
+        #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('StarterAlrmMngr_{}'.format(self.pssgId), exitFlag)
 
         #The following attributes are to manage this variables in a cleaner way.
         self.pssgObj = pssgControl['pssgObj']
-        self.cleanerPssgMngrAlive = pssgControl['cleanerPssgMngrAlive']
+        self.starterAlrmMngrAlive = pssgControl['starterAlrmMngrAlive']
         self.lockTimeAccessPermit = pssgControl['lockTimeAccessPermit']
         #We can't do the following, because datetime type is inmmutable
         #self.timeAccessPermit = pssgControl['timeAccessPermit']
-        self.rlseTime = pssgControl['pssgObj'].pssgParams['rlseTime']
-        self.bzzrTime = pssgControl['pssgObj'].pssgParams['bzzrTime']
+        self.alrmTime = pssgControl['pssgObj'].pssgParams['alrmTime']
+        self.openPssg = pssgControl['openPssg']
 
 
     def run(self):
         '''
-        This is the main method of the 
+        This is the main method of the thread.
+        It sleeps "EXIT_CHECK_TIME". Each time it awakes it calculates the time happened
+        from the last access in the passage. If that time is greater than "alrmTime",
+        it turns on the buzzer acting as an alarm
         '''
+
+        alive = True
+
+        while alive and self.openPssg.is_set():
+
+            time.sleep(EXIT_CHECK_TIME)
+            self.checkExit()
+
+            with self.lockTimeAccessPermit:
+                elapsedTime = datetime.datetime.now() - self.pssgControl['timeAccessPermit']
+
+            elapsedTime = int(elapsedTime.total_seconds())
+
+            if elapsedTime >= self.alrmTime:
+                self.logger.debug("Starting the alarm on passage {}.".format(self.pssgId))
+                self.pssgObj.startBzzr(True)
+                alive = False
+
+        #Notifying that this thread has died
+        self.starterAlrmMngrAlive.clear()
 
 
 
