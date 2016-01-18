@@ -283,8 +283,8 @@ class Controller(object):
 
         #The state of the passage indicates that was closed
         else:
-            logMsg = ("The state of the passage: {}, indicates that was closed"
-                          "Stopping the alarm.".format(pssgId)
+            logMsg = ("The state of the passage: {}, indicates that was closed. "
+                      "Stopping the alarm.".format(pssgId)
                      )
             self.logger.info(logMsg)
             pssgControl['openPssg'].clear()

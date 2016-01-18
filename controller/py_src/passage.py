@@ -118,6 +118,7 @@ class CleanerPssgMngr(genmngr.GenericMngr):
 
         #The following attributes are to manage this variables in a cleaner way.
         self.pssgObj = pssgControl['pssgObj']
+        self.accessPermit = pssgControl['accessPermit']
         self.cleanerPssgMngrAlive = pssgControl['cleanerPssgMngrAlive']
         self.lockTimeAccessPermit = pssgControl['lockTimeAccessPermit']
         #We can't do the following, because datetime type is inmmutable
@@ -152,6 +153,9 @@ class CleanerPssgMngr(genmngr.GenericMngr):
                 self.logger.debug("Unreleasing the passage {}.".format(self.pssgId))
                 self.pssgObj.release(False)
                 pssgReleased = False
+                #Once the passage was closed, if somebody opens the passage, will be 
+                #considered an unpermitted access since the following event wil be cleared
+                self.accessPermit.clear()
 
             if bzzrStarted and elapsedTime >= self.bzzrTime:
                 self.logger.debug("Stopping the buzzer on passage {}.".format(self.pssgId))
