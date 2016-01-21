@@ -187,10 +187,16 @@ class NetMngr(genmngr.GenericMngr):
     def recvConMsg(self, ctrllerSckt, timeToWait):
         '''
         This method receive the response to Connection Message.
-        It waits until all response comes
+        It waits until all response comes since it could come fragmented.
+        It only waits "timeToWait", after that it throws a "TimeOutConnectionMsg"
+        exception.
+        If during the reception, b'' is received, meaning that the controller
+        was disconnected, a "CtrllerDisconnected" exception will be thrown.
+        When the END byte is received we can return the content of the message
+        
         '''
-        if not ctrllerSckt:
-            raise ControllerNotConnected
+        #if not ctrllerSckt:
+        #    raise ControllerNotConnected
 
         ctrllerSckt.settimeout(timeToWait)
 
@@ -219,6 +225,11 @@ class NetMngr(genmngr.GenericMngr):
 
     def sendRespConMsg(self, ctrllerSckt, ctrllerMac):
         '''
+        This method responds to controller "CON" message with "OK" or "NO".
+        To take this decision it verifies the MAC address sent by the controller
+        against the Data Base.
+        When the controller is not registered in Data Base an "UnknownController"
+        exception is thrown
         '''
 
         if self.dbMngr.isValidCtrller(ctrllerMac):
@@ -312,8 +323,6 @@ class NetMngr(genmngr.GenericMngr):
 
                     #We should receive bytes until we receive the end of
                     #the message
-
-
                     msg = self.fdConnObjects[fd]['inBuffer'] + recBytes
                     if msg.endswith(END):
                         self.procRecMsg(fd, msg)
