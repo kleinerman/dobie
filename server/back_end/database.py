@@ -65,10 +65,12 @@ class DbMngr(genmngr.GenericMngr):
 
         for event in events:
 
-            if event['notReason']:
-                notReason = event['notReason']
-            else:
-                notReason = 'NULL'
+            #Converting all None fields to 'NULL' to write the SQL sentence
+            #At this moment this is only need in 'personId' and 'notReason'
+            #fields
+            for eventField in event:
+                if event[eventField] == None:
+                    event[eventField] = 'NULL'
 
 
             sql = ("INSERT INTO "
@@ -76,11 +78,10 @@ class DbMngr(genmngr.GenericMngr):
                    "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
                    "".format(event['eventType'], event['pssgId'], event['dateTime'],
                              event['latchType'], event['personId'], event['side'],
-                             event['allowed'], notReason
+                             event['allowed'], event['notReason']
                             ) 
 
                   )
-
 
             self.cursor.execute(sql)
             self.connection.commit()
