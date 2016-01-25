@@ -28,6 +28,9 @@ for i in range(SIM_PERSON_QUANT):
     if candCardNum not in cardNumList:
         cardNumList.append(candCardNum)
 
+#Creating a record for unknown person (for example when somebody press the button)
+cursor.execute("insert into Person(id, cardNumber) values(1, 0)")
+
 #Storing random card numbers in database
 for cardNum in cardNumList:
     cursor.execute("insert into Person(cardNumber) values('{}')".format(cardNum))
@@ -54,7 +57,7 @@ cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rls
 
 #######Filling Access table#######
 
-cursor.execute("SELECT id from Person")
+cursor.execute("SELECT id from Person where id not in (1)") #Excluding the unknown user from access
 allRows = cursor.fetchall()
 personIds = [row[0] for row in allRows]
 
