@@ -21,7 +21,7 @@ if [[ $1 == --create ]]; then
         INSERT INTO EventType(id, description, rowStateId) VALUES(1, 'Access with card', 1), (2, 'Access with button', 1), (3, 'The passage remains opened', 1);
         INSERT INTO Latch(id, description, rowStateId) VALUES(1, 'Card Reader', 1), (2, 'Button', 1), (3, 'Fingerprint Reader', 1);
         INSERT INTO Zone(id, name) VALUES(1, 'Ingreso Principal');
-        INSERT INTO NotReason(id, description, rowStateId) VALUES(1, 'No access', 1), (2, 'Expired card', 1), (3, 'Button', 1);
+        INSERT INTO NotReason(id, description, rowStateId) VALUES(1, 'No access', 1), (2, 'Expired card', 1), (3, 'Out of time', 1);
         INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, zoneId, controllerId, rowStateId) VALUES(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
         INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, zoneId, controllerId, rowStateId) VALUES(7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
                                                  

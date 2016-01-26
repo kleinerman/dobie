@@ -82,9 +82,12 @@ class DbMngr(genmngr.GenericMngr):
                             ) 
 
                   )
+            try:
+                self.cursor.execute(sql)
+                self.connection.commit()
 
-            self.cursor.execute(sql)
-            self.connection.commit()
+            except pymysql.err.IntegrityError as integrityError:
+                self.logger.warning(integrityError)
 
 
 

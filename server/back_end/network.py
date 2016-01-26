@@ -283,6 +283,7 @@ class NetMngr(genmngr.GenericMngr):
                         connObjects = {'socket': ctrllerSckt,
                                        'inBuffer': b'',
                                        'outBufferQue': queue.Queue()
+                                       #'connected': threading.Event()
                                       }
 
                         self.fdConnObjects[ctrllerScktFd] = connObjects
@@ -363,8 +364,16 @@ class NetMngr(genmngr.GenericMngr):
                     with self.lockNetPoller:
                         #Unregistering the socket from the "netPoller" object
                         self.netPoller.unregister(fd)
-                    #Setting "connected" to False (this will break the while loop)
-                    self.connected.clear()
+                        connObject = self.fdConnObjects.pop(fd)
+
+                    for mac in self.macConnObjects:
+                        if connObject == self.macConnObjects[mac]:
+                            break
+                    self.macConnObjects.pop(mac)
+
+            print('MAC-->',self.macConnObjects)
+            print('FD-->',self.fdConnObjects)
+                    
 
             #Cheking if Main thread ask as to finish.
             self.checkExit()
