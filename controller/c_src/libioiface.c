@@ -419,7 +419,7 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
             args->pssg_id = pssg[i].id;
             args->d0 = pssg[i].i0In;
             args->d1 = pssg[i].i1In;
-            args->side = 'i';
+            args->side = '1';
             args->mq = mq;
 
             /* and launch the thread */
@@ -432,7 +432,7 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
             args->pssg_id = pssg[i].id;
             args->d0 = pssg[i].o0In;
             args->d1 = pssg[i].o1In;
-            args->side = 'o';
+            args->side = '0';
             args->mq = mq;
 
             /* and launch the thread */
@@ -506,10 +506,14 @@ void *buttons (void *b_args)
         if (epoll_wait(epfd, events, args->number_of_buttons, EPOLL_WAIT_TIME)) { // wait for an evente. Only fetch up one event
             for (j=0; j < args->number_of_buttons; j++) {
                 if (events[0].data.fd == bttn_tbl[j][1]) {
-                    sprintf(message, "%d;button_pressed", bttn_tbl[j][0]);
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, bttn_tbl[j][1], &ev[j]);
+                    sprintf(message, "%d;0;button=1", bttn_tbl[j][0]);
                     // put the message into the queue
                     mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
                     printf("%s\n", message);
+                    usleep(BOUNCE_TIME);
+                    epoll_ctl(epfd, EPOLL_CTL_ADD, bttn_tbl[j][1], &ev[j]);
+                    epoll_wait(epfd, events, 1, -1);
                     break;
                 }
             }
@@ -580,7 +584,7 @@ void *state (void *s_args)
                 if (events[0].data.fd == state_tbl[j][1]) {
                     read(state_tbl[j][1], value, 1);
                     lseek(state_tbl[j][1],0,SEEK_SET);
-                    sprintf(message, "%d;state=%s", state_tbl[j][0], value);
+                    sprintf(message, "%d;0;state=%s", state_tbl[j][0], value);
                     // put the message into the queue
                     mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
                     printf("%s\n", message);
