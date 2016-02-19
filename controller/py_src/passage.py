@@ -149,7 +149,7 @@ class CleanerPssgMngr(genmngr.GenericMngr):
                 
             elapsedTime = int(elapsedTime.total_seconds())
 
-            if pssgReleased and elapsedTime >= self.rlseTime:
+            if  elapsedTime >= self.rlseTime:
                 self.logger.debug("Unreleasing the passage {}.".format(self.pssgId))
                 self.pssgObj.release(False)
                 pssgReleased = False
@@ -157,10 +157,24 @@ class CleanerPssgMngr(genmngr.GenericMngr):
                 #considered an unpermitted access since the following event wil be cleared
                 self.accessPermit.clear()
 
-            if bzzrStarted and elapsedTime >= self.bzzrTime:
+            #At the beginning the "if" was in the following way:
+            #"if bzzrStarted and elapsedTime >= self.bzzrTime" to avoid calculating time
+            #in each iteration, but then we have to remove the first part of the "if" because
+            #sometimes when the buzzer was stopped and the passage was not closed yet and in 
+            #this moment someone passes again, the buzzer was started again and it will never
+            #be cleared since the "bzzrStarted" variable was set to "False"
+            #The same could happen with "rlseTime" if it will be lesser than "bzzrTime".
+
+            if  elapsedTime >= self.bzzrTime:
                 self.logger.debug("Stopping the buzzer on passage {}.".format(self.pssgId))
                 self.pssgObj.startBzzr(False)
                 bzzrStarted = False
+
+            #The situation explained in the previous comment will produce that once "bzzrStarted"
+            #was set to False, it will never be set to True altough the passage was opened again
+            #before completing the rlseTime. But it doesnt matter and the following if will be valid
+            #to determinate when the thread have to died.
+            #The same could happen with "rlseTime" if it will be lesser than "bzzrTime".
 
             if not pssgReleased and not bzzrStarted:
                 self.logger.debug("Finishing CleanerPssgMngr on passage {}".format(self.pssgId))
