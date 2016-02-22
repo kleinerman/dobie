@@ -6,7 +6,7 @@ import posix_ipc
 
 
 
-QUEUE_FILE = '/pssg_iface_queue'
+QUEUE_FILE = '/ioiface_queue'
 
 ioIfaceQue=posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
 

@@ -19,6 +19,7 @@ import signal
 import database
 import events
 import network
+import passage
 from config import *
 
 
@@ -48,7 +49,7 @@ class Controller(object):
 
         #Dictionary containing functions to be launched according to the messages received by the ioiface
         self.handlers = { 'card'   : self.procCard,
-                          'buttom' : self.procButtom,
+                          'button' : self.procButton,
                           'state'  : self.procState
                         }
 
@@ -77,6 +78,29 @@ class Controller(object):
         #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
         #by pssg parametters names
         self.pssgsParams = self.dataBase.getPssgsParams()
+
+        #Dictionary indexed by pssgId containing dictionaries with objects to control the passages 
+        self.pssgsControl = {}
+        for pssgId in self.pssgsParams.keys():
+            self.pssgsControl[pssgId] = { #Passage object to manage the passage
+                                         'pssgObj': passage.Passage(self.pssgsParams[pssgId]),
+                                          #Event object to know when a passage was opened 
+                                          #in a correct way by someone who has access
+                                         'accessPermit': threading.Event(),
+                                          #Lock and datetime object to know when the access
+                                          #was opened
+                                         'lockTimeAccessPermit': threading.Lock(),
+                                         'timeAccessPermit': None,
+                                          #Event object to know when the "cleanerPssgMngr" thread is alive
+                                          #to avoid creating more than once
+                                         'cleanerPssgMngrAlive': threading.Event(),
+                                          #Event to know when the passage was opened
+                                         'openPssg': threading.Event(),
+                                          #Event object to know when the "starterAlrmMngrMngr" thread
+                                          #is alive to avoid creating more than once
+                                         'starterAlrmMngrAlive': threading.Event()
+                                        }
+
 
         #By default our exit code will be success
         self.exitCode = 0
@@ -110,9 +134,12 @@ class Controller(object):
         for pssgId in self.pssgsParams:
 
             for pssgParamName in self.dataBase.getPssgParamsNames():
-                pssgParamValue = self.pssgsParams[pssgId][pssgParamName]
-                if pssgParamValue:
-                    ioIfaceArgs += '--{} {} '.format(pssgParamName, pssgParamValue)
+                #Since not all the columns names of Passage table are parameters of 
+                #ioiface binary, they should be checked if they are in the IOFACE_ARGS list
+                if pssgParamName in IOIFACE_ARGS:
+                    pssgParamValue = self.pssgsParams[pssgId][pssgParamName]
+                    if pssgParamValue:
+                        ioIfaceArgs += '--{} {} '.format(pssgParamName, pssgParamValue)
 
         return ioIfaceArgs
 
@@ -137,6 +164,32 @@ class Controller(object):
                                        )
         return ioIfaceProc
 
+    #----------------------------------------------------------------------------#
+
+    def openPssg(self, pssgId):
+        '''
+        This method is called by "procCard" and "procButton" methods to release
+        the passage and start the buzzer.
+        It also creates a thread to close the passage and buzzer
+        '''
+
+        pssgControl = self.pssgsControl[pssgId]
+
+        pssgControl['pssgObj'].release(True)
+        self.logger.debug("Releasing the passage {}.".format(pssgId))
+        pssgControl['pssgObj'].startBzzr(True)
+        self.logger.debug("Starting the buzzer on passage {}.".format(pssgId))
+        pssgControl['accessPermit'].set()
+        pssgControl['timeAccessPermit'] = datetime.datetime.now()
+
+
+        if not pssgControl['cleanerPssgMngrAlive'].is_set():
+            pssgControl['cleanerPssgMngrAlive'].set()
+            cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
+            cleanerPssgMngr.start()
+
+
+
 
 
     #---------------------------------------------------------------------------#
@@ -149,9 +202,7 @@ class Controller(object):
         allowed, personId, notReason = self.dataBase.canAccess(pssgId, side, cardNumber)
 
         if allowed:
-            #Open the passage as soon as posible
-            print('Opening the passage...')
-
+            self.openPssg(pssgId)
 
         dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         
@@ -172,15 +223,72 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def procButtom(self, pssgId, state):
-        print('procButtom', pssgId, state)
+    def procButton(self, pssgId, side, value):
+        '''
+        This method is called each time somebody press the button to release
+        the passage
+        '''
+
+        self.openPssg(pssgId)
+
+        dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
+
+        event = {'pssgId' : pssgId,
+                 'eventType' : 2,
+                 'dateTime' : dateTime,
+                 'latchType' : 3,
+                 'personId' : 1,
+                 'side' : side,
+                 'allowed' : True,
+                 'notReason' : None
+                }
+
+        #Sending the event to the "Event Manager" thread
+        self.mainToEvent.put(event)
+
+
+
+
 
 
 
     #---------------------------------------------------------------------------#
 
-    def procState(self, pssgId, state):
-        print('procState', pssgId, state)
+    def procState(self, pssgId, side, openOrClose):
+        '''
+        This method is called each time a passage change its state. (It is opened or closed)
+        '''
+        pssgControl = self.pssgsControl[pssgId]
+
+        #Converting "openOrClose" to int type to evaluete it on if statement
+        openOrClose = int(openOrClose)
+        #The state of the passage indicates that was opened
+        if openOrClose:
+            pssgControl['openPssg'].set()
+            #If the passage was open in a permitted way
+            if pssgControl['accessPermit'].is_set():
+                #Creates a StarterAlrmMngrAlive if not was previously created by other access
+                if not pssgControl['starterAlrmMngrAlive'].is_set():
+                    starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, self.exitFlag)
+                    starterAlrmMngr.start()
+
+            #If the passage was not opened in a permitted way, start the alarm
+            else:
+                logMsg = ("Unpermitted access on passage: {}, "
+                          "Starting the alarm.".format(pssgId)
+                         )
+                self.logger.warning(logMsg)
+                pssgControl['pssgObj'].startBzzr(True)
+
+        #The state of the passage indicates that was closed
+        else:
+            logMsg = ("The state of the passage: {}, indicates that was closed. "
+                      "Stopping the alarm.".format(pssgId)
+                     )
+            self.logger.info(logMsg)
+            pssgControl['openPssg'].clear()
+            pssgControl['pssgObj'].startBzzr(False)
 
 
 
@@ -213,10 +321,10 @@ class Controller(object):
         except posix_ipc.SignalError:
             self.logger.debug('IO Interface Queue was interrupted by a OS signal.')
 
-        except Exception as exception:
-            logMsg = 'The following exception occurred: {}'.format(exception)
-            self.logger.debug(logMsg)
-            self.exitCode = 1
+#        except Exception as exception:
+#            logMsg = 'The following exception occurred: {}'.format(exception)
+#            self.logger.debug(logMsg)
+#            self.exitCode = 1
 
         self.logger.debug('Notifying all threads to finish.')
         self.exitFlag.set()

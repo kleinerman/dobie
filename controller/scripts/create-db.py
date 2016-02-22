@@ -5,8 +5,9 @@
 #import logging.handlers
 import sqlite3
 
+from config import *
 
-db = sqlite3.connect('access.db')
+db = sqlite3.connect(DB_FILE)
 cursor = db.cursor()
 cursor.execute('PRAGMA foreign_keys = ON')
 
@@ -38,10 +39,13 @@ cursor.execute('''
         i1In     INTEGER,
         o0In     INTEGER,
         o1In     INTEGER,
-        bttnIn    INTEGER,
+        bttnIn   INTEGER,
         stateIn  INTEGER,
         rlseOut  INTEGER,
-        bzzrOut  INTEGER
+        bzzrOut  INTEGER,
+        rlseTime INTEGER,
+        bzzrTime INTEGER,
+        alrmTime INTEGER
     )
     '''
 )

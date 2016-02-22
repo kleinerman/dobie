@@ -59,7 +59,7 @@ class DataBase(object):
 
                 if allWeek:
 
-                    if startTime < nowTime < endTime:
+                    if startTime <= nowTime <= endTime:
                         print("Can access!!")
                         return (True, personId, None)
                     else:
@@ -81,7 +81,7 @@ class DataBase(object):
                     if params:
                         startTime, endTime = params
 
-                        if startTime < nowTime < endTime:
+                        if startTime <= nowTime <= endTime:
                             print("Can access!!!")
                             return (True, personId, None)
                         else:
@@ -93,8 +93,8 @@ class DataBase(object):
                         return (False, None, 1)
 
             else:
-                return (False, None, 2)
                 print("Can NOT access (expired card)")
+                return (False, None, 2)
 
         else:
             print("This person has not access on this pssg/side")
@@ -135,6 +135,7 @@ class DataBase(object):
                          event['dateTime'], event['latchType'], 
                          personId, side, allowed, notReason)
               )
+
         self.cursor.execute(sql)
         self.connection.commit()
 
@@ -219,6 +220,10 @@ class DataBase(object):
 
         sql = "SELECT * FROM Passage"
         self.cursor.execute(sql)
+
+        #To leave the DB unlocked for other threads, it is necesary to
+        #fetch all the rows from the cursor
+        self.cursor.fetchall()
         self.connection.commit()
 
         return [i[0] for i in self.cursor.description]
@@ -258,4 +263,5 @@ class DataBase(object):
             ppsDictsDict[ppsDict['id']] = ppsDict
 
         return ppsDictsDict
+
 

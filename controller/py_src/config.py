@@ -3,7 +3,9 @@ import logging
 SIM_PERSON_QUANT = 5000
 SIM_LIM_ACCESS_QUANT = 500
 
-IOIFACE_BIN = '../c_src/main'
+IOIFACE_BIN = '../c_src/ioiface'
+IOIFACE_ARGS = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut']
+
 
 DB_FILE = 'access.db'
 QUEUE_FILE = '/ioiface_queue'
@@ -11,7 +13,8 @@ QUEUE_FILE = '/ioiface_queue'
 
 LOGGING_FILE ='logevents.log'
 
-SERVER_IP = '127.0.0.1'
+SERVER_IP = '192.168.122.35'
+#SERVER_IP = '127.0.0.1'
 SERVER_PORT = 7979
 
 EXIT_CHECK_TIME = 2
@@ -26,6 +29,9 @@ REC_BYTES = 4096
 NET_POLL_MSEC = 1000
 
 RE_SEND_EVTS_QUANT = 4
+
+#This parametter should be put in db for each pssg
+PSSG_RLSE_TIME = 10
 
 
 BIND_IP = '0.0.0.0'

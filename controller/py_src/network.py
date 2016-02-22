@@ -16,20 +16,23 @@ from config import *
 
 
 import sys
+import uuid
 
 
 
-
-
-int_EVT  = 0x01
-int_REVT = 0x02
-int_EVS  = 0x03
-int_REVS = 0x04
-int_CUD  = 0x05
-int_RCUD = 0x06
+int_CON  = 0x01
+int_RCON = 0x02
+int_EVT  = 0x03
+int_REVT = 0x04
+int_EVS  = 0x05
+int_REVS = 0x06
+int_CUD  = 0x07
+int_RCUD = 0x08
 int_END  = 0x1F
 
 
+CON  = bytes([int_CON])
+RCON = bytes([int_RCON])
 EVT  = bytes([int_EVT])
 REVT = bytes([int_REVT])
 EVS  = bytes([int_EVS])
@@ -44,6 +47,19 @@ END  = bytes([int_END])
 #CUD  = b'%'
 #RCUD = b'&'
 #END  = b'.\n'
+
+
+
+class ServerNotConnected(Exception):
+    pass
+
+
+class InvalidConnectionResponse(Exception):
+    pass
+
+
+class TimeOutConnectionResponse(Exception):
+    pass
 
 
 class Unblocker(object):
@@ -242,6 +258,55 @@ class NetMngr(genmngr.GenericMngr):
         
 
 
+
+    def sendConMsg(self):
+        '''
+        '''
+        if not self.srvSock:
+            raise ServerNotConnected
+   
+        macAsInt = uuid.getnode()
+        mac = ('{0:0{1}x}'.format(macAsInt, 12)).encode('utf8')
+ 
+        conMsg = CON + mac + END
+        self.logger.info('Sending connection message {} to server'.format(conMsg))
+        self.srvSock.sendall(conMsg)
+
+
+
+    def recvRespConMsg(self, timeToWait):
+        '''
+        This method receive the response to Connection Message.
+        It waits until all response comes
+        '''
+        if not self.srvSock:
+            raise ServerNotConnected
+
+        self.srvSock.settimeout(WAIT_RESP_TIME)
+   
+        completeResp = b'' 
+        completed = False
+        while not completed:
+
+            try:
+                resp = self.srvSock.recv(REC_BYTES)
+                self.logger.debug('The server respond to CON message with: {}'.format(resp))
+                self.checkExit()
+            except socket.timeout:
+                raise TimeOutConnectionResponse
+
+            completeResp += resp
+            if completeResp.endswith(END):
+                completed = True
+            
+        respContent = completeResp.strip(RCON+END)
+
+        if respContent != b'OK':
+            raise InvalidConnectionResponse
+
+
+
+
     #---------------------------------------------------------------------------#
 
     def run(self):
@@ -259,8 +324,16 @@ class NetMngr(genmngr.GenericMngr):
             try:
                 #Creating the socket to connect the to the server
                 self.srvSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            
                 #If there is no connection to the server, an exception will happen here
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
+
+                #Sending the Connection message to server
+                self.sendConMsg()
+                #Receiving the response from server. The below method checks the
+                #if the server response is correct. If not it will raise "InvalidConnectionResponse"
+                self.recvRespConMsg(WAIT_RESP_TIME)
+
                 #Registering the socket in the network poller object
                 self.netPoller.register(self.srvSock, select.POLLIN)
                 self.connected.set()
@@ -337,8 +410,21 @@ class NetMngr(genmngr.GenericMngr):
                     self.checkExit()
 
 
-            except (ConnectionRefusedError, ConnectionResetError):
-                #Cheking if Main thread ask as to finish.
+            except (OSError, ConnectionRefusedError, ConnectionResetError):
+                self.logger.info('Could not establish connection with server.')
+
+            except TimeOutConnectionResponse:
+                self.logger.info('The server does not answer to Connect message.')
+
+            except InvalidConnectionResponse:
+                self.logger.info('The server does not respond OK to connection message')
+
+
+
+
+
+            finally:
+                self.srvSock.close()
                 self.checkExit()
                 self.logger.info('Reconnecting to server in {} seconds...'.format(RECONNECT_TIME))
                 time.sleep(RECONNECT_TIME)
