@@ -136,8 +136,6 @@ class CleanerPssgMngr(genmngr.GenericMngr):
         '''
 
         alive = True
-        pssgReleased = True
-        bzzrStarted = True
 
         while alive:
 
@@ -152,7 +150,6 @@ class CleanerPssgMngr(genmngr.GenericMngr):
             if  elapsedTime >= self.rlseTime:
                 self.logger.debug("Unreleasing the passage {}.".format(self.pssgId))
                 self.pssgObj.release(False)
-                pssgReleased = False
                 #Once the passage was closed, if somebody opens the passage, will be 
                 #considered an unpermitted access since the following event wil be cleared
                 self.accessPermit.clear()
@@ -168,15 +165,8 @@ class CleanerPssgMngr(genmngr.GenericMngr):
             if  elapsedTime >= self.bzzrTime:
                 self.logger.debug("Stopping the buzzer on passage {}.".format(self.pssgId))
                 self.pssgObj.startBzzr(False)
-                bzzrStarted = False
 
-            #The situation explained in the previous comment will produce that once "bzzrStarted"
-            #was set to False, it will never be set to True altough the passage was opened again
-            #before completing the rlseTime. But it doesnt matter and the following if will be valid
-            #to determinate when the thread have to died.
-            #The same could happen with "rlseTime" if it will be lesser than "bzzrTime".
-
-            if not pssgReleased and not bzzrStarted:
+            if elapsedTime >= self.rlseTime and elapsedTime >= self.bzzrTime:
                 self.logger.debug("Finishing CleanerPssgMngr on passage {}".format(self.pssgId))
                 alive = False
 
