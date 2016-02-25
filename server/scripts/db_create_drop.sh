@@ -14,7 +14,7 @@ if [[ $1 == --create ]]; then
 
 
         INSERT INTO RowState(id, description) VALUES (1, 'To Add'), (2, 'Added'), (3, 'To Delete'), (4, 'Deleted');
-        INSERT INTO Controller(boardModel, macAddress) VALUES ('Raspberry PI','b80305508c9b');
+        INSERT INTO Controller(boardModel, macAddress) VALUES ('Raspberry PI','c4e98409ebaf');
         INSERT INTO Organization(id, name) VALUES(1, 'Kleinernet');
         INSERT INTO Person(id, name, cardNumber, orgId, rowStateId) VALUES(1, 'Unknown', 0, 1, 1);
         INSERT INTO Person(id, name, cardNumber, orgId, rowStateId) VALUES(1619, 'Jorge Kleinerman', 43242432, 1, 1);
