@@ -189,7 +189,8 @@ int gpio_set_direction(unsigned int gpio, unsigned int direction)
 }
 
 
-/* Select the signal edge that will make poll-on the "value" file return.
+/* 
+ * Select the signal edge that will make poll-on the "value" file return.
  * It returns 0 on success
  * ++ In a near future, this function will be implemented in Python ++
  */
@@ -506,13 +507,16 @@ void *buttons (void *b_args)
         if (epoll_wait(epfd, events, args->number_of_buttons, EPOLL_WAIT_TIME)) { // wait for an evente. Only fetch up one event
             for (j=0; j < args->number_of_buttons; j++) {
                 if (events[0].data.fd == bttn_tbl[j][1]) {
+                    // deregister the target file descriptor from the epoll instance to avoid button bounce
                     epoll_ctl(epfd, EPOLL_CTL_DEL, bttn_tbl[j][1], &ev[j]);
                     sprintf(message, "%d;0;button=1", bttn_tbl[j][0]);
                     // put the message into the queue
                     mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
                     printf("%s\n", message);
+                    // wait a bounce time and then register again the target file descriptor.
                     usleep(BOUNCE_TIME);
                     epoll_ctl(epfd, EPOLL_CTL_ADD, bttn_tbl[j][1], &ev[j]);
+                    // because it was registered again, first time it triggers with current state, so ignore it again
                     epoll_wait(epfd, events, 1, -1);
                     break;
                 }
@@ -582,12 +586,19 @@ void *state (void *s_args)
         if (epoll_wait(epfd, events, args->number_of_states, EPOLL_WAIT_TIME)) { // wait for an event
             for (j=0; j < args->number_of_states; j++) {
                 if (events[0].data.fd == state_tbl[j][1]) {
+                    // deregister the target file descriptor from the epoll instance to avoid button bounce
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, state_tbl[j][1], &ev[j]);
                     read(state_tbl[j][1], value, 1);
                     lseek(state_tbl[j][1],0,SEEK_SET);
                     sprintf(message, "%d;0;state=%s", state_tbl[j][0], value);
                     // put the message into the queue
                     mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
                     printf("%s\n", message);
+                    // wait a bounce time and then register again the target file descriptor.
+                    usleep(BOUNCE_TIME);
+                    epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]);
+                    // because it was registered again, first time it triggers with current state, so ignore it again
+                    epoll_wait(epfd, events, 1, -1);
                     break;
                 }
             }
