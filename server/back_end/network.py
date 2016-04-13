@@ -371,8 +371,8 @@ class NetMngr(genmngr.GenericMngr):
                             break
                     self.macConnObjects.pop(mac)
 
-            print('MAC-->',self.macConnObjects)
-            print('FD-->',self.fdConnObjects)
+            #print('MAC-->',self.macConnObjects)
+            #print('FD-->',self.fdConnObjects)
                     
 
             #Cheking if Main thread ask as to finish.

@@ -92,6 +92,28 @@ class DbMngr(genmngr.GenericMngr):
 
 
 
+    def saveOrganization(self, organization):
+        '''
+        Receive a dictionary with organization parametters and save it in DB
+        '''
+
+        sql = ("INSERT INTO Organization(name) VALUES({})"
+               "".format[organization['name']]
+              )
+        
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+
+
+
+
+
+
+
 
     def run(self):
         '''

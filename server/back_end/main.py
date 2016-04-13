@@ -17,6 +17,7 @@ import signal
 
 import database
 import network
+import crud
 from config import *
 
 
@@ -52,6 +53,10 @@ class BackEndSrvr(object):
         self.netMngr = network.NetMngr(self.dbMngr, self.exitFlag)        
 
 
+        #Creating CRUD Manager Thread
+        self.crudMngr = crud.CrudMngr(self.dbMngr, self.exitFlag)
+
+
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
         signal.signal(signal.SIGTERM, self.sigtermHandler)
         signal.signal(signal.SIGINT, self.sigtermHandler)
@@ -80,6 +85,10 @@ class BackEndSrvr(object):
         
         #Starting the "DataBase Manager" thread
         self.dbMngr.start()
+
+        #Starting "CRUD Manager" thread
+        self.crudMngr.start()
+        
         
 
         for thread in threading.enumerate():
