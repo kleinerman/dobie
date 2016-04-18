@@ -20,7 +20,7 @@ import network
 import crud
 from config import *
 
-
+import os
 
 
 
@@ -46,30 +46,33 @@ class BackEndSrvr(object):
         #DataBase object 
         self.dbMngr = database.DbMngr(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self.exitFlag)
 
-        #Queue used to send Events and CRUD confirmation to dbMngr
-        #netToDb = queue.Queue()
-
         #Creating the Net Manager Thread 
         self.netMngr = network.NetMngr(self.dbMngr, self.exitFlag)        
 
 
-        #Creating CRUD Manager Thread
-        self.crudMngr = crud.CrudMngr(self.dbMngr, self.exitFlag)
+        #Creating CRUD Manager (This will run in main thread)
+        self.crudMngr = crud.CrudMngr(self.dbMngr)
 
+
+        self.origSigIntHandler = signal.getsignal(signal.SIGINT)
 
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
-        signal.signal(signal.SIGTERM, self.sigtermHandler)
-        signal.signal(signal.SIGINT, self.sigtermHandler)
+        signal.signal(signal.SIGTERM, self.finishHandler)
+        signal.signal(signal.SIGINT, self.finishHandler)
 
         #By default our exit code will be success
         self.exitCode = 0
 
 
+        
 
 
-    def sigtermHandler(self, signal, frame):
+
+    def finishHandler(self, sigNum, frame):
+        signal.signal(signal.SIGINT, self.origSigIntHandler)
         self.logger.debug('Notifying all threads to finish.')
         self.exitFlag.set()
+        os.kill(os.getpid(),signal.SIGINT)
 
 
 
@@ -86,9 +89,9 @@ class BackEndSrvr(object):
         #Starting the "DataBase Manager" thread
         self.dbMngr.start()
 
-        #Starting "CRUD Manager" thread
-        self.crudMngr.start()
-        
+        #Starting "CRUD Manager" It will run in main thread
+        self.crudMngr.run()
+
         
 
         for thread in threading.enumerate():

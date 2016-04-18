@@ -14,8 +14,8 @@ from config import *
 
 import sys
 
-
-
+from flask import Flask, jsonify, request, abort
+import time
 
 
 class CrudMngr(genmngr.GenericMngr):
@@ -24,15 +24,9 @@ class CrudMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, dbMngr, exitFlag):
+    def __init__(self, dbMngr):
 
-        #Invoking the parent class constructor, specifying the thread name, 
-        #to have a understandable log file.
-        super().__init__('CrudMngr', exitFlag)
-
-        #Queue used to send Events and CRUD confirmation to dbMngr
         self.dbMngr = dbMngr
-        #self.netToDb = netToDb
 
 
 
@@ -43,24 +37,22 @@ class CrudMngr(genmngr.GenericMngr):
         '''
         '''
 
-        while True:
 
+        app = Flask(__name__)
 
-            tecInput = input()
+        @app.route('/api/v1.0/organization', methods=['POST'])
+        def addOrganization():
+            if not request.json or not 'name' in request.json:
+                abort(400)
 
-            print(tecInput)
+            print(request.json['name'])
 
-#            if tecInput.split()[0] == '1':
-#
-#                organization = json.loads()
+            self.dbMngr.saveOrganization(request.json)
 
-#                self.dbMngr.saveOrganization()
-
-
-
-            #Cheking if Main thread ask as to finish.
-            self.checkExit()
+            return jsonify({'1': 1}), 201
 
 
 
-    
+
+        app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
+

@@ -97,9 +97,10 @@ class DbMngr(genmngr.GenericMngr):
         Receive a dictionary with organization parametters and save it in DB
         '''
 
-        sql = ("INSERT INTO Organization(name) VALUES({})"
-               "".format[organization['name']]
+        sql = ("INSERT INTO Organization(name) VALUES('{}')"
+               "".format(organization['name'])
               )
+        print(sql)
         
         try:
             self.cursor.execute(sql)
