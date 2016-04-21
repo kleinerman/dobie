@@ -21,11 +21,12 @@ import time
 class CrudMngr(genmngr.GenericMngr):
 
     '''
-    This thread receives the events from the main thread, tries to send them to the server.
-    When it doesn't receive confirmation from the server, it stores them in database.
+    This class is responsible for managing the creations, deletions and 
+    modifications in database
     '''
     def __init__(self, dbMngr):
 
+        #Database manager object to access DB
         self.dbMngr = dbMngr
 
 
@@ -35,6 +36,8 @@ class CrudMngr(genmngr.GenericMngr):
 
     def run(self):
         '''
+        This method is launched by the main thread.
+        It launches the Flask server and it waits for REST request from the GUI
         '''
 
 
@@ -45,9 +48,7 @@ class CrudMngr(genmngr.GenericMngr):
             if not request.json or not 'name' in request.json:
                 abort(400)
 
-            print(request.json['name'])
-
-            self.dbMngr.saveOrganization(request.json)
+            self.dbMngr.addOrganization(request.json)
 
             return jsonify({'1': 1}), 201
 
