@@ -26,6 +26,7 @@ CREATE TABLE `Person` (
 CREATE TABLE `Controller` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `boardModel` varchar(40) NOT NULL,
+    `macAddress` varchar(12) NOT NULL,
     `ipAddress` varchar(39) NOT NULL
 )
 ;
@@ -125,8 +126,8 @@ CREATE TABLE `Event` (
     CONSTRAINT `fk_Event_EventType` FOREIGN KEY (`eventTypeId`) REFERENCES `EventType` (`id`),
     CONSTRAINT `fk_Event_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`),
     CONSTRAINT `fk_Event_Latch` FOREIGN KEY (`latchId`) REFERENCES `Latch` (`id`),    
-    CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`)
-
+    CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
+    CONSTRAINT `fk_Event_NotReason` FOREIGN KEY (`notReason`) REFERENCES `NotReason` (`id`)
 
 )
 ;

@@ -1,234 +1,146 @@
-import sqlite3
-import datetime
+import pymysql
+import queue
 import logging
 
-
-boolSide = {'o':0, 'i':1}
-
-
-class DataBase(object):
-
-    def __init__(self, dbFile):
-
-        #self.connection = sqlite3.connect(dbFile, check_same_thread=False)
-        self.connection = sqlite3.connect(dbFile)
-        self.cursor = self.connection.cursor()
-        self.cursor.execute('PRAGMA foreign_keys = ON')
-
-        #Getting the logger
-        self.logger = logging.getLogger('Controller')
+import genmngr
+from config import *
 
 
 
-    def canAccess(self, pssgId, side, cardNumber):
-        '''
-        This method
-        '''
+class DbMngr(genmngr.GenericMngr):
 
-        sqlSentence = ("SELECT person.id, access.allWeek, access.startTime, "
-                       "access.endTime, access.expireDate "
-                       "FROM Access access JOIN Person person ON (access.personId = person.id) "
-                       "WHERE access.pssgId = '{}' AND access.{}Side = 1 " 
-                       "AND person.cardNumber = '{}'"
-                       "".format(pssgId, side, cardNumber)
-                      )
+    def __init__(self, host, user, passwd, dataBase, exitFlag):
 
-        self.cursor.execute(sqlSentence)
-        params = self.cursor.fetchone()
+        #Invoking the parent class constructor, specifying the thread name, 
+        #to have a understandable log file.
+        super().__init__('DbMngr', exitFlag)
 
-        if params:
-            personId, allWeek, startTime, endTime, expireDate = params
-            nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-            nowDate, nowTime = nowDateTime.split()
-
-            if nowDate < expireDate:
-
-                if allWeek:
-
-                    if startTime < nowTime < endTime:
-                        print("Can access!!")
-                        return (True, personId, None)
-                    else:
-                        print("Can NOT access (out of time!!)")
-                        return (False, personId, 3)
-
-                else:
-                    nowWeekDay = datetime.datetime.now().isoweekday()
-
-                    sqlSentence = ("SELECT startTime, endTime FROM LimitedAccess "
-                                   "WHERE pssgId = {} AND personId = {} AND "
-                                   "weekDay = {}".format(pssgId, personId, nowWeekDay)
-                                  )
-
-                    self.cursor.execute(sqlSentence)
-                    params = self.cursor.fetchone()
-
-                    if params:
-                        startTime, endTime = params
-
-                        if startTime < nowTime < endTime:
-                            print("Can access!!!")
-                            return (True, personId, None)
-                        else:
-                            print("Can NOT access (out of time!!!)")
-                            return (False, personId, 3)
-
-                    else:
-                        print("Error. Card number not in LimitedAccess table")
-                        return (False, None, 9)
-
-            else:
-                return (False, None, 2)
-                print("Can NOT access (expired card)")
-
-        else:
-            return (False, None, 1)
-            print("This person has not access on this pssg/side")
-
-
-        print(params)
-
+        self.host = host
+        self.user = user
+        self.passwd = passwd
+        self.dataBase = dataBase
     
-    def saveEvent(self, event):
-        '''
-        Save events in database when no connection to server.
-        '''
-
-        if event['personId']:
-            personId = event['personId']
-        else:
-            personId = 'NULL'
-
-        side = boolSide[event['side']]
-
-        allowed = int(event['allowed'])
-
-        if event['notReason']:
-            notReason = event['notReason']
-        else:
-            notReason = 'NULL'
-            
-
-        sqlSentence = ("INSERT INTO Events"
-                       "(pssgId, eventType, dateTime, latchType, "
-                       "personId, side, allowed, notReason) "
-                       "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
-                       "".format(event['pssgId'], event['eventType'], 
-                                 event['dateTime'], event['latchType'], 
-                                 personId, side, allowed, notReason)
-                      )
-        self.cursor.execute(sqlSentence)
-        self.connection.commit()
+        self.netToDb = queue.Queue()
 
 
-
-    def getNEvents(self, evtsQtty):
-        '''
-        On each iteration over this method, it returns a list with
-        "evtsQtty" events 
-        '''
+        self.connection = pymysql.connect(host, user, passwd, dataBase)
         
-        sqlSentence = ("SELECT id, pssgId, eventType, dateTime, latchType, "
-                       "personId, side, allowed, notReason FROM Events "
-                       "LIMIT {}".format(evtsQtty)
-                      )
-
-        self.cursor.execute(sqlSentence)
-        evtTupleList = self.cursor.fetchall()
+        self.cursor = self.connection.cursor()
 
 
 
-        while evtTupleList:
+
+    def isValidCtrller(self, ctrllerMac):
+
+        #Creating a separate connection since this method will be called from
+        #different thread
+        connection = pymysql.connect(self.host, self.user, self.passwd, self.dataBase)
+        cursor = connection.cursor()
+
+        #macAsHex = '{0:0{1}x}'.format(macAsInt, 12)
+        sql = "SELECT COUNT(*) FROM Controller WHERE macAddress = '{}'".format(ctrllerMac)
+
+        cursor.execute(sql)
+        return cursor.fetchone()[0]
 
 
-            evtDictList = []
-            evtIdList = []
-            for evtTuple in evtTupleList:
-                evtDict = {'pssgId' : evtTuple[1],
-                           'eventType' : evtTuple[2],
-                           'dateTime' : evtTuple[3],
-                           'latchType' : evtTuple[4],
-                           'personId' : evtTuple[5],
-                           'side' : evtTuple[6],
-                           'allowed' : bool(evtTuple[7]),
-                           'notReason' : evtTuple[8]
-                          }
 
-                evtDictList.append(evtDict)
-                evtIdList.append(evtTuple[0])
-            
+
+
+    def putEvents(self, events):
+        '''
+        '''
+        self.netToDb.put(events)
+
+
+
+
+
+
+    def saveEvents(self, events):
+        '''
+        It receives a list of events and saves them in the database
+        '''
+
+
+        for event in events:
+
+            #Converting all None fields to 'NULL' to write the SQL sentence
+            #At this moment this is only need in 'personId' and 'notReason'
+            #fields
+            for eventField in event:
+                if event[eventField] == None:
+                    event[eventField] = 'NULL'
+
+
+            sql = ("INSERT INTO "
+                   "Event(eventTypeId, pssgId, dateTime, latchId, personId, side, allowed, notReason) "
+                   "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
+                   "".format(event['eventType'], event['pssgId'], event['dateTime'],
+                             event['latchType'], event['personId'], event['side'],
+                             event['allowed'], event['notReason']
+                            ) 
+
+                  )
+            try:
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+            except pymysql.err.IntegrityError as integrityError:
+                self.logger.warning(integrityError)
+
+
+
+
+    def addOrganization(self, organization):
+        '''
+        Receive a dictionary with organization parametters and save it in DB
+        '''
+
+        sql = ("INSERT INTO Organization(name) VALUES('{}')"
+               "".format(organization['name'])
+              )
+        
+        try:
+            self.cursor.execute(sql)
             self.connection.commit()
-            yield evtIdList, evtDictList
-            self.cursor.execute(sqlSentence)
-            evtTupleList = self.cursor.fetchall()
 
-        self.connection.commit()
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
 
 
 
-    def delEvents(self, evtIdList):
+
+
+
+
+
+    def run(self):
         '''
-        Delete Events with
-        '''
-
-        evtIdStrList = [str(evtId) for evtId in evtIdList]
-
-        evtIdsStr = '({})'.format(','.join(evtIdStrList))
-        
-        sqlSentence = "DELETE FROM Events WHERE id IN {}".format(evtIdsStr)
-
-        self.cursor.execute(sqlSentence)
-        self.connection.commit()
-
-
-
-    def getPssgParamsNames(self):
-        '''
-        Getting Passage Params Names from SQL database
+        This is the main method of the thread. Most of the time it is blocked waiting 
+        for queue messages coming from the "Network" thread.
         '''
 
-        sqlSentence = "SELECT * FROM Passage"
-        self.cursor.execute(sqlSentence)
-        self.connection.commit()
+        while True:
+            try:
+                #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
+                events = self.netToDb.get(timeout=EXIT_CHECK_TIME)
+                self.checkExit()
+                self.saveEvents(events)
 
-        return [i[0] for i in self.cursor.description]
-
-
-
-
-    def getPssgsParams(self):
-        '''
-        Get the arguments of passages to call ioiface external program.
-        pps = Passage Parametters
-
-        '''
-
-        ppsNames = self.getPssgParamsNames()
-
-        
-        sqlSentence = ("SELECT {}, {}, {}, {}, {}, {}, {}, {}, {} "
-                       "FROM Passage".format(*ppsNames)
-                      )
-
-        self.cursor.execute(sqlSentence)
-        ppsTuplesList = self.cursor.fetchall()
-        self.connection.commit()
+            except queue.Empty:
+                #Cheking if Main thread ask as to finish.
+                self.checkExit()
 
 
-        ppsDictsDict = {}
-
-        for ppsTuple in ppsTuplesList:
-            
-            ppsDict = {}
-
-            for i, ppName in enumerate(ppsNames):
-
-                ppsDict[ppName] = ppsTuple[i]
 
 
-                #self.logger.error('Invalid row in Passage table, skiping to the next row.')
-            
-            ppsDictsDict[ppsDict['id']] = ppsDict
 
-        return ppsDictsDict
+
+
+
+    #def __del__(self):
+   
+        #self.connection.commit() 
+        #self.connection.close()
 
