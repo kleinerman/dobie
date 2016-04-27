@@ -7,6 +7,19 @@ from config import *
 
 
 
+class OrganizationError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+
+
+
 class DbMngr(genmngr.GenericMngr):
 
     def __init__(self, host, user, passwd, dataBase, exitFlag):
@@ -107,6 +120,50 @@ class DbMngr(genmngr.GenericMngr):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
+            raise OrganizationError('Can not add this organization')
+
+
+
+
+
+    def delOrganization(self, organization):
+        '''
+        Receive a dictionary with id organization
+        '''
+
+        sql = ("DELETE FROM Organization WHERE id = {}"
+               "".format(organization['id'])
+              )        
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise OrganizationError('Can not delete this organization')
+
+
+
+    def updOrganization(self, organization):
+        '''
+        Receive a dictionary with id organization
+        '''
+
+        sql = ("UPDATE Organization SET name = '{}' WHERE id = {}"
+               "".format(organization['name'], organization['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise OrganizationError('Can not update this organization')
+
+
+
 
 
 

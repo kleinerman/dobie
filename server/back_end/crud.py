@@ -48,9 +48,35 @@ class CrudMngr(genmngr.GenericMngr):
             if not request.json or not 'name' in request.json:
                 abort(400)
 
-            self.dbMngr.addOrganization(request.json)
+            try:
+                self.dbMngr.addOrganization(request.json)
+            except database.OrganizationError as organizationError:
+                
+
 
             return jsonify({'1': 1}), 201
+
+
+        @app.route('/api/v1.0/organization', methods=['DELETE'])
+        def addOrganization():
+            if not request.json or not 'id' in request.json:
+                abort(400)
+
+            self.dbMngr.delOrganization(request.json)
+
+            return jsonify({'1': 1}), 200
+
+
+
+        @app.route('/api/v1.0/organization', methods=['PUT'])
+        def addOrganization():
+            if not request.json or not 'name' in request.json:
+                abort(400)
+
+            self.dbMngr.updOrganization(request.json)
+
+            return jsonify({'1': 1}), 200
+
 
 
 
