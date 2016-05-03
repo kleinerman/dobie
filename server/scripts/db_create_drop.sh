@@ -2,7 +2,7 @@
 
 if [[ $1 == --create ]]; then
                      
-    mysql -u root -p -e "CREATE USER 'conpass_usr'@'localhost' IDENTIFIED BY 'qwe123qwe'; 
+    mysql -u root -p -e "CREATE USER 'conpass_usr'@'%' IDENTIFIED BY 'qwe123qwe'; 
                          CREATE DATABASE conpass_db; 
                          GRANT ALL ON conpass_db.* TO conpass_usr;"
 
@@ -32,7 +32,7 @@ if [[ $1 == --create ]]; then
                    
 elif [[ $1 == --drop ]]; then
 
-    mysql -u root -p -e "DROP USER 'conpass_usr'@'localhost';
+    mysql -u root -p -e "DROP USER 'conpass_usr';
                          DROP DATABASE conpass_db;"
 
 fi
