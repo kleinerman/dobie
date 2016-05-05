@@ -61,19 +61,22 @@ class CrudMngr(genmngr.GenericMngr):
         def crudOrganization():
             try:
                 if request.method == 'POST':
-                    if not 'name' in request.json:
+                    necessaryKeys = ('name',)
+                    if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
                     self.dbMngr.addOrganization(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
-                    if not 'id' in request.json and not 'name' in request.json:
+                    necessaryKeys = ('id', 'name')
+                    if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
                     self.dbMngr.updOrganization(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
-                    if not 'id' in request.json:
+                    necessaryKeys = ('id',)
+                    if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
                     self.dbMngr.delOrganization(request.json)
                     return jsonify({'1': 1}), OK
@@ -81,6 +84,41 @@ class CrudMngr(genmngr.GenericMngr):
 
             except database.OrganizationError as organizationError:
                 return jsonify({'1': 1}), 500
+
+
+        @app.route('/api/v1.0/person', methods=['POST', 'PUT','DELETE'])
+        @auth.login_required
+        def crudPerson():
+            try:
+                if request.method == 'POST':
+                    necessaryKeys = ('name', 'cardNumber', 'orgId')
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.addPerson(request.json)
+                    return jsonify({'1': 1}), CREATED
+
+                elif request.method == 'PUT':
+                    necessaryKeys = ('id', 'name', 'cardNumber', 'orgId')
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.updPerson(request.json)
+                    return jsonify({'1': 1}), OK
+
+                elif request.method == 'DELETE':
+                    necessaryKeys = ('id',)
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.delPerson(request.json)
+                    return jsonify({'1': 1}), OK
+
+
+            except database.PersonError as personError:
+                return jsonify({'1': 1}), 500
+
+
+
+
+
                 
 
         app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)

@@ -18,6 +18,16 @@ class OrganizationError(Exception):
 
 
 
+class PersonError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
 
 
 class DbMngr(genmngr.GenericMngr):
@@ -104,6 +114,8 @@ class DbMngr(genmngr.GenericMngr):
 
 
 
+#----------------------------------Organization----------------------------------------
+
 
     def addOrganization(self, organization):
         '''
@@ -137,6 +149,8 @@ class DbMngr(genmngr.GenericMngr):
 
         try:
             self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise OrganizationError('Organization not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
@@ -165,10 +179,75 @@ class DbMngr(genmngr.GenericMngr):
 
 
 
+#-------------------------------Person-----------------------------------
 
 
 
 
+    def addPerson(self, person):
+        '''
+        Receive a dictionary with person parametters and save it in DB
+        '''
+
+        sql = ("INSERT INTO Person(name, cardNumber, orgId, rowStateId) VALUES('{}', {}, {}, {})"
+               "".format(person['name'], person['cardNumber'], person['orgId'], 2)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise PersonError('Can not add this organization')
+
+
+
+
+
+    def delPerson(self, person):
+        '''
+        Receive a dictionary with id organization
+        '''
+
+        sql = ("DELETE FROM Person WHERE id = {}"
+               "".format(person['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise OrganizationError('Person not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise PersonError('Can not delete this person')
+
+
+
+
+
+    def updPerson(self, person):
+        '''
+        Receive a dictionary with id organization
+        '''
+
+        sql = ("UPDATE Person SET name = '{}', cardNumber = {}, orgId = {} WHERE id = {}"
+               "".format(person['name'], person['cardNumber'], person['orgId'], person['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise PersonError('Can not update this person')
+
+
+
+#---------------------------------------------------------------------------------------
 
 
 
