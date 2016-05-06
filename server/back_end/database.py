@@ -40,6 +40,16 @@ class ZoneError(Exception):
 
 
 
+class ControllerError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
 
 class DbMngr(genmngr.GenericMngr):
 
@@ -257,6 +267,78 @@ class DbMngr(genmngr.GenericMngr):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ZoneError('Can not update this zone')
+
+
+
+
+
+
+#----------------------------------Controller----------------------------------------
+
+
+    def addController(self, controller):
+        '''
+        Receive a dictionary with controller parametters and save it in DB
+        '''
+
+        sql = ("INSERT INTO Controller(boardModel, macAddress, ipAddress) "
+               "VALUES('{}', '{}', '{}')"
+               "".format(controller['boardModel'], controller['macAddress'], 
+                         controller['ipAddress'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise ControllerError('Can not add this controller')
+
+
+
+
+
+    def delController(self, controller):
+        '''
+        Receive a dictionary with id controller
+        '''
+
+        sql = ("DELETE FROM Controller WHERE id = {}"
+               "".format(controller['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise ControllerError('Controller not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise ControllerError('Can not delete this controller')
+
+
+
+
+    def updController(self, controller):
+        '''
+        Receive a dictionary with id controller
+        '''
+
+        sql = ("UPDATE Controller SET boardModel = '{}', macAddress = '{}', "
+               "ipAddress = '{}' WHERE id = {}"
+               "".format(controller['boardModel'], controller['macAddress'], 
+                         controller['ipAddress'], controller['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise ControllerError('Can not update this controller')
 
 
 

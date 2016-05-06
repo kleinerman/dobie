@@ -157,6 +157,43 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+
+
+        @app.route('/api/v1.0/controller', methods=['POST', 'PUT','DELETE'])
+        @auth.login_required
+        def crudController():
+            try:
+                if request.method == 'POST':
+                    necessaryKeys = ('boardModel', 'macAddress', 'ipAddress')
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.addController(request.json)
+                    return jsonify({'1': 1}), CREATED
+
+                elif request.method == 'PUT':
+                    necessaryKeys = ('id', 'boardModel', 'macAddress', 'ipAddress')
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.updController(request.json)
+                    return jsonify({'1': 1}), OK
+
+                elif request.method == 'DELETE':
+                    necessaryKeys = ('id',)
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.delController(request.json)
+                    return jsonify({'1': 1}), OK
+
+
+            except database.ControllerError as controllerError:
+                return jsonify({'1': 1}), 500
+
+
+
+
+
+
+
                 
 
         app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
