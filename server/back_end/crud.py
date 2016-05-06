@@ -86,6 +86,44 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify({'1': 1}), 500
 
 
+
+
+
+
+        @app.route('/api/v1.0/zone', methods=['POST', 'PUT','DELETE'])
+        @auth.login_required
+        def crudZone():
+            try:
+                if request.method == 'POST':
+                    necessaryKeys = ('name',)
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.addZone(request.json)
+                    return jsonify({'1': 1}), CREATED
+
+                elif request.method == 'PUT':
+                    necessaryKeys = ('id', 'name')
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.updZone(request.json)
+                    return jsonify({'1': 1}), OK
+
+                elif request.method == 'DELETE':
+                    necessaryKeys = ('id',)
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.delZone(request.json)
+                    return jsonify({'1': 1}), OK
+
+
+            except database.ZoneError as ozoneError:
+                return jsonify({'1': 1}), 500
+
+
+
+
+
+
         @app.route('/api/v1.0/person', methods=['POST', 'PUT','DELETE'])
         @auth.login_required
         def crudPerson():

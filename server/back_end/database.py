@@ -29,6 +29,17 @@ class PersonError(Exception):
 
 
 
+class ZoneError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+
 
 class DbMngr(genmngr.GenericMngr):
 
@@ -175,6 +186,78 @@ class DbMngr(genmngr.GenericMngr):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise OrganizationError('Can not update this organization')
+
+
+
+
+
+
+
+#----------------------------------Zone----------------------------------------
+
+
+    def addZone(self, zone):
+        '''
+        Receive a dictionary with zone parametters and save it in DB
+        '''
+
+        sql = ("INSERT INTO Zone(name) VALUES('{}')"
+               "".format(zone['name'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise ZoneError('Can not add this zone')
+
+
+
+
+
+    def delZone(self, zone):
+        '''
+        Receive a dictionary with id zone
+        '''
+
+        sql = ("DELETE FROM Zone WHERE id = {}"
+               "".format(zone['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise ZoneError('Zone not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise ZoneError('Can not delete this zone')
+
+
+
+
+
+
+    def updZone(self, zone):
+        '''
+        Receive a dictionary with id zone
+        '''
+
+        sql = ("UPDATE Zone SET name = '{}' WHERE id = {}"
+               "".format(zone['name'], zone['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise ZoneError('Can not update this zone')
+
 
 
 
