@@ -51,6 +51,18 @@ class ControllerError(Exception):
 
 
 
+class PassageError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+
+
 class DbMngr(genmngr.GenericMngr):
 
     def __init__(self, host, user, passwd, dataBase, exitFlag):
@@ -339,6 +351,93 @@ class DbMngr(genmngr.GenericMngr):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ControllerError('Can not update this controller')
+
+
+
+
+
+
+
+
+#----------------------------------Passage----------------------------------------
+
+
+    def addPassage(self, passage):
+        '''
+        Receive a dictionary with passage parametters and save it in DB
+        '''
+
+        sql = ("INSERT INTO Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, "
+               "rlseOut, bzzrOut, zoneId, controllerId, rowStateId) "
+               "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
+               "".format(passage['i0In'], passage['i1In'], passage['o0In'],
+                         passage['o1In'], passage['bttnIn'], passage['stateIn'],
+                         passage['rlseOut'], passage['bzzrOut'], passage['zoneId'],
+                         passage['controllerId'], passage['rowStateId']) 
+              )
+
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise PassageError('Can not add this passage')
+
+
+
+
+
+    def delPassage(self, passage):
+        '''
+        Receive a dictionary with id passage
+        '''
+
+        sql = ("DELETE FROM Passage WHERE id = {}"
+               "".format(passage['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise PassageError('Passage not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise PassageError('Can not delete this passage')
+
+
+
+
+    def updPassage(self, passage):
+        '''
+        Receive a dictionary with id passage
+        '''
+
+        sql = ("UPDATE Passage SET i0In = {}, i1In = {}, o0In = {}, o1In = {}, "
+               "bttnIn = {}, stateIn = {}, rlseOut = {}, bzzrOut = {}, zoneId = {}, "
+               "controllerId = {}, rowStateId = {} WHERE id = {}"
+               "".format(passage['i0In'], passage['i1In'], passage['o0In'],
+                         passage['o1In'], passage['bttnIn'], passage['stateIn'],
+                         passage['rlseOut'], passage['bzzrOut'], passage['zoneId'],
+                         passage['controllerId'], passage['rowStateId'], passage['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise PassageError('Can not update this passage')
+
+
+
+
+
+
 
 
 

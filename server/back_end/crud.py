@@ -192,6 +192,41 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+        @app.route('/api/v1.0/passage', methods=['POST', 'PUT','DELETE'])
+        @auth.login_required
+        def crudPassage():
+            try:
+                if request.method == 'POST':
+                    necessaryKeys = ('i0In', 'i1In', 'o0In', 'o1In', 'bttnIn',
+                                     'stateIn', 'rlseOut', 'bzzrOut', 'zoneId',
+                                     'controllerId', 'rowStateId')
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.addPassage(request.json)
+                    return jsonify({'1': 1}), CREATED
+
+                elif request.method == 'PUT':
+                    necessaryKeys = ('id', 'i0In', 'i1In', 'o0In', 'o1In',
+                                     'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut',
+                                     'zoneId', 'controllerId', 'rowStateId')
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.updPassage(request.json)
+                    return jsonify({'1': 1}), OK
+
+                elif request.method == 'DELETE':
+                    necessaryKeys = ('id',)
+                    if not all(key in request.json for key in necessaryKeys):
+                        abort(BAD_REQUEST)
+                    self.dbMngr.delPassage(request.json)
+                    return jsonify({'1': 1}), OK
+
+
+            except database.PassageError as passageError:
+                return jsonify({'1': 1}), 500
+
+
+
 
 
                 
