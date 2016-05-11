@@ -199,16 +199,16 @@ class CrudMngr(genmngr.GenericMngr):
                 if request.method == 'POST':
                     necessaryKeys = ('i0In', 'i1In', 'o0In', 'o1In', 'bttnIn',
                                      'stateIn', 'rlseOut', 'bzzrOut', 'zoneId',
-                                     'controllerId', 'rowStateId')
+                                     'controllerId')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.addPassage(request.json)
+                    passageId = self.dbMngr.addPassage(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
                     necessaryKeys = ('id', 'i0In', 'i1In', 'o0In', 'o1In',
                                      'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut',
-                                     'zoneId', 'controllerId', 'rowStateId')
+                                     'zoneId', 'controllerId')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
                     self.dbMngr.updPassage(request.json)

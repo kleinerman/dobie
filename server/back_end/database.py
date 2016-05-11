@@ -6,6 +6,12 @@ import genmngr
 from config import *
 
 
+ROW_STATE_TO_ADD = 1
+ROW_STATE_ADDED = 2
+ROW_STATE_TO_DELETE = 3
+ROW_STATE_DELETED = 4
+
+
 
 class OrganizationError(Exception):
     '''
@@ -354,7 +360,15 @@ class DbMngr(genmngr.GenericMngr):
 
 
 
+    def getControllerMac(self, passageId):
+        '''
+        Return the controller MAC address receiving the passage ID
+        '''
 
+        sql = "SELECT macAddress FROM Controller WHERE id = {}".format(passageId)
+
+        self.cursor.execute(sql)
+        return cursor.fetchone()[0]
 
 
 
@@ -373,13 +387,14 @@ class DbMngr(genmngr.GenericMngr):
                "".format(passage['i0In'], passage['i1In'], passage['o0In'],
                          passage['o1In'], passage['bttnIn'], passage['stateIn'],
                          passage['rlseOut'], passage['bzzrOut'], passage['zoneId'],
-                         passage['controllerId'], passage['rowStateId']) 
+                         passage['controllerId'], ROW_STATE_TO_ADD) 
               )
 
 
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
@@ -422,7 +437,7 @@ class DbMngr(genmngr.GenericMngr):
                "".format(passage['i0In'], passage['i1In'], passage['o0In'],
                          passage['o1In'], passage['bttnIn'], passage['stateIn'],
                          passage['rlseOut'], passage['bzzrOut'], passage['zoneId'],
-                         passage['controllerId'], passage['rowStateId'], passage['id'])
+                         passage['controllerId'], ROW_STATE_TO_ADD, passage['id'])
               )
 
         try:
@@ -454,7 +469,7 @@ class DbMngr(genmngr.GenericMngr):
         '''
 
         sql = ("INSERT INTO Person(name, cardNumber, orgId, rowStateId) VALUES('{}', {}, {}, {})"
-               "".format(person['name'], person['cardNumber'], person['orgId'], 2)
+               "".format(person['name'], person['cardNumber'], person['orgId'], ROW_STATE_ADDED)
               )
 
         try:
