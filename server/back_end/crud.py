@@ -9,6 +9,7 @@ import database
 import queue
 
 import genmngr
+import netpassage
 from config import *
 
 import sys
@@ -32,10 +33,12 @@ class CrudMngr(genmngr.GenericMngr):
     This class is responsible for managing the creations, deletions and 
     modifications in database
     '''
-    def __init__(self, dbMngr):
+    def __init__(self, dbMngr, netMngr):
 
         #Database manager object to access DB
         self.dbMngr = dbMngr
+
+        self.netPassage = netpassage.NetPassage(netMngr)
 
 
     #---------------------------------------------------------------------------#
@@ -203,6 +206,12 @@ class CrudMngr(genmngr.GenericMngr):
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
                     passageId = self.dbMngr.addPassage(request.json)
+
+                    passage = request.json
+                    passage['id'] = passageId
+                    ctrllerMac = self.dbMngr.getControllerMac(passageId)
+                    self.netPassage.addPassage(ctrllerMac, passage)
+
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':

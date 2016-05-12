@@ -365,10 +365,15 @@ class DbMngr(genmngr.GenericMngr):
         Return the controller MAC address receiving the passage ID
         '''
 
-        sql = "SELECT macAddress FROM Controller WHERE id = {}".format(passageId)
+
+        sql = ("SELECT controller.macAddress FROM Controller controller JOIN "
+               "Passage passage ON (controller.id = passage.controllerId) WHERE "
+               "passage.id = {}".format(passageId)
+              )
+        
 
         self.cursor.execute(sql)
-        return cursor.fetchone()[0]
+        return self.cursor.fetchone()[0]
 
 
 

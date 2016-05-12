@@ -51,7 +51,7 @@ class BackEndSrvr(object):
 
 
         #Creating CRUD Manager (This will run in main thread)
-        self.crudMngr = crud.CrudMngr(self.dbMngr)
+        self.crudMngr = crud.CrudMngr(self.dbMngr, self.netMngr)
 
 
         self.origSigIntHandler = signal.getsignal(signal.SIGINT)

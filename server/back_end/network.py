@@ -181,6 +181,24 @@ class NetMngr(genmngr.GenericMngr):
 
 
 
+    def sendToCtrller(self, msg, mac = None, scktFd = None):
+        '''
+        '''
+        if (not mac and not scktFd) or (mac and scktFd):
+            self.logger.error('Error calling "sendToCtrller" function')
+            raise ValueError("One of 'mac' or 'sctkFd' arguments should be 'None'")
+
+        if mac:
+            outBufferQue = self.macConnObjects[mac]['outBufferQue']
+            ctrllerSckt = self.macConnObjects[mac]['socket']
+        else:
+            outBufferQue = self.fdConnObjects[scktFd]['outBufferQue']
+            ctrllerSckt = self.fdConnObjects[scktFd]['socket']
+
+        outBufferQue.put(msg)
+        with self.lockNetPoller:
+            self.netPoller.modify(ctrllerSckt, select.POLLOUT)
+
 
 
 
