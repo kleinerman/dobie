@@ -312,6 +312,7 @@ class Controller(object):
             while True:
                 ioIfaceData = self.ioIfaceQue.receive()
                 ioIfaceData = ioIfaceData[0].decode('utf8')
+                print(ioIfaceData)
                 pssgId, side, varField = ioIfaceData.split(';')
                 pssgId = int(pssgId)
                 side = int(side)
