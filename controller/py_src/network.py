@@ -256,6 +256,8 @@ class NetMngr(genmngr.GenericMngr):
             response = response.decode('utf8')
             self.netToReSnd.put(response)
         
+        elif msg.startswith(CUD):
+            print('vamos joraca')
 
 
 
