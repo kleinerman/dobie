@@ -28,11 +28,10 @@ PASSWD = 'password'
 
 
 class BadRequest(Exception):
-    def __init__(self, message, status_code=400):
+    def __init__(self, message, status_code=400 ):
         Exception.__init__(self)
         self.message = message
         self.status_code = status_code
-
 
 
 class InternalError(Exception):
@@ -74,6 +73,22 @@ class CrudMngr(genmngr.GenericMngr):
             response.status_code = error.status_code
             return response
 
+        @app.errorhandler(400)
+        def badRequest(error):
+            response = jsonify ({'error': 'bad request', 
+                                 'message':'the client sent a request that this server could not understand',
+                                 'code':400})
+            response.status_code = 400
+            return response
+        
+        @app.errorhandler(405)
+        def methodNotAllowed(error):
+            response = jsonify ({'error': 'method not allowed', 
+                                 'message':'The method is not allowed for the requested URL',
+                                 'code':405})
+            response.status_code = 405
+            return response
+
         @app.errorhandler(404)
         def notFound(error):
             response = jsonify ({'error': 'request not found', 'message': 'Not found', 'code':404})
@@ -82,7 +97,7 @@ class CrudMngr(genmngr.GenericMngr):
 
         @app.errorhandler(InternalError)
         def internalServerError(error):
-            response = jsonify ({'error': 'internal server error', 'message': 'Not found', 'code':404})
+            response = jsonify ({'error': 'internal server error', 'message': error.message , 'code':500})
             response.status_code = 500
             return response
 
@@ -110,25 +125,28 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 if request.method == 'POST':
                     # if this json key does not exist, it will raise a BadRequest exception
-                    necessaryKeys = request.json['name']
+                    necessaryKeys = ('name',)
+                    if not all(key in request.json for key in necessaryKeys):
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.addOrganization(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
-                    necessaryKeys = request.json['id'], request.json['name']
+                    necessaryKeys = ('id', 'name',)
+                    if not all(key in request.json for key in necessaryKeys):
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.updOrganization(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
-                    necessaryKeys = request.json['id']
+                    necessaryKeys = ('id',)
+                    if not all(key in request.json for key in necessaryKeys):
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.delOrganization(request.json)
                     return jsonify({'1': 1}), OK
 
-
             except database.OrganizationError as e:
-                raise InternalError(e)
-            except KeyError as e:
-                raise BadRequest("Invalid Organization: missing '{}'".format(e.args[0]))
+                raise InternalError(str(e))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '          
@@ -143,30 +161,31 @@ class CrudMngr(genmngr.GenericMngr):
                 if request.method == 'POST':
                     necessaryKeys = ('name',)
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.addZone(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
                     necessaryKeys = ('id', 'name')
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.updZone(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
                     necessaryKeys = ('id',)
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.delZone(request.json)
                     return jsonify({'1': 1}), OK
 
-
-            except database.ZoneError as ozoneError:
-                return jsonify({'1': 1}), 500
-
-
-
+            except database.ZoneError as e:
+                raise InternalError(str(e))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '          
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
 
 
 
@@ -177,31 +196,31 @@ class CrudMngr(genmngr.GenericMngr):
                 if request.method == 'POST':
                     necessaryKeys = ('name', 'cardNumber', 'orgId')
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.addPerson(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
                     necessaryKeys = ('id', 'name', 'cardNumber', 'orgId')
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.updPerson(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
                     necessaryKeys = ('id',)
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.delPerson(request.json)
                     return jsonify({'1': 1}), OK
 
-
-            except database.PersonError as personError:
-                return jsonify({'1': 1}), 500
-
-
-
-
+            except database.PersonError as e:
+                raise InternalError(str(e))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '          
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
 
 
 
@@ -212,29 +231,31 @@ class CrudMngr(genmngr.GenericMngr):
                 if request.method == 'POST':
                     necessaryKeys = ('boardModel', 'macAddress', 'ipAddress')
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.addController(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
                     necessaryKeys = ('id', 'boardModel', 'macAddress', 'ipAddress')
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.updController(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
                     necessaryKeys = ('id',)
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.delController(request.json)
                     return jsonify({'1': 1}), OK
 
-
-            except database.ControllerError as controllerError:
-                return jsonify({'1': 1}), 500
-
-
+            except database.ControllerError as e:
+                raise InternalError(str(e))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '          
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
 
 
 
@@ -247,7 +268,7 @@ class CrudMngr(genmngr.GenericMngr):
                                      'stateIn', 'rlseOut', 'bzzrOut', 'zoneId',
                                      'controllerId', 'rowStateId')
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.addPassage(request.json)
                     return jsonify({'1': 1}), CREATED
 
@@ -256,26 +277,26 @@ class CrudMngr(genmngr.GenericMngr):
                                      'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut',
                                      'zoneId', 'controllerId', 'rowStateId')
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.updPassage(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
                     necessaryKeys = ('id',)
                     if not all(key in request.json for key in necessaryKeys):
-                        abort(BAD_REQUEST)
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                     self.dbMngr.delPassage(request.json)
                     return jsonify({'1': 1}), OK
 
+            except database.PassageError as e:
+                raise InternalError(str(e))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '          
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
 
-            except database.PassageError as passageError:
-                return jsonify({'1': 1}), 500
 
-
-
-
-
-                
 
         app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
 
