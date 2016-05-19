@@ -19,7 +19,7 @@ class CrudMngr(genmngr.GenericMngr):
     '''
     '''
 
-    def __init__(self, netMngr, netToCrud, exitFlag):
+    def __init__(self, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
@@ -27,12 +27,6 @@ class CrudMngr(genmngr.GenericMngr):
 
         #Database connection should be created in run method
         self.dataBase = None
-
-        #Queue to receive message from the Main thread.
-        self.mainToEvent = mainToEvent
-
-        #Queue to send messages to net.
-        self.netMngr = netMngr
 
         #Queue to receive message from the Network thread.
         self.netToCrud = queue.Queue()
@@ -54,35 +48,11 @@ class CrudMngr(genmngr.GenericMngr):
         self.dataBase = database.DataBase(DB_FILE)
 
         while True:
-            #self.logger.debug('Sender Thread waiting from MGT or Asynchronous Receiver messages ...')
             try:
                 #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
-                event = self.mainToEvent.get(timeout=EXIT_CHECK_TIME)
+                crud = self.netToCrud.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
-                self.netMngr.sendEvent(event)
-                try:
-                    eventResponse = None
-                    eventResponse = self.netToEvent.get(timeout=WAIT_RESP_TIME)
-                    if eventResponse == 'OK':
-                        self.logger.debug('The server confirms the reception of the event.')
-                    else:
-                        raise queue.Empty
-                except queue.Empty:
-                
-                    if eventResponse:
-                        logMsg = 'The server could not save the event, '
-                    else:
-                        logMsg = 'No response from server, '
-                    logMsg += 'saving event in local DB'
-
-                    self.logger.warning(logMsg)
-                    self.dataBase.saveEvent(event)
-                    self.checkExit()
-                    
-                    if not self.resenderAlive.is_set():
-                        self.resenderAlive.set()
-                        reSender = ReSender(self.netMngr, self.netToReSnd, self.resenderAlive, self.exitFlag)
-                        reSender.start()
+                print(crud)
     
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
@@ -90,71 +60,3 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-
-
-
-
-class ReSender(genmngr.GenericMngr):
-
-    '''
-    This thread tries to resend events when there is no connection to server.
-    Once the connection is established it resend the events and it dies.
-    '''
-
-    def __init__(self, netMngr, netToReSnd, resenderAlive, exitFlag):
-
-        #Invoking the parent class constructor, specifying the thread name, 
-        #to have a understandable log file.
-        super().__init__('ReSender', exitFlag)
-
-        self.netMngr = netMngr
-
-        self.netToReSnd = netToReSnd
-
-        #Database connection should be created in run method
-        self.dataBase = None
-
-        #Flag to know if Resender Thread is alive
-        self.resenderAlive = resenderAlive
-
-        #Calculating turns to sleep EXIT_CHECK_TIME
-        self.SLEEP_TURNS = RE_SEND_TIME // EXIT_CHECK_TIME
-
-        #Calculating real resend time just for logging purposes
-        self.REAL_RE_SEND_TIME = self.SLEEP_TURNS * EXIT_CHECK_TIME
-
-
-
-
-    def run(self):
-        '''
-        '''
-        self.dataBase = database.DataBase(DB_FILE)
-
-        for eventIdList, eventList in self.dataBase.getNEvents(RE_SEND_EVTS_QUANT):
-            noConnection = True
-            while noConnection:
-                self.netMngr.reSendEvents(eventList)
-                try:
-                    eventsResponse = self.netToReSnd.get(timeout=WAIT_RESP_TIME)
-                    if eventsResponse == 'OK':
-                        self.logger.debug('The server confirms the reception of the events.')
-                        self.dataBase.delEvents(eventIdList)
-                        noConnection = False
-                    else:
-                        logMsg = ('The server could not save the events correctly, '
-                                  'saving the event in local DB.'
-                                 )
-                        self.logger.warning(logMsg)
-                        raise queue.Empty
-                except queue.Empty:
-                    logMsg = ("Sleeping for {} secs to retry sending events."
-                              "".format(self.REAL_RE_SEND_TIME)
-                             )
-                    self.logger.info(logMsg) 
-                    for i in range(self.SLEEP_TURNS):
-                        self.checkExit()
-                        time.sleep(EXIT_CHECK_TIME)
-
-        self.resenderAlive.clear()
-        sys.exit(self.exitCode)
