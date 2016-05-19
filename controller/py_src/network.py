@@ -96,7 +96,7 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, netToEvent, netToReSnd, exitFlag):
+    def __init__(self, netToEvent, netToReSnd, crudMngr, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
@@ -109,6 +109,9 @@ class NetMngr(genmngr.GenericMngr):
         #Buffer to send bytes to server
         #It is used in POLLOUT event
         self.outBuffer = b''
+
+        #CRUD Manager to send the CRUD commands received from server
+        self.crudMngr = crudMngr
 
         #Queue to send responses to Event Thread
         self.netToEvent = netToEvent
@@ -255,9 +258,10 @@ class NetMngr(genmngr.GenericMngr):
             response = msg.strip(REVS+END)
             response = response.decode('utf8')
             self.netToReSnd.put(response)
-        
+
+        #This will happen when the server send to controller a CRUD message
         elif msg.startswith(CUD):
-            print('vamos joraca')
+            self.crudMngr.netToCrud.put(msg)
 
 
 

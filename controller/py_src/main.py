@@ -20,6 +20,7 @@ import database
 import events
 import network
 import passage
+import crud
 from config import *
 
 
@@ -65,8 +66,11 @@ class Controller(object):
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
+        #Creating the CRUD Manager Thread 
+        self.crudMngr = crud.CrudMngr(self.exitFlag)
+
         #Creating the Net Manager Thread 
-        self.netMngr = network.NetMngr(netToEvent, netToReSnd, self.exitFlag)        
+        self.netMngr = network.NetMngr(netToEvent, netToReSnd, self.crudMngr, self.exitFlag)        
 
         #Creating the Event Manager Thread giving to it the previous event queue
         self.eventMngr = events.EventMngr(self.mainToEvent, self.netMngr, netToEvent, netToReSnd, self.exitFlag)
@@ -307,6 +311,9 @@ class Controller(object):
 
         #Starting the "Event Manager" thread
         self.netMngr.start()
+
+        #Starting the "CRUD Manager" thread
+        self.crudMngr.start()
         
         try:
             while True:
