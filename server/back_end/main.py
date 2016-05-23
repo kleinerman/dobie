@@ -17,6 +17,7 @@ import signal
 
 import database
 import network
+import msgreceiver
 import crud
 from config import *
 
@@ -43,15 +44,11 @@ class BackEndSrvr(object):
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
-        #DataBase object 
-        self.dbMngr = database.DbMngr(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self.exitFlag)
-
         #Creating the Net Manager Thread 
-        self.netMngr = network.NetMngr(self.dbMngr, self.exitFlag)        
-
+        self.netMngr = network.NetMngr(self.exitFlag)        
 
         #Creating CRUD Manager (This will run in main thread)
-        self.crudMngr = crud.CrudMngr(self.dbMngr, self.netMngr)
+        self.crudMngr = crud.CrudMngr(self.netMngr)
 
 
         self.origSigIntHandler = signal.getsignal(signal.SIGINT)
@@ -85,9 +82,6 @@ class BackEndSrvr(object):
         
         #Starting the "Event Manager" thread
         self.netMngr.start()
-        
-        #Starting the "DataBase Manager" thread
-        self.dbMngr.start()
 
         #Starting "CRUD Manager" It will run in main thread
         self.crudMngr.run()

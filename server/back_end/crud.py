@@ -33,10 +33,10 @@ class CrudMngr(genmngr.GenericMngr):
     This class is responsible for managing the creations, deletions and 
     modifications in database
     '''
-    def __init__(self, dbMngr, netMngr):
+    def __init__(self, netMngr):
 
-        #Database manager object to access DB
-        self.dbMngr = dbMngr
+        #Database object to access DB
+        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
 
         self.netPassage = netpassage.NetPassage(netMngr)
 
@@ -67,21 +67,21 @@ class CrudMngr(genmngr.GenericMngr):
                     necessaryKeys = ('name',)
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.addOrganization(request.json)
+                    self.dataBase.addOrganization(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
                     necessaryKeys = ('id', 'name')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.updOrganization(request.json)
+                    self.dataBase.updOrganization(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
                     necessaryKeys = ('id',)
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.delOrganization(request.json)
+                    self.dataBase.delOrganization(request.json)
                     return jsonify({'1': 1}), OK
 
 
@@ -101,21 +101,21 @@ class CrudMngr(genmngr.GenericMngr):
                     necessaryKeys = ('name',)
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.addZone(request.json)
+                    self.dataBase.addZone(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
                     necessaryKeys = ('id', 'name')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.updZone(request.json)
+                    self.dataBase.updZone(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
                     necessaryKeys = ('id',)
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.delZone(request.json)
+                    self.dataBase.delZone(request.json)
                     return jsonify({'1': 1}), OK
 
 
@@ -135,21 +135,21 @@ class CrudMngr(genmngr.GenericMngr):
                     necessaryKeys = ('name', 'cardNumber', 'orgId')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.addPerson(request.json)
+                    self.dataBase.addPerson(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
                     necessaryKeys = ('id', 'name', 'cardNumber', 'orgId')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.updPerson(request.json)
+                    self.dataBase.updPerson(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
                     necessaryKeys = ('id',)
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.delPerson(request.json)
+                    self.dataBase.delPerson(request.json)
                     return jsonify({'1': 1}), OK
 
 
@@ -170,21 +170,21 @@ class CrudMngr(genmngr.GenericMngr):
                     necessaryKeys = ('boardModel', 'macAddress', 'ipAddress')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.addController(request.json)
+                    self.dataBase.addController(request.json)
                     return jsonify({'1': 1}), CREATED
 
                 elif request.method == 'PUT':
                     necessaryKeys = ('id', 'boardModel', 'macAddress', 'ipAddress')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.updController(request.json)
+                    self.dataBase.updController(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
                     necessaryKeys = ('id',)
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.delController(request.json)
+                    self.dataBase.delController(request.json)
                     return jsonify({'1': 1}), OK
 
 
@@ -205,11 +205,11 @@ class CrudMngr(genmngr.GenericMngr):
                                      'controllerId')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    passageId = self.dbMngr.addPassage(request.json)
+                    passageId = self.dataBase.addPassage(request.json)
 
                     passage = request.json
                     passage['id'] = passageId
-                    ctrllerMac = self.dbMngr.getControllerMac(passageId)
+                    ctrllerMac = self.dataBase.getControllerMac(passageId)
                     self.netPassage.addPassage(ctrllerMac, passage)
 
                     return jsonify({'1': 1}), CREATED
@@ -220,14 +220,14 @@ class CrudMngr(genmngr.GenericMngr):
                                      'zoneId', 'controllerId')
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.updPassage(request.json)
+                    self.dataBase.updPassage(request.json)
                     return jsonify({'1': 1}), OK
 
                 elif request.method == 'DELETE':
                     necessaryKeys = ('id',)
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
-                    self.dbMngr.delPassage(request.json)
+                    self.dataBase.delPassage(request.json)
                     return jsonify({'1': 1}), OK
 
 

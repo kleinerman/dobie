@@ -2,7 +2,6 @@ import pymysql
 import queue
 import logging
 
-import genmngr
 from config import *
 
 
@@ -69,21 +68,17 @@ class PassageError(Exception):
 
 
 
-class DbMngr(genmngr.GenericMngr):
+class DataBase(object):
 
-    def __init__(self, host, user, passwd, dataBase, exitFlag):
+    def __init__(self, host, user, passwd, dataBase):
 
-        #Invoking the parent class constructor, specifying the thread name, 
-        #to have a understandable log file.
-        super().__init__('DbMngr', exitFlag)
+
+        self.logger = logging.getLogger(LOGGER_NAME)
 
         self.host = host
         self.user = user
         self.passwd = passwd
         self.dataBase = dataBase
-    
-        self.netToDb = queue.Queue()
-
 
         self.connection = pymysql.connect(host, user, passwd, dataBase)
         
@@ -108,22 +103,10 @@ class DbMngr(genmngr.GenericMngr):
 
 
 
-
-    def putEvents(self, events):
-        '''
-        '''
-        self.netToDb.put(events)
-
-
-
-
-
-
     def saveEvents(self, events):
         '''
         It receives a list of events and saves them in the database
         '''
-
 
         for event in events:
 

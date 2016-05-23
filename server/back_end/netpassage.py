@@ -27,6 +27,6 @@ class NetPassage(object):
         '''
         passageJson = json.dumps(passage).encode('utf8')
 
-        msg = CUD + b'S' + b'C' + REVS + passageJson + END 
+        msg = CUD + b'S' + b'C' + passageJson + END 
         
         self.netMngr.sendToCtrller(msg, ctrllerMac)
