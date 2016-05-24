@@ -34,12 +34,18 @@ class BadRequest(Exception):
         self.status_code = status_code
 
 
+class ConflictError(Exception):
+    def __init__(self, message, status_code=409):
+        Exception.__init__(self)
+        self.message = message
+        self.status_code = status_code
+
+
 class InternalError(Exception):
     def __init__(self, message, status_code=500):
         Exception.__init__(self)
         self.message = message
         self.status_code = status_code
-
 
 
 class CrudMngr(genmngr.GenericMngr):
@@ -95,6 +101,14 @@ class CrudMngr(genmngr.GenericMngr):
             response.status_code = 404
             return response
 
+        @app.errorhandler(ConflictError)
+        def conflictError(error):
+            response = jsonify ({'error': ('The request could not be completed due to a conflict with '
+                                          'the current state of the target resource'), 'message': error.message, 'code':409})
+            response.status_code = 409
+            return response
+
+
         @app.errorhandler(InternalError)
         def internalServerError(error):
             response = jsonify ({'error': 'internal server error', 'message': error.message , 'code':500})
@@ -146,7 +160,7 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'1': 1}), OK
 
             except database.OrganizationError as e:
-                raise InternalError(str(e))
+                raise ConflictError(str(e))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '          
@@ -180,7 +194,7 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'1': 1}), OK
 
             except database.ZoneError as e:
-                raise InternalError(str(e))
+                raise ConflictError(str(e))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '          
@@ -215,7 +229,7 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'1': 1}), OK
 
             except database.PersonError as e:
-                raise InternalError(str(e))
+                raise ConflictError(str(e))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '          
@@ -250,7 +264,7 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'1': 1}), OK
 
             except database.ControllerError as e:
-                raise InternalError(str(e))
+                raise ConflictError(str(e))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '          
@@ -289,7 +303,7 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'1': 1}), OK
 
             except database.PassageError as e:
-                raise InternalError(str(e))
+                raise ConflictError(str(e))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '          

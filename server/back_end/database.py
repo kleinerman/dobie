@@ -463,7 +463,7 @@ class DbMngr(genmngr.GenericMngr):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
-            raise PersonError('Can not add this organization')
+            raise PersonError('Can not add this person')
 
 
 
