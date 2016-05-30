@@ -78,7 +78,6 @@ class DbMngr(genmngr.GenericMngr):
     
         self.netToDb = queue.Queue()
 
-
         self.connection = pymysql.connect(host, user, passwd, dataBase)
         
         self.cursor = self.connection.cursor()
