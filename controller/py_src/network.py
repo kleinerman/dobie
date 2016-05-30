@@ -258,10 +258,11 @@ class NetMngr(genmngr.GenericMngr):
 
         #This will happen when the server send to controller a CRUD message
         elif msg.startswith(CUD):
-            self.crudMngr.netToCrud.put(msg)
+            crudMsg = msg.strip(CUD+END).decode('utf8')
+            self.crudMngr.netToCrud.put(crudMsg)
             crudCmd = msg[1:3]
-            jsonComplete = msg[3:-1].decode('utf8')
-            jsonId = re.search('("id":\s*\d*)', jsonComplete).groups()[0]
+            completeJson = crudMsg[2:]
+            jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
             jsonId = '{' + jsonId + '}'
             jsonId = jsonId.encode('utf8')
             ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
