@@ -265,3 +265,23 @@ class DataBase(object):
         return ppsDictsDict
 
 
+
+    #---------------------------------------------------------------------------#
+
+    def addPassage(self, passage):
+        '''
+        Receive a passage dictionary and add it into DB
+        '''
+
+        sql = ("INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
+               "rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) "
+               "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
+               "".format(passage['id'], passage['i0In'], passage['i1In'], passage['o0In'], 
+                         passage['o1In'], passage['bttnIn'], passage['stateIn'], 
+                         passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
+                         passage['bzzrTime'], passage['alrmTime'])
+              )
+        print(sql)
+
+
+

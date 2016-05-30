@@ -3,6 +3,7 @@ import logging
 import datetime
 import time
 import sys
+import json
 
 import database
 import queue
@@ -31,8 +32,34 @@ class CrudMngr(genmngr.GenericMngr):
         #Queue to receive message from the Network thread.
         self.netToCrud = queue.Queue()
 
+        self.crudHndlrs = {'S': self.mngPassage
+                          }
 
 
+
+
+
+    def mngPassage(self, crudMsg):
+        '''
+        '''
+
+        crudSubCmd = crudMsg[1]
+        passageJson = crudMsg[2:]
+
+        passage = json.loads(passageJson)
+
+        if crudSubCmd == 'C':
+            print(passage)
+            self.dataBase.addPassage(passage)
+
+        elif crudSubCmd == 'U':
+            print(crudSubCmd, crudJsonObj)
+
+        elif crudSubCmd == 'D':
+            print(crudSubCmd, crudJsonObj)
+
+        else:
+            print('Invalid crud passage sub command.')
 
 
 
@@ -50,9 +77,14 @@ class CrudMngr(genmngr.GenericMngr):
         while True:
             try:
                 #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
-                crud = self.netToCrud.get(timeout=EXIT_CHECK_TIME)
+                crudMsg = self.netToCrud.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
-                print(crud)
+                crudCmd = crudMsg[0]
+                self.crudHndlrs[crudCmd](crudMsg)  
+
+
+                
+
     
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
