@@ -369,12 +369,13 @@ class DataBase(object):
         Receive a dictionary with passage parametters and save it in DB
         '''
 
-        sql = ("INSERT INTO Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, "
-               "rlseOut, bzzrOut, zoneId, controllerId, rowStateId) "
-               "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
+        sql = ("INSERT INTO Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, "
+               "bzzrOut, rlseTime, bzzrTime, alrmTime, zoneId, controllerId, rowStateId) "
+               "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
                "".format(passage['i0In'], passage['i1In'], passage['o0In'],
                          passage['o1In'], passage['bttnIn'], passage['stateIn'],
-                         passage['rlseOut'], passage['bzzrOut'], passage['zoneId'],
+                         passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'], 
+                         passage['bzzrTime'], passage['alrmTime'], passage['zoneId'],
                          passage['controllerId'], ROW_STATE_TO_ADD) 
               )
 

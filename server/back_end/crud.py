@@ -201,8 +201,10 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 if request.method == 'POST':
                     necessaryKeys = ('i0In', 'i1In', 'o0In', 'o1In', 'bttnIn',
-                                     'stateIn', 'rlseOut', 'bzzrOut', 'zoneId',
-                                     'controllerId')
+                                     'stateIn', 'rlseOut', 'bzzrOut', 'rlseTime', 
+                                     'bzzrTime', 'alrmTime', 'zoneId', 'controllerId')
+
+
                     if not all(key in request.json for key in necessaryKeys):
                         abort(BAD_REQUEST)
                     passageId = self.dataBase.addPassage(request.json)
