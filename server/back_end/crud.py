@@ -211,6 +211,8 @@ class CrudMngr(genmngr.GenericMngr):
 
                     passage = request.json
                     passage['id'] = passageId
+                    passage.pop('zoneId')
+                    passage.pop('controllerId')
                     ctrllerMac = self.dataBase.getControllerMac(passageId)
                     self.netPassage.addPassage(ctrllerMac, passage)
 

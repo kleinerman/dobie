@@ -5,10 +5,10 @@ import logging
 from config import *
 
 
-ROW_STATE_TO_ADD = 1
-ROW_STATE_ADDED = 2
-ROW_STATE_TO_DELETE = 3
-ROW_STATE_DELETED = 4
+TO_COMMIT = 1
+COMMITTED = 2
+TO_DELETE = 3
+DELETED = 4
 
 
 
@@ -376,7 +376,7 @@ class DataBase(object):
                          passage['o1In'], passage['bttnIn'], passage['stateIn'],
                          passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'], 
                          passage['bzzrTime'], passage['alrmTime'], passage['zoneId'],
-                         passage['controllerId'], ROW_STATE_TO_ADD) 
+                         passage['controllerId'], TO_COMMIT) 
               )
 
 
@@ -388,6 +388,35 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise PassageError('Can not add this passage')
+
+
+
+    def commitPassage(self, passageId):
+        '''
+        Mark the passage in database as COMMITTED if it was previously in TO_COMMIT state
+        or mark it as DELETED if it was previously in TO_DELETE state
+        '''
+
+        sql = "SELECT rowStateId FROM Passage WHERE id = {}".format(passageId)
+
+        try:
+            self.cursor.execute(sql)
+            rowState = self.cursor.fetchone()[0]
+
+            if rowState == TO_COMMIT:
+                sql = "UPDATE Passage SET rowStateId = {}".format(COMMITED)
+            elif rowState == TO_DELETE:
+                sql = "UPDATE Passage SET rowStateId = {}".format(DELETED)
+            else:
+                self.logger.error("Invalid state detected in Passage table.")
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+                
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise PassageError('Error committing this passage')
 
 
 
@@ -426,7 +455,7 @@ class DataBase(object):
                "".format(passage['i0In'], passage['i1In'], passage['o0In'],
                          passage['o1In'], passage['bttnIn'], passage['stateIn'],
                          passage['rlseOut'], passage['bzzrOut'], passage['zoneId'],
-                         passage['controllerId'], ROW_STATE_TO_ADD, passage['id'])
+                         passage['controllerId'], TO_COMMIT, passage['id'])
               )
 
         try:
@@ -458,7 +487,7 @@ class DataBase(object):
         '''
 
         sql = ("INSERT INTO Person(name, cardNumber, orgId, rowStateId) VALUES('{}', {}, {}, {})"
-               "".format(person['name'], person['cardNumber'], person['orgId'], ROW_STATE_ADDED)
+               "".format(person['name'], person['cardNumber'], person['orgId'], COMMITTED)
               )
 
         try:
