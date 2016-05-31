@@ -161,6 +161,7 @@ class DbMngr(genmngr.GenericMngr):
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
@@ -202,6 +203,8 @@ class DbMngr(genmngr.GenericMngr):
 
         try:
             self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise OrganizationError('Organization not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
@@ -229,6 +232,7 @@ class DbMngr(genmngr.GenericMngr):
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
@@ -301,6 +305,7 @@ class DbMngr(genmngr.GenericMngr):
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
@@ -379,6 +384,7 @@ class DbMngr(genmngr.GenericMngr):
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
@@ -459,6 +465,7 @@ class DbMngr(genmngr.GenericMngr):
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)

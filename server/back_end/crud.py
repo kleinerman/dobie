@@ -15,8 +15,8 @@ import sys
 
 import time
 
-from flask import Flask, jsonify, request, abort
-from flask.ext.httpauth import HTTPBasicAuth
+from flask import Flask, jsonify, request, abort, url_for
+from flask_httpauth import HTTPBasicAuth
 
 # constants
 BAD_REQUEST = 400
@@ -149,29 +149,41 @@ class CrudMngr(genmngr.GenericMngr):
                 pass
 
 
-        @app.route('/api/v1.0/organization', methods=['POST', 'PUT','DELETE'])
-        def crudOrganization():
+        @app.route('/api/v1.0/organization', methods=['POST'])
+        def addOrganization():
             try:
-                if request.method == 'POST':
-                    # if this json key does not exist, it will raise a BadRequest exception
+                # if this json key does not exist, it will raise a BadRequest exception
+                necessaryKeys = ('name',)
+                if not all(key in request.json for key in necessaryKeys):
+                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
+                id = self.dbMngr.addOrganization(request.json)
+                uri = url_for('upDelOrganization', orgId=id, _external=True)
+
+                return jsonify({'status': 'OK', 'message': 'Organization added', 'code': 201, 'uri': uri}), CREATED
+
+            except database.OrganizationError as e:
+                raise ConflictError(str(e))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+        @app.route('/api/v1.0/organization/<int:orgId>', methods=['PUT','DELETE'])
+        def upDelOrganization(orgId):
+            try:
+                if request.method == 'PUT':
                     necessaryKeys = ('name',)
                     if not all(key in request.json for key in necessaryKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.addOrganization(request.json)
-                    return jsonify({'status': 'OK', 'message': 'Organization added'}), CREATED
-
-                elif request.method == 'PUT':
-                    necessaryKeys = ('id', 'name',)
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.updOrganization(request.json)
+                    organization = request.json
+                    organization['id'] = orgId
+                    self.dbMngr.updOrganization(organization)
                     return jsonify({'status': 'OK', 'message': 'Organization updated'}), OK
 
                 elif request.method == 'DELETE':
-                    necessaryKeys = ('id',)
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.delOrganization(request.json)
+                    print(1)
+                    self.dbMngr.delOrganization({'id':orgId})
                     return jsonify({'status': 'OK', 'message': 'Organization deleted'}), OK
 
             except database.OrganizationError as e:
