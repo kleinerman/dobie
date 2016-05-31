@@ -281,7 +281,7 @@ class DataBase(object):
                          passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
                          passage['bzzrTime'], passage['alrmTime'])
               )
-        print(sql)
-
+        self.cursor.execute(sql)
+        self.connection.commit()
 
 
