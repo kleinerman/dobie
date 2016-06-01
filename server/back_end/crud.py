@@ -157,9 +157,9 @@ class CrudMngr(genmngr.GenericMngr):
                 if not all(key in request.json for key in necessaryKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
                 id = self.dbMngr.addOrganization(request.json)
-                uri = url_for('upDelOrganization', orgId=id, _external=True)
+                uri = url_for('modOrganization', orgId=id, _external=True)
 
-                return jsonify({'status': 'OK', 'message': 'Organization added', 'code': 201, 'uri': uri}), CREATED
+                return jsonify({'status': 'OK', 'message': 'Organization added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.OrganizationError as e:
                 raise ConflictError(str(e))
@@ -170,19 +170,19 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
 
         @app.route('/api/v1.0/organization/<int:orgId>', methods=['PUT','DELETE'])
-        def upDelOrganization(orgId):
+        def modOrganization(orgId):
             try:
+                organization = request.json
+                organization['id'] = orgId
+
                 if request.method == 'PUT':
                     necessaryKeys = ('name',)
                     if not all(key in request.json for key in necessaryKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    organization = request.json
-                    organization['id'] = orgId
                     self.dbMngr.updOrganization(organization)
                     return jsonify({'status': 'OK', 'message': 'Organization updated'}), OK
 
                 elif request.method == 'DELETE':
-                    print(1)
                     self.dbMngr.delOrganization({'id':orgId})
                     return jsonify({'status': 'OK', 'message': 'Organization deleted'}), OK
 
@@ -195,29 +195,44 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
 
 
-        @app.route('/api/v1.0/zone', methods=['POST', 'PUT','DELETE'])
+        @app.route('/api/v1.0/zone', methods=['POST'])
         @auth.login_required
-        def crudZone():
+        def addZone():
             try:
-                if request.method == 'POST':
+                necessaryKeys = ('name',)
+                if not all(key in request.json for key in necessaryKeys):
+                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
+                id = self.dbMngr.addZone(request.json)
+                uri = url_for('modZone', zoneId=id, _external=True)
+                return jsonify({'status': 'OK', 'message': 'Zone added', 'code': CREATED, 'uri': uri}), CREATED
+
+            except database.ZoneError as e:
+                raise ConflictError(str(e))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
+        @app.route('/api/v1.0/zone/<int:zoneId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def modZone(zoneId):
+            try:
+                zone = request.json
+                zone['id'] = zoneId
+
+                if request.method == 'PUT':
                     necessaryKeys = ('name',)
                     if not all(key in request.json for key in necessaryKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.addZone(request.json)
-                    return jsonify({'status': 'OK', 'message': 'Zone added'}), CREATED
 
-                elif request.method == 'PUT':
-                    necessaryKeys = ('id', 'name')
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.updZone(request.json)
+                    self.dbMngr.updZone(zone)
                     return jsonify({'status': 'OK', 'message': 'Zone updated'}), OK
 
                 elif request.method == 'DELETE':
-                    necessaryKeys = ('id',)
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.delZone(request.json)
+                    self.dbMngr.delZone(zone)
                     return jsonify({'status': 'OK', 'message': 'Zone deleted'}), OK
 
             except database.ZoneError as e:
@@ -230,29 +245,43 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/person', methods=['POST', 'PUT','DELETE'])
+        @app.route('/api/v1.0/person', methods=['POST'])
         @auth.login_required
-        def crudPerson():
+        def addPerson():
             try:
-                if request.method == 'POST':
+                necessaryKeys = ('name', 'cardNumber', 'orgId')
+                if not all(key in request.json for key in necessaryKeys):
+                   raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
+                self.dbMngr.addPerson(request.json)
+                id = self.dbMngr.addPerson(request.json)
+                uri = url_for('modPerson', personId=id, _external=True)
+                return jsonify({'status': 'OK', 'message': 'Person added', 'code': CREATED, 'uri': uri}), CREATED
+
+            except database.PersonError as e:
+                raise ConflictError(str(e))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '          
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+        @app.route('/api/v1.0/person/<int:personId>', methods=['POST'])
+        @auth.login_required
+        def modPerson(personID):
+            try:
+                person = request.json
+                person['id'] = personId
+
+                if request.method == 'PUT':
                     necessaryKeys = ('name', 'cardNumber', 'orgId')
                     if not all(key in request.json for key in necessaryKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.addPerson(request.json)
-                    return jsonify({'status': 'OK', 'message': 'Person added'}), CREATED
 
-                elif request.method == 'PUT':
-                    necessaryKeys = ('id', 'name', 'cardNumber', 'orgId')
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.updPerson(request.json)
+                    self.dbMngr.updPerson(person)
                     return jsonify({'status': 'OK', 'message': 'Person updated'}), OK
 
                 elif request.method == 'DELETE':
-                    necessaryKeys = ('id',)
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.delPerson(request.json)
+                    self.dbMngr.delPerson(person)
                     return jsonify({'status': 'OK', 'message': 'Person deleted'}), OK
 
             except database.PersonError as e:
@@ -265,29 +294,43 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/controller', methods=['POST', 'PUT','DELETE'])
+        @app.route('/api/v1.0/controller', methods=['POST'])
         @auth.login_required
-        def crudController():
+        def addController():
             try:
-                if request.method == 'POST':
+                necessaryKeys = ('boardModel', 'macAddress', 'ipAddress')
+                if not all(key in request.json for key in necessaryKeys):
+                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
+                id = self.dbMngr.addController(request.json)
+                uri = url_for('modController', controllerId=id, _external=True)
+                return jsonify({'status': 'OK', 'message': 'Controller added', 'code': CREATED, 'uri': uri}), CREATED
+
+            except database.ControllerError as e:
+                raise ConflictError(str(e))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '          
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+        @app.route('/api/v1.0/controller/<int:controllerId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def modController(controllerId):
+            try:
+
+                controller = request.json
+                controller['id'] = controllerId
+
+                if request.method == 'PUT':
                     necessaryKeys = ('boardModel', 'macAddress', 'ipAddress')
                     if not all(key in request.json for key in necessaryKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.addController(request.json)
-                    return jsonify({'status': 'OK', 'message': 'Controller added'}), CREATED
-
-                elif request.method == 'PUT':
-                    necessaryKeys = ('id', 'boardModel', 'macAddress', 'ipAddress')
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.updController(request.json)
+                    self.dbMngr.updController(controller)
                     return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
-
+                
                 elif request.method == 'DELETE':
-                    necessaryKeys = ('id',)
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.delController(request.json)
+                    self.dbMngr.delController(controller)
                     return jsonify({'status': 'OK', 'message': 'Controller deleted'}), OK
 
             except database.ControllerError as e:
@@ -299,34 +342,46 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
 
 
-
-        @app.route('/api/v1.0/passage', methods=['POST', 'PUT','DELETE'])
+        @app.route('/api/v1.0/passage', methods=['POST'])
         @auth.login_required
-        def crudPassage():
+        def addPassage():
             try:
-                if request.method == 'POST':
-                    necessaryKeys = ('i0In', 'i1In', 'o0In', 'o1In', 'bttnIn',
-                                     'stateIn', 'rlseOut', 'bzzrOut', 'zoneId',
-                                     'controllerId', 'rowStateId')
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.addPassage(request.json)
-                    return jsonify({'status': 'OK', 'message': 'Passage added'}), CREATED
+                necessaryKeys = ('i0In', 'i1In', 'o0In', 'o1In', 'bttnIn',
+                                 'stateIn', 'rlseOut', 'bzzrOut', 'zoneId',
+                                 'controllerId', 'rowStateId')
+                if not all(key in request.json for key in necessaryKeys):
+                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
+                id = self.dbMngr.addPassage(request.json)
+                uri = url_for('modPassage', passageId=id, _external=True)
+                return jsonify({'status': 'OK', 'message': 'Passage added', 'code': CREATED, 'uri': uri}), CREATED
+            except database.ControllerError as e:
+                raise ConflictError(str(e))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
 
-                elif request.method == 'PUT':
-                    necessaryKeys = ('id', 'i0In', 'i1In', 'o0In', 'o1In',
-                                     'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut',
-                                     'zoneId', 'controllerId', 'rowStateId')
+        @app.route('/api/v1.0/passage/<int:passageId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def modPassage(passageId):
+            try:
+                
+                passage = request.json
+                passage['id'] = passageId
+
+                if request.method == 'PUT':
+                    necessaryKeys = ('i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn',
+                                     'rlseOut', 'bzzrOut', 'zoneId', 'controllerId', 'rowStateId')
                     if not all(key in request.json for key in necessaryKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.updPassage(request.json)
+
+                    
+                    self.dbMngr.updPassage(passage)
                     return jsonify({'status': 'OK', 'message': 'Passage updated'}), OK
 
                 elif request.method == 'DELETE':
-                    necessaryKeys = ('id',)
-                    if not all(key in request.json for key in necessaryKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(necessaryKeys)))
-                    self.dbMngr.delPassage(request.json)
+                    self.dbMngr.delPassage(passage)
                     return jsonify({'status': 'OK', 'message': 'Passage deleted'}), OK
 
             except database.PassageError as e:
