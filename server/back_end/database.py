@@ -404,9 +404,13 @@ class DataBase(object):
             rowState = self.cursor.fetchone()[0]
 
             if rowState == TO_COMMIT:
-                sql = "UPDATE Passage SET rowStateId = {}".format(COMMITED)
+                sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
+                       "".format(COMMITTED, passageId)
+                      )
             elif rowState == TO_DELETE:
-                sql = "UPDATE Passage SET rowStateId = {}".format(DELETED)
+                sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
+                       "".format(DELETED, passageId)
+                      )
             else:
                 self.logger.error("Invalid state detected in Passage table.")
 
