@@ -151,6 +151,7 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
@@ -192,6 +193,8 @@ class DataBase(object):
 
         try:
             self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise OrganizationError('Organization not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
@@ -219,6 +222,7 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
@@ -291,6 +295,7 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
@@ -497,10 +502,11 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
             self.connection.commit()
+            return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
-            raise PersonError('Can not add this organization')
+            raise PersonError('Can not add this person')
 
 
 
