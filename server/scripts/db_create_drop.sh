@@ -24,7 +24,7 @@ if [[ $1 == --create ]]; then
         INSERT INTO Zone(id, name) VALUES(1, 'Ingreso Principal');
         INSERT INTO NotReason(id, description, rowStateId) VALUES(1, 'No access', 1), (2, 'Expired card', 1), (3, 'Out of time', 1);
         INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime, zoneId, controllerId, rowStateId) VALUES(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-        INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime, zoneId, controllerId, rowStateId) VALUES(7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime, zoneId, controllerId, rowStateId) VALUES(2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
                                                  
                                                    "
     
