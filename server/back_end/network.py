@@ -154,12 +154,17 @@ class NetMngr(genmngr.GenericMngr):
             self.logger.error('Error calling "sendToCtrller" function')
             raise ValueError("One of 'mac' or 'sctkFd' arguments should be 'None'")
 
-        if mac:
-            outBufferQue = self.macConnObjects[mac]['outBufferQue']
-            ctrllerSckt = self.macConnObjects[mac]['socket']
-        else:
-            outBufferQue = self.fdConnObjects[scktFd]['outBufferQue']
-            ctrllerSckt = self.fdConnObjects[scktFd]['socket']
+        try:
+            if mac:
+                outBufferQue = self.macConnObjects[mac]['outBufferQue']
+                ctrllerSckt = self.macConnObjects[mac]['socket']
+            else:
+                outBufferQue = self.fdConnObjects[scktFd]['outBufferQue']
+                ctrllerSckt = self.fdConnObjects[scktFd]['socket']
+
+        except KeyError:
+            self.logger.warning('Controller not connected.')
+            return
 
         outBufferQue.put(msg)
         with self.lockNetPoller:

@@ -30,3 +30,16 @@ class NetPassage(object):
         msg = CUD + b'S' + b'C' + passageJson + END 
         
         self.netMngr.sendToCtrller(msg, ctrllerMac)
+
+
+
+
+    def delPassage(self, ctrllerMac, passageId):
+        '''
+        '''
+        passageId = str(passageId).encode('utf8')
+
+        msg = CUD + b'S' + b'D' + b'{"id": ' + passageId + b'}' + END
+
+        self.netMngr.sendToCtrller(msg, ctrllerMac)
+

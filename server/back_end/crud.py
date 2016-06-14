@@ -351,7 +351,7 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'status': 'OK', 'message': 'Controller deleted'}), OK
 
             except database.ControllerError as controllerError:
-                raise ConflictError(str(ontrollerError))
+                raise ConflictError(str(controllerError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '          
@@ -373,7 +373,6 @@ class CrudMngr(genmngr.GenericMngr):
                 if not all(key in request.json for key in pssgNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
                 passageId = self.dataBase.addPassage(request.json)
-
                 passage = request.json
                 passage['id'] = passageId
                 passage.pop('zoneId')
@@ -409,7 +408,9 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'status': 'OK', 'message': 'Passage updated'}), OK
 
                 elif request.method == 'DELETE':
-                    self.dataBase.delPassage(passage)
+                    ctrllerMac = self.dataBase.getControllerMac(passageId)
+                    self.dataBase.markPassageToDel(passageId)
+                    self.netPassage.delPassage(ctrllerMac, passageId)
                     return jsonify({'status': 'OK', 'message': 'Passage deleted'}), OK
 
             except database.PassageError as passageError:

@@ -358,7 +358,7 @@ class DataBase(object):
                "Passage passage ON (controller.id = passage.controllerId) WHERE "
                "passage.id = {}".format(passageId)
               )
-        
+
 
         self.cursor.execute(sql)
         return self.cursor.fetchone()[0]
@@ -413,9 +413,13 @@ class DataBase(object):
                        "".format(COMMITTED, passageId)
                       )
             elif rowState == TO_DELETE:
-                sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
-                       "".format(DELETED, passageId)
+                sql = ("DELETE FROM Passage WHERE id = {}"
+                       "".format(passageId)
                       )
+
+                #sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
+                #       "".format(DELETED, passageId)
+                #      )
             else:
                 self.logger.error("Invalid state detected in Passage table.")
 
@@ -425,31 +429,27 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
-            raise PassageError('Error committing this passage')
+            raise PassageError('Error committing this passage.')
 
 
 
 
-
-    def delPassage(self, passage):
+    def markPassageToDel(self, passageId):
         '''
-        Receive a dictionary with id passage
         '''
 
-        sql = ("DELETE FROM Passage WHERE id = {}"
-               "".format(passage['id'])
+        sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
+               "".format(TO_DELETE, passageId)
               )
 
         try:
             self.cursor.execute(sql)
-            if self.cursor.rowcount < 1:
-                raise PassageError('Passage not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
-            raise PassageError('Can not delete this passage')
-
+            raise PassageError('Error marking the Passage to be deleted.')
+        
 
 
 
