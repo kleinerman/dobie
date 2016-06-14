@@ -285,3 +285,17 @@ class DataBase(object):
         self.connection.commit()
 
 
+
+    #---------------------------------------------------------------------------#
+
+    def delPassage(self, passage):
+        '''
+        Receive a passage dictionary and delete it
+        '''
+
+        sql = "DELETE FROM Passage WHERE id = {}".format(passage['id'])
+
+        self.cursor.execute(sql)
+        self.connection.commit()
+
+

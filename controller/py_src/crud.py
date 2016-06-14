@@ -49,14 +49,13 @@ class CrudMngr(genmngr.GenericMngr):
         passage = json.loads(passageJson)
 
         if crudSubCmd == 'C':
-            print(passage)
             self.dataBase.addPassage(passage)
 
         elif crudSubCmd == 'U':
-            print(crudSubCmd, crudJsonObj)
+            print(crudSubCmd, passageJson)
 
         elif crudSubCmd == 'D':
-            print(crudSubCmd, crudJsonObj)
+            self.dataBase.delPassage(passage)
 
         else:
             print('Invalid crud passage sub command.')
