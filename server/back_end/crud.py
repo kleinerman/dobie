@@ -26,7 +26,14 @@ PASSWD = 'password'
 
 
 class BadRequest(Exception):
-    def __init__(self, message, status_code=400 ):
+    def __init__(self, message, status_code=400):
+        Exception.__init__(self)
+        self.message = message
+        self.status_code = status_code
+
+
+class NotFound(Exception):
+    def __init__(self, message, status_code=404):
         Exception.__init__(self)
         self.message = message
         self.status_code = status_code
@@ -44,6 +51,7 @@ class InternalError(Exception):
         Exception.__init__(self)
         self.message = message
         self.status_code = status_code
+
 
 
 class CrudMngr(genmngr.GenericMngr):
@@ -92,6 +100,13 @@ class CrudMngr(genmngr.GenericMngr):
         @app.errorhandler(404)
         def notFound(error):
             response = jsonify ({'status': 'error', 'error': 'request not found', 'message': 'Not found', 'code':404})
+            response.status_code = 404
+            return response
+
+
+        @app.errorhandler(NotFound)
+        def notFound(error):
+            response = jsonify ({'status': 'error', 'error': 'request not found', 'message': error.message, 'code':404})
             response.status_code = 404
             return response
 
@@ -191,6 +206,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.delOrganization({'id':orgId})
                     return jsonify({'status': 'OK', 'message': 'Organization deleted'}), OK
 
+            except database.OrganizationNotFound as organizationNotFound:
+                raise NotFound(str(organizationNotFound))
             except database.OrganizationError as organizationError:
                 raise ConflictError(str(organizationError))
             except TypeError:
@@ -246,6 +263,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.delZone(zone)
                     return jsonify({'status': 'OK', 'message': 'Zone deleted'}), OK
 
+            except database.ZoneNotFound as zoneNotFound:
+                raise NotFound(str(zoneNotFound))
             except database.ZoneError as zoneError:
                 raise ConflictError(str(zoneError))
             except TypeError:
@@ -281,9 +300,9 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
 
-        @app.route('/api/v1.0/person/<int:personId>', methods=['POST'])
+        @app.route('/api/v1.0/person/<int:personId>', methods=['PUT', 'DELETE'])
         @auth.login_required
-        def modPerson(personID):
+        def modPerson(personId):
             try:
                 person = request.json
                 person['id'] = personId
@@ -299,6 +318,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.delPerson(person)
                     return jsonify({'status': 'OK', 'message': 'Person deleted'}), OK
 
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
             except database.PersonError as personError:
                 raise ConflictError(str(personError))
             except TypeError:
@@ -350,6 +371,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.delController(controller)
                     return jsonify({'status': 'OK', 'message': 'Controller deleted'}), OK
 
+            except database.ControllerNotFound as controllerNotFound:
+                raise NotFound(str(controllerNotFound))
             except database.ControllerError as controllerError:
                 raise ConflictError(str(ontrollerError))
             except TypeError:
@@ -412,6 +435,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.delPassage(passage)
                     return jsonify({'status': 'OK', 'message': 'Passage deleted'}), OK
 
+            except database.PassageNotFound as passageNotFound:
+                raise NotFound(str(passageNotFound))
             except database.PassageError as passageError:
                 raise ConflictError(str(passageError))
             except TypeError:
