@@ -290,11 +290,17 @@ class DataBase(object):
 
     def delPassage(self, passage):
         '''
-        Receive a passage dictionary and delete it
+        Receive a passage dictionary and delete it.
+        All access and limited access on these passage will be automatically deleted 
+        by the db engine as "ON DELETE CASCADE" clause is present.
+        Then all the persons who has no access to any passage are also deleted manually.
         '''
 
         sql = "DELETE FROM Passage WHERE id = {}".format(passage['id'])
+        self.cursor.execute(sql)
+        self.connection.commit()
 
+        sql = "DELETE FROM Person WHERE id NOT IN (SELECT DISTINCT personId FROM Access)"
         self.cursor.execute(sql)
         self.connection.commit()
 
