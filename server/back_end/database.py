@@ -184,6 +184,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise OrganizationError('Can not add this organization')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise OrganizationError('Can not add this organization: wrong argument')
+
 
 
 
@@ -228,6 +232,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise OrganizationError('Can not update this organization')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise OrganizationError('Can not update this organization: wrong argument')
+
 
 
 
@@ -255,6 +263,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ZoneError('Can not add this zone')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise ZoneError('Can not add this zone: wrong argument')
+
 
 
 
@@ -302,6 +314,9 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ZoneError('Can not update this zone')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise ZoneError('Can not update this zone: wrong argument')
 
 
 
@@ -328,6 +343,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ControllerError('Can not add this controller')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise ControllerError('Can not add this controller: wrong argument')
+
 
 
 
@@ -375,6 +394,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ControllerError('Can not update this controller')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise ControllerError('Can not update this controller: wrong argument')
+
 
 
 
@@ -425,6 +448,9 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise PassageError('Can not add this passage')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise PassageError('Can not add this passage: wrong argument')
 
 
 
@@ -510,10 +536,9 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise PassageError('Can not update this passage')
-
-
-
-
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise PassageError('Can not update this passage: wrong argument')
 
 
 
@@ -541,6 +566,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise PersonError('Can not add this person')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise PersonError('Can not add this person: wrong argument')
+
 
 
 
@@ -587,6 +616,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise PersonError('Can not update this person')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise PersonError('Can not update this person: wrong argument')
+
 
 
 
