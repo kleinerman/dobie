@@ -4,11 +4,11 @@ import logging
 
 from config import *
 
-
-TO_COMMIT = 1
-COMMITTED = 2
-TO_DELETE = 3
-DELETED = 4
+TO_ADD = 1
+TO_UPDATE = 2
+COMMITTED = 3
+TO_DELETE = 4
+DELETED = 5
 
 
 
@@ -381,7 +381,7 @@ class DataBase(object):
                          passage['o1In'], passage['bttnIn'], passage['stateIn'],
                          passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'], 
                          passage['bzzrTime'], passage['alrmTime'], passage['zoneId'],
-                         passage['controllerId'], TO_COMMIT) 
+                         passage['controllerId'], TO_ADD) 
               )
 
 
@@ -408,7 +408,7 @@ class DataBase(object):
             self.cursor.execute(sql)
             rowState = self.cursor.fetchone()[0]
 
-            if rowState == TO_COMMIT:
+            if rowState in (TO_ADD, TO_UPDATE):
                 sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
                        "".format(COMMITTED, passageId)
                       )
@@ -466,7 +466,7 @@ class DataBase(object):
                          passage['o1In'], passage['bttnIn'], passage['stateIn'],
                          passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'], 
                          passage['bzzrTime'], passage['alrmTime'], passage['zoneId'],
-                         passage['controllerId'], TO_COMMIT, passage['id'])
+                         passage['controllerId'], TO_UPDATE, passage['id'])
               )
 
         try:
@@ -496,7 +496,7 @@ class DataBase(object):
         '''
         Receive a dictionary with person parametters and save it in DB
         '''
-
+        #RowState should be removed in Person table
         sql = ("INSERT INTO Person(name, cardNumber, orgId, rowStateId) VALUES('{}', {}, {}, {})"
                "".format(person['name'], person['cardNumber'], person['orgId'], COMMITTED)
               )

@@ -12,7 +12,7 @@ from flask_httpauth import HTTPBasicAuth
 
 import genmngr
 import database
-import netpassage
+import ctrllermsger
 from config import *
 
 
@@ -57,7 +57,7 @@ class CrudMngr(genmngr.GenericMngr):
         #Database object to access DB
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
 
-        self.netPassage = netpassage.NetPassage(netMngr)
+        self.ctrllerMsger = ctrllermsger.CtrllerMsger(netMngr)
 
 
     #---------------------------------------------------------------------------#
@@ -370,15 +370,17 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def addPassage():
             try:
+
+                passage = request.json
+
                 if not all(key in request.json for key in pssgNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
-                passageId = self.dataBase.addPassage(request.json)
-                passage = request.json
+                passageId = self.dataBase.addPassage(passage)
                 passage['id'] = passageId
                 passage.pop('zoneId')
                 passage.pop('controllerId')
                 ctrllerMac = self.dataBase.getControllerMac(passageId)
-                self.netPassage.addPassage(ctrllerMac, passage)
+                self.ctrllerMsger.addPassage(ctrllerMac, passage)
 
                 uri = url_for('modPassage', passageId=passageId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Passage added', 'code': CREATED, 'uri': uri}), CREATED
@@ -402,15 +404,18 @@ class CrudMngr(genmngr.GenericMngr):
                 if request.method == 'PUT':
                     if not all(key in request.json for key in pssgNeedKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
-
-                    
                     self.dataBase.updPassage(passage)
+                    passage.pop('zoneId')
+                    passage.pop('controllerId')
+                    ctrllerMac = self.dataBase.getControllerMac(passageId)
+                    self.ctrllerMsger.updPassage(ctrllerMac, passage)
+
                     return jsonify({'status': 'OK', 'message': 'Passage updated'}), OK
 
                 elif request.method == 'DELETE':
                     ctrllerMac = self.dataBase.getControllerMac(passageId)
                     self.dataBase.markPassageToDel(passageId)
-                    self.netPassage.delPassage(ctrllerMac, passageId)
+                    self.ctrllerMsger.delPassage(ctrllerMac, passageId)
                     return jsonify({'status': 'OK', 'message': 'Passage deleted'}), OK
 
             except database.PassageError as passageError:
