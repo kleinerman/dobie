@@ -288,6 +288,27 @@ class DataBase(object):
 
     #---------------------------------------------------------------------------#
 
+    def updPassage(self, passage):
+        '''
+        Receive a passage dictionary and add it into DB
+        '''
+
+        sql = ("UPDATE Passage SET i0In = {}, i1In = {}, o0In = {}, o1In = {}, "
+               "bttnIn = {}, stateIn = {}, rlseOut = {}, bzzrOut = {}, rlseTime = {}, "
+               "bzzrTime = {}, alrmTime = {} WHERE id = {}"
+               "".format(passage['i0In'], passage['i1In'], passage['o0In'],
+                         passage['o1In'], passage['bttnIn'], passage['stateIn'],
+                         passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
+                         passage['bzzrTime'], passage['alrmTime'], passage['id'])
+              )
+        self.cursor.execute(sql)
+        self.connection.commit()
+
+
+
+
+    #---------------------------------------------------------------------------#
+
     def delPassage(self, passage):
         '''
         Receive a passage dictionary and delete it.
