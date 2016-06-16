@@ -52,7 +52,7 @@ class CrudMngr(genmngr.GenericMngr):
             self.dataBase.addPassage(passage)
 
         elif crudSubCmd == 'U':
-            print(crudSubCmd, passageJson)
+            self.dataBase.updPassage(passage)
 
         elif crudSubCmd == 'D':
             self.dataBase.delPassage(passage)
