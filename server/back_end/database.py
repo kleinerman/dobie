@@ -415,6 +415,8 @@ class DataBase(object):
 
 
         self.cursor.execute(sql)
+        if self.cursor.rowcount < 1:
+            raise PassageNotFound('Passage not found')
         return self.cursor.fetchone()[0]
 
 
@@ -495,9 +497,10 @@ class DataBase(object):
         sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
                "".format(TO_DELETE, passageId)
               )
-
         try:
             self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise PassageNotFound('Passage not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
