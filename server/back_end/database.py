@@ -22,6 +22,12 @@ class OrganizationError(Exception):
         return self.errorMessage
 
 
+class OrganizationNotFound(OrganizationError):
+    '''
+    '''
+    pass
+
+
 
 class PersonError(Exception):
     '''
@@ -31,6 +37,12 @@ class PersonError(Exception):
 
     def __str__(self):
         return self.errorMessage
+
+
+class PersonNotFound(PersonError):
+    '''
+    '''
+    pass
 
 
 
@@ -44,6 +56,11 @@ class ZoneError(Exception):
         return self.errorMessage
 
 
+class ZoneNotFound(ZoneError):
+    '''
+    '''
+    pass
+
 
 class ControllerError(Exception):
     '''
@@ -54,6 +71,11 @@ class ControllerError(Exception):
     def __str__(self):
         return self.errorMessage
 
+
+class ControllerNotFound(ControllerError):
+    '''
+    '''
+    pass
 
 
 class PassageError(Exception):
@@ -66,6 +88,10 @@ class PassageError(Exception):
         return self.errorMessage
 
 
+class PassageNotFound(PassageError):
+    '''
+    '''
+    pass
 
 
 class DataBase(object):
@@ -80,7 +106,8 @@ class DataBase(object):
         self.passwd = passwd
         self.dataBase = dataBase
 
-        self.connection = pymysql.connect(host, user, passwd, dataBase)
+        # With this client_flag, cursor.rowcount will have found rows instead of affected rows
+        self.connection = pymysql.connect(host, user, passwd, dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
         
         self.cursor = self.connection.cursor()
 
@@ -156,6 +183,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise OrganizationError('Can not add this organization')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise OrganizationError('Can not add this organization: wrong argument')
+
 
 
 
@@ -173,7 +204,7 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
             if self.cursor.rowcount < 1:
-                raise OrganizationError('Organization not found')
+                raise OrganizationNotFound('Organization not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
@@ -194,12 +225,16 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
             if self.cursor.rowcount < 1:
-                raise OrganizationError('Organization not found')
+                raise OrganizationNotFound('Organization not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise OrganizationError('Can not update this organization')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise OrganizationError('Can not update this organization: wrong argument')
+
 
 
 
@@ -227,6 +262,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ZoneError('Can not add this zone')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise ZoneError('Can not add this zone: wrong argument')
+
 
 
 
@@ -244,7 +283,7 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
             if self.cursor.rowcount < 1:
-                raise ZoneError('Zone not found')
+                raise ZoneNotFound('Zone not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
@@ -267,13 +306,16 @@ class DataBase(object):
 
         try:
             self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise ZoneNotFound('Zone not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ZoneError('Can not update this zone')
-
-
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise ZoneError('Can not update this zone: wrong argument')
 
 
 
@@ -300,6 +342,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ControllerError('Can not add this controller')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise ControllerError('Can not add this controller: wrong argument')
+
 
 
 
@@ -317,7 +363,7 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
             if self.cursor.rowcount < 1:
-                raise ControllerError('Controller not found')
+                raise ControllerNotFound('Controller not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
@@ -340,11 +386,19 @@ class DataBase(object):
 
         try:
             self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise ControllerNotFound('Controller not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ControllerError('Can not update this controller')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise ControllerError('Can not update this controller: wrong argument')
+
+
+
 
 
 
@@ -393,6 +447,9 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise PassageError('Can not add this passage')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise PassageError('Can not add this passage: wrong argument')
 
 
 
@@ -416,10 +473,6 @@ class DataBase(object):
                 sql = ("DELETE FROM Passage WHERE id = {}"
                        "".format(passageId)
                       )
-
-                #sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
-                #       "".format(DELETED, passageId)
-                #      )
             else:
                 self.logger.error("Invalid state detected in Passage table.")
 
@@ -436,6 +489,7 @@ class DataBase(object):
 
     def markPassageToDel(self, passageId):
         '''
+        Set passage row state in the server DB for a pending delete.
         '''
 
         sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
@@ -471,17 +525,16 @@ class DataBase(object):
 
         try:
             self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise PassageNotFound('Passage not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise PassageError('Can not update this passage')
-
-
-
-
-
-
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise PassageError('Can not update this passage: wrong argument')
 
 
 
@@ -509,6 +562,10 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise PersonError('Can not add this person')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise PersonError('Can not add this person: wrong argument')
+
 
 
 
@@ -526,7 +583,7 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
             if self.cursor.rowcount < 1:
-                raise OrganizationError('Person not found')
+                raise PersonNotFound('Person not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
@@ -548,11 +605,17 @@ class DataBase(object):
 
         try:
             self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise PersonNotFound('Person not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise PersonError('Can not update this person')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise PersonError('Can not update this person: wrong argument')
+
 
 
 

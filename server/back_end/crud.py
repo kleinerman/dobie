@@ -6,17 +6,17 @@ import json
 import queue
 import sys
 import time
+
 from flask import Flask, jsonify, request, abort, url_for
 from flask_httpauth import HTTPBasicAuth
-
 
 import genmngr
 import database
 import ctrllermsger
 from config import *
 
-
-# constants
+# Constants used in the code
+#
 BAD_REQUEST = 400
 CREATED = 201
 OK = 200
@@ -24,9 +24,17 @@ USER = 'conpass'
 PASSWD = 'password'
 
 
-
+# Exceptions used by Flask errorhandler decorator
+#
 class BadRequest(Exception):
-    def __init__(self, message, status_code=400 ):
+    def __init__(self, message, status_code=400):
+        Exception.__init__(self)
+        self.message = message
+        self.status_code = status_code
+
+
+class NotFound(Exception):
+    def __init__(self, message, status_code=404):
         Exception.__init__(self)
         self.message = message
         self.status_code = status_code
@@ -47,10 +55,9 @@ class InternalError(Exception):
 
 
 class CrudMngr(genmngr.GenericMngr):
-
     '''
-    This class is responsible for managing the creations, deletions and 
-    modifications in database
+    Through a RESTful API, this clase manages creations, deletions and modifications in
+    the database.
     '''
     def __init__(self, netMngr):
 
@@ -64,15 +71,15 @@ class CrudMngr(genmngr.GenericMngr):
 
     def run(self):
         '''
-        This method is launched by the main thread.
-        It launches the Flask server and it waits for REST request from the GUI
+        Launch the Flask server and wait for REST request
         '''
 
         app = Flask(__name__)
         auth = HTTPBasicAuth()
 
         
-        # Error hanlders
+        ## Error hanlders
+        #
         @app.errorhandler(BadRequest)
         def badRequest(error):
             response = jsonify ({'status': 'error', 'error': 'bad request', 'message': error.message, 'code':error.status_code})
@@ -92,6 +99,13 @@ class CrudMngr(genmngr.GenericMngr):
         @app.errorhandler(404)
         def notFound(error):
             response = jsonify ({'status': 'error', 'error': 'request not found', 'message': 'Not found', 'code':404})
+            response.status_code = 404
+            return response
+
+
+        @app.errorhandler(NotFound)
+        def notFound(error):
+            response = jsonify ({'status': 'error', 'error': 'request not found', 'message': error.message, 'code':404})
             response.status_code = 404
             return response
 
@@ -154,15 +168,23 @@ class CrudMngr(genmngr.GenericMngr):
 
 #-------------------------------------Organization------------------------------------------
 
+        
+        # Tuple with all necessary keys in the URL request
         orgNeedKeys = ('name',)
 
         @app.route('/api/v1.0/organization', methods=['POST'])
         def addOrganization():
+            '''
+            Add a new organization into the database
+            '''
             try:
-                # if this json key does not exist, it will raise a BadRequest exception
+                # Check if all key:value are present before modify the database
                 if not all(key in request.json for key in orgNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+
+                # Add organization into the database and get the database 'id' of this organization
                 orgId = self.dataBase.addOrganization(request.json)
+                # Generate a URL to the given endpoint with the method provided.
                 uri = url_for('modOrganization', orgId=orgId, _external=True)
 
                 return jsonify({'status': 'OK', 'message': 'Organization added', 'code': CREATED, 'uri': uri}), CREATED
@@ -177,20 +199,30 @@ class CrudMngr(genmngr.GenericMngr):
 
         @app.route('/api/v1.0/organization/<int:orgId>', methods=['PUT','DELETE'])
         def modOrganization(orgId):
+            '''
+            Update or delete an organization in the database
+            '''
             try:
+                # organization is a dictionary with the request json.
                 organization = request.json
+                # add the database organization id into the dictionary
                 organization['id'] = orgId
 
+                # Update an organization
                 if request.method == 'PUT':
+                    # Check if all key:value are present before modify the database
                     if not all(key in request.json for key in orgNeedKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
                     self.dataBase.updOrganization(organization)
                     return jsonify({'status': 'OK', 'message': 'Organization updated'}), OK
 
+                # Delete an organization
                 elif request.method == 'DELETE':
                     self.dataBase.delOrganization({'id':orgId})
                     return jsonify({'status': 'OK', 'message': 'Organization deleted'}), OK
 
+            except database.OrganizationNotFound as organizationNotFound:
+                raise NotFound(str(organizationNotFound))
             except database.OrganizationError as organizationError:
                 raise ConflictError(str(organizationError))
             except TypeError:
@@ -201,9 +233,6 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-
-
-
 #-------------------------------------Zone------------------------------------------
 
         zoneNeedKeys = ('name',)
@@ -211,6 +240,9 @@ class CrudMngr(genmngr.GenericMngr):
         @app.route('/api/v1.0/zone', methods=['POST'])
         @auth.login_required
         def addZone():
+            '''
+            Add a new Zone into the database
+            '''
             try:
                 if not all(key in request.json for key in zoneNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
@@ -231,6 +263,9 @@ class CrudMngr(genmngr.GenericMngr):
         @app.route('/api/v1.0/zone/<int:zoneId>', methods=['PUT', 'DELETE'])
         @auth.login_required
         def modZone(zoneId):
+            '''
+            Update or delete a Zone in the database.
+            '''
             try:
                 zone = request.json
                 zone['id'] = zoneId
@@ -238,7 +273,6 @@ class CrudMngr(genmngr.GenericMngr):
                 if request.method == 'PUT':
                     if not all(key in request.json for key in zoneNeedKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
-
                     self.dataBase.updZone(zone)
                     return jsonify({'status': 'OK', 'message': 'Zone updated'}), OK
 
@@ -246,6 +280,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.delZone(zone)
                     return jsonify({'status': 'OK', 'message': 'Zone deleted'}), OK
 
+            except database.ZoneNotFound as zoneNotFound:
+                raise NotFound(str(zoneNotFound))
             except database.ZoneError as zoneError:
                 raise ConflictError(str(zoneError))
             except TypeError:
@@ -256,16 +292,16 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-
-
 #-------------------------------------Person------------------------------------------
-
 
         prsnNeedKeys = ('name', 'cardNumber', 'orgId')
 
         @app.route('/api/v1.0/person', methods=['POST'])
         @auth.login_required
         def addPerson():
+            '''
+            Add a new Person into the database.
+            '''
             try:
                 if not all(key in request.json for key in prsnNeedKeys):
                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(prsnNeedKeys)))
@@ -281,9 +317,12 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
 
-        @app.route('/api/v1.0/person/<int:personId>', methods=['POST'])
+        @app.route('/api/v1.0/person/<int:personId>', methods=['PUT', 'DELETE'])
         @auth.login_required
-        def modPerson(personID):
+        def modPerson(personId):
+            '''
+            Update or delete a Zone in the database.
+            '''
             try:
                 person = request.json
                 person['id'] = personId
@@ -291,7 +330,6 @@ class CrudMngr(genmngr.GenericMngr):
                 if request.method == 'PUT':
                     if not all(key in request.json for key in prsnNeedKeys):
                         raise BadRequest('Invalid request. Missing: {}'.format(', '.join(prsnNeedKeys)))
-
                     self.dataBase.updPerson(person)
                     return jsonify({'status': 'OK', 'message': 'Person updated'}), OK
 
@@ -299,6 +337,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.delPerson(person)
                     return jsonify({'status': 'OK', 'message': 'Person deleted'}), OK
 
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
             except database.PersonError as personError:
                 raise ConflictError(str(personError))
             except TypeError:
@@ -316,6 +356,9 @@ class CrudMngr(genmngr.GenericMngr):
         @app.route('/api/v1.0/controller', methods=['POST'])
         @auth.login_required
         def addController():
+            '''
+            Add a new Controller into the database.
+            '''
             try:
                 if not all(key in request.json for key in ctrllerNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
@@ -335,8 +378,10 @@ class CrudMngr(genmngr.GenericMngr):
         @app.route('/api/v1.0/controller/<int:controllerId>', methods=['PUT', 'DELETE'])
         @auth.login_required
         def modController(controllerId):
+            '''
+            Update or delete a Controller in the database.
+            '''
             try:
-
                 controller = request.json
                 controller['id'] = controllerId
 
@@ -350,6 +395,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.delController(controller)
                     return jsonify({'status': 'OK', 'message': 'Controller deleted'}), OK
 
+            except database.ControllerNotFound as controllerNotFound:
+                raise NotFound(str(controllerNotFound))
             except database.ControllerError as controllerError:
                 raise ConflictError(str(controllerError))
             except TypeError:
@@ -369,16 +416,20 @@ class CrudMngr(genmngr.GenericMngr):
         @app.route('/api/v1.0/passage', methods=['POST'])
         @auth.login_required
         def addPassage():
+            '''
+            Add a new Passage into the database and send it to the controller
+            '''
             try:
-
                 passage = request.json
-
                 if not all(key in request.json for key in pssgNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
                 passageId = self.dataBase.addPassage(passage)
+                
+                # Passage dictionary modified for the controller database (same server passage id)
                 passage['id'] = passageId
                 passage.pop('zoneId')
                 passage.pop('controllerId')
+                # Get the controller mac address
                 ctrllerMac = self.dataBase.getControllerMac(passageId)
                 self.ctrllerMsger.addPassage(ctrllerMac, passage)
 
@@ -396,6 +447,10 @@ class CrudMngr(genmngr.GenericMngr):
         @app.route('/api/v1.0/passage/<int:passageId>', methods=['PUT', 'DELETE'])
         @auth.login_required
         def modPassage(passageId):
+            '''
+            Update or delete a Passage in the database and send the modification to
+            the appropriate controller.
+            '''
             try:
                 
                 passage = request.json
@@ -418,6 +473,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.ctrllerMsger.delPassage(ctrllerMac, passageId)
                     return jsonify({'status': 'OK', 'message': 'Passage deleted'}), OK
 
+            except database.PassageNotFound as passageNotFound:
+                raise NotFound(str(passageNotFound))
             except database.PassageError as passageError:
                 raise ConflictError(str(passageError))
             except TypeError:
