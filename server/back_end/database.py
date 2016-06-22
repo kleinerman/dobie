@@ -94,6 +94,24 @@ class PassageNotFound(PassageError):
     pass
 
 
+
+class AccessError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class AccessNotFound(AccessError):
+    '''
+    '''
+    pass
+
+
+
 class DataBase(object):
 
     def __init__(self, host, user, passwd, dataBase):
@@ -620,6 +638,88 @@ class DataBase(object):
             raise PersonError('Can not update this person: wrong argument')
 
 
+
+
+
+
+
+#-------------------------------Access-----------------------------------
+
+
+
+
+    def addAccess(self, access):
+        '''
+        Receive a dictionary with access parametters and save it in DB
+        '''
+        #RowState should be removed in Access table
+        sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
+               "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {})"
+               "".format(access['pssgId'], access['personId'], access['iSide'], access['oSide'],
+                         access['startTime'], access['endTime'], access['expireDate'] TO_ADD)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+            return self.cursor.lastrowid
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Can not add this access')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise AccessError('Can not add this access: wrong argument')
+
+
+
+
+
+    def delAccess(self, access):
+        '''
+        Receive a dictionary with id organization
+        '''
+
+        sql = ("DELETE FROM Access WHERE id = {}"
+               "".format(access['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise AccessNotFound('Access not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Can not delete this access')
+
+
+
+
+
+
+    def updAccess(self, access):
+        '''
+        Receive a dictionary with id organization
+        '''
+
+        sql = ("UPDATE Access SET name = '{}', cardNumber = {}, orgId = {} WHERE id = {}"
+               "".format(access['name'], access['cardNumber'], access['orgId'], access['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise AccessNotFound('Access not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Can not update this access')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise AccessError('Can not update this access: wrong argument')
 
 
 #---------------------------------------------------------------------------------------

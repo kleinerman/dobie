@@ -484,6 +484,84 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
 
 
+
+#--------------------------------------Access------------------------------------------
+
+
+        accessNeedKeys = ('pssgId', 'personId', 'iSide', 'oSide',
+                          'startTime', 'endTime', 'expireDate')
+
+        @app.route('/api/v1.0/access', methods=['POST'])
+        @auth.login_required
+        def addAccess():
+            '''
+            Add a new Access into the database and send it to the controller
+            '''
+            try:
+                access = request.json
+                if not all(key in request.json for key in accessNeedKeys):
+                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
+                accessId = self.dataBase.addAccess(access)
+
+                # Access dictionary modified for the controller database (same server access id)
+                access['id'] = accessId
+                # Get the controller mac address
+                pssgId = access['pssgId']
+                ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                #self.ctrllerMsger.addAccess(ctrllerMac, access)
+
+                uri = url_for('modAccess', accessId=accessId, _external=True)
+                return jsonify({'status': 'OK', 'message': 'Access added', 'code': CREATED, 'uri': uri}), CREATED
+
+            except database.AccessError as accessError:
+                raise ConflictError(str(accessError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+        @app.route('/api/v1.0/access/<int:accessId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def modAccess(accessId):
+            '''
+            Update or delete a Access in the database and send the modification to
+            the appropriate controller.
+            '''
+            try:
+
+                access = request.json
+                access['id'] = accessId
+
+                if request.method == 'PUT':
+                    if not all(key in request.json for key in accessNeedKeys):
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
+                    self.dataBase.updAccess(access)
+                    access.pop('zoneId')
+                    access.pop('controllerId')
+                    ctrllerMac = self.dataBase.getControllerMac(accessId)
+                    self.ctrllerMsger.updAccess(ctrllerMac, access)
+
+                    return jsonify({'status': 'OK', 'message': 'Access updated'}), OK
+
+                elif request.method == 'DELETE':
+                    ctrllerMac = self.dataBase.getControllerMac(accessId)
+                    self.dataBase.markAccessToDel(accessId)
+                    self.ctrllerMsger.delAccess(ctrllerMac, accessId)
+                    return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
+
+            except database.AccessNotFound as accessNotFound:
+                raise NotFound(str(accessNotFound))
+            except database.AccessError as accessError:
+                raise ConflictError(str(accessError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
 #----------------------------------------Main--------------------------------------------
 
 
