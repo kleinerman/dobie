@@ -641,6 +641,21 @@ class DataBase(object):
 
 
 
+    def getPerson(self, personId):
+        '''
+        Receive person id and returns a dictionary with person parameters
+        '''
+
+        sql = "SELECT name, cardNumber FROM Person WHERE id = {}".format(personId)
+
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+        
+
+        cursor.execute(sql)
+        print(cursor.fetchone())
+        #return cursor.fetchone()[0]
+
+
 
 
 #-------------------------------Access-----------------------------------
@@ -656,7 +671,7 @@ class DataBase(object):
         sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
                "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {})"
                "".format(access['pssgId'], access['personId'], access['iSide'], access['oSide'],
-                         access['startTime'], access['endTime'], access['expireDate'] TO_ADD)
+                         access['startTime'], access['endTime'], access['expireDate'], TO_ADD)
               )
 
         try:

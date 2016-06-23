@@ -423,17 +423,17 @@ class CrudMngr(genmngr.GenericMngr):
                 passage = request.json
                 if not all(key in request.json for key in pssgNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
-                passageId = self.dataBase.addPassage(passage)
+                pssgId = self.dataBase.addPassage(passage)
                 
                 # Passage dictionary modified for the controller database (same server passage id)
-                passage['id'] = passageId
+                passage['id'] = pssgId
                 passage.pop('zoneId')
                 passage.pop('controllerId')
                 # Get the controller mac address
-                ctrllerMac = self.dataBase.getControllerMac(passageId)
+                ctrllerMac = self.dataBase.getControllerMac(pssgId)
                 self.ctrllerMsger.addPassage(ctrllerMac, passage)
 
-                uri = url_for('modPassage', passageId=passageId, _external=True)
+                uri = url_for('modPassage', pssgId=pssgId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Passage added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.PassageError as passageError:
@@ -444,9 +444,9 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
 
-        @app.route('/api/v1.0/passage/<int:passageId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/passage/<int:pssgId>', methods=['PUT', 'DELETE'])
         @auth.login_required
-        def modPassage(passageId):
+        def modPassage(pssgId):
             '''
             Update or delete a Passage in the database and send the modification to
             the appropriate controller.
@@ -454,7 +454,7 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 
                 passage = request.json
-                passage['id'] = passageId
+                passage['id'] = pssgId
 
                 if request.method == 'PUT':
                     if not all(key in request.json for key in pssgNeedKeys):
@@ -462,15 +462,15 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.updPassage(passage)
                     passage.pop('zoneId')
                     passage.pop('controllerId')
-                    ctrllerMac = self.dataBase.getControllerMac(passageId)
+                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
                     self.ctrllerMsger.updPassage(ctrllerMac, passage)
 
                     return jsonify({'status': 'OK', 'message': 'Passage updated'}), OK
 
                 elif request.method == 'DELETE':
-                    ctrllerMac = self.dataBase.getControllerMac(passageId)
-                    self.dataBase.markPassageToDel(passageId)
-                    self.ctrllerMsger.delPassage(ctrllerMac, passageId)
+                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                    self.dataBase.markPassageToDel(pssgId)
+                    self.ctrllerMsger.delPassage(ctrllerMac, pssgId)
                     return jsonify({'status': 'OK', 'message': 'Passage deleted'}), OK
 
             except database.PassageNotFound as passageNotFound:
@@ -508,11 +508,14 @@ class CrudMngr(genmngr.GenericMngr):
                 # Get the controller mac address
                 pssgId = access['pssgId']
                 ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                self.dataBase.getPerson(access['personId'])
                 #self.ctrllerMsger.addAccess(ctrllerMac, access)
 
                 uri = url_for('modAccess', accessId=accessId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Access added', 'code': CREATED, 'uri': uri}), CREATED
 
+            except database.PassageNotFound as passageNotFound:
+                raise NotFound(str(passageNotFound))
             except database.AccessError as accessError:
                 raise ConflictError(str(accessError))
             except TypeError:
@@ -550,6 +553,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.ctrllerMsger.delAccess(ctrllerMac, accessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
+            except database.PassageNotFound as passageNotFound:
+                raise NotFound(str(passageNotFound))
             except database.AccessNotFound as accessNotFound:
                 raise NotFound(str(accessNotFound))
             except database.AccessError as accessError:
