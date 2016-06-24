@@ -127,7 +127,7 @@ class DataBase(object):
         # With this client_flag, cursor.rowcount will have found rows instead of affected rows
         self.connection = pymysql.connect(host, user, passwd, dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
         
-        self.cursor = self.connection.cursor()
+        self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
 
 
@@ -137,13 +137,13 @@ class DataBase(object):
         #Creating a separate connection since this method will be called from
         #different thread
         connection = pymysql.connect(self.host, self.user, self.passwd, self.dataBase)
-        cursor = connection.cursor()
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
         #macAsHex = '{0:0{1}x}'.format(macAsInt, 12)
         sql = "SELECT COUNT(*) FROM Controller WHERE macAddress = '{}'".format(ctrllerMac)
 
         cursor.execute(sql)
-        return cursor.fetchone()[0]
+        return cursor.fetchone()['COUNT(*)']
 
 
 
@@ -435,7 +435,8 @@ class DataBase(object):
         self.cursor.execute(sql)
         if self.cursor.rowcount < 1:
             raise PassageNotFound('Passage not found')
-        return self.cursor.fetchone()[0]
+
+        return self.cursor.fetchone()['macAddress']
 
 
 
@@ -483,7 +484,7 @@ class DataBase(object):
 
         try:
             self.cursor.execute(sql)
-            rowState = self.cursor.fetchone()[0]
+            rowState = self.cursor.fetchone()['rowStateId']
 
             if rowState in (TO_ADD, TO_UPDATE):
                 sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
@@ -645,15 +646,15 @@ class DataBase(object):
         '''
         Receive person id and returns a dictionary with person parameters
         '''
-
         sql = "SELECT name, cardNumber FROM Person WHERE id = {}".format(personId)
+        #cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+        self.cursor.execute(sql)
+        person = self.cursor.fetchone()
 
-        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-        
+        if not person:
+            raise PersonNotFound('Person not found')
 
-        cursor.execute(sql)
-        print(cursor.fetchone())
-        #return cursor.fetchone()[0]
+        return person
 
 
 

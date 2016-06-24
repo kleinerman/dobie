@@ -505,15 +505,26 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Access dictionary modified for the controller database (same server access id)
                 access['id'] = accessId
+        
+                #Get the person parameters as a dictionary
+                person = self.dataBase.getPerson(access['personId'])
+
                 # Get the controller mac address
                 pssgId = access['pssgId']
                 ctrllerMac = self.dataBase.getControllerMac(pssgId)
-                self.dataBase.getPerson(access['personId'])
-                #self.ctrllerMsger.addAccess(ctrllerMac, access)
+
+                self.ctrllerMsger.addAccess(ctrllerMac, person, access)
 
                 uri = url_for('modAccess', accessId=accessId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Access added', 'code': CREATED, 'uri': uri}), CREATED
 
+
+            #This exception could be raised by getPerson() method.
+            #It will never happen since addAccess() method will raise an exception caused by constraint.
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
+            #This exception could be raised by getControllerMac() method.
+            #It will never happen since addAccess() method will raise an exception caused by constraint.
             except database.PassageNotFound as passageNotFound:
                 raise NotFound(str(passageNotFound))
             except database.AccessError as accessError:
