@@ -302,6 +302,8 @@ class NetMngr(genmngr.GenericMngr):
 
             try:
                 resp = self.srvSock.recv(REC_BYTES)
+                if not resp:
+                    raise ServerNotConnected
                 self.logger.debug('The server respond to CON message with: {}'.format(resp))
                 self.checkExit()
             except socket.timeout:
@@ -431,7 +433,8 @@ class NetMngr(genmngr.GenericMngr):
             except InvalidConnectionResponse:
                 self.logger.info('The server does not respond OK to connection message')
 
-
+            except ServerNotConnected:
+                self.logger.info('The server disconected during initial connection message')
 
 
 
