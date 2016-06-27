@@ -509,11 +509,16 @@ class CrudMngr(genmngr.GenericMngr):
                 #Get the person parameters as a dictionary
                 person = self.dataBase.getPerson(access['personId'])
 
+                #Adding to access dictionary necesary person parameters to add person if it doesn't
+                #exist in controller
+
+                access['cardNumber'] = person['cardNumber']
+
                 # Get the controller mac address
                 pssgId = access['pssgId']
                 ctrllerMac = self.dataBase.getControllerMac(pssgId)
 
-                self.ctrllerMsger.addAccess(ctrllerMac, person, access)
+                self.ctrllerMsger.addAccess(ctrllerMac, access)
 
                 uri = url_for('modAccess', accessId=accessId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Access added', 'code': CREATED, 'uri': uri}), CREATED

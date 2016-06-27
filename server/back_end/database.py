@@ -646,7 +646,7 @@ class DataBase(object):
         '''
         Receive person id and returns a dictionary with person parameters
         '''
-        sql = "SELECT name, cardNumber FROM Person WHERE id = {}".format(personId)
+        sql = "SELECT id, name, cardNumber FROM Person WHERE id = {}".format(personId)
         #cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         self.cursor.execute(sql)
         person = self.cursor.fetchone()
