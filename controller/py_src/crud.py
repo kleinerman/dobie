@@ -32,8 +32,10 @@ class CrudMngr(genmngr.GenericMngr):
         #Queue to receive message from the Network thread.
         self.netToCrud = queue.Queue()
 
-        self.crudHndlrs = {'S': self.mngPassage
-                          }
+        #self.crudHndlrs = {'SC': self.dataBase.addPassage,
+        #                   'SU': self.dataBase.updPassage,
+        #                   'SD': self.dataBase.delPassage
+        #                  }
 
 
 
@@ -73,13 +75,20 @@ class CrudMngr(genmngr.GenericMngr):
         #from diffrent thread each thread shoud crate its own connection.
         self.dataBase = database.DataBase(DB_FILE)
 
+        self.crudHndlrs = {'SC': self.dataBase.addPassage,
+                           'SU': self.dataBase.updPassage,
+                           'SD': self.dataBase.delPassage,
+                           'AC': self.dataBase.addAccess
+                          }
+
         while True:
             try:
                 #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
                 crudMsg = self.netToCrud.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
-                crudCmd = crudMsg[0]
-                self.crudHndlrs[crudCmd](crudMsg)  
+                crudCmd = crudMsg[0:2]
+                crudObject = json.loads(crudMsg[2:])
+                self.crudHndlrs[crudCmd](crudObject)  
 
 
                 
