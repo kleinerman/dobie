@@ -326,3 +326,5 @@ class DataBase(object):
         self.connection.commit()
 
 
+    def addAccess(self, access):
+        print(access)
