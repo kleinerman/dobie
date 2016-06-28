@@ -4,13 +4,14 @@ import datetime
 import time
 import sys
 import json
+import re
 
 import database
 import queue
 
 import genmngr
 from config import *
-
+from msgheaders import *
 
 
 
@@ -26,41 +27,14 @@ class CrudMngr(genmngr.GenericMngr):
         #to have a understandable log file.
         super().__init__('CrudMngr', exitFlag)
 
+        #Reference to network manager
+        self.netMngr = None
+
         #Database connection should be created in run method
         self.dataBase = None
 
         #Queue to receive message from the Network thread.
         self.netToCrud = queue.Queue()
-
-        #self.crudHndlrs = {'SC': self.dataBase.addPassage,
-        #                   'SU': self.dataBase.updPassage,
-        #                   'SD': self.dataBase.delPassage
-        #                  }
-
-
-
-
-
-    def mngPassage(self, crudMsg):
-        '''
-        '''
-
-        crudSubCmd = crudMsg[1]
-        passageJson = crudMsg[2:]
-
-        passage = json.loads(passageJson)
-
-        if crudSubCmd == 'C':
-            self.dataBase.addPassage(passage)
-
-        elif crudSubCmd == 'U':
-            self.dataBase.updPassage(passage)
-
-        elif crudSubCmd == 'D':
-            self.dataBase.delPassage(passage)
-
-        else:
-            print('Invalid crud passage sub command.')
 
 
 
@@ -86,10 +60,22 @@ class CrudMngr(genmngr.GenericMngr):
                 #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
                 crudMsg = self.netToCrud.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
-                crudCmd = crudMsg[0:2]
-                crudObject = json.loads(crudMsg[2:])
-                self.crudHndlrs[crudCmd](crudObject)  
 
+
+                crudCmd = crudMsg[0:2]
+                completeJson = crudMsg[2:]
+
+                crudObject = json.loads(completeJson)
+                self.crudHndlrs[crudCmd](crudObject)
+                print(crudObject)    
+                print(type(crudObject['iSide']))
+
+                jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
+                jsonId = '{' + jsonId + '}'
+                jsonId = jsonId.encode('utf8')
+                crudCmd = crudCmd.encode('utf8')
+                ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
+                self.netMngr.sendToServer(ctrllerResponse)
 
                 
 

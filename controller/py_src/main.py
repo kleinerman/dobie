@@ -72,6 +72,10 @@ class Controller(object):
         #Creating the Net Manager Thread 
         self.netMngr = network.NetMngr(netToEvent, netToReSnd, self.crudMngr, self.exitFlag)        
 
+        #Setting internal crudMngr reference to netMngr thread to be able to answer
+        #once the CRUD where commited in DB
+        self.crudMngr.netMngr = self.netMngr
+
         #Creating the Event Manager Thread giving to it the previous event queue
         self.eventMngr = events.EventMngr(self.mainToEvent, self.netMngr, netToEvent, netToReSnd, self.exitFlag)
 
