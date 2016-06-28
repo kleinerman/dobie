@@ -326,5 +326,28 @@ class DataBase(object):
         self.connection.commit()
 
 
+
+
+    #---------------------------------------------------------------------------#
+
     def addAccess(self, access):
-        print(access)
+        '''
+        '''
+
+        
+        sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
+               "".format(access['personId'], access['cardNumber']) 
+              )
+
+        print(sql)
+
+
+        sql = ("INSERT INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
+               "endTime, expireDate) VALUES({}, {}, {}, {}, {}, {}, '{}', '{}', '{}')"
+               "".format(access['id'], access['pssgId'], access['personId'], True,
+                         access['iSide'], access['oSide'], access['startTime'],
+                         access['endTime'], access['expireDate'])
+              )
+
+
+        print(sql)

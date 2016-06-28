@@ -14,33 +14,33 @@ import queue
 
 import genmngr
 from config import *
-
+from msgheaders import *
 
 import sys
 import uuid
 
 
 
-int_CON  = 0x01
-int_RCON = 0x02
-int_EVT  = 0x03
-int_REVT = 0x04
-int_EVS  = 0x05
-int_REVS = 0x06
-int_CUD  = 0x07
-int_RCUD = 0x08
-int_END  = 0x1F
-
-
-CON  = bytes([int_CON])
-RCON = bytes([int_RCON])
-EVT  = bytes([int_EVT])
-REVT = bytes([int_REVT])
-EVS  = bytes([int_EVS])
-REVS = bytes([int_REVS])
-CUD  = bytes([int_CUD])
-RCUD = bytes([int_RCUD])
-END  = bytes([int_END])
+#int_CON  = 0x01
+#int_RCON = 0x02
+#int_EVT  = 0x03
+#int_REVT = 0x04
+#int_EVS  = 0x05
+#int_REVS = 0x06
+#int_CUD  = 0x07
+#int_RCUD = 0x08
+#int_END  = 0x1F
+#
+#
+#CON  = bytes([int_CON])
+#RCON = bytes([int_RCON])
+#EVT  = bytes([int_EVT])
+#REVT = bytes([int_REVT])
+#EVS  = bytes([int_EVS])
+#REVS = bytes([int_REVS])
+#CUD  = bytes([int_CUD])
+#RCUD = bytes([int_RCUD])
+#END  = bytes([int_END])
 
 
 #EVT  = b'#'
@@ -260,13 +260,13 @@ class NetMngr(genmngr.GenericMngr):
         elif msg.startswith(CUD):
             crudMsg = msg.strip(CUD+END).decode('utf8')
             self.crudMngr.netToCrud.put(crudMsg)
-            crudCmd = msg[1:3]
-            completeJson = crudMsg[2:]
-            jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
-            jsonId = '{' + jsonId + '}'
-            jsonId = jsonId.encode('utf8')
-            ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
-            self.sendToServer(ctrllerResponse)
+#            crudCmd = msg[1:3]
+#            completeJson = crudMsg[2:]
+#            jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
+#            jsonId = '{' + jsonId + '}'
+#            jsonId = jsonId.encode('utf8')
+#            ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
+#            self.sendToServer(ctrllerResponse)
 
 
 
