@@ -505,6 +505,9 @@ class DataBase(object):
             self.logger.warning(integrityError)
             raise PassageError('Error committing this passage.')
 
+        except TypeError:
+            self.logger.warning('Error fetching the passage.')
+            raise PassageError('Error committing this passage.')
 
 
 
@@ -741,6 +744,11 @@ class DataBase(object):
 #---------------------------------------------------------------------------------------
 
 
+    def commitAccess(self, accessId):
+        print('commiting access')
+
+
+#---------------------------------------------------------------------------------------
 
     def run(self):
         '''
