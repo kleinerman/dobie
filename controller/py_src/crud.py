@@ -67,8 +67,6 @@ class CrudMngr(genmngr.GenericMngr):
 
                 crudObject = json.loads(completeJson)
                 self.crudHndlrs[crudCmd](crudObject)
-                print(crudObject)    
-                print(type(crudObject['iSide']))
 
                 jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
                 jsonId = '{' + jsonId + '}'
@@ -77,12 +75,17 @@ class CrudMngr(genmngr.GenericMngr):
                 ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
                 self.netMngr.sendToServer(ctrllerResponse)
 
-                
-
     
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
                 self.checkExit()
+
+            except database.OperationalError as operationalError:
+                self.logger.error(operationalError)
+
+            except database.IntegrityError as integrityError:
+                self.logger.error(integrityError)
+                
 
 
 

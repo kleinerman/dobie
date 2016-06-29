@@ -3,6 +3,30 @@ import datetime
 import logging
 
 
+
+
+class OperationalError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+
+class IntegrityError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+
 class DataBase(object):
     '''
     This object connects the database in the constructor.
@@ -273,16 +297,28 @@ class DataBase(object):
         Receive a passage dictionary and add it into DB
         '''
 
-        sql = ("INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
-               "rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) "
-               "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
-               "".format(passage['id'], passage['i0In'], passage['i1In'], passage['o0In'], 
-                         passage['o1In'], passage['bttnIn'], passage['stateIn'], 
-                         passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
-                         passage['bzzrTime'], passage['alrmTime'])
-              )
-        self.cursor.execute(sql)
-        self.connection.commit()
+        try:
+
+            sql = ("INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
+                   "rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) "
+                   "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
+                   "".format(passage['id'], passage['i0In'], passage['i1In'], passage['o0In'], 
+                             passage['o1In'], passage['bttnIn'], passage['stateIn'], 
+                             passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
+                             passage['bzzrTime'], passage['alrmTime'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Passage.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error adding a Passage.')
+
 
 
 
@@ -332,22 +368,48 @@ class DataBase(object):
 
     def addAccess(self, access):
         '''
+        Receive an access dictionary and add it into DB.
+        The access dictionary include person parametters. This method try to 
+        add this person to database if it is not present.
         '''
 
+        try:        
+            sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
+                   "".format(access['personId'], access['cardNumber'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit() 
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Person.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.info('The person is already in local DB.')
         
-        sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
-               "".format(access['personId'], access['cardNumber']) 
-              )
 
-        print(sql)
+        try:
+            sql = ("INSERT INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate) VALUES({}, {}, {}, {}, {}, {}, '{}', '{}', '{}')"
+                   "".format(access['id'], access['pssgId'], access['personId'], 1,
+                             access['iSide'], access['oSide'], access['startTime'],
+                             access['endTime'], access['expireDate'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding an Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error adding an Access.')
 
 
-        sql = ("INSERT INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
-               "endTime, expireDate) VALUES({}, {}, {}, {}, {}, {}, '{}', '{}', '{}')"
-               "".format(access['id'], access['pssgId'], access['personId'], True,
-                         access['iSide'], access['oSide'], access['startTime'],
-                         access['endTime'], access['expireDate'])
-              )
 
 
-        print(sql)
+
+
+
