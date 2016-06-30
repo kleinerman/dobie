@@ -397,6 +397,13 @@ class DataBase(object):
                              access['endTime'], access['expireDate'])
                   )
             self.cursor.execute(sql)
+            
+            #Everytime an all week access is added, all limited accesses should be deleted if exist.
+            sql = ("DELETE FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
+                   "".format(access['pssgId'], access['personId'])
+                  )
+            self.cursor.execute(sql)
+
             self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
