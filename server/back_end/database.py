@@ -671,14 +671,19 @@ class DataBase(object):
         '''
         Receive a dictionary with access parametters and save it in DB
         '''
-        #RowState should be removed in Access table
-        sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
-               "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {})"
-               "".format(access['pssgId'], access['personId'], access['iSide'], access['oSide'],
-                         access['startTime'], access['endTime'], access['expireDate'], TO_ADD)
-              )
 
         try:
+
+            sql = ("DELETE FROM LimitedAccess WHERE pssgId = {} and personId = {}"
+                   "".format(access['pssgId'], access['personId'])
+                  )
+
+
+            sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {})"
+                   "".format(access['pssgId'], access['personId'], access['iSide'], access['oSide'],
+                             access['startTime'], access['endTime'], access['expireDate'], TO_ADD)
+                  )
             self.cursor.execute(sql)
             self.connection.commit()
             return self.cursor.lastrowid
@@ -745,7 +750,43 @@ class DataBase(object):
 
 
     def commitAccess(self, accessId):
-        print('commiting access')
+        '''
+        Mark the access in database as COMMITTED if it was previously in TO_ADD or
+        TO_UPDATE state or mark it as DELETED if it was previously in TO_DELETE state
+        '''
+
+        sql = "SELECT rowStateId FROM Access WHERE id = {}".format(accessId)
+
+        try:
+            self.cursor.execute(sql)
+            rowState = self.cursor.fetchone()['rowStateId']
+
+            if rowState in (TO_ADD, TO_UPDATE):
+                sql = ("UPDATE Access SET rowStateId = {} WHERE id = {}"
+                       "".format(COMMITTED, accessId)
+                      )
+            elif rowState == TO_DELETE:
+                sql = ("DELETE FROM Access WHERE id = {}"
+                       "".format(accessId)
+                      )
+            else:
+                self.logger.error("Invalid state detected in Access table.")
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Error committing this access.')
+
+        except TypeError:
+            self.logger.warning('Error fetching the access.')
+            raise AccessError('Error committing this access.')
+
+
+
+
 
 
 #---------------------------------------------------------------------------------------
