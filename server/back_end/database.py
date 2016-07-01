@@ -725,11 +725,17 @@ class DataBase(object):
 
     def updAccess(self, access):
         '''
-        Receive a dictionary with id organization
+        Receive a dictionary with access parameter to update it.
+        pssgId, personId and allWeek parameter are not modified.
+        If a change on them is necessary, the access should be deleted
+        and it should be added again.
         '''
 
-        sql = ("UPDATE Access SET name = '{}', cardNumber = {}, orgId = {} WHERE id = {}"
-               "".format(access['name'], access['cardNumber'], access['orgId'], access['id'])
+        sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
+               "endTime = '{}', expireDate = '{}', rowStateId = {} WHERE id = {}"
+               "".format(access['iSide'], access['oSide'], access['startTime'],
+                         access['endTime'], access['expireDate'], TO_UPDATE,
+                         access['id'])
               )
 
         try:

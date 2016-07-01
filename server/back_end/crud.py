@@ -488,7 +488,7 @@ class CrudMngr(genmngr.GenericMngr):
 #--------------------------------------Access------------------------------------------
 
 
-        accessNeedKeys = ('pssgId', 'personId', 'iSide', 'oSide',
+        addAccessNeedKeys = ('pssgId', 'personId', 'iSide', 'oSide',
                           'startTime', 'endTime', 'expireDate')
 
         @app.route('/api/v1.0/access', methods=['POST'])
@@ -499,7 +499,7 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             try:
                 access = request.json
-                if not all(key in request.json for key in accessNeedKeys):
+                if not all(key in request.json for key in addAccessNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
                 accessId = self.dataBase.addAccess(access)
 
@@ -540,6 +540,10 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
 
+
+
+        updAccessNeedKeys = ('iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
+
         @app.route('/api/v1.0/access/<int:accessId>', methods=['PUT', 'DELETE'])
         @auth.login_required
         def modAccess(accessId):
@@ -548,18 +552,19 @@ class CrudMngr(genmngr.GenericMngr):
             the appropriate controller.
             '''
             try:
-
-                access = request.json
-                access['id'] = accessId
-
                 if request.method == 'PUT':
-                    if not all(key in request.json for key in accessNeedKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
+                    # Create a clean access dictionary with only required access params,
+                    # removing unnecessary parameters if the client send them.
+                    # Also a KeyError wil be raised if the client misses any parameter.
+                    access = {}
+                    for param in updAccessNeedKeys:
+                        access[param] = request.json[param]
+                    access['id'] = accessId
                     self.dataBase.updAccess(access)
-                    access.pop('zoneId')
-                    access.pop('controllerId')
-                    ctrllerMac = self.dataBase.getControllerMac(accessId)
-                    self.ctrllerMsger.updAccess(ctrllerMac, access)
+                    print(access)
+
+                    #ctrllerMac = self.dataBase.getControllerMac(accessId)
+                    #self.ctrllerMsger.updAccess(ctrllerMac, access)
 
                     return jsonify({'status': 'OK', 'message': 'Access updated'}), OK
 
@@ -580,7 +585,8 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(pssgNeedKeys)))
 
 
 #----------------------------------------Main--------------------------------------------
