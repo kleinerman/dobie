@@ -2,7 +2,7 @@
 
 ## Vars
 
-ARGS="us"
+ARGS="ush"
 UFLAG=0
 SFLAG=0
 NETWORK_CONFIGURED=0
@@ -12,6 +12,8 @@ USERMOD=/usr/bin/usermod
 PACKAGES="sudo bash-completion python vim base-devel git"
 TIME_ZONE="America/Argentina/Cordoba"
 IFACE=eth0
+COLOR_ORANGE="\033[0;33m"
+NO_COLOR="\033[0m"
 
 ##
 
@@ -68,7 +70,7 @@ function set_network {
 #### main ####
 
 # Check root permissions
-if [ "$EUID" -ne 0 ]; then echo "Please run as root"; fi
+if [ "$EUID" -ne 0 ]; then echo "Please run as root" && exit 1; fi
 
 
 # User arguments
@@ -83,7 +85,13 @@ while getopts $ARGS OPTION; do
             set_network
             ;;
 
-        ?)  printf "Bad usage\n"
+        h)  echo "Usage: `basename $0` [-u] [-s]"
+            printf "${COLOR_ORANGE}-u${NO_COLOR}, Create users\n"
+            printf "${COLOR_ORANGE}-s${NO_COLOR}, Set static IP address\n"
+            exit 0;
+            ;;
+
+        ?)  printf "Error: Invalid argument.\n"
             exit 1
             ;;
     esac
