@@ -416,6 +416,30 @@ class DataBase(object):
 
 
 
+    #---------------------------------------------------------------------------#
+
+    def updAccess(self, access):
+        '''
+        Receive an access dictionary and update it into DB.
+        '''
+
+        try:
+            sql = ("UPDATE Access SET pssgId = {}, iSide = {}, oSide = {}, startTime = '{}', "
+                   "endTime = '{}', expireDate = '{}' WHERE id = {}"
+                   "".format(access['pssgId'], access['iSide'], access['oSide'], access['startTime'],
+                             access['endTime'], access['expireDate'], access['id'])
+                  )
+            print(sql)
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating an Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error updating an Access.')
 
 
 
