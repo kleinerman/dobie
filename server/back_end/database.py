@@ -731,11 +731,11 @@ class DataBase(object):
         and it should be added again.
         '''
 
-        sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
+        sql = ("UPDATE Access SET pssgId = {}, iSide = {}, oSide = {}, startTime = '{}', "
                "endTime = '{}', expireDate = '{}', rowStateId = {} WHERE id = {}"
-               "".format(access['iSide'], access['oSide'], access['startTime'],
-                         access['endTime'], access['expireDate'], TO_UPDATE,
-                         access['id'])
+               "".format(access['pssgId'], access['iSide'], access['oSide'],
+                         access['startTime'], access['endTime'],
+                         access['expireDate'], TO_UPDATE, access['id'])
               )
 
         try:

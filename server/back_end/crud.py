@@ -542,7 +542,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        updAccessNeedKeys = ('iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
+        updAccessNeedKeys = ('pssgId', 'iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
 
         @app.route('/api/v1.0/access/<int:accessId>', methods=['PUT', 'DELETE'])
         @auth.login_required
@@ -561,10 +561,9 @@ class CrudMngr(genmngr.GenericMngr):
                         access[param] = request.json[param]
                     access['id'] = accessId
                     self.dataBase.updAccess(access)
-                    print(access)
 
-                    #ctrllerMac = self.dataBase.getControllerMac(accessId)
-                    #self.ctrllerMsger.updAccess(ctrllerMac, access)
+                    ctrllerMac = self.dataBase.getControllerMac(access['pssgId'])
+                    self.ctrllerMsger.updAccess(ctrllerMac, access)
 
                     return jsonify({'status': 'OK', 'message': 'Access updated'}), OK
 
