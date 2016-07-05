@@ -568,7 +568,9 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'status': 'OK', 'message': 'Access updated'}), OK
 
                 elif request.method == 'DELETE':
-                    ctrllerMac = self.dataBase.getControllerMac(accessId)
+                    pssgId = self.dataBase.getPssgId(accessId)
+                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                    
                     self.dataBase.markAccessToDel(accessId)
                     self.ctrllerMsger.delAccess(ctrllerMac, accessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK

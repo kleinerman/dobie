@@ -698,31 +698,6 @@ class DataBase(object):
 
 
 
-
-    def delAccess(self, access):
-        '''
-        Receive a dictionary with id organization
-        '''
-
-        sql = ("DELETE FROM Access WHERE id = {}"
-               "".format(access['id'])
-              )
-
-        try:
-            self.cursor.execute(sql)
-            if self.cursor.rowcount < 1:
-                raise AccessNotFound('Access not found')
-            self.connection.commit()
-
-        except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
-            raise AccessError('Can not delete this access')
-
-
-
-
-
-
     def updAccess(self, access):
         '''
         Receive a dictionary with access parameter to update it.
@@ -752,7 +727,28 @@ class DataBase(object):
             raise AccessError('Can not update this access: wrong argument')
 
 
-#---------------------------------------------------------------------------------------
+
+
+    def markAccessToDel(self, accessId):
+        '''
+        Set access row state in the server DB for a pending delete.
+        '''
+
+        sql = ("UPDATE Access SET rowStateId = {} WHERE id = {}"
+               "".format(TO_DELETE, accessId)
+              )
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise AccessNotFound('Access not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Error marking the Access to be deleted.')
+
+
+
 
 
     def commitAccess(self, accessId):
@@ -792,6 +788,24 @@ class DataBase(object):
 
 
 
+    def getPssgId(self, accessId):
+        '''
+        '''
+
+        sql = "SELECT pssgId FROM Access WHERE id = {}".format(accessId)
+
+        try:
+            self.cursor.execute(sql)
+            pssgId = self.cursor.fetchone()['pssgId']
+            return pssgId
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Error committing this access.') #Fix
+
+        except TypeError:
+            self.logger.warning('Error fetching the access.')  #Fix
+            raise AccessError('Error committing this access.')
 
 
 
