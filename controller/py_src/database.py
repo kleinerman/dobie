@@ -443,4 +443,27 @@ class DataBase(object):
 
 
 
+    #---------------------------------------------------------------------------#
+
+    def delAccess(self, access):
+        '''
+        Receive an access dictionary and delete it.
+        Then all the persons who has no access to any passage are also deleted manually.
+        '''
+        try:
+            sql = "DELETE FROM Access WHERE id = {}".format(access['id'])
+            self.cursor.execute(sql)
+
+            sql = "DELETE FROM Person WHERE id NOT IN (SELECT DISTINCT personId FROM Access)"
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting an Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting an Access.')
+
 
