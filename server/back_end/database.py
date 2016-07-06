@@ -690,10 +690,10 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
-            raise AccessError('Can not add this access')
+            raise AccessError('Can not add this access.')
         except pymysql.err.InternalError as internalError:
             self.logger.warning(internalError)
-            raise AccessError('Can not add this access: wrong argument')
+            raise AccessError('Can not add this access.')
 
 
 
@@ -790,6 +790,9 @@ class DataBase(object):
 
     def getPssgId(self, accessId):
         '''
+        This method is called by CRUD module when it wants to delete an access.
+        On that situation, it needs to know the "pssgId" to send the DELETE 
+        message to the corresponding controller.
         '''
 
         sql = "SELECT pssgId FROM Access WHERE id = {}".format(accessId)
@@ -800,12 +803,12 @@ class DataBase(object):
             return pssgId
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
-            raise AccessError('Error committing this access.') #Fix
+            self.logger.debug(integrityError)
+            raise AccessError('Can not get passage id for this access.')
 
         except TypeError:
-            self.logger.warning('Error fetching the access.')  #Fix
-            raise AccessError('Error committing this access.')
+            self.logger.debug('Error fetching pssgId.')
+            raise AccessError('Can not get passage id for this access.')
 
 
 
