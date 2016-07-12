@@ -184,6 +184,18 @@ class DataBase(object):
 #----------------------------------Organization----------------------------------------
 
 
+    def getOrganizations(self):
+        '''
+        '''
+        sql = ('SELECT * FROM Organization')
+        self.cursor.execute(sql)
+        organizations = self.cursor.fetchall()
+
+        return organizations
+
+
+                                             
+
     def addOrganization(self, organization):
         '''
         Receive a dictionary with organization parametters and save it in DB

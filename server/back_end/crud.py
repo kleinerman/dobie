@@ -168,26 +168,37 @@ class CrudMngr(genmngr.GenericMngr):
 
 #-------------------------------------Organization------------------------------------------
 
-        
+
         # Tuple with all necessary keys in the URL request
         orgNeedKeys = ('name',)
 
-        @app.route('/api/v1.0/organization', methods=['POST'])
-        def addOrganization():
+        @app.route('/api/v1.0/organization', methods=['POST', 'GET'])
+        def Organization():
             '''
-            Add a new organization into the database
             '''
             try:
-                # Check if all key:value are present before modify the database
-                if not all(key in request.json for key in orgNeedKeys):
-                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+                ## Return a JSON with all organizations
+                if request.method == 'GET':
+                    organizations = self.dataBase.getOrganizations()
 
-                # Add organization into the database and get the database 'id' of this organization
-                orgId = self.dataBase.addOrganization(request.json)
-                # Generate a URL to the given endpoint with the method provided.
-                uri = url_for('modOrganization', orgId=orgId, _external=True)
+                    for organization in organizations:
+                        organization['uri'] = url_for('modOrganization', orgId=organization['id'], _external=True)
+                        organization.pop('id')
 
-                return jsonify({'status': 'OK', 'message': 'Organization added', 'code': CREATED, 'uri': uri}), CREATED
+                    return jsonify(organizations)
+
+                ## Add a new organizations
+                if request.method == 'POST':
+                    # Check if all key:value are present before modify the database
+                    if not all(key in request.json for key in orgNeedKeys):
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+
+                    # Add organization into the database and get the database 'id' of this organization
+                    orgId = self.dataBase.addOrganization(request.json)
+                    # Generate a URL to the given endpoint with the method provided.
+                    uri = url_for('modOrganization', orgId=orgId, _external=True)
+
+                    return jsonify({'status': 'OK', 'message': 'Organization added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.OrganizationError as organizationError:
                 raise ConflictError(str(organizationError))
