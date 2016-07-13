@@ -186,6 +186,7 @@ class DataBase(object):
 
     def getOrganizations(self):
         '''
+        Return a a dictionary with all organizations
         '''
         sql = ('SELECT * FROM Organization')
         self.cursor.execute(sql)
@@ -298,9 +299,6 @@ class DataBase(object):
 
 
 
-
-
-
     def delZone(self, zone):
         '''
         Receive a dictionary with id zone
@@ -319,8 +317,6 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise ZoneError('Can not delete this zone')
-
-
 
 
 
@@ -579,6 +575,23 @@ class DataBase(object):
 
 #-------------------------------Person-----------------------------------
 
+    def getPersons(self, orgId):
+        '''
+        Return a dictionary with all persons in an organization
+        '''
+        # check if the organization id exist
+        sql = ("SELECT * FROM Organization WHERE id='{}'".format(orgId))
+        self.cursor.execute(sql)
+        organization = self.cursor.fetchall()
+
+        if not organization:
+            raise OrganizationNotFound('Organization not found')
+         
+        sql = ("SELECT * FROM Person WHERE orgId='{}'".format(orgId))
+        self.cursor.execute(sql)
+        persons = self.cursor.fetchall()
+        
+        return persons
 
 
 

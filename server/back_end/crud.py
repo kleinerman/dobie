@@ -208,12 +208,22 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
 
-        @app.route('/api/v1.0/organization/<int:orgId>', methods=['PUT','DELETE'])
+
+        @app.route('/api/v1.0/organization/<int:orgId>', methods=['GET','PUT','DELETE'])
         def modOrganization(orgId):
             '''
             Update or delete an organization in the database
             '''
             try:
+                if request.method == 'GET':
+                    persons = self.dataBase.getPersons(orgId)
+                    
+                    for person in persons:
+                        person['uri'] = url_for('modPerson', personId=person['id'], _external=True)
+                        person.pop('id')
+
+                    return jsonify(persons)
+
                 # organization is a dictionary with the request json.
                 organization = request.json
                 # add the database organization id into the dictionary
