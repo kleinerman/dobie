@@ -590,6 +590,88 @@ class CrudMngr(genmngr.GenericMngr):
                 raise BadRequest('Invalid request. Required: {}'.format(', '.join(pssgNeedKeys)))
 
 
+
+
+
+
+
+#---------------------------------Limited Access--------------------------------------
+
+
+        addLiAccessNeedKeys = ('pssgId', 'personId', 'iSide', 'oSide', 'weekDay'
+                             'startTime', 'endTime', 'expireDate')
+
+        @app.route('/api/v1.0/liaccess', methods=['POST'])
+        @auth.login_required
+        def addLiAccess():
+            '''
+            Add a new Limited Access into the database and send it to the controller
+            '''
+            try:
+
+
+                # Create a clean access dictionary with only required access params,
+                # removing unnecessary parameters if the client send them.
+                # Also a KeyError will be raised if the client misses any parameter.
+                liAccess = {}
+                for param in addLiAccessNeedKeys:
+                    liAccess[param] = request.json[param]
+
+
+
+                liAccessId = self.dataBase.addLiAccess(access)
+
+                # Access dictionary modified for the controller database (same server access id)
+                liAccess['id'] = liAccessId
+
+                #Get the person parameters as a dictionary
+                person = self.dataBase.getPerson(liAccess['personId'])
+
+                #Adding to access dictionary necesary person parameters to add person if it doesn't
+                #exist in controller
+                liAccess['cardNumber'] = person['cardNumber']
+
+                # Get the controller mac address
+                pssgId = liAccess['pssgId']
+                ctrllerMac = self.dataBase.getControllerMac(pssgId)
+
+                self.ctrllerMsger.addLiAccess(ctrllerMac, access)
+
+                uri = url_for('modLiAccess', liAccessId=liAccessId, _external=True)
+                return jsonify({'status': 'OK', 'message': 'Access added', 'code': CREATED, 'uri': uri}), CREATED
+
+
+            #This exception could be raised by getPerson() method.
+            #It will never happen since addAccess() method will raise an exception caused by constraint.
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
+            #This exception could be raised by getControllerMac() method.
+            #It will never happen since addAccess() method will raise an exception caused by constraint.
+            except database.PassageNotFound as passageNotFound:
+                raise NotFound(str(passageNotFound))
+            except database.AccessError as accessError:
+                raise ConflictError(str(accessError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(pssgNeedKeys)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #----------------------------------------Main--------------------------------------------
 
 

@@ -76,6 +76,8 @@ CREATE TABLE `Access` (
 )
 ;
 
+CREATE UNIQUE INDEX pssgPersonIndex ON Access (pssgId, personId)
+;
 
 CREATE TABLE `LimitedAccess` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,

@@ -812,6 +812,40 @@ class DataBase(object):
 
 
 
+
+
+
+#-------------------------------Limited Access---------------------------------
+
+
+
+
+    def addLiAccess(self, liAccess):
+        '''
+        Receive a dictionary with access parametters and save it in DB
+        '''
+
+        try:
+            sql = ("REPLACE INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate, rowStateId) VALUES({}, {}, False, {}, {}, '{}', '{}', '{}', {})"
+                   "".format(liAccess['pssgId'], liAccess['personId'], liAccess['iSide'], liAccess['oSide'],
+                             access['startTime'], access['endTime'], access['expireDate'], TO_ADD)
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+            return self.cursor.lastrowid
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Can not add this access.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise AccessError('Can not add this access.')
+
+
+
+
+
 #---------------------------------------------------------------------------------------
 
     def run(self):
