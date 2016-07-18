@@ -54,7 +54,8 @@ class CrudMngr(genmngr.GenericMngr):
                            'SD': self.dataBase.delPassage,
                            'AC': self.dataBase.addAccess,
                            'AU': self.dataBase.updAccess,
-                           'AD': self.dataBase.delAccess
+                           'AD': self.dataBase.delAccess,
+                           'LC': self.dataBase.addLiAccess,
                           }
 
         while True:

@@ -390,9 +390,9 @@ class DataBase(object):
         
 
         try:
-            sql = ("INSERT INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
-                   "endTime, expireDate) VALUES({}, {}, {}, {}, {}, {}, '{}', '{}', '{}')"
-                   "".format(access['id'], access['pssgId'], access['personId'], 1,
+            sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate) VALUES({}, {}, {}, 1, {}, {}, '{}', '{}', '{}')"
+                   "".format(access['id'], access['pssgId'], access['personId'],
                              access['iSide'], access['oSide'], access['startTime'],
                              access['endTime'], access['expireDate'])
                   )
@@ -465,5 +465,62 @@ class DataBase(object):
         except sqlite3.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise IntegrityError('Integrity error deleting an Access.')
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def addLiAccess(self, liAccess):
+        '''
+        Receive a limited access dictionary and add it into DB.
+        The limited access dictionary include person parametters. This method try to 
+        add this person to database if it is not present.
+        '''
+
+        try:
+            sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
+                   "".format(liAccess['personId'], liAccess['cardNumber'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Person.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.info('The person is already in local DB.')
+
+
+        try:
+            sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate) VALUES({}, {}, {}, 0, 0, 0, NULL, NULL, '{}')"
+                   "".format(liAccess['accessId'], liAccess['pssgId'],
+                             liAccess['personId'], liAccess['expireDate'])
+                  )
+            self.cursor.execute(sql)
+
+
+            sql = ("INSERT INTO LimitedAccess(id, pssgId, personId, weekDay, iSide, oSide, startTime, "
+                   "endTime) VALUES({}, {}, {}, {}, {}, {}, '{}', '{}')"
+                   "".format(liAccess['id'], liAccess['pssgId'], liAccess['personId'], liAccess['weekDay'],
+                             liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
+                             liAccess['endTime'])
+
+                  )
+            self.cursor.execute(sql)
+
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Limited Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error adding a Limited Access.')
+
+
 
 
