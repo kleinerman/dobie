@@ -677,9 +677,10 @@ class DataBase(object):
             sql = ("DELETE FROM LimitedAccess WHERE pssgId = {} and personId = {}"
                    "".format(access['pssgId'], access['personId'])
                   )
+            self.cursor.execute(sql)
+            self.connection.commit()
 
-
-            sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
+            sql = ("REPLACE INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {})"
                    "".format(access['pssgId'], access['personId'], access['iSide'], access['oSide'],
                              access['startTime'], access['endTime'], access['expireDate'], TO_ADD)
@@ -826,24 +827,43 @@ class DataBase(object):
         '''
 
         try:
+
+
+
+
             sql = ("REPLACE INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
-                   "endTime, expireDate, rowStateId) VALUES({}, {}, False, {}, {}, '{}', '{}', '{}', {})"
-                   "".format(liAccess['pssgId'], liAccess['personId'], liAccess['iSide'], liAccess['oSide'],
-                             access['startTime'], access['endTime'], access['expireDate'], TO_ADD)
+                   "endTime, expireDate, rowStateId) VALUES({}, {}, False, False, False, Null, Null, '{}', {})"
+                   "".format(liAccess['pssgId'], liAccess['personId'], liAccess['expireDate'], COMMITTED)
+                  )
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+            accessId = self.cursor.lastrowid
+
+
+            sql = ("INSERT INTO LimitedAccess(pssgId, personId, weekDay, iSide, oSide, startTime, "
+                   "endTime, rowStateId) VALUES({}, {}, {}, {}, {}, '{}', '{}', {})"
+                   "".format(liAccess['pssgId'], liAccess['personId'], liAccess['weekDay'],
+                             liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
+                             liAccess['endTime'], TO_ADD)
                   )
             self.cursor.execute(sql)
             self.connection.commit()
-            return self.cursor.lastrowid
+            liAccessId = self.cursor.lastrowid
+            return accessId, liAccessId
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
-            raise AccessError('Can not add this access.')
+            raise AccessError('Can not add this limited access.')
         except pymysql.err.InternalError as internalError:
             self.logger.warning(internalError)
-            raise AccessError('Can not add this access.')
+            raise AccessError('Can not add this limited access.')
 
 
 
+
+    def commitLiAccess(self, liAccessId):
+        pass
 
 
 #---------------------------------------------------------------------------------------

@@ -498,9 +498,13 @@ class CrudMngr(genmngr.GenericMngr):
             Add a new Access into the database and send it to the controller
             '''
             try:
-                access = request.json
-                if not all(key in request.json for key in addAccessNeedKeys):
-                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
+                # Create a clean access dictionary with only required access params,
+                # removing unnecessary parameters if the client send them.
+                # Also a KeyError will be raised if the client misses any parameter.
+                access = {}
+                for param in addAccessNeedKeys:
+                    access[param] = request.json[param]
+
                 accessId = self.dataBase.addAccess(access)
 
                 # Access dictionary modified for the controller database (same server access id)
@@ -539,6 +543,8 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(addAccessNeedKeys)))
 
 
 
@@ -587,7 +593,7 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
-                raise BadRequest('Invalid request. Required: {}'.format(', '.join(pssgNeedKeys)))
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(updAccessNeedKeys)))
 
 
 
@@ -598,8 +604,8 @@ class CrudMngr(genmngr.GenericMngr):
 #---------------------------------Limited Access--------------------------------------
 
 
-        addLiAccessNeedKeys = ('pssgId', 'personId', 'iSide', 'oSide', 'weekDay'
-                             'startTime', 'endTime', 'expireDate')
+        addLiAccessNeedKeys = ('pssgId', 'personId', 'weekDay', 'iSide', 
+                               'oSide', 'startTime', 'endTime', 'expireDate')
 
         @app.route('/api/v1.0/liaccess', methods=['POST'])
         @auth.login_required
@@ -617,12 +623,11 @@ class CrudMngr(genmngr.GenericMngr):
                 for param in addLiAccessNeedKeys:
                     liAccess[param] = request.json[param]
 
-
-
-                liAccessId = self.dataBase.addLiAccess(access)
+                accessId, liAccessId = self.dataBase.addLiAccess(liAccess)
 
                 # Access dictionary modified for the controller database (same server access id)
                 liAccess['id'] = liAccessId
+                liAccess['accessId'] = accessId
 
                 #Get the person parameters as a dictionary
                 person = self.dataBase.getPerson(liAccess['personId'])
@@ -635,7 +640,7 @@ class CrudMngr(genmngr.GenericMngr):
                 pssgId = liAccess['pssgId']
                 ctrllerMac = self.dataBase.getControllerMac(pssgId)
 
-                self.ctrllerMsger.addLiAccess(ctrllerMac, access)
+                self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
 
                 uri = url_for('modLiAccess', liAccessId=liAccessId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Access added', 'code': CREATED, 'uri': uri}), CREATED
@@ -657,12 +662,57 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
-                raise BadRequest('Invalid request. Required: {}'.format(', '.join(pssgNeedKeys)))
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(addLiAccessNeedKeys)))
 
 
 
 
+        updLiAccessNeedKeys = ('pssgId', 'weekDay', 'iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
 
+        @app.route('/api/v1.0/liaccess/<int:liAccessId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def modLiAccess(liAccessId):
+            '''
+            Update or delete a Access in the database and send the modification to
+            the appropriate controller.
+            '''
+            try:
+                if request.method == 'PUT':
+                    # Create a clean access dictionary with only required access params,
+                    # removing unnecessary parameters if the client send them.
+                    # Also a KeyError wil be raised if the client misses any parameter.
+                    access = {}
+                    for param in updAccessNeedKeys:
+                        access[param] = request.json[param]
+                    access['id'] = accessId
+                    self.dataBase.updAccess(access)
+
+                    ctrllerMac = self.dataBase.getControllerMac(access['pssgId'])
+                    self.ctrllerMsger.updAccess(ctrllerMac, access)
+
+                    return jsonify({'status': 'OK', 'message': 'Access updated'}), OK
+
+                elif request.method == 'DELETE':
+                    pssgId = self.dataBase.getPssgId(accessId)
+                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                    #Perhaps we should put markAccessToDel first of all 
+                    self.dataBase.markAccessToDel(accessId)
+                    self.ctrllerMsger.delAccess(ctrllerMac, accessId)
+                    return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
+
+            except database.PassageNotFound as passageNotFound:
+                raise NotFound(str(passageNotFound))
+            except database.AccessNotFound as accessNotFound:
+                raise NotFound(str(accessNotFound))
+            except database.AccessError as accessError:
+                raise ConflictError(str(accessError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(updAccessNeedKeys)))
 
 
 
