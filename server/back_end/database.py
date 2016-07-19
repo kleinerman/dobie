@@ -680,11 +680,24 @@ class DataBase(object):
             self.cursor.execute(sql)
             self.connection.commit()
 
-            sql = ("REPLACE INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
-                   "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {})"
+            #sql = ("REPLACE INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
+            #       "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {})"
+            #       "".format(access['pssgId'], access['personId'], access['iSide'], access['oSide'],
+            #                 access['startTime'], access['endTime'], access['expireDate'], TO_ADD)
+            #      )
+
+
+            sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {}) "
+                   "ON DUPLICATE KEY UPDATE allWeek = True, iSide = {}, oSide = {}, startTime = '{}', "
+                   "endTime = '{}', expireDate = '{}', rowStateId = {}"
                    "".format(access['pssgId'], access['personId'], access['iSide'], access['oSide'],
-                             access['startTime'], access['endTime'], access['expireDate'], TO_ADD)
+                             access['startTime'], access['endTime'], access['expireDate'], TO_ADD,
+                             access['iSide'], access['oSide'], access['startTime'], access['endTime'],
+                             access['expireDate'], TO_ADD)
                   )
+
+
             self.cursor.execute(sql)
             self.connection.commit()
             return self.cursor.lastrowid
@@ -828,13 +841,19 @@ class DataBase(object):
 
         try:
 
-
-
-
-            sql = ("REPLACE INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
-                   "endTime, expireDate, rowStateId) VALUES({}, {}, False, False, False, Null, Null, '{}', {})"
-                   "".format(liAccess['pssgId'], liAccess['personId'], liAccess['expireDate'], COMMITTED)
+            sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate, rowStateId) VALUES({}, {}, FALSE, FALSE, FALSE, NULL, NULL, '{}', {}) "
+                   "ON DUPLICATE KEY UPDATE allWeek = FALSE, iSide = FALSE, oSide = FALSE, startTime = NULL, "
+                   "endTime = NULL, expireDate = '{}', rowStateId = {}"
+                   "".format(liAccess['pssgId'], liAccess['personId'], liAccess['expireDate'], 
+                             COMMITTED, liAccess['expireDate'], COMMITTED)
                   )
+
+
+            #sql = ("REPLACE INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
+            #       "endTime, expireDate, rowStateId) VALUES({}, {}, False, False, False, Null, Null, '{}', {})"
+            #       "".format(liAccess['pssgId'], liAccess['personId'], liAccess['expireDate'], COMMITTED)
+            #      )
 
             self.cursor.execute(sql)
             self.connection.commit()
