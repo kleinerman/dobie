@@ -681,23 +681,23 @@ class CrudMngr(genmngr.GenericMngr):
                     # Create a clean access dictionary with only required access params,
                     # removing unnecessary parameters if the client send them.
                     # Also a KeyError wil be raised if the client misses any parameter.
-                    access = {}
-                    for param in updAccessNeedKeys:
-                        access[param] = request.json[param]
-                    access['id'] = accessId
-                    self.dataBase.updAccess(access)
+                    liAccess = {}
+                    for param in updLiAccessNeedKeys:
+                        liAccess[param] = request.json[param]
+                    liAccess['id'] = liAccessId
+                    self.dataBase.updLiAccess(liAccess)
 
-                    ctrllerMac = self.dataBase.getControllerMac(access['pssgId'])
-                    self.ctrllerMsger.updAccess(ctrllerMac, access)
+                    ctrllerMac = self.dataBase.getControllerMac(liAccess['pssgId'])
+                    self.ctrllerMsger.updLiAccess(ctrllerMac, access)
 
-                    return jsonify({'status': 'OK', 'message': 'Access updated'}), OK
+                    return jsonify({'status': 'OK', 'message': 'Limited Access updated'}), OK
 
                 elif request.method == 'DELETE':
-                    pssgId = self.dataBase.getPssgId(accessId)
+                    pssgId = self.dataBase.getPssgId(liAccessId)
                     ctrllerMac = self.dataBase.getControllerMac(pssgId)
                     #Perhaps we should put markAccessToDel first of all 
-                    self.dataBase.markAccessToDel(accessId)
-                    self.ctrllerMsger.delAccess(ctrllerMac, accessId)
+                    self.dataBase.markLiAccessToDel(liAccessId)
+                    self.ctrllerMsger.delAccess(ctrllerMac, liAccessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
             except database.PassageNotFound as passageNotFound:
@@ -712,7 +712,7 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
-                raise BadRequest('Invalid request. Required: {}'.format(', '.join(updAccessNeedKeys)))
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(updLiAccessNeedKeys)))
 
 
 

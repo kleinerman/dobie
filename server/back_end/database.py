@@ -881,6 +881,65 @@ class DataBase(object):
 
 
 
+
+    def updLiAccess(self, liAccess):
+        '''
+        Receive a dictionary with access parameter to update it.
+        pssgId, personId and allWeek parameter are not modified.
+        If a change on them is necessary, the access should be deleted
+        and it should be added again.
+        '''
+
+
+        try:
+
+            sql = ("SELECT pssgId, personId FROM LimitedAccess WHERE id = {}"
+                   "".format(liAccess['id'])
+                  )
+
+            self.cursor.execute(sql)
+            row = self.cursor.fetchone() #KeyError exception could be raised here
+            pssgId = row['pssgId']
+            personId = row['personId']
+
+
+            sql = ("UPDATE Access SET expireDate = '{}' WHERE pssgId = {} AND personId = {}"
+                   "".format(liAccess['expireDate'], pssgId, personId)
+                  )
+
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise AccessNotFound('Access not found')
+            self.connection.commit()
+
+
+
+            sql = ("UPDATE LimitedAccess SET pssgId = {}, iSide = {}, oSide = {}, startTime = '{}', "
+                   "endTime = '{}', rowStateId = {} WHERE id = {}"
+                   "".format(access['pssgId'], access['iSide'], access['oSide'],
+                             access['startTime'], access['endTime'],
+                             access['expireDate'], TO_UPDATE, access['id'])
+                  )
+
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise AccessNotFound('Access not found')
+            self.connection.commit()
+
+
+        except KeyError:
+            raise AccessError('Can not update this limited access')
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Can not update this limited access')
+        except pymysql.err.InternalError as internalError:
+            self.logger.warning(internalError)
+            raise AccessError('Can not update this access: wrong argument')
+
+
+
+
+
     def commitLiAccess(self, liAccessId):
         pass
 
