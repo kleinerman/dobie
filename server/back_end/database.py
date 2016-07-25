@@ -720,9 +720,9 @@ class DataBase(object):
         and it should be added again.
         '''
 
-        sql = ("UPDATE Access SET pssgId = {}, iSide = {}, oSide = {}, startTime = '{}', "
+        sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
                "endTime = '{}', expireDate = '{}', rowStateId = {} WHERE id = {}"
-               "".format(access['pssgId'], access['iSide'], access['oSide'],
+               "".format(access['iSide'], access['oSide'],
                          access['startTime'], access['endTime'],
                          access['expireDate'], TO_UPDATE, access['id'])
               )
@@ -802,14 +802,23 @@ class DataBase(object):
 
 
 
-    def getPssgId(self, accessId):
+    def getPssgId(self, accessId=None, liAccessId=None):
         '''
         This method is called by CRUD module when it wants to delete an access.
         On that situation, it needs to know the "pssgId" to send the DELETE 
         message to the corresponding controller.
         '''
 
-        sql = "SELECT pssgId FROM Access WHERE id = {}".format(accessId)
+        if accessId and not liAccessId:
+            sql = "SELECT pssgId FROM Access WHERE id = {}".format(accessId)
+
+        elif liAccessId and not accessId:
+            sql = "SELECT pssgId FROM LimitedAccess WHERE id = {}".format(liAccessId)
+
+        else:
+            self.logger.debug('Error with arguments calling getPssgId method')
+            raise AccessError('Can not get passage id for this access.')
+
 
         try:
             self.cursor.execute(sql)
@@ -914,11 +923,10 @@ class DataBase(object):
 
 
 
-            sql = ("UPDATE LimitedAccess SET pssgId = {}, iSide = {}, oSide = {}, startTime = '{}', "
-                   "endTime = '{}', rowStateId = {} WHERE id = {}"
-                   "".format(access['pssgId'], access['iSide'], access['oSide'],
-                             access['startTime'], access['endTime'],
-                             access['expireDate'], TO_UPDATE, access['id'])
+            sql = ("UPDATE LimitedAccess SET pssgId = {}, weekDay = {}, iSide = {}, oSide = {}, "
+                   "startTime = '{}', endTime = '{}', rowStateId = {} WHERE id = {}"
+                   "".format(liAccess['pssgId'], liAccess['weekDay'], liAccess['iSide'], liAccess['oSide'],
+                             liAccess['startTime'], liAccess['endTime'], TO_UPDATE, liAccess['id'])
                   )
 
             self.cursor.execute(sql)
@@ -940,8 +948,43 @@ class DataBase(object):
 
 
 
+
     def commitLiAccess(self, liAccessId):
-        pass
+        '''
+        Mark the limited access in database as COMMITTED if it was previously in TO_ADD or
+        TO_UPDATE state or mark it as DELETED if it was previously in TO_DELETE state
+        '''
+
+        sql = "SELECT rowStateId FROM LimitedAccess WHERE id = {}".format(liAccessId)
+
+        try:
+            self.cursor.execute(sql)
+            rowState = self.cursor.fetchone()['rowStateId']
+
+            if rowState in (TO_ADD, TO_UPDATE):
+                sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE id = {}"
+                       "".format(COMMITTED, liAccessId)
+                      )
+            elif rowState == TO_DELETE:
+                sql = ("DELETE FROM LimitedAccess WHERE id = {}"
+                       "".format(liAccessId)
+                      )
+            else:
+                self.logger.error("Invalid state detected in Limited Access table.")
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Error committing this limited access.')
+
+        except TypeError:
+            self.logger.warning('Error fetching the limited access.')
+            raise AccessError('Error committing this limited access.')
+
+
 
 
 #---------------------------------------------------------------------------------------
