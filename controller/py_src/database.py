@@ -424,12 +424,11 @@ class DataBase(object):
         '''
 
         try:
-            sql = ("UPDATE Access SET pssgId = {}, iSide = {}, oSide = {}, startTime = '{}', "
+            sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
                    "endTime = '{}', expireDate = '{}' WHERE id = {}"
-                   "".format(access['pssgId'], access['iSide'], access['oSide'], access['startTime'],
+                   "".format(access['iSide'], access['oSide'], access['startTime'],
                              access['endTime'], access['expireDate'], access['id'])
                   )
-            print(sql)
             self.cursor.execute(sql)
             self.connection.commit()
 
@@ -521,6 +520,52 @@ class DataBase(object):
             self.logger.debug(integrityError)
             raise IntegrityError('Integrity error adding a Limited Access.')
 
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def updLiAccess(self, liAccess):
+        '''
+        Receive an access dictionary and update it into DB.
+        '''
+
+        try:
+
+            sql = ("SELECT pssgId, personId FROM LimitedAccess WHERE id = {}"
+                   "".format(liAccess['id'])
+                  )
+            self.cursor.execute(sql)
+            row = self.cursor.fetchone()
+            pssgId = row[0]
+            personId = row[1]
+            
+
+            sql = ("UPDATE Access SET expireDate = '{}' WHERE pssgId = {} AND personId = {}"
+                   "".format(liAccess['expireDate'], pssgId, personId)
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+
+            sql = ("UPDATE LimitedAccess SET pssgId = {}, weekDay = {}, iSide = {}, oSide = {}, "
+                   "startTime = '{}', endTime = '{}' WHERE id = {}"
+                   "".format(liAccess['pssgId'], liAccess['weekDay'], liAccess['iSide'], liAccess['oSide'],
+                             liAccess['startTime'], liAccess['endTime'], liAccess['id'])
+                  )
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating an Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error updating an Access.')
 
 
 
