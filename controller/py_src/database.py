@@ -549,9 +549,9 @@ class DataBase(object):
 
 
 
-            sql = ("UPDATE LimitedAccess SET pssgId = {}, weekDay = {}, iSide = {}, oSide = {}, "
+            sql = ("UPDATE LimitedAccess SET weekDay = {}, iSide = {}, oSide = {}, "
                    "startTime = '{}', endTime = '{}' WHERE id = {}"
-                   "".format(liAccess['pssgId'], liAccess['weekDay'], liAccess['iSide'], liAccess['oSide'],
+                   "".format(liAccess['weekDay'], liAccess['iSide'], liAccess['oSide'],
                              liAccess['startTime'], liAccess['endTime'], liAccess['id'])
                   )
 
@@ -561,11 +561,35 @@ class DataBase(object):
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
-            raise OperationalError('Operational error updating an Access.')
+            raise OperationalError('Operational error updating a Limited Access.')
 
         except sqlite3.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise IntegrityError('Integrity error updating an Access.')
+            raise IntegrityError('Integrity error updating a Limited Access.')
 
 
+
+
+    #---------------------------------------------------------------------------#
+
+    def delLiAccess(self, liAccess):
+        '''
+        Receive an access dictionary and delete it.
+        Then all the persons who has no access to any passage are also deleted manually.
+        '''
+        try:
+            sql = "DELETE FROM Access WHERE id = {}".format(access['id'])
+            self.cursor.execute(sql)
+
+            sql = "DELETE FROM Person WHERE id NOT IN (SELECT DISTINCT personId FROM Access)"
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting an Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting an Access.')
 
