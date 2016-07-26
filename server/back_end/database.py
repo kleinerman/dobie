@@ -923,10 +923,11 @@ class DataBase(object):
 
 
 
-            sql = ("UPDATE LimitedAccess SET pssgId = {}, weekDay = {}, iSide = {}, oSide = {}, "
+            sql = ("UPDATE LimitedAccess SET weekDay = {}, iSide = {}, oSide = {}, "
                    "startTime = '{}', endTime = '{}', rowStateId = {} WHERE id = {}"
-                   "".format(liAccess['pssgId'], liAccess['weekDay'], liAccess['iSide'], liAccess['oSide'],
-                             liAccess['startTime'], liAccess['endTime'], TO_UPDATE, liAccess['id'])
+                   "".format(liAccess['weekDay'], liAccess['iSide'], liAccess['oSide'],
+                             liAccess['startTime'], liAccess['endTime'], TO_UPDATE,
+                             liAccess['id'])
                   )
 
             self.cursor.execute(sql)
@@ -943,6 +944,29 @@ class DataBase(object):
         except pymysql.err.InternalError as internalError:
             self.logger.warning(internalError)
             raise AccessError('Can not update this access: wrong argument')
+
+
+
+
+
+    def markLiAccessToDel(self, liAccessId):
+        '''
+        Set access row state in the server DB for a pending delete.
+        '''
+
+        sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE id = {}"
+               "".format(TO_DELETE, liAccessId)
+              )
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise AccessNotFound('Access not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.warning(integrityError)
+            raise AccessError('Error marking the Limited Access to be deleted.')
+
 
 
 

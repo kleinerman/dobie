@@ -668,7 +668,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        updLiAccessNeedKeys = ('pssgId', 'weekDay', 'iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
+        updLiAccessNeedKeys = ('weekDay', 'iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
 
         @app.route('/api/v1.0/liaccess/<int:liAccessId>', methods=['PUT', 'DELETE'])
         @auth.login_required
@@ -687,17 +687,16 @@ class CrudMngr(genmngr.GenericMngr):
                         liAccess[param] = request.json[param]
                     liAccess['id'] = liAccessId
                     self.dataBase.updLiAccess(liAccess)
-
-                    ctrllerMac = self.dataBase.getControllerMac(liAccess['pssgId'])
+                    pssgId = self.dataBase.getPssgId(liAccessId=liAccessId)
+                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
                     self.ctrllerMsger.updLiAccess(ctrllerMac,liAccess)
 
                     return jsonify({'status': 'OK', 'message': 'Limited Access updated'}), OK
 
                 elif request.method == 'DELETE':
-                    pssgId = self.dataBase.getPssgId(liAccessId)
-                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
-                    #Perhaps we should put markAccessToDel first of all 
                     self.dataBase.markLiAccessToDel(liAccessId)
+                    pssgId = self.dataBase.getPssgId(liAccessId=liAccessId)
+                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
                     self.ctrllerMsger.delAccess(ctrllerMac, liAccessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
