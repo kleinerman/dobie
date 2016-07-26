@@ -56,7 +56,8 @@ class CrudMngr(genmngr.GenericMngr):
                            'AU': self.dataBase.updAccess,
                            'AD': self.dataBase.delAccess,
                            'LC': self.dataBase.addLiAccess,
-                           'LU': self.dataBase.updLiAccess
+                           'LU': self.dataBase.updLiAccess,
+                           'LD': self.dataBase.delLiAccess
                           }
 
         while True:
