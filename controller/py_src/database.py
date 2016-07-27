@@ -578,18 +578,42 @@ class DataBase(object):
         Then all the persons who has no access to any passage are also deleted manually.
         '''
         try:
-            sql = "DELETE FROM Access WHERE id = {}".format(access['id'])
+            sql = "SELECT pssgId, personId FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
             self.cursor.execute(sql)
-
-            sql = "DELETE FROM Person WHERE id NOT IN (SELECT DISTINCT personId FROM Access)"
+            row = self.cursor.fetchone()
+            pssgId = row[0]
+            personId = row[1]
+            
+            sql = "DELETE FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
             self.cursor.execute(sql)
             self.connection.commit()
 
+            sql = ("SELECT * FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
+                   "".format(pssgId, personId)
+                  )
+            self.cursor.execute(sql)
+            
+            #If there is not more limited access from this person in this passage,
+            #the entry in access table should be deleted and also the person from 
+            #Person table in case this person has not access on any other passage
+            if not self.cursor.fetchone():
+                
+                sql = ("DELETE FROM Access WHERE pssgId = {} AND personId = {}"
+                       "".format(pssgId, personId)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+                 
+                sql = "DELETE FROM Person WHERE id NOT IN (SELECT DISTINCT personId FROM Access)"
+                self.cursor.execute(sql)
+                self.connection.commit()
+
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
-            raise OperationalError('Operational error deleting an Access.')
+            raise OperationalError('Operational error deleting a LimitedAccess.')
 
         except sqlite3.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise IntegrityError('Integrity error deleting an Access.')
+            raise IntegrityError('Integrity error deleting a LimitedAccess.')
 
