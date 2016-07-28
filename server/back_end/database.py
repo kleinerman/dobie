@@ -700,8 +700,18 @@ class DataBase(object):
 
             self.cursor.execute(sql)
             self.connection.commit()
-            return self.cursor.lastrowid
 
+
+            sql = ("SELECT id FROM Access WHERE pssgId = {} AND personId = {}"
+                   "".format(access['pssgId'], access['personId'])
+                  )
+            self.cursor.execute(sql)
+            return self.cursor.fetchone()['id']
+
+
+        except KeyError:
+            self.logger.debug('Error fetching access id.')
+            raise AccessError('Can not add this  access.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise AccessError('Can not add this access.')
@@ -866,7 +876,14 @@ class DataBase(object):
 
             self.cursor.execute(sql)
             self.connection.commit()
-            accessId = self.cursor.lastrowid
+
+            sql = ("SELECT id FROM Access WHERE pssgId = {} AND personId = {}"
+                   "".format(liAccess['pssgId'], liAccess['personId'])
+                  )
+            self.cursor.execute(sql)
+            accessId = self.cursor.fetchone()['id']
+            
+            #accessId = self.cursor.lastrowid
 
 
             sql = ("INSERT INTO LimitedAccess(pssgId, personId, weekDay, iSide, oSide, startTime, "
@@ -878,8 +895,12 @@ class DataBase(object):
             self.cursor.execute(sql)
             self.connection.commit()
             liAccessId = self.cursor.lastrowid
+            print(accessId, liAccessId)
             return accessId, liAccessId
 
+        except KeyError:
+            self.logger.debug('Error fetching access id.')
+            raise AccessError('Can not add this limited access.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)
             raise AccessError('Can not add this limited access.')
@@ -989,16 +1010,52 @@ class DataBase(object):
                 sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE id = {}"
                        "".format(COMMITTED, liAccessId)
                       )
+
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+
             elif rowState == TO_DELETE:
+
+                sql = ("SELECT pssgId, personId FROM LimitedAccess WHERE id = {}"
+                       "".format(liAccessId)
+                      )
+
+                self.cursor.execute(sql)
+                row = self.cursor.fetchone() #KeyError exception could be raised here
+                pssgId = row['pssgId']
+                personId = row['personId']
+        
                 sql = ("DELETE FROM LimitedAccess WHERE id = {}"
                        "".format(liAccessId)
                       )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+
+                sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
+                       "".format(pssgId, personId)
+                      )
+                self.cursor.execute(sql)
+                remaining = self.cursor.fetchone()['COUNT(*)']
+
+                if not remaining:
+                   sql = ("DELETE FROM Access WHERE pssgId = {} AND personId = {}"
+                          "".format(pssgId, personId)
+                         )
+                   self.cursor.execute(sql)
+                   self.connection.commit()
+
             else:
                 self.logger.error("Invalid state detected in Limited Access table.")
 
             self.cursor.execute(sql)
             self.connection.commit()
 
+
+        except KeyError:
+            self.logger.debug('Error getting the amount of remaining limited access')
+            raise AccessError('Error committing this limited access.')
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.warning(integrityError)

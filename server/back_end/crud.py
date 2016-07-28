@@ -420,11 +420,11 @@ class CrudMngr(genmngr.GenericMngr):
             Add a new Passage into the database and send it to the controller
             '''
             try:
-                passage = request.json
-                if not all(key in request.json for key in pssgNeedKeys):
-                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
+                passage = {}
+                for param in pssgNeedKeys:
+                    passage[param] = request.json[param]
                 pssgId = self.dataBase.addPassage(passage)
-                
+
                 # Passage dictionary modified for the controller database (same server passage id)
                 passage['id'] = pssgId
                 passage.pop('zoneId')
@@ -443,6 +443,9 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(pssgNeedKeys)))
+
 
         @app.route('/api/v1.0/passage/<int:pssgId>', methods=['PUT', 'DELETE'])
         @auth.login_required
@@ -452,13 +455,14 @@ class CrudMngr(genmngr.GenericMngr):
             the appropriate controller.
             '''
             try:
-                
-                passage = request.json
-                passage['id'] = pssgId
-
                 if request.method == 'PUT':
-                    if not all(key in request.json for key in pssgNeedKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(pssgNeedKeys)))
+                    # Create a clean passage dictionary with only required passage params,
+                    # removing unnecessary parameters if the client send them.
+                    # Also a KeyError wil be raised if the client misses any parameter.
+                    passage = {}
+                    for param in pssgNeedKeys:
+                        passage[param] = request.json[param]
+                    passage['id'] = pssgId
                     self.dataBase.updPassage(passage)
                     passage.pop('zoneId')
                     passage.pop('controllerId')
@@ -468,8 +472,8 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'status': 'OK', 'message': 'Passage updated'}), OK
 
                 elif request.method == 'DELETE':
-                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
                     self.dataBase.markPassageToDel(pssgId)
+                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
                     self.ctrllerMsger.delPassage(ctrllerMac, pssgId)
                     return jsonify({'status': 'OK', 'message': 'Passage deleted'}), OK
 
@@ -482,6 +486,8 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '          
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(pssgNeedKeys)))
 
 
 
@@ -575,10 +581,9 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'status': 'OK', 'message': 'Access updated'}), OK
 
                 elif request.method == 'DELETE':
+                    self.dataBase.markAccessToDel(accessId)
                     pssgId = self.dataBase.getPssgId(accessId=accessId)
                     ctrllerMac = self.dataBase.getControllerMac(pssgId)
-                    #Perhaps we should put markAccessToDel first of all 
-                    self.dataBase.markAccessToDel(accessId)
                     self.ctrllerMsger.delAccess(ctrllerMac, accessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
@@ -697,7 +702,7 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.markLiAccessToDel(liAccessId)
                     pssgId = self.dataBase.getPssgId(liAccessId=liAccessId)
                     ctrllerMac = self.dataBase.getControllerMac(pssgId)
-                    self.ctrllerMsger.delAccess(ctrllerMac, liAccessId)
+                    self.ctrllerMsger.delLiAccess(ctrllerMac, liAccessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
             except database.PassageNotFound as passageNotFound:
