@@ -191,6 +191,7 @@ class DataBase(object):
     def addOrganization(self, organization):
         '''
         Receive a dictionary with organization parametters and save it in DB
+        It returns the id of the added organization.
         '''
 
         sql = ("INSERT INTO Organization(name) VALUES('{}')"
@@ -216,7 +217,7 @@ class DataBase(object):
 
     def delOrganization(self, organization):
         '''
-        Receive a dictionary with id organization
+        Receive a dictionary with id organization and delete the organization.
         '''
 
         sql = ("DELETE FROM Organization WHERE id = {}"
@@ -237,7 +238,7 @@ class DataBase(object):
 
     def updOrganization(self, organization):
         '''
-        Receive a dictionary with id organization
+        Receive a dictionary with organization parametters and update it in DB
         '''
 
         sql = ("UPDATE Organization SET name = '{}' WHERE id = {}"
@@ -270,6 +271,7 @@ class DataBase(object):
     def addZone(self, zone):
         '''
         Receive a dictionary with zone parametters and save it in DB
+        It returns the id of the added zone.
         '''
 
         sql = ("INSERT INTO Zone(name) VALUES('{}')"
@@ -295,7 +297,7 @@ class DataBase(object):
 
     def delZone(self, zone):
         '''
-        Receive a dictionary with id zone
+        Receive a dictionary with id zone and delete the zone
         '''
 
         sql = ("DELETE FROM Zone WHERE id = {}"
@@ -319,7 +321,7 @@ class DataBase(object):
 
     def updZone(self, zone):
         '''
-        Receive a dictionary with id zone
+        Receive a dictionary with zone parametters and update it in DB
         '''
 
         sql = ("UPDATE Zone SET name = '{}' WHERE id = {}"
@@ -348,6 +350,7 @@ class DataBase(object):
     def addController(self, controller):
         '''
         Receive a dictionary with controller parametters and save it in DB
+        It returns the id of the added controller.
         '''
 
         sql = ("INSERT INTO Controller(boardModel, macAddress, ipAddress) "
@@ -375,7 +378,7 @@ class DataBase(object):
 
     def delController(self, controller):
         '''
-        Receive a dictionary with id controller
+        Receive a dictionary with id controller and delete the controller
         '''
 
         sql = ("DELETE FROM Controller WHERE id = {}"
@@ -397,7 +400,7 @@ class DataBase(object):
 
     def updController(self, controller):
         '''
-        Receive a dictionary with id controller
+        Receive a dictionary with controller parametters and update it in DB
         '''
 
         sql = ("UPDATE Controller SET boardModel = '{}', macAddress = '{}', "
@@ -456,6 +459,7 @@ class DataBase(object):
     def addPassage(self, passage):
         '''
         Receive a dictionary with passage parametters and save it in DB
+        It returns the id of the added passage
         '''
 
         sql = ("INSERT INTO Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, "
@@ -485,8 +489,8 @@ class DataBase(object):
 
     def commitPassage(self, passageId):
         '''
-        Mark the passage in database as COMMITTED if it was previously in TO_COMMIT state
-        or mark it as DELETED if it was previously in TO_DELETE state
+        Mark the passage in database as COMMITTED if it was previously in TO_ADD or
+        TO_UPDATE state or delete it if it was previously in TO_DELETE state
         '''
 
         sql = "SELECT rowStateId FROM Passage WHERE id = {}".format(passageId)
@@ -522,7 +526,7 @@ class DataBase(object):
 
     def markPassageToDel(self, passageId):
         '''
-        Set passage row state in the server DB for a pending delete.
+        Set passage row state in state: TO_DELETE (pending to delete).
         '''
 
         sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
@@ -543,7 +547,7 @@ class DataBase(object):
 
     def updPassage(self, passage):
         '''
-        Receive a dictionary with id passage
+        Receive a dictionary with passage parametters and update it in DB
         '''
 
         sql = ("UPDATE Passage SET i0In = {}, i1In = {}, o0In = {}, o1In = {}, "
@@ -583,6 +587,7 @@ class DataBase(object):
         '''
         Receive a dictionary with person parametters and save it in DB
         '''
+
         #RowState should be removed in Person table
         sql = ("INSERT INTO Person(name, cardNumber, orgId, rowStateId) VALUES('{}', {}, {}, {})"
                "".format(person['name'], person['cardNumber'], person['orgId'], COMMITTED)
