@@ -173,8 +173,10 @@ class CrudMngr(genmngr.GenericMngr):
         orgNeedKeys = ('name',)
 
         @app.route('/api/v1.0/organization', methods=['POST', 'GET'])
-        def Organization():
+        def Organizations():
             '''
+            GET: return a list with all organizations
+            POST: add a new organization in the database
             '''
             try:
                 ## Return a JSON with all organizations
@@ -182,7 +184,7 @@ class CrudMngr(genmngr.GenericMngr):
                     organizations = self.dataBase.getOrganizations()
 
                     for organization in organizations:
-                        organization['uri'] = url_for('modOrganization', orgId=organization['id'], _external=True)
+                        organization['uri'] = url_for('Organization', orgId=organization['id'], _external=True)
                         organization.pop('id')
 
                     return jsonify(organizations)
@@ -196,7 +198,7 @@ class CrudMngr(genmngr.GenericMngr):
                     # Add organization into the database and get the database 'id' of this organization
                     orgId = self.dataBase.addOrganization(request.json)
                     # Generate a URL to the given endpoint with the method provided.
-                    uri = url_for('modOrganization', orgId=orgId, _external=True)
+                    uri = url_for('Organization', orgId=orgId, _external=True)
 
                     return jsonify({'status': 'OK', 'message': 'Organization added', 'code': CREATED, 'uri': uri}), CREATED
 
@@ -210,11 +212,14 @@ class CrudMngr(genmngr.GenericMngr):
 
 
         @app.route('/api/v1.0/organization/<int:orgId>', methods=['GET','PUT','DELETE'])
-        def modOrganization(orgId):
+        def Organization(orgId):
             '''
-            Update or delete an organization in the database
+            GET: Return a list with all persons in the organization
+            PUT: Update an organization in the database
+            DELETE: Delete an organization
             '''
             try:
+                ## For GET method
                 if request.method == 'GET':
                     persons = self.dataBase.getPersons(orgId)
                     
@@ -224,6 +229,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                     return jsonify(persons)
 
+                ## For PUT and DELETE methods
                 # organization is a dictionary with the request json.
                 organization = request.json
                 # add the database organization id into the dictionary
@@ -258,17 +264,30 @@ class CrudMngr(genmngr.GenericMngr):
 
         zoneNeedKeys = ('name',)
 
-        @app.route('/api/v1.0/zone', methods=['POST'])
+        @app.route('/api/v1.0/zone', methods=['GET', 'POST'])
         @auth.login_required
-        def addZone():
+        def Zones():
             '''
-            Add a new Zone into the database
+            GET: Return a list with all zones
+            POST: Add a new Zone into the database
             '''
+
             try:
+                ## For GET method
+                if request.method == 'GET':
+                    zones = self.dataBase.getZones()
+
+                    for zone in zones:
+                        zone['uri'] = url_for('Zone', zoneId=zone['id'], _external=True)
+                        zone.pop('id')
+
+                    return jsonify(zones)
+
+                ## For POST method
                 if not all(key in request.json for key in zoneNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
                 zoneId = self.dataBase.addZone(request.json)
-                uri = url_for('modZone', zoneId=zoneId, _external=True)
+                uri = url_for('Zone', zoneId=zoneId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Zone added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.ZoneError as zoneError:
@@ -281,13 +300,26 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/zone/<int:zoneId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/zone/<int:zoneId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
-        def modZone(zoneId):
+        def Zone(zoneId):
             '''
             Update or delete a Zone in the database.
             '''
             try:
+
+                ## For GET method
+                if request.method == 'GET':
+                    passages = self.dataBase.getPassages(zoneId)
+                    
+                    for passage in passages:
+                        passage['uri'] = url_for('modPassage', pssgId=passage['id'], _external=True)
+                        passage.pop('id')
+
+                    return jsonify(passages)
+
+
+                ## For PUT and DELETE methods
                 zone = request.json
                 zone['id'] = zoneId
 

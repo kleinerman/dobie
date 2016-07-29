@@ -276,6 +276,18 @@ class DataBase(object):
 #----------------------------------Zone----------------------------------------
 
 
+    def getZones(self):
+        '''
+        Return a a dictionary with all Zones
+        '''
+        sql = ('SELECT * FROM Zone')
+        self.cursor.execute(sql)
+        zones = self.cursor.fetchall()
+
+        return zones
+
+
+
     def addZone(self, zone):
         '''
         Receive a dictionary with zone parametters and save it in DB
@@ -452,6 +464,27 @@ class DataBase(object):
 #----------------------------------Passage----------------------------------------
 
 
+    def getPassages(self, zoneId):
+        '''
+        Return a dictionary with all passages in a Zone
+        '''
+        # check if the organization id exist in the database
+        sql = ("SELECT * FROM Zone WHERE id='{}'".format(zoneId))
+        self.cursor.execute(sql)
+        zone = self.cursor.fetchall()
+
+        if not zone:
+            raise ZoneNotFound('Zone not found')
+        
+        # Get all persons from the organization
+        sql = ("SELECT * FROM Passage WHERE zoneId='{}'".format(zoneId))
+        self.cursor.execute(sql)
+        passages = self.cursor.fetchall()
+        
+        return passages
+
+
+
     def addPassage(self, passage):
         '''
         Receive a dictionary with passage parametters and save it in DB
@@ -579,20 +612,20 @@ class DataBase(object):
         '''
         Return a dictionary with all persons in an organization
         '''
-        # check if the organization id exist
+        # check if the organization id exist in the database
         sql = ("SELECT * FROM Organization WHERE id='{}'".format(orgId))
         self.cursor.execute(sql)
         organization = self.cursor.fetchall()
 
         if not organization:
             raise OrganizationNotFound('Organization not found')
-         
+        
+        # Get all persons from the organization
         sql = ("SELECT * FROM Person WHERE orgId='{}'".format(orgId))
         self.cursor.execute(sql)
         persons = self.cursor.fetchall()
         
         return persons
-
 
 
     def addPerson(self, person):
