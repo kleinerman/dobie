@@ -126,13 +126,17 @@ class DataBase(object):
 
         # With this client_flag, cursor.rowcount will have found rows instead of affected rows
         self.connection = pymysql.connect(host, user, passwd, dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
-        
+        # The following line makes all "fetch" calls return a dictionary instead a tuple 
         self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
 
 
 
     def isValidCtrller(self, ctrllerMac):
+        '''
+        Returns an Integer when the MAC is registered in DB
+        If the MAC is not registered, it returns None
+        '''
 
         #Creating a separate connection since this method will be called from
         #different thread
@@ -177,7 +181,7 @@ class DataBase(object):
                 self.connection.commit()
 
             except pymysql.err.IntegrityError as integrityError:
-                self.logger.warning(integrityError)
+                self.logger.debug(integrityError)
 
 
 
@@ -199,11 +203,11 @@ class DataBase(object):
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise OrganizationError('Can not add this organization')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
-            raise OrganizationError('Can not add this organization: wrong argument')
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not add this organization')
 
 
 
@@ -226,7 +230,7 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise OrganizationError('Can not delete this organization')
 
 
@@ -247,10 +251,10 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise OrganizationError('Can not update this organization')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise OrganizationError('Can not update this organization: wrong argument')
 
 
@@ -278,10 +282,10 @@ class DataBase(object):
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise ZoneError('Can not add this zone')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise ZoneError('Can not add this zone: wrong argument')
 
 
@@ -305,7 +309,7 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise ZoneError('Can not delete this zone')
 
 
@@ -329,10 +333,10 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise ZoneError('Can not update this zone')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise ZoneError('Can not update this zone: wrong argument')
 
 
@@ -358,10 +362,10 @@ class DataBase(object):
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise ControllerError('Can not add this controller')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise ControllerError('Can not add this controller: wrong argument')
 
 
@@ -385,7 +389,7 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise ControllerError('Can not delete this controller')
 
 
@@ -409,10 +413,10 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise ControllerError('Can not update this controller')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise ControllerError('Can not update this controller: wrong argument')
 
 
@@ -432,11 +436,16 @@ class DataBase(object):
               )
 
 
-        self.cursor.execute(sql)
-        if self.cursor.rowcount < 1:
+
+
+        try:
+            self.cursor.execute(sql)
+            return self.cursor.fetchone()['macAddress']
+
+        except TypeError:
+            self.logger.debug('This passage id has not MAC registered')
             raise PassageNotFound('Passage not found')
 
-        return self.cursor.fetchone()['macAddress']
 
 
 
@@ -466,10 +475,10 @@ class DataBase(object):
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise PassageError('Can not add this passage')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise PassageError('Can not add this passage: wrong argument')
 
 
@@ -502,11 +511,11 @@ class DataBase(object):
                 
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise PassageError('Error committing this passage.')
 
         except TypeError:
-            self.logger.warning('Error fetching the passage.')
+            self.logger.debug('Error fetching the passage.')
             raise PassageError('Error committing this passage.')
 
 
@@ -526,7 +535,7 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise PassageError('Error marking the Passage to be deleted.')
         
 
@@ -555,10 +564,10 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise PassageError('Can not update this passage')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise PassageError('Can not update this passage: wrong argument')
 
 
@@ -585,10 +594,10 @@ class DataBase(object):
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise PersonError('Can not add this person')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise PersonError('Can not add this person: wrong argument')
 
 
@@ -612,7 +621,7 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise PersonError('Can not delete this person')
 
 
@@ -635,10 +644,10 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise PersonError('Can not update this person')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise PersonError('Can not update this person: wrong argument')
 
 
@@ -680,12 +689,6 @@ class DataBase(object):
             self.cursor.execute(sql)
             self.connection.commit()
 
-            #sql = ("REPLACE INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
-            #       "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {})"
-            #       "".format(access['pssgId'], access['personId'], access['iSide'], access['oSide'],
-            #                 access['startTime'], access['endTime'], access['expireDate'], TO_ADD)
-            #      )
-
 
             sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {}) "
@@ -709,14 +712,14 @@ class DataBase(object):
             return self.cursor.fetchone()['id']
 
 
-        except KeyError:
+        except TypeError:
             self.logger.debug('Error fetching access id.')
-            raise AccessError('Can not add this  access.')
+            raise AccessError('Can not add this access.')
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise AccessError('Can not add this access.')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise AccessError('Can not add this access.')
 
 
@@ -744,10 +747,10 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise AccessError('Can not update this access')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise AccessError('Can not update this access: wrong argument')
 
 
@@ -768,7 +771,7 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise AccessError('Error marking the Access to be deleted.')
 
 
@@ -803,11 +806,11 @@ class DataBase(object):
 
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise AccessError('Error committing this access.')
 
         except TypeError:
-            self.logger.warning('Error fetching the access.')
+            self.logger.debug('Error fetching the access.')
             raise AccessError('Error committing this access.')
 
 
@@ -869,11 +872,6 @@ class DataBase(object):
                   )
 
 
-            #sql = ("REPLACE INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
-            #       "endTime, expireDate, rowStateId) VALUES({}, {}, False, False, False, Null, Null, '{}', {})"
-            #       "".format(liAccess['pssgId'], liAccess['personId'], liAccess['expireDate'], COMMITTED)
-            #      )
-
             self.cursor.execute(sql)
             self.connection.commit()
 
@@ -898,14 +896,14 @@ class DataBase(object):
             print(accessId, liAccessId)
             return accessId, liAccessId
 
-        except KeyError:
+        except TypeError:
             self.logger.debug('Error fetching access id.')
             raise AccessError('Can not add this limited access.')
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise AccessError('Can not add this limited access.')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
+            self.logger.debug(internalError)
             raise AccessError('Can not add this limited access.')
 
 
@@ -919,7 +917,6 @@ class DataBase(object):
         If a change on them is necessary, the access should be deleted
         and it should be added again.
         '''
-
 
         try:
 
@@ -957,14 +954,15 @@ class DataBase(object):
             self.connection.commit()
 
 
-        except KeyError:
-            raise AccessError('Can not update this limited access')
+        except TypeError:
+            self.logger.debug('Can not fetching pssgId and perssonId.')
+            raise AccessError('Can not update this limited access.')
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
-            raise AccessError('Can not update this limited access')
+            self.logger.debug(integrityError)
+            raise AccessError('Can not update this limited access.')
         except pymysql.err.InternalError as internalError:
-            self.logger.warning(internalError)
-            raise AccessError('Can not update this access: wrong argument')
+            self.logger.debug(internalError)
+            raise AccessError('Can not update this limited access.')
 
 
 
@@ -985,7 +983,7 @@ class DataBase(object):
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise AccessError('Error marking the Limited Access to be deleted.')
 
 
@@ -1058,44 +1056,12 @@ class DataBase(object):
             raise AccessError('Error committing this limited access.')
 
         except pymysql.err.IntegrityError as integrityError:
-            self.logger.warning(integrityError)
+            self.logger.debug(integrityError)
             raise AccessError('Error committing this limited access.')
 
         except TypeError:
-            self.logger.warning('Error fetching the limited access.')
+            self.logger.debug('Error fetching the limited access.')
             raise AccessError('Error committing this limited access.')
 
 
-
-
-#---------------------------------------------------------------------------------------
-
-    def run(self):
-        '''
-        This is the main method of the thread. Most of the time it is blocked waiting 
-        for queue messages coming from the "Network" thread.
-        '''
-
-        while True:
-            try:
-                #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
-                events = self.netToDb.get(timeout=EXIT_CHECK_TIME)
-                self.checkExit()
-                self.saveEvents(events)
-
-            except queue.Empty:
-                #Cheking if Main thread ask as to finish.
-                self.checkExit()
-
-
-
-
-
-
-
-
-    #def __del__(self):
-   
-        #self.connection.commit() 
-        #self.connection.close()
 
