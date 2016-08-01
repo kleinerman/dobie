@@ -438,9 +438,6 @@ class DataBase(object):
                "passage.id = {}".format(passageId)
               )
 
-
-
-
         try:
             self.cursor.execute(sql)
             return self.cursor.fetchone()['macAddress']
@@ -683,7 +680,10 @@ class DataBase(object):
 
     def addAccess(self, access):
         '''
-        Receive a dictionary with access parametters and save it in DB
+        Receive a dictionary with access parametters and save it in DB.
+        First of all, it tries to delete all limited access with the same
+        pssgId and personId. This could happen when it is given a full
+        access to a person who has limited access.
         '''
 
         try:
@@ -695,6 +695,9 @@ class DataBase(object):
             self.connection.commit()
 
 
+            #If there was a row in access table, it should be overwritten, avoiding the engine
+            #complaining by the constraints. For this reason the ID is kept. For this reason it
+            #is used "ON DUPLICATE KEY UPDATE" statement.
             sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {}) "
                    "ON DUPLICATE KEY UPDATE allWeek = True, iSide = {}, oSide = {}, startTime = '{}', "
@@ -704,12 +707,13 @@ class DataBase(object):
                              access['iSide'], access['oSide'], access['startTime'], access['endTime'],
                              access['expireDate'], TO_ADD)
                   )
-
-
             self.cursor.execute(sql)
             self.connection.commit()
 
 
+            #As it is necessary to return the access ID, we could use "cursor.lastrowid" attribute,
+            #but when all the parametters are the same and nothing is updated, lastrowid returns 0.
+            #For this reason, a SELECT statement should be executed
             sql = ("SELECT id FROM Access WHERE pssgId = {} AND personId = {}"
                    "".format(access['pssgId'], access['personId'])
                   )
@@ -717,6 +721,8 @@ class DataBase(object):
             return self.cursor.fetchone()['id']
 
 
+        #This exception (TypeError) could be raised by the SELECT statement when fetchone()
+        #returns None. This should never happen.
         except TypeError:
             self.logger.debug('Error fetching access id.')
             raise AccessError('Can not add this access.')
@@ -825,6 +831,7 @@ class DataBase(object):
         This method is called by CRUD module when it wants to delete an access.
         On that situation, it needs to know the "pssgId" to send the DELETE 
         message to the corresponding controller.
+        It can receive "accessId" or "liAccessId" but not both.
         '''
 
         if accessId and not liAccessId:
@@ -863,11 +870,19 @@ class DataBase(object):
 
     def addLiAccess(self, liAccess):
         '''
-        Receive a dictionary with access parametters and save it in DB
+        Receive a dictionary with limited access parametters and save it in DB.
+        In addition to creating an entry in the table "LimitedAccess" it also 
+        creates an entry in "Access" table with allWeek = False.
         '''
 
         try:
-
+            #Each time an entry in "LimitedAccess" table is created with the same
+            #combination (pssgId, personId), this method will try to add an entry
+            #in "Access" table. For this reason it is used "ON DUPLICATE KEY UPDATE"
+            #statement. Also it is necessary to use since when a "allWeek" access is
+            #changing to a limited access type.
+            #The REPLACE statement was not used because each time it is invoked, the ID
+            #will increment since it is a DELETE followed by an INSERT.
             sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate, rowStateId) VALUES({}, {}, FALSE, FALSE, FALSE, NULL, NULL, '{}', {}) "
                    "ON DUPLICATE KEY UPDATE allWeek = FALSE, iSide = FALSE, oSide = FALSE, startTime = NULL, "
@@ -875,19 +890,19 @@ class DataBase(object):
                    "".format(liAccess['pssgId'], liAccess['personId'], liAccess['expireDate'], 
                              COMMITTED, liAccess['expireDate'], COMMITTED)
                   )
-
-
             self.cursor.execute(sql)
             self.connection.commit()
 
+
+            #As it is necessary to return the access ID, we could use "cursor.lastrowid" attribute,
+            #but when all the parametters are the same and nothing is updated, lastrowid returns 0.
+            #For this reason, a SELECT statement should be executed.
             sql = ("SELECT id FROM Access WHERE pssgId = {} AND personId = {}"
                    "".format(liAccess['pssgId'], liAccess['personId'])
                   )
             self.cursor.execute(sql)
             accessId = self.cursor.fetchone()['id']
             
-            #accessId = self.cursor.lastrowid
-
 
             sql = ("INSERT INTO LimitedAccess(pssgId, personId, weekDay, iSide, oSide, startTime, "
                    "endTime, rowStateId) VALUES({}, {}, {}, {}, {}, '{}', '{}', {})"
@@ -898,9 +913,11 @@ class DataBase(object):
             self.cursor.execute(sql)
             self.connection.commit()
             liAccessId = self.cursor.lastrowid
-            print(accessId, liAccessId)
             return accessId, liAccessId
 
+
+        #This exception (TypeError) could be raised by the SELECT statement when fetchone()
+        #returns None. This should never happen.
         except TypeError:
             self.logger.debug('Error fetching access id.')
             raise AccessError('Can not add this limited access.')
@@ -924,13 +941,14 @@ class DataBase(object):
         '''
 
         try:
-
+            #The only thing we should modify in "Access" table is the "expireDate" field.
+            #To modify the access table, we need "pssgId" and "personId"
             sql = ("SELECT pssgId, personId FROM LimitedAccess WHERE id = {}"
                    "".format(liAccess['id'])
                   )
 
             self.cursor.execute(sql)
-            row = self.cursor.fetchone() #KeyError exception could be raised here
+            row = self.cursor.fetchone()
             pssgId = row['pssgId']
             personId = row['personId']
 
@@ -975,7 +993,7 @@ class DataBase(object):
 
     def markLiAccessToDel(self, liAccessId):
         '''
-        Set access row state in the server DB for a pending delete.
+        Set limited access row state in state pending to delete.
         '''
 
         sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE id = {}"
@@ -1003,9 +1021,8 @@ class DataBase(object):
         TO_UPDATE state or mark it as DELETED if it was previously in TO_DELETE state
         '''
 
-        sql = "SELECT rowStateId FROM LimitedAccess WHERE id = {}".format(liAccessId)
-
         try:
+            sql = "SELECT rowStateId FROM LimitedAccess WHERE id = {}".format(liAccessId)
             self.cursor.execute(sql)
             rowState = self.cursor.fetchone()['rowStateId']
 
@@ -1036,6 +1053,9 @@ class DataBase(object):
                 self.connection.commit()
 
 
+                #Once we delete a limited access, we should verify if there is another
+                #limited access with the same "pssgId" and the same "personId", if there
+                #is not, we should delete the entry in "access" table.
                 sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
                        "".format(pssgId, personId)
                       )
@@ -1057,7 +1077,7 @@ class DataBase(object):
 
 
         except KeyError:
-            self.logger.debug('Error getting the amount of remaining limited access')
+            self.logger.debug('Error fetching something in commitLiAccess method.')
             raise AccessError('Error committing this limited access.')
 
         except pymysql.err.IntegrityError as integrityError:
