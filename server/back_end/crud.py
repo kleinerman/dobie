@@ -304,7 +304,8 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def Zone(zoneId):
             '''
-            Update or delete a Zone in the database.
+            GET: List all passages in the zone
+            PUT/DELETE: Update or delete a Zone in the database.
             '''
             try:
 
@@ -370,13 +371,24 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
 
-        @app.route('/api/v1.0/person/<int:personId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/person/<int:personId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
         def modPerson(personId):
             '''
-            Update or delete a Zone in the database.
+            GET: Return a JSON with all accesses that this person has
+            PUT/DELETE: Update or delete a Zone in the database.
             '''
             try:
+                ## For GET method
+                if request.method == 'GET':
+                    accesses = self.dataBase.getAccesses(personId)
+                    for access in accesses:
+                        access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
+                        access.pop('id')
+
+                    return jsonify(accesses)
+
+				## For PUT and DELETE method
                 person = request.json
                 person['id'] = personId
 

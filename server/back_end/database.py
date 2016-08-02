@@ -278,7 +278,7 @@ class DataBase(object):
 
     def getZones(self):
         '''
-        Return a a dictionary with all Zones
+        Return a dictionary with all Zones
         '''
         sql = ('SELECT * FROM Zone')
         self.cursor.execute(sql)
@@ -468,14 +468,14 @@ class DataBase(object):
         '''
         Return a dictionary with all passages in a Zone
         '''
-        # check if the organization id exist in the database
+        # check if the zoneId exists in the database
         sql = ("SELECT * FROM Zone WHERE id='{}'".format(zoneId))
         self.cursor.execute(sql)
         zone = self.cursor.fetchall()
 
         if not zone:
             raise ZoneNotFound('Zone not found')
-        
+       
         # Get all persons from the organization
         sql = ("SELECT * FROM Passage WHERE zoneId='{}'".format(zoneId))
         self.cursor.execute(sql)
@@ -722,6 +722,26 @@ class DataBase(object):
 
 #-------------------------------Access-----------------------------------
 
+
+    def getAccesses(self, personId):
+
+        '''
+        Return a dictionary with all access with the personId
+        '''
+        # check if the person id exist in the database
+        sql = ("SELECT * FROM Person WHERE id='{}'".format(personId))
+        self.cursor.execute(sql)
+        person = self.cursor.fetchall()
+
+        if not person:
+            raise PersonNotFound('Person not found')
+
+        # Get all persons from the organization
+        sql = ("SELECT * FROM Access WHERE personId='{}'".format(personId))
+        self.cursor.execute(sql)
+        accesses = self.cursor.fetchall()
+
+        return accesses
 
 
 
