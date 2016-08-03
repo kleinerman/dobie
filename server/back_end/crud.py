@@ -384,6 +384,11 @@ class CrudMngr(genmngr.GenericMngr):
                     accesses = self.dataBase.getAccesses(personId)
                     for access in accesses:
                         access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
+                        # Convert to string the following values for jsonify
+                        access['startTime'] = str(access['startTime'])
+                        access['endTime'] = str(access['endTime'])
+                        access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+                        # Remove id
                         access.pop('id')
 
                     return jsonify(accesses)
