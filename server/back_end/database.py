@@ -449,6 +449,33 @@ class DataBase(object):
 
 
 
+    def getCtrllerMacsToDelPrsn(self, personId):
+        '''
+        Return a list of controller MAC addresses receiving the person ID
+        to delete.
+        '''
+        
+        sql = ("SELECT macAddress FROM Controller controller JOIN Passage passage "
+               "ON (controller.id = passage.controllerId) JOIN Access access "
+               "ON (passage.id = access.pssgId) JOIN Person person "
+               "ON (access.personId = person.id) WHERE person.rowStateId = {} AND "
+               "person.id = {}".format(TO_DELETE, personId)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            ctrllerMacsToDelPrsn = self.cursor.fetchall()
+            ctrllerMacsToDelPrsn = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsToDelPrsn]
+            if ctrllerMacsToDelPrsn == []:
+                raise TypeError
+            return ctrllerMacsToDelPrsn
+
+        except TypeError:
+            self.logger.debug('This person is not present in any controller')
+            raise PersonNotFound('Person not found') #We should check what to do when the person only in local db
+
+
+
 
 #----------------------------------Passage----------------------------------------
 
@@ -601,6 +628,29 @@ class DataBase(object):
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
             raise PersonError('Can not add this person: wrong argument')
+
+
+
+
+
+    def markPersonToDel(self, personId):
+        '''
+        Set person row state in state: TO_DELETE (pending to delete).
+        '''
+
+        sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+               "".format(TO_DELETE, personId)
+              )
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise PersonNotFound('Person not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise PassageError('Error marking the Person to be deleted.')
+
 
 
 
