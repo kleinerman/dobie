@@ -168,26 +168,39 @@ class CrudMngr(genmngr.GenericMngr):
 
 #-------------------------------------Organization------------------------------------------
 
-        
+
         # Tuple with all necessary keys in the URL request
         orgNeedKeys = ('name',)
 
-        @app.route('/api/v1.0/organization', methods=['POST'])
-        def addOrganization():
+        @app.route('/api/v1.0/organization', methods=['POST', 'GET'])
+        def Organizations():
             '''
-            Add a new organization into the database
+            GET: return a list with all organizations
+            POST: add a new organization in the database
             '''
             try:
-                # Check if all key:value are present before modify the database
-                if not all(key in request.json for key in orgNeedKeys):
-                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+                ## Return a JSON with all organizations
+                if request.method == 'GET':
+                    organizations = self.dataBase.getOrganizations()
 
-                # Add organization into the database and get the database 'id' of this organization
-                orgId = self.dataBase.addOrganization(request.json)
-                # Generate a URL to the given endpoint with the method provided.
-                uri = url_for('modOrganization', orgId=orgId, _external=True)
+                    for organization in organizations:
+                        organization['uri'] = url_for('Organization', orgId=organization['id'], _external=True)
+                        organization.pop('id')
 
-                return jsonify({'status': 'OK', 'message': 'Organization added', 'code': CREATED, 'uri': uri}), CREATED
+                    return jsonify(organizations)
+
+                ## Add a new organizations
+                if request.method == 'POST':
+                    # Check if all key:value are present before modify the database
+                    if not all(key in request.json for key in orgNeedKeys):
+                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+
+                    # Add organization into the database and get the database 'id' of this organization
+                    orgId = self.dataBase.addOrganization(request.json)
+                    # Generate a URL to the given endpoint with the method provided.
+                    uri = url_for('Organization', orgId=orgId, _external=True)
+
+                    return jsonify({'status': 'OK', 'message': 'Organization added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.OrganizationError as organizationError:
                 raise ConflictError(str(organizationError))
@@ -197,12 +210,26 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
 
-        @app.route('/api/v1.0/organization/<int:orgId>', methods=['PUT','DELETE'])
-        def modOrganization(orgId):
+
+        @app.route('/api/v1.0/organization/<int:orgId>', methods=['GET','PUT','DELETE'])
+        def Organization(orgId):
             '''
-            Update or delete an organization in the database
+            GET: Return a list with all persons in the organization
+            PUT: Update an organization in the database
+            DELETE: Delete an organization
             '''
             try:
+                ## For GET method
+                if request.method == 'GET':
+                    persons = self.dataBase.getPersons(orgId)
+                    
+                    for person in persons:
+                        person['uri'] = url_for('modPerson', personId=person['id'], _external=True)
+                        person.pop('id')
+
+                    return jsonify(persons)
+
+                ## For PUT and DELETE methods
                 # organization is a dictionary with the request json.
                 organization = request.json
                 # add the database organization id into the dictionary
@@ -237,17 +264,30 @@ class CrudMngr(genmngr.GenericMngr):
 
         zoneNeedKeys = ('name',)
 
-        @app.route('/api/v1.0/zone', methods=['POST'])
+        @app.route('/api/v1.0/zone', methods=['GET', 'POST'])
         @auth.login_required
-        def addZone():
+        def Zones():
             '''
-            Add a new Zone into the database
+            GET: Return a list with all zones
+            POST: Add a new Zone into the database
             '''
+
             try:
+                ## For GET method
+                if request.method == 'GET':
+                    zones = self.dataBase.getZones()
+
+                    for zone in zones:
+                        zone['uri'] = url_for('Zone', zoneId=zone['id'], _external=True)
+                        zone.pop('id')
+
+                    return jsonify(zones)
+
+                ## For POST method
                 if not all(key in request.json for key in zoneNeedKeys):
                     raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
                 zoneId = self.dataBase.addZone(request.json)
-                uri = url_for('modZone', zoneId=zoneId, _external=True)
+                uri = url_for('Zone', zoneId=zoneId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Zone added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.ZoneError as zoneError:
@@ -260,13 +300,27 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/zone/<int:zoneId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/zone/<int:zoneId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
-        def modZone(zoneId):
+        def Zone(zoneId):
             '''
-            Update or delete a Zone in the database.
+            GET: List all passages in the zone
+            PUT/DELETE: Update or delete a Zone in the database.
             '''
             try:
+
+                ## For GET method
+                if request.method == 'GET':
+                    passages = self.dataBase.getPassages(zoneId)
+                    
+                    for passage in passages:
+                        passage['uri'] = url_for('modPassage', pssgId=passage['id'], _external=True)
+                        passage.pop('id')
+
+                    return jsonify(passages)
+
+
+                ## For PUT and DELETE methods
                 zone = request.json
                 zone['id'] = zoneId
 
@@ -317,13 +371,29 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
 
-        @app.route('/api/v1.0/person/<int:personId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/person/<int:personId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
         def modPerson(personId):
             '''
-            Update or delete a Zone in the database.
+            GET: Return a JSON with all accesses that this person has
+            PUT/DELETE: Update or delete a Zone in the database.
             '''
             try:
+                ## For GET method
+                if request.method == 'GET':
+                    accesses = self.dataBase.getAccesses(personId)
+                    for access in accesses:
+                        access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
+                        # Convert to string the following values for jsonify
+                        access['startTime'] = str(access['startTime'])
+                        access['endTime'] = str(access['endTime'])
+                        access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+                        # Remove id
+                        access.pop('id')
+
+                    return jsonify(accesses)
+
+				## For PUT and DELETE method
                 person = request.json
                 person['id'] = personId
 

@@ -188,6 +188,19 @@ class DataBase(object):
 #----------------------------------Organization----------------------------------------
 
 
+    def getOrganizations(self):
+        '''
+        Return a a dictionary with all organizations
+        '''
+        sql = ('SELECT * FROM Organization')
+        self.cursor.execute(sql)
+        organizations = self.cursor.fetchall()
+
+        return organizations
+
+
+                                             
+
     def addOrganization(self, organization):
         '''
         Receive a dictionary with organization parametters and save it in DB
@@ -268,6 +281,18 @@ class DataBase(object):
 #----------------------------------Zone----------------------------------------
 
 
+    def getZones(self):
+        '''
+        Return a dictionary with all Zones
+        '''
+        sql = ('SELECT * FROM Zone')
+        self.cursor.execute(sql)
+        zones = self.cursor.fetchall()
+
+        return zones
+
+
+
     def addZone(self, zone):
         '''
         Receive a dictionary with zone parametters and save it in DB
@@ -292,9 +317,6 @@ class DataBase(object):
 
 
 
-
-
-
     def delZone(self, zone):
         '''
         Receive a dictionary with id zone and delete the zone
@@ -313,8 +335,6 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise ZoneError('Can not delete this zone')
-
-
 
 
 
@@ -480,6 +500,27 @@ class DataBase(object):
 #----------------------------------Passage----------------------------------------
 
 
+    def getPassages(self, zoneId):
+        '''
+        Return a dictionary with all passages in a Zone
+        '''
+        # check if the zoneId exists in the database
+        sql = ("SELECT * FROM Zone WHERE id='{}'".format(zoneId))
+        self.cursor.execute(sql)
+        zone = self.cursor.fetchall()
+
+        if not zone:
+            raise ZoneNotFound('Zone not found')
+       
+        # Get all persons from the organization
+        sql = ("SELECT * FROM Passage WHERE zoneId='{}'".format(zoneId))
+        self.cursor.execute(sql)
+        passages = self.cursor.fetchall()
+        
+        return passages
+
+
+
     def addPassage(self, passage):
         '''
         Receive a dictionary with passage parametters and save it in DB
@@ -604,7 +645,24 @@ class DataBase(object):
 
 #-------------------------------Person-----------------------------------
 
+    def getPersons(self, orgId):
+        '''
+        Return a dictionary with all persons in an organization
+        '''
+        # check if the organization id exist in the database
+        sql = ("SELECT * FROM Organization WHERE id='{}'".format(orgId))
+        self.cursor.execute(sql)
+        organization = self.cursor.fetchall()
 
+        if not organization:
+            raise OrganizationNotFound('Organization not found')
+        
+        # Get all persons from the organization
+        sql = ("SELECT * FROM Person WHERE orgId='{}'".format(orgId))
+        self.cursor.execute(sql)
+        persons = self.cursor.fetchall()
+        
+        return persons
 
 
     def addPerson(self, person):
@@ -725,6 +783,26 @@ class DataBase(object):
 
 #-------------------------------Access-----------------------------------
 
+
+    def getAccesses(self, personId):
+
+        '''
+        Return a dictionary with all access with the personId
+        '''
+        # check if the person id exist in the database
+        sql = ("SELECT * FROM Person WHERE id='{}'".format(personId))
+        self.cursor.execute(sql)
+        person = self.cursor.fetchall()
+
+        if not person:
+            raise PersonNotFound('Person not found')
+
+        # Get all persons from the organization
+        sql = ("SELECT * FROM Access WHERE personId='{}'".format(personId))
+        self.cursor.execute(sql)
+        accesses = self.cursor.fetchall()
+
+        return accesses
 
 
 
