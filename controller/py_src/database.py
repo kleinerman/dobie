@@ -617,3 +617,29 @@ class DataBase(object):
             self.logger.debug(integrityError)
             raise IntegrityError('Integrity error deleting a LimitedAccess.')
 
+
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def delPerson(self, person):
+        '''
+        Receive a person dictionary and delete it.
+        All access and limited access on these passage will be automatically deleted 
+        by the db engine as "ON DELETE CASCADE" clause is present.
+        '''
+        try:
+            sql = "DELETE FROM Person WHERE id = {}".format(person['id'])
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting a Person.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a Person.')
+
+
