@@ -3,44 +3,18 @@ import logging
 import datetime
 import time
 import os
+import sys
 
 import select
 import socket
 import json
-
-import database
 import queue
 
 import genmngr
+import database
+import msgreceiver
 from config import *
-
-
-import sys
-
-
-
-int_CON  = 0x01
-int_RCON = 0x02
-int_EVT  = 0x03
-int_REVT = 0x04
-int_EVS  = 0x05
-int_REVS = 0x06
-int_CUD  = 0x07
-int_RCUD = 0x08
-int_END  = 0x1F
-
-
-CON  = bytes([int_CON])
-RCON = bytes([int_RCON])
-EVT  = bytes([int_EVT])
-REVT = bytes([int_REVT])
-EVS  = bytes([int_EVS])
-REVS = bytes([int_REVS])
-CUD  = bytes([int_CUD])
-RCUD = bytes([int_RCUD])
-END  = bytes([int_END])
-
-
+from msgheaders import *
 
 
 
@@ -94,15 +68,18 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, dbMngr, exitFlag):
+    def __init__(self, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
 
-        #Queue used to send Events and CRUD confirmation to dbMngr
-        self.dbMngr = dbMngr
-        #self.netToDb = netToDb
+        #DataBase object 
+        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+
+        #MsgReceiver thread
+        self.msgReceiver = msgreceiver.MsgReceiver(exitFlag)
+        self.msgReceiver.start()
 
         #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
@@ -152,34 +129,46 @@ class NetMngr(genmngr.GenericMngr):
         #It should be delivered to "eventMngr" thread.
         if msg.startswith(EVT):
             response = REVT + b'OK' + END
-
-            event = msg.strip(EVT+END).decode('utf8')
-            event = json.loads(event)
-            events = [event]
-            self.dbMngr.putEvents(events)
-
+            self.sendToCtrller(response, scktFd=fd)
+            self.msgReceiver.netToMsgRec.put(msg)
 
 
         elif msg.startswith(EVS):
             response = REVS + b'OK' + END
-
-            events = msg[1:-1].split(EVS)
-            events = [json.loads(evnt.decode('utf8')) for evnt in events]
-            self.dbMngr.putEvents(events)
-            
-
-            
-        self.fdConnObjects[fd]['outBufferQue'].put(response)
-        ctrllerSckt = self.fdConnObjects[fd]['socket']
-        with self.lockNetPoller:
-            self.netPoller.modify(ctrllerSckt, select.POLLOUT)
+            self.sendToCtrller(response, scktFd=fd)
+            self.msgReceiver.netToMsgRec.put(msg)
 
 
+        elif msg.startswith(RCUD):
+            self.msgReceiver.netToMsgRec.put(msg)
 
 
     #---------------------------------------------------------------------------#
 
 
+
+    def sendToCtrller(self, msg, mac = None, scktFd = None):
+        '''
+        '''
+        if (not mac and not scktFd) or (mac and scktFd):
+            self.logger.error('Error calling "sendToCtrller" function')
+            raise ValueError("One of 'mac' or 'sctkFd' arguments should be 'None'")
+
+        try:
+            if mac:
+                outBufferQue = self.macConnObjects[mac]['outBufferQue']
+                ctrllerSckt = self.macConnObjects[mac]['socket']
+            else:
+                outBufferQue = self.fdConnObjects[scktFd]['outBufferQue']
+                ctrllerSckt = self.fdConnObjects[scktFd]['socket']
+
+        except KeyError:
+            self.logger.warning('Controller not connected.')
+            return
+
+        outBufferQue.put(msg)
+        with self.lockNetPoller:
+            self.netPoller.modify(ctrllerSckt, select.POLLOUT)
 
 
 
@@ -232,7 +221,7 @@ class NetMngr(genmngr.GenericMngr):
         exception is thrown
         '''
 
-        if self.dbMngr.isValidCtrller(ctrllerMac):
+        if self.dataBase.isValidCtrller(ctrllerMac):
             ctrllerSckt.sendall(RCON + b'OK' + END)
         else:
             ctrllerSckt.sendall(RCON + b'NO' + END)
