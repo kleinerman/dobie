@@ -76,14 +76,16 @@ CREATE TABLE `Access` (
 )
 ;
 
+CREATE UNIQUE INDEX pssgPersonIndex ON Access (pssgId, personId)
+;
 
 CREATE TABLE `LimitedAccess` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `pssgId` integer NOT NULL,
     `personId` integer NOT NULL,
+    `weekDay` integer NOT NULL,
     `iSide` boolean NOT NULL,
     `oSide` boolean NOT NULL,
-    `weekDay` integer NOT NULL,
     `startTime` time NOT NULL,
     `endTime` time NOT NULL,
     `rowStateId` integer NOT NULL,
@@ -91,6 +93,11 @@ CREATE TABLE `LimitedAccess` (
     CONSTRAINT `fk_LimitedAccess_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
     CONSTRAINT `fk_LimitedAccess_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`))
 ;
+
+CREATE UNIQUE INDEX personWeekDayIndex ON LimitedAccess (personId, weekDay)
+;
+
+
 
 CREATE TABLE `EventType` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
