@@ -142,6 +142,15 @@ CREATE TABLE `Event` (
 )
 ;
 
+CREATE TABLE `CtrllerPrsnPendOp` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `personId` integer,
+    `macAddress` varchar(12) NOT NULL,
+    `pendingOp` integer,
+    CONSTRAINT `fk_CtrllerPrsnPendOp_RowState` FOREIGN KEY (`pendingOp`) REFERENCES `RowState` (`id`)
+)
+;
+
 COMMIT;
 
 

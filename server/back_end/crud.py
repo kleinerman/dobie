@@ -404,8 +404,8 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'status': 'OK', 'message': 'Person updated'}), OK
 
                 elif request.method == 'DELETE':
-                    self.dataBase.markPersonToDel(personId)
-                    ctrllerMacsToDelPrsn = self.dataBase.getCtrllerMacsToDelPrsn(personId)
+                    ctrllerMacsToDelPrsn = self.dataBase.markPerson(personId, database.TO_DELETE)
+                    #ctrllerMacsToDelPrsn = self.dataBase.getCtrllerMacsToDelPrsn(personId)
                     self.ctrllerMsger.delPerson(ctrllerMacsToDelPrsn, personId)
 
                     return jsonify({'status': 'OK', 'message': 'Person deleted'}), OK

@@ -691,28 +691,76 @@ class DataBase(object):
 
 
 
-    def markPersonToDel(self, personId):
+    def markPerson(self, personId, operation):
         '''
         Set person row state in state: TO_DELETE (pending to delete).
+        Return a list of controller MAC addresses receiving the person ID
+        to delete.
         '''
 
-        sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
-               "".format(TO_DELETE, personId)
-              )
+
         try:
+
+            sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+                   "".format(operation, personId)
+                  )
             self.cursor.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PersonNotFound('Person not found')
             self.connection.commit()
 
+
+
+            sql = ("SELECT macAddress FROM Controller controller JOIN Passage passage "
+                   "ON (controller.id = passage.controllerId) JOIN Access access "
+                   "ON (passage.id = access.pssgId) JOIN Person person "
+                   "ON (access.personId = person.id) WHERE person.id = {}"
+                   "".format(personId)
+                  )
+
+            self.cursor.execute(sql)
+            ctrllerMacsToDelPrsn = self.cursor.fetchall()
+            ctrllerMacsToDelPrsn = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsToDelPrsn]
+            if ctrllerMacsToDelPrsn == []:
+
+                logMsg = ("This person is not present in any controller. "
+                          "Removing it from central DB." 
+                         )
+                self.logger.debug(logMsg)
+                sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                self.cursor.execute(sql)
+                self.connection.commit()
+            
+            else:
+                values = ''
+                for mac in ctrllerMacsToDelPrsn:
+                    values += "({}, '{}', {}), ".format(personId, mac, operation)
+                #Removing the last coma and space
+                values = values[:-2]
+
+                sql = ("INSERT INTO CtrllerPrsnPendOp(personId, macAddress, pendingOp) VALUES {}"
+                       "".format(values)
+                      )
+                print(sql)
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+            return ctrllerMacsToDelPrsn
+
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PassageError('Error marking the Person to be deleted.')
+            raise PersonError('Can not add this person')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Can not add this person: wrong argument')
+
+        
 
 
 
 
-
+    def commitPerson(self, person):
+        pass
 
 
     def delPerson(self, person):

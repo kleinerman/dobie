@@ -13,7 +13,8 @@ if [[ $1 == --create ]]; then
     mysql -u conpass_usr -pqwe123qwe conpass_db -e "
 
 
-        INSERT INTO RowState(id, description) VALUES (1, 'To Add'), (2, 'Added'), (3, 'To Delete'), (4, 'Deleted');
+
+        INSERT INTO RowState(id, description) VALUES (1, 'To Add'), (2, 'To Update'), (3, 'Committed'), (4, 'To Delete'), (5, 'Deleted');
         INSERT INTO Controller(boardModel, macAddress) VALUES ('Raspberry PI', 'b827eb277791');
         INSERT INTO Controller(boardModel, macAddress) VALUES ('Raspberry PI', 'c4e98409ebaf');
         INSERT INTO Organization(id, name) VALUES(1, 'Kleinernet');
