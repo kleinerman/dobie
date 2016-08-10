@@ -31,6 +31,9 @@ CREATE TABLE `Controller` (
 )
 ;
 
+
+
+
 CREATE TABLE `Zone` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL
@@ -94,7 +97,7 @@ CREATE TABLE `LimitedAccess` (
     CONSTRAINT `fk_LimitedAccess_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`))
 ;
 
-CREATE UNIQUE INDEX personWeekDayIndex ON LimitedAccess (personId, weekDay)
+CREATE UNIQUE INDEX pssgPersonWeekDayIndex ON LimitedAccess (pssgId, personId, weekDay)
 ;
 
 
@@ -142,14 +145,21 @@ CREATE TABLE `Event` (
 )
 ;
 
-CREATE TABLE `CtrllerPrsnPendOp` (
+CREATE TABLE `PersonPendingOperation` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `personId` integer,
+    `personId` integer NOT NULL,
     `macAddress` varchar(12) NOT NULL,
-    `pendingOp` integer,
-    CONSTRAINT `fk_CtrllerPrsnPendOp_RowState` FOREIGN KEY (`pendingOp`) REFERENCES `RowState` (`id`)
+    `pendingOp` integer NOT NULL,
+    CONSTRAINT `fk_PersonPendingOperation_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
+    CONSTRAINT `fk_PersonPendingOperation_RowState` FOREIGN KEY (`pendingOp`) REFERENCES `RowState` (`id`)
+
 )
 ;
+
+CREATE UNIQUE INDEX personMacAddressIndex ON PersonPendingOperation (personId, macAddress)
+;
+
+
 
 COMMIT;
 

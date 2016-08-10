@@ -710,8 +710,10 @@ class DataBase(object):
             self.connection.commit()
 
 
-
-            sql = ("SELECT macAddress FROM Controller controller JOIN Passage passage "
+            #To avoid having duplicate MACs in the result list, it is used DISTINCT clause
+            #since we can have a Person having access in more than one passage
+            #and those passage could be on the same controller (with the same MAC)
+            sql = ("SELECT DISTINCT macAddress FROM Controller controller JOIN Passage passage "
                    "ON (controller.id = passage.controllerId) JOIN Access access "
                    "ON (passage.id = access.pssgId) JOIN Person person "
                    "ON (access.personId = person.id) WHERE person.id = {}"
@@ -738,10 +740,9 @@ class DataBase(object):
                 #Removing the last coma and space
                 values = values[:-2]
 
-                sql = ("INSERT INTO CtrllerPrsnPendOp(personId, macAddress, pendingOp) VALUES {}"
+                sql = ("INSERT IGNORE INTO PersonPendingOperation(personId, macAddress, pendingOp) VALUES {}"
                        "".format(values)
                       )
-                print(sql)
                 self.cursor.execute(sql)
                 self.connection.commit()
 
@@ -760,6 +761,7 @@ class DataBase(object):
 
 
     def commitPerson(self, person):
+        print('si')
         pass
 
 
