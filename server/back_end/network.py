@@ -140,6 +140,13 @@ class NetMngr(genmngr.GenericMngr):
 
 
         elif msg.startswith(RCUD):
+            if bytes([msg[1]]) == b'P':
+                index = msg.index(b'}')
+                msg  = (msg[:index] 
+                        + b', "mac": ' + self.fdConnObjects[fd]['mac'].encode('utf8') 
+                        + msg[index:]
+                       )
+                print(msg)
             self.msgReceiver.netToMsgRec.put(msg)
 
 
@@ -271,7 +278,8 @@ class NetMngr(genmngr.GenericMngr):
 
                         connObjects = {'socket': ctrllerSckt,
                                        'inBuffer': b'',
-                                       'outBufferQue': queue.Queue()
+                                       'outBufferQue': queue.Queue(),
+                                       'mac': ctrllerMac
                                        #'connected': threading.Event()
                                       }
 

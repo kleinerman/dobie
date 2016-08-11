@@ -760,9 +760,33 @@ class DataBase(object):
 
 
 
-    def commitPerson(self, person):
-        print('si')
-        pass
+    def commitPerson(self, personId, ctrllerMac):
+
+
+        sql = "SELECT rowStateId FROM Person WHERE id = {}".format(personId)
+        print(sql)
+
+
+        sql = ("DELETE FROM Access WHERE personId = {} AND pssgId IN "
+               "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
+               "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
+               "".format(personId, ctrllerMac)
+              )
+        print(sql)
+
+        sql = ("DELETE FROM LimitedAccess WHERE personId = {} AND pssgId IN "
+               "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
+               "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
+               "".format(personId, ctrllerMac)
+              )
+        print(sql)
+
+
+        sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}')"
+               "".format(personId, ctrllerMac)
+              )
+        print(sql)       
+        
 
 
     def delPerson(self, person):
