@@ -761,32 +761,74 @@ class DataBase(object):
 
 
     def commitPerson(self, personId, ctrllerMac):
+        '''
+        '''
+
+        try:
+            sql = "SELECT rowStateId FROM Person WHERE id = {}".format(personId)
+
+            self.cursor.execute(sql)
+            pendingOp = self.cursor.fetchone()['rowStateId']
 
 
-        sql = "SELECT rowStateId FROM Person WHERE id = {}".format(personId)
-        print(sql)
+            if pendingOp == TO_DELETE:
+
+                sql = ("DELETE FROM LimitedAccess WHERE personId = {} AND pssgId IN "
+                       "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
+                       "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
+                       "".format(personId, ctrllerMac)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit() 
+
+                sql = ("DELETE FROM Access WHERE personId = {} AND pssgId IN "
+                       "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
+                       "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
+                       "".format(personId, ctrllerMac)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()                
+
+                sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
+                       "AND pendingOp = {}".format(personId, ctrllerMac, TO_DELETE)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()
 
 
-        sql = ("DELETE FROM Access WHERE personId = {} AND pssgId IN "
-               "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
-               "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
-               "".format(personId, ctrllerMac)
-              )
-        print(sql)
+                sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
+                       "AND pendingOp = {}".format(personId, TO_DELETE)
+                      )
+                self.cursor.execute(sql)
+                pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
 
-        sql = ("DELETE FROM LimitedAccess WHERE personId = {} AND pssgId IN "
-               "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
-               "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
-               "".format(personId, ctrllerMac)
-              )
-        print(sql)
+                if not pendCtrllersToDel:
+                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    self.cursor.execute(sql)
+                    self.connection.commit()
+
+            elif pendingOp == TO_UPDATE:
+                #should be completed
+                pass
+
+            else:
+                #should be completed                
+                pass
 
 
-        sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}')"
-               "".format(personId, ctrllerMac)
-              )
-        print(sql)       
-        
+        except TypeError:
+            self.logger.debug('Error fetching something in commitPerson method.')
+            raise PersonError('Error committing this person.')
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise PersonError('Can not commit this person.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Can not commit this person.')
+
+
+
+
 
 
     def delPerson(self, person):

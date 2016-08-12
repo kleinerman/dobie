@@ -146,7 +146,6 @@ class NetMngr(genmngr.GenericMngr):
                         + b', "mac": ' + self.fdConnObjects[fd]['mac'].encode('utf8') 
                         + msg[index:]
                        )
-                print(msg)
             self.msgReceiver.netToMsgRec.put(msg)
 
 
