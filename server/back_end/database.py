@@ -693,11 +693,12 @@ class DataBase(object):
 
     def markPerson(self, personId, operation):
         '''
-        Set person row state in state: TO_DELETE (pending to delete).
-        Return a list of controller MAC addresses receiving the person ID
-        to delete.
+        Set person row state in state: TO_DELETE (pending to delete) or
+        TO_UPDATE (pending to update).
+        Receive personId and operation (TO_DELETE or TO_UPDATE).
+        Return a list of controller MAC addresses where the person should 
+        be deleted.
         '''
-
 
         try:
 
@@ -723,8 +724,10 @@ class DataBase(object):
             self.cursor.execute(sql)
             ctrllerMacsToDelPrsn = self.cursor.fetchall()
             ctrllerMacsToDelPrsn = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsToDelPrsn]
+            
+            #If the person is not present in any controller, we should log this situation and
+            #remove it from the central DB.
             if ctrllerMacsToDelPrsn == []:
-
                 logMsg = ("This person is not present in any controller. "
                           "Removing it from central DB." 
                          )
@@ -734,18 +737,24 @@ class DataBase(object):
                 self.connection.commit()
             
             else:
+                #Adding in PersonPendingOperation table: personId, mac address and pending operation
+                #Each entry on this table will be removed when each controller answer to the delete 
+                #person message.
                 values = ''
                 for mac in ctrllerMacsToDelPrsn:
                     values += "({}, '{}', {}), ".format(personId, mac, operation)
                 #Removing the last coma and space
                 values = values[:-2]
-
+                #Using INSERT IGNORE to avoid having duplicates entries on this table (This situation can happen
+                #if the server receive more than once a REST command to delete a person and the controller does not
+                #confirm the deletion of this person.)
                 sql = ("INSERT IGNORE INTO PersonPendingOperation(personId, macAddress, pendingOp) VALUES {}"
                        "".format(values)
                       )
                 self.cursor.execute(sql)
                 self.connection.commit()
 
+            #If the list of MACs is void or not, we always return it.
             return ctrllerMacsToDelPrsn
 
         except pymysql.err.IntegrityError as integrityError:
