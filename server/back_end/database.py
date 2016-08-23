@@ -771,17 +771,28 @@ class DataBase(object):
 
     def commitPerson(self, personId, ctrllerMac):
         '''
+        Receive personId and controller MAC.
+        First of all it determines the pendig operation of that person on that controller.
+
+        If the operation is TO_DELETE: it deletes all the accesses and limited accesses of
+        this person on the passages managed by this controller. 
+        Then it deletes the entry in "PersonPendingOperation" table which has this person id,
+        this MAC and the corresponding pending operation. 
+        If there is not more entries on "PersonPendingOperation" table with this person and 
+        this operation type, it can delete the person definitely from the central database.
         '''
 
         try:
+            #Determines the pendig operation of that person on that controller
             sql = "SELECT rowStateId FROM Person WHERE id = {}".format(personId)
 
             self.cursor.execute(sql)
             pendingOp = self.cursor.fetchone()['rowStateId']
 
-
             if pendingOp == TO_DELETE:
 
+                #Deleting all the limited accesses of this person on the passages managed by 
+                #this controller
                 sql = ("DELETE FROM LimitedAccess WHERE personId = {} AND pssgId IN "
                        "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
                        "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
@@ -790,6 +801,8 @@ class DataBase(object):
                 self.cursor.execute(sql)
                 self.connection.commit() 
 
+                #Deleting all the accesses of this person on the passages managed by 
+                #this controller
                 sql = ("DELETE FROM Access WHERE personId = {} AND pssgId IN "
                        "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
                        "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
@@ -798,19 +811,21 @@ class DataBase(object):
                 self.cursor.execute(sql)
                 self.connection.commit()                
 
+                #Deleting the entry in "PersonPendingOperation" table which has this person id,
+                #this MAC and the corresponding pending operation.
                 sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
                        "AND pendingOp = {}".format(personId, ctrllerMac, TO_DELETE)
                       )
                 self.cursor.execute(sql)
                 self.connection.commit()
 
-
+                #If there is not more entries on "PersonPendingOperation" table with this person and 
+                #this operation type, it can delete the person definitely from the central database.                
                 sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
                        "AND pendingOp = {}".format(personId, TO_DELETE)
                       )
                 self.cursor.execute(sql)
                 pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
-
                 if not pendCtrllersToDel:
                     sql = "DELETE FROM Person WHERE id = {}".format(personId)
                     self.cursor.execute(sql)
