@@ -140,6 +140,9 @@ class NetMngr(genmngr.GenericMngr):
 
 
         elif msg.startswith(RCUD):
+            #When a response from an update or delete person is received, it is
+            #necessary to know the controller which send that response. For this
+            #reason, the MAC is inserted in the json dictionary.
             if bytes([msg[1]]) == b'P':
                 index = msg.index(b'}')
                 msg  = (msg[:index] 

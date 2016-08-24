@@ -357,8 +357,9 @@ class CrudMngr(genmngr.GenericMngr):
             Add a new Person into the database.
             '''
             try:
-                if not all(key in request.json for key in prsnNeedKeys):
-                   raise BadRequest('Invalid request. Missing: {}'.format(', '.join(prsnNeedKeys)))
+                person = {}
+                for param in prsnNeedKeys:
+                    person[param] = request.json[param]
                 personId = self.dataBase.addPerson(request.json)
                 uri = url_for('modPerson', personId=personId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Person added', 'code': CREATED, 'uri': uri}), CREATED
@@ -370,6 +371,10 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '          
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(prsnNeedKeys)))
+
+
 
         @app.route('/api/v1.0/person/<int:personId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
@@ -394,20 +399,19 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify(accesses)
 
 				## For PUT and DELETE method
-                person = request.json
-                person['id'] = personId
-
                 if request.method == 'PUT':
-                    if not all(key in request.json for key in prsnNeedKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(prsnNeedKeys)))
+                    person = {}
+                    person['id'] = personId
+                    for param in prsnNeedKeys:
+                        person[param] = request.json[param]
                     self.dataBase.updPerson(person)
+                    ctrllerMacsToUpdPrsn = self.dataBase.markPerson(personId, database.TO_UPDATE)
+                    self.ctrllerMsger.updPerson(ctrllerMacsToUpdPrsn, personId)
                     return jsonify({'status': 'OK', 'message': 'Person updated'}), OK
 
                 elif request.method == 'DELETE':
                     ctrllerMacsToDelPrsn = self.dataBase.markPerson(personId, database.TO_DELETE)
-                    #ctrllerMacsToDelPrsn = self.dataBase.getCtrllerMacsToDelPrsn(personId)
                     self.ctrllerMsger.delPerson(ctrllerMacsToDelPrsn, personId)
-
                     return jsonify({'status': 'OK', 'message': 'Person deleted'}), OK
 
             except database.PersonNotFound as personNotFound:
@@ -419,8 +423,8 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '          
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-
-
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(prsnNeedKeys)))
 
 #--------------------------------------Controller------------------------------------------
 
