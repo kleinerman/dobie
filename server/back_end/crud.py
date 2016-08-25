@@ -405,8 +405,9 @@ class CrudMngr(genmngr.GenericMngr):
                     for param in prsnNeedKeys:
                         person[param] = request.json[param]
                     self.dataBase.updPerson(person)
+                    person.pop('orgId')
                     ctrllerMacsToUpdPrsn = self.dataBase.markPerson(personId, database.TO_UPDATE)
-                    self.ctrllerMsger.updPerson(ctrllerMacsToUpdPrsn, personId)
+                    self.ctrllerMsger.updPerson(ctrllerMacsToUpdPrsn, person)
                     return jsonify({'status': 'OK', 'message': 'Person updated'}), OK
 
                 elif request.method == 'DELETE':
