@@ -179,7 +179,7 @@ cursor.execute(sqlSentence)
 
 
 #Adding my card
-sqlSentence = "UPDATE Person SET cardNumber = 6926767 WHERE id = 1619"
+sqlSentence = "UPDATE Person SET cardNumber = 4300737 WHERE id = 1619"
 cursor.execute(sqlSentence)
 
 
