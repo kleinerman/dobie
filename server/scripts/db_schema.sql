@@ -137,9 +137,9 @@ CREATE TABLE `Event` (
     `allowed` boolean,
     `notReason` integer,
     CONSTRAINT `fk_Event_EventType` FOREIGN KEY (`eventTypeId`) REFERENCES `EventType` (`id`),
-    CONSTRAINT `fk_Event_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`),
+    CONSTRAINT `fk_Event_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Event_Latch` FOREIGN KEY (`latchId`) REFERENCES `Latch` (`id`),    
-    CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
+    CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Event_NotReason` FOREIGN KEY (`notReason`) REFERENCES `NotReason` (`id`)
 
 )
