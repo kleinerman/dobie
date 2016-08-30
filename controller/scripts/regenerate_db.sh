@@ -4,4 +4,5 @@
 
 rm ../py_src/access.db
 ./create-db.py
-./fill-db.py
+./init-db.py
+#./fill-db.py
