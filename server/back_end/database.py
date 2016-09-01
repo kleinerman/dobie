@@ -138,16 +138,14 @@ class DataBase(object):
         If the MAC is not registered, it returns None
         '''
 
-        #Creating a separate connection since this method will be called from
-        #different thread
-        connection = pymysql.connect(self.host, self.user, self.passwd, self.dataBase)
-        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-
         #macAsHex = '{0:0{1}x}'.format(macAsInt, 12)
         sql = "SELECT COUNT(*) FROM Controller WHERE macAddress = '{}'".format(ctrllerMac)
 
-        cursor.execute(sql)
-        return cursor.fetchone()['COUNT(*)']
+        self.cursor.execute(sql)
+        #If commit is not present, once adding the controller via REST 
+        #it is neccesary to restart the server (not sure why)
+        self.connection.commit()
+        return self.cursor.fetchone()['COUNT(*)']
 
 
 
