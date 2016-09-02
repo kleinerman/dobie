@@ -624,8 +624,22 @@ class DataBase(object):
 
     def updPerson(self, person):
         '''
+        Receive a person dictionary and update it.
         '''
-        pass
+        try:
+            sql = ("UPDATE Person SET cardNumber = {} WHERE id = {}"
+                   "".format(person['cardNumber'], person['id'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating a Person.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a Person.')
 
 
 
