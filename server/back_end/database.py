@@ -720,26 +720,32 @@ class DataBase(object):
                   )
 
             self.cursor.execute(sql)
-            ctrllerMacsToDelPrsn = self.cursor.fetchall()
-            ctrllerMacsToDelPrsn = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsToDelPrsn]
+            ctrllerMacs = self.cursor.fetchall()
+            ctrllerMacs = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacs]
             
             #If the person is not present in any controller, we should log this situation and
             #remove it from the central DB.
-            if ctrllerMacsToDelPrsn == []:
-                logMsg = ("This person is not present in any controller. "
-                          "Removing it from central DB." 
-                         )
-                self.logger.debug(logMsg)
-                sql = "DELETE FROM Person WHERE id = {}".format(personId)
-                self.cursor.execute(sql)
-                self.connection.commit()
-            
+            if ctrllerMacs == []:
+                if operation == TO_DELETE:
+                    logMsg = ("This person is not present in any controller. "
+                              "Removing it from central DB." 
+                             )
+                    self.logger.debug(logMsg)
+                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    self.cursor.execute(sql)
+                    self.connection.commit()
+
+                elif operation == TO_UPDATE:
+                    logMsg = ("This person is not present in any controller. "
+                              "Just modifying it in central DB."
+                             )
+                    self.logger.debug(logMsg)
             else:
                 #Adding in PersonPendingOperation table: personId, mac address and pending operation
                 #Each entry on this table will be removed when each controller answer to the delete 
                 #person message.
                 values = ''
-                for mac in ctrllerMacsToDelPrsn:
+                for mac in ctrllerMacs:
                     values += "({}, '{}', {}), ".format(personId, mac, operation)
                 #Removing the last coma and space
                 values = values[:-2]
@@ -753,7 +759,7 @@ class DataBase(object):
                 self.connection.commit()
 
             #If the list of MACs is void or not, we always return it.
-            return ctrllerMacsToDelPrsn
+            return ctrllerMacs
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -830,17 +836,34 @@ class DataBase(object):
                     self.connection.commit()
 
             elif pendingOp == TO_UPDATE:
-                #should be completed
-                pass
+                #Deleting the entry in "PersonPendingOperation" table which has this person id,
+                #this MAC and the corresponding pending operation.
+                sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
+                       "AND pendingOp = {}".format(personId, ctrllerMac, TO_UPDATE)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+                #If there is not more entries on "PersonPendingOperation" table with this person and 
+                #this operation type, it can delete the person definitely from the central database.                
+                sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
+                       "AND pendingOp = {}".format(personId, TO_UPDATE)
+                      )
+                self.cursor.execute(sql)
+                pendCtrllersToUpd = self.cursor.fetchone()['COUNT(*)']
+                if not pendCtrllersToUpd:
+                    sql = "UPDATE Person SET rowStateId = {} WHERE id = {}".format(COMMITTED, personId)
+                    self.cursor.execute(sql)
+                    self.connection.commit()
 
             else:
-                #should be completed                
-                pass
+                self.logger.debug('Invalid pending operation in Person table.')
+                raise PersonError('Can not commit this person.')
 
 
         except TypeError:
             self.logger.debug('Error fetching something in commitPerson method.')
-            raise PersonError('Error committing this person.')
+            raise PersonError('Can not commit this person.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise PersonError('Can not commit this person.')
