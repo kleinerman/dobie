@@ -186,20 +186,17 @@ class CrudMngr(genmngr.GenericMngr):
                     for organization in organizations:
                         organization['uri'] = url_for('Organization', orgId=organization['id'], _external=True)
                         organization.pop('id')
-
                     return jsonify(organizations)
 
                 ## Add a new organizations
-                if request.method == 'POST':
-                    # Check if all key:value are present before modify the database
-                    if not all(key in request.json for key in orgNeedKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
-
+                elif request.method == 'POST':
+                    organization = {}
+                    for param in orgNeedKeys:
+                        organization[param] = request.json[param]
                     # Add organization into the database and get the database 'id' of this organization
-                    orgId = self.dataBase.addOrganization(request.json)
+                    orgId = self.dataBase.addOrganization(organization)
                     # Generate a URL to the given endpoint with the method provided.
                     uri = url_for('Organization', orgId=orgId, _external=True)
-
                     return jsonify({'status': 'OK', 'message': 'Organization added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.OrganizationError as organizationError:
@@ -209,6 +206,8 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
 
 
         @app.route('/api/v1.0/organization/<int:orgId>', methods=['GET','PUT','DELETE'])
@@ -226,26 +225,20 @@ class CrudMngr(genmngr.GenericMngr):
                     for person in persons:
                         person['uri'] = url_for('modPerson', personId=person['id'], _external=True)
                         person.pop('id')
-
                     return jsonify(persons)
 
-                ## For PUT and DELETE methods
-                # organization is a dictionary with the request json.
-                organization = request.json
-                # add the database organization id into the dictionary
-                organization['id'] = orgId
-
                 # Update an organization
-                if request.method == 'PUT':
-                    # Check if all key:value are present before modify the database
-                    if not all(key in request.json for key in orgNeedKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+                elif request.method == 'PUT':
+                    organization = {}
+                    organization['id'] = orgId
+                    for param in orgNeedKeys:
+                        organization[param] = request.json[param]
                     self.dataBase.updOrganization(organization)
                     return jsonify({'status': 'OK', 'message': 'Organization updated'}), OK
 
                 # Delete an organization
                 elif request.method == 'DELETE':
-                    self.dataBase.delOrganization({'id':orgId})
+                    self.dataBase.delOrganization(orgId)
                     return jsonify({'status': 'OK', 'message': 'Organization deleted'}), OK
 
             except database.OrganizationNotFound as organizationNotFound:
@@ -257,6 +250,8 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '          
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
 
 
 
@@ -276,19 +271,19 @@ class CrudMngr(genmngr.GenericMngr):
                 ## For GET method
                 if request.method == 'GET':
                     zones = self.dataBase.getZones()
-
                     for zone in zones:
                         zone['uri'] = url_for('Zone', zoneId=zone['id'], _external=True)
                         zone.pop('id')
-
                     return jsonify(zones)
 
                 ## For POST method
-                if not all(key in request.json for key in zoneNeedKeys):
-                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
-                zoneId = self.dataBase.addZone(request.json)
-                uri = url_for('Zone', zoneId=zoneId, _external=True)
-                return jsonify({'status': 'OK', 'message': 'Zone added', 'code': CREATED, 'uri': uri}), CREATED
+                elif request.method == 'POST':
+                    zone = {}
+                    for param in zoneNeedKeys:
+                        zone[param] = request.json[param]
+                    zoneId = self.dataBase.addZone(zone)
+                    uri = url_for('Zone', zoneId=zoneId, _external=True)
+                    return jsonify({'status': 'OK', 'message': 'Zone added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.ZoneError as zoneError:
                 raise ConflictError(str(zoneError))
@@ -297,6 +292,8 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
 
 
 
@@ -316,22 +313,20 @@ class CrudMngr(genmngr.GenericMngr):
                     for passage in passages:
                         passage['uri'] = url_for('modPassage', pssgId=passage['id'], _external=True)
                         passage.pop('id')
-
                     return jsonify(passages)
 
 
                 ## For PUT and DELETE methods
-                zone = request.json
-                zone['id'] = zoneId
-
-                if request.method == 'PUT':
-                    if not all(key in request.json for key in zoneNeedKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
+                elif request.method == 'PUT':
+                    zone = {}
+                    zone['id'] = zoneId
+                    for param in zoneNeedKeys:
+                        zone[param] = request.json[param]
                     self.dataBase.updZone(zone)
                     return jsonify({'status': 'OK', 'message': 'Zone updated'}), OK
 
                 elif request.method == 'DELETE':
-                    self.dataBase.delZone(zone)
+                    self.dataBase.delZone(zoneId)
                     return jsonify({'status': 'OK', 'message': 'Zone deleted'}), OK
 
             except database.ZoneNotFound as zoneNotFound:
@@ -343,6 +338,8 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '          
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
 
 
 
@@ -360,7 +357,7 @@ class CrudMngr(genmngr.GenericMngr):
                 person = {}
                 for param in prsnNeedKeys:
                     person[param] = request.json[param]
-                personId = self.dataBase.addPerson(request.json)
+                personId = self.dataBase.addPerson(person)
                 uri = url_for('modPerson', personId=personId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Person added', 'code': CREATED, 'uri': uri}), CREATED
 
@@ -399,7 +396,7 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify(accesses)
 
 				## For PUT and DELETE method
-                if request.method == 'PUT':
+                elif request.method == 'PUT':
                     person = {}
                     person['id'] = personId
                     for param in prsnNeedKeys:
@@ -429,7 +426,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 #--------------------------------------Controller------------------------------------------
 
-        ctrllerNeedKeys = ('boardModel', 'macAddress', 'ipAddress')
+        ctrllerNeedKeys = ('boardModel', 'macAddress')
 
         @app.route('/api/v1.0/controller', methods=['POST'])
         @auth.login_required
@@ -438,9 +435,10 @@ class CrudMngr(genmngr.GenericMngr):
             Add a new Controller into the database.
             '''
             try:
-                if not all(key in request.json for key in ctrllerNeedKeys):
-                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
-                controllerId = self.dataBase.addController(request.json)
+                controller = {}
+                for param in ctrllerNeedKeys:
+                    controller[param] = request.json[param]
+                controllerId = self.dataBase.addController(controller)
                 uri = url_for('modController', controllerId=controllerId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Controller added', 'code': CREATED, 'uri': uri}), CREATED
 
@@ -451,6 +449,9 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '          
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
+
 
 
         @app.route('/api/v1.0/controller/<int:controllerId>', methods=['PUT', 'DELETE'])
@@ -460,17 +461,16 @@ class CrudMngr(genmngr.GenericMngr):
             Update or delete a Controller in the database.
             '''
             try:
-                controller = request.json
-                controller['id'] = controllerId
-
                 if request.method == 'PUT':
-                    if not all(key in request.json for key in ctrllerNeedKeys):
-                        raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
+                    controller = {}
+                    controller['id'] = controllerId
+                    for param in ctrllerNeedKeys:
+                        controller[param] = request.json[param]
                     self.dataBase.updController(controller)
                     return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
                 
                 elif request.method == 'DELETE':
-                    self.dataBase.delController(controller)
+                    self.dataBase.delController(controllerId)
                     return jsonify({'status': 'OK', 'message': 'Controller deleted'}), OK
 
             except database.ControllerNotFound as controllerNotFound:
@@ -482,6 +482,8 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '          
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
 
 
 #--------------------------------------Passage------------------------------------------
@@ -538,9 +540,9 @@ class CrudMngr(genmngr.GenericMngr):
                     # removing unnecessary parameters if the client send them.
                     # Also a KeyError wil be raised if the client misses any parameter.
                     passage = {}
+                    passage['id'] = pssgId
                     for param in pssgNeedKeys:
                         passage[param] = request.json[param]
-                    passage['id'] = pssgId
                     self.dataBase.updPassage(passage)
                     passage.pop('zoneId')
                     passage.pop('controllerId')
@@ -647,9 +649,9 @@ class CrudMngr(genmngr.GenericMngr):
                     # removing unnecessary parameters if the client send them.
                     # Also a KeyError wil be raised if the client misses any parameter.
                     access = {}
+                    access['id'] = accessId
                     for param in updAccessNeedKeys:
                         access[param] = request.json[param]
-                    access['id'] = accessId
                     self.dataBase.updAccess(access)
 
                     pssgId = self.dataBase.getPssgId(accessId=accessId)
@@ -698,8 +700,6 @@ class CrudMngr(genmngr.GenericMngr):
             Add a new Limited Access into the database and send it to the controller
             '''
             try:
-
-
                 # Create a clean access dictionary with only required access params,
                 # removing unnecessary parameters if the client send them.
                 # Also a KeyError will be raised if the client misses any parameter.
@@ -766,9 +766,9 @@ class CrudMngr(genmngr.GenericMngr):
                     # removing unnecessary parameters if the client send them.
                     # Also a KeyError wil be raised if the client misses any parameter.
                     liAccess = {}
+                    liAccess['id'] = liAccessId
                     for param in updLiAccessNeedKeys:
                         liAccess[param] = request.json[param]
-                    liAccess['id'] = liAccessId
                     self.dataBase.updLiAccess(liAccess)
                     pssgId = self.dataBase.getPssgId(liAccessId=liAccessId)
                     ctrllerMac = self.dataBase.getControllerMac(pssgId)

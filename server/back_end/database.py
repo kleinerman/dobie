@@ -226,13 +226,13 @@ class DataBase(object):
 
 
 
-    def delOrganization(self, organization):
+    def delOrganization(self, orgId):
         '''
         Receive a dictionary with id organization and delete the organization.
         '''
 
         sql = ("DELETE FROM Organization WHERE id = {}"
-               "".format(organization['id'])
+               "".format(orgId)
               )        
 
         try:
@@ -315,13 +315,13 @@ class DataBase(object):
 
 
 
-    def delZone(self, zone):
+    def delZone(self, zoneId):
         '''
         Receive a dictionary with id zone and delete the zone
         '''
 
         sql = ("DELETE FROM Zone WHERE id = {}"
-               "".format(zone['id'])
+               "".format(zoneId)
               )
 
         try:
@@ -371,10 +371,9 @@ class DataBase(object):
         It returns the id of the added controller.
         '''
 
-        sql = ("INSERT INTO Controller(boardModel, macAddress, ipAddress) "
-               "VALUES('{}', '{}', '{}')"
-               "".format(controller['boardModel'], controller['macAddress'], 
-                         controller['ipAddress'])
+        sql = ("INSERT INTO Controller(boardModel, macAddress) "
+               "VALUES('{}', '{}')"
+               "".format(controller['boardModel'], controller['macAddress'])
               )
 
         try:
@@ -394,13 +393,13 @@ class DataBase(object):
 
 
 
-    def delController(self, controller):
+    def delController(self, controllerId):
         '''
         Receive a dictionary with id controller and delete the controller
         '''
 
         sql = ("DELETE FROM Controller WHERE id = {}"
-               "".format(controller['id'])
+               "".format(controllerId)
               )
 
         try:
@@ -421,10 +420,10 @@ class DataBase(object):
         Receive a dictionary with controller parametters and update it in DB
         '''
 
-        sql = ("UPDATE Controller SET boardModel = '{}', macAddress = '{}', "
-               "ipAddress = '{}' WHERE id = {}"
+        sql = ("UPDATE Controller SET boardModel = '{}', macAddress = '{}' "
+               "WHERE id = {}"
                "".format(controller['boardModel'], controller['macAddress'], 
-                         controller['ipAddress'], controller['id'])
+                         controller['id'])
               )
 
         try:
