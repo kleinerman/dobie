@@ -739,6 +739,11 @@ class DataBase(object):
                               "Just modifying it in central DB."
                              )
                     self.logger.debug(logMsg)
+                    sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+                       "".format(COMMITTED, personId)
+                          )
+                    self.cursor.execute(sql)
+                    self.connection.commit()
             else:
                 #Adding in PersonPendingOperation table: personId, mac address and pending operation
                 #Each entry on this table will be removed when each controller answer to the delete 
@@ -844,7 +849,8 @@ class DataBase(object):
                 self.connection.commit()
 
                 #If there is not more entries on "PersonPendingOperation" table with this person and 
-                #this operation type, it can delete the person definitely from the central database.                
+                #this operation type, it can set the person row state as COMMITTED definitely in the 
+                #central database.                
                 sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
                        "AND pendingOp = {}".format(personId, TO_UPDATE)
                       )

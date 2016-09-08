@@ -24,10 +24,10 @@ function create {
 
         INSERT INTO RowState(id, description) VALUES (1, 'To Add'), (2, 'To Update'), (3, 'Committed'), (4, 'To Delete'), (5, 'Deleted');
         INSERT INTO Organization(id, name) VALUES(1, 'Unknown');
-        INSERT INTO Person(id, name, cardNumber, orgId, rowStateId) VALUES(1, 'Unknown', 0, 1, 1);
-        INSERT INTO EventType(id, description, rowStateId) VALUES(1, 'Access with card', 1), (2, 'Access with button', 1), (3, 'The passage remains opened', 1);
-        INSERT INTO Latch(id, description, rowStateId) VALUES(1, 'Card Reader', 1), (2, 'Button', 1), (3, 'Fingerprint Reader', 1);
-        INSERT INTO NotReason(id, description, rowStateId) VALUES(1, 'No access', 1), (2, 'Expired card', 1), (3, 'Out of time', 1);
+        INSERT INTO Person(id, name, cardNumber, orgId, rowStateId) VALUES(1, 'Unknown', 0, 1, 3);
+        INSERT INTO EventType(id, description, rowStateId) VALUES(1, 'Access with card', 3), (2, 'Access with button', 3), (3, 'The passage remains opened', 3);
+        INSERT INTO Latch(id, description, rowStateId) VALUES(1, 'Card Reader', 3), (2, 'Button', 3), (3, 'Fingerprint Reader', 3);
+        INSERT INTO NotReason(id, description, rowStateId) VALUES(1, 'No access', 3), (2, 'Expired card', 3), (3, 'Out of time', 3);
 
                                                    "
 
