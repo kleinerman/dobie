@@ -245,7 +245,7 @@ int set_gpio_pins (pssg_t *pssg, int number_of_pssgs)
         if (pssg[i].button != UNDEFINED) {
             if ( export_gpio(pssg[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_direction(pssg[i].button, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_edge(pssg[i].button, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(pssg[i].button, RISING) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
         if (pssg[i].state != UNDEFINED) {
             if ( export_gpio(pssg[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
@@ -453,6 +453,7 @@ void *buttons (void *b_args)
 {
     char filename[40];
     char message[50];
+    char value[2] = {'0','\0'};
     int **bttn_tbl;
     int i;  // for cicle index
     int j=0;    // table row index: max value is the (number_of_buttons - 1)
@@ -509,12 +510,22 @@ void *buttons (void *b_args)
                 if (events[0].data.fd == bttn_tbl[j][1]) {
                     // deregister the target file descriptor from the epoll instance to avoid button bounce
                     epoll_ctl(epfd, EPOLL_CTL_DEL, bttn_tbl[j][1], &ev[j]);
-                    sprintf(message, "%d;0;button=1", bttn_tbl[j][0]);
-                    // put the message into the queue
-                    mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
-                    printf("%s\n", message);
-                    // wait a bounce time and then register again the target file descriptor.
+                    
                     usleep(BOUNCE_TIME);
+                    read(bttn_tbl[j][1], value, 1);
+                    lseek(bttn_tbl[j][1],0,SEEK_SET);
+
+                    printf("VALOR %s\n",value);
+
+                    if (strcmp(value, "1") == 0) {
+                        printf("AAAAAAAAAAAAAAAAAAAAAAAA\n");
+                        sprintf(message, "%d;0;button=1", bttn_tbl[j][0]);
+                        // put the message into the queue
+                        mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
+                        printf("%s\n", message);
+                    }
+
+                    // wait a bounce time and then register again the target file descriptor.
                     epoll_ctl(epfd, EPOLL_CTL_ADD, bttn_tbl[j][1], &ev[j]);
                     // because it was registered again, first time it triggers with current state, so ignore it again
                     epoll_wait(epfd, events, 1, -1);
