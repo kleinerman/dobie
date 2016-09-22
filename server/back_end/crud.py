@@ -707,6 +707,10 @@ class CrudMngr(genmngr.GenericMngr):
                 for param in addLiAccessNeedKeys:
                     liAccess[param] = request.json[param]
 
+                # Checking if the client is sending an invalid week day
+                if not 1 <= liAccess['weekDay'] <= 7:
+                    raise TypeError
+
                 accessId, liAccessId = self.dataBase.addLiAccess(liAccess)
 
                 # Access dictionary modified for the controller database (same server access id)
@@ -769,6 +773,11 @@ class CrudMngr(genmngr.GenericMngr):
                     liAccess['id'] = liAccessId
                     for param in updLiAccessNeedKeys:
                         liAccess[param] = request.json[param]
+
+                    # Checking if the client is sending an invalid week day
+                    if not 1 <= liAccess['weekDay'] <= 7:
+                        raise TypeError
+
                     self.dataBase.updLiAccess(liAccess)
                     pssgId = self.dataBase.getPssgId(liAccessId=liAccessId)
                     ctrllerMac = self.dataBase.getControllerMac(pssgId)

@@ -31,7 +31,8 @@ CREATE TABLE `Controller` (
 )
 ;
 
-
+CREATE UNIQUE INDEX macAddressIndex ON Controller (macAddress)
+;
 
 
 CREATE TABLE `Zone` (
