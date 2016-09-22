@@ -453,7 +453,9 @@ class DataBase(object):
             sql = "DELETE FROM Access WHERE id = {}".format(access['id'])
             self.cursor.execute(sql)
 
-            sql = "DELETE FROM Person WHERE id NOT IN (SELECT DISTINCT personId FROM Access)"
+            sql = ("DELETE FROM Person WHERE id NOT IN "
+                   "(SELECT DISTINCT personId FROM Access) AND id != 1"
+                  )
             self.cursor.execute(sql)
             self.connection.commit()
 
@@ -605,7 +607,9 @@ class DataBase(object):
                 self.connection.commit()
 
                  
-                sql = "DELETE FROM Person WHERE id NOT IN (SELECT DISTINCT personId FROM Access)"
+                sql = ("DELETE FROM Person WHERE id NOT IN "
+                       "(SELECT DISTINCT personId FROM Access) AND id != 1"
+                      )
                 self.cursor.execute(sql)
                 self.connection.commit()
 
