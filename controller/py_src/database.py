@@ -329,16 +329,26 @@ class DataBase(object):
         Receive a passage dictionary and add it into DB
         '''
 
-        sql = ("UPDATE Passage SET i0In = {}, i1In = {}, o0In = {}, o1In = {}, "
-               "bttnIn = {}, stateIn = {}, rlseOut = {}, bzzrOut = {}, rlseTime = {}, "
-               "bzzrTime = {}, alrmTime = {} WHERE id = {}"
-               "".format(passage['i0In'], passage['i1In'], passage['o0In'],
-                         passage['o1In'], passage['bttnIn'], passage['stateIn'],
-                         passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
-                         passage['bzzrTime'], passage['alrmTime'], passage['id'])
+        try:
+            sql = ("UPDATE Passage SET i0In = {}, i1In = {}, o0In = {}, o1In = {}, "
+                   "bttnIn = {}, stateIn = {}, rlseOut = {}, bzzrOut = {}, rlseTime = {}, "
+                   "bzzrTime = {}, alrmTime = {} WHERE id = {}"
+                   "".format(passage['i0In'], passage['i1In'], passage['o0In'],
+                             passage['o1In'], passage['bttnIn'], passage['stateIn'],
+                             passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
+                             passage['bzzrTime'], passage['alrmTime'], passage['id'])
               )
-        self.cursor.execute(sql)
-        self.connection.commit()
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating a passage.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error updating a passage.')
 
 
 
@@ -353,13 +363,24 @@ class DataBase(object):
         Then all the persons who has no access to any passage are also deleted manually.
         '''
 
-        sql = "DELETE FROM Passage WHERE id = {}".format(passage['id'])
-        self.cursor.execute(sql)
-        self.connection.commit()
+        try:
+            sql = "DELETE FROM Passage WHERE id = {}".format(passage['id'])
+            self.cursor.execute(sql)
+            self.connection.commit()
 
-        sql = "DELETE FROM Person WHERE id NOT IN (SELECT DISTINCT personId FROM Access)"
-        self.cursor.execute(sql)
-        self.connection.commit()
+            sql = "DELETE FROM Person WHERE id NOT IN (SELECT DISTINCT personId FROM Access)"
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting a passage.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a passage.')
+
+
 
 
 
