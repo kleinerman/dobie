@@ -68,11 +68,14 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, exitFlag):
+    def __init__(self, exitFlag, netToCrudReSndr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
+
+        #Queue to send message to crudReSndr thread
+        self.netToCrudReSndr = netToCrudReSndr
 
         #DataBase object 
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)

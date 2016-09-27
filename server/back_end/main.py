@@ -18,7 +18,7 @@ import signal
 import database
 import network
 import msgreceiver
-import crud
+import crud, crudresndr
 from config import *
 
 import os
@@ -44,8 +44,11 @@ class BackEndSrvr(object):
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
+        #Creating the Crud Resender Thread
+        self.crudReSndr = crudresndr.CrudReSndr(self.exitFlag)
+
         #Creating the Net Manager Thread 
-        self.netMngr = network.NetMngr(self.exitFlag)        
+        self.netMngr = network.NetMngr(self.exitFlag, self.crudReSndr.netToCrudReSndr)
 
         #Creating CRUD Manager (This will run in main thread)
         self.crudMngr = crud.CrudMngr(self.netMngr)
@@ -79,6 +82,9 @@ class BackEndSrvr(object):
 
 
         self.logger.debug('Starting Server Back End')
+
+        #Starting the "CRUD Re Sender" thread
+        self.crudReSndr.start()
         
         #Starting the "Event Manager" thread
         self.netMngr.start()
