@@ -68,21 +68,20 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, exitFlag, netToCrudReSndr):
+    def __init__(self, exitFlag, netToMsgRec, netToCrudReSndr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
 
-        #Queue to send message to crudReSndr thread
+        #Queue to send messages to crudReSndr thread
         self.netToCrudReSndr = netToCrudReSndr
+
+        #Queue to send message to msgReceiver thread
+        self.netToMsgRec = netToMsgRec
 
         #DataBase object 
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
-
-        #MsgReceiver thread
-        self.msgReceiver = msgreceiver.MsgReceiver(exitFlag)
-        self.msgReceiver.start()
 
         #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
@@ -133,13 +132,13 @@ class NetMngr(genmngr.GenericMngr):
         if msg.startswith(EVT):
             response = REVT + b'OK' + END
             self.sendToCtrller(response, scktFd=fd)
-            self.msgReceiver.netToMsgRec.put(msg)
+            self.netToMsgRec.put(msg)
 
 
         elif msg.startswith(EVS):
             response = REVS + b'OK' + END
             self.sendToCtrller(response, scktFd=fd)
-            self.msgReceiver.netToMsgRec.put(msg)
+            self.netToMsgRec.put(msg)
 
 
         elif msg.startswith(RCUD):
@@ -152,7 +151,7 @@ class NetMngr(genmngr.GenericMngr):
                         + b', "mac": ' + self.fdConnObjects[fd]['mac'].encode('utf8') 
                         + msg[index:]
                        )
-            self.msgReceiver.netToMsgRec.put(msg)
+            self.netToMsgRec.put(msg)
 
 
     #---------------------------------------------------------------------------#

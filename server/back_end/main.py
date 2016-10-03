@@ -47,8 +47,12 @@ class BackEndSrvr(object):
         #Creating the Crud Resender Thread
         self.crudReSndr = crudresndr.CrudReSndr(self.exitFlag)
 
+        #Creating the Message Receiver Thread
+        self.msgReceiver = msgreceiver.MsgReceiver(self.exitFlag)
+
         #Creating the Net Manager Thread 
-        self.netMngr = network.NetMngr(self.exitFlag, self.crudReSndr.netToCrudReSndr)
+        self.netMngr = network.NetMngr(self.exitFlag, self.msgReceiver.netToMsgRec,
+                                       self.crudReSndr.netToCrudReSndr)
 
         #Creating CRUD Manager (This will run in main thread)
         self.crudMngr = crud.CrudMngr(self.netMngr)
@@ -82,6 +86,9 @@ class BackEndSrvr(object):
 
 
         self.logger.debug('Starting Server Back End')
+
+        #Starting the "Message Receiver" thread
+        self.msgReceiver.start()
 
         #Starting the "CRUD Re Sender" thread
         self.crudReSndr.start()
