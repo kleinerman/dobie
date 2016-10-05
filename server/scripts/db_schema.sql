@@ -75,7 +75,7 @@ CREATE TABLE `Access` (
     `expireDate` date NOT NULL,
     `rowStateId` integer NOT NULL,
     CONSTRAINT `fk_Access_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_Access_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
+    CONSTRAINT `fk_Access_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Access_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
 )
 ;
@@ -93,8 +93,8 @@ CREATE TABLE `LimitedAccess` (
     `startTime` time NOT NULL,
     `endTime` time NOT NULL,
     `rowStateId` integer NOT NULL,
-    CONSTRAINT `fk_LimitedAccess_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`),
-    CONSTRAINT `fk_LimitedAccess_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
+    CONSTRAINT `fk_LimitedAccess_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_LimitedAccess_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_LimitedAccess_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`))
 ;
 
