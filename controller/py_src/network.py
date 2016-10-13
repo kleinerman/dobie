@@ -379,24 +379,17 @@ class NetMngr(genmngr.GenericMngr):
 
                             #We should receive bytes until we receive the end of
                             #the message
-                            buff = self.inBuffer + recBytes
+                            allBytes = self.inBuffer + recBytes
                             
                             try:
-                                while buff:
-                                    msg = buff[:buff.index(END)+1]
+                                while allBytes:
+                                    msg = allBytes[:allBytes.index(END)+1]
                                     self.procRecMsg(msg)
-                                    buff = buff[buff.index(END)+1:]
-                                    #self.inBuffer = buff[buff.index(END)+1:]
+                                    allBytes = allBytes[allBytes.index(END)+1:]
                                 self.inBuffer = b''
                             
                             except ValueError:
-                                self.inBuffer = buff
-
-                            #if msg.endswith(END):
-                            #    self.inBuffer = b''
-                            #    self.procRecMsg(msg)
-                            #else:
-                            #    self.inBuffer = msg
+                                self.inBuffer = allBytes
 
 
                         #This will happen when "event" thread or "reSender" thread
