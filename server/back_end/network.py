@@ -325,11 +325,31 @@ class NetMngr(genmngr.GenericMngr):
 
                     #We should receive bytes until we receive the end of
                     #the message
-                    msg = self.fdConnObjects[fd]['inBuffer'] + recBytes
-                    if msg.endswith(END):
-                        self.procRecMsg(fd, msg)
-                    else:
-                        self.fdConnObjects[fd]['inBuffer'] = msg
+
+
+                    allBytes = self.fdConnObjects[fd]['inBuffer'] + recBytes
+
+                    try:
+                       while allBytes:
+                           msg = allBytes[:allBytes.index(END)+1]
+                           self.procRecMsg(fd, msg)
+                           allBytes = allBytes[allBytes.index(END)+1:]
+                       self.fdConnObjects[fd]['inBuffer'] = b''
+
+                    except ValueError:
+                        self.fdConnObjects[fd]['inBuffer'] = allBytes
+
+
+
+
+
+
+
+                #msg = self.fdConnObjects[fd]['inBuffer'] + recBytes
+                #    if msg.endswith(END):
+                #        self.procRecMsg(fd, msg)
+                #    else:
+                #        self.fdConnObjects[fd]['inBuffer'] = msg
 
 
                 #This will happen when "event" thread or "reSender" thread
