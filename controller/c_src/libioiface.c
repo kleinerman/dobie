@@ -548,7 +548,6 @@ void *state (void *s_args)
     int i;
     int j=0;
     int epfd; // epool file descriptor
-    int old_state = 0;
     int cur_state;
     struct epoll_event *ev;
     struct epoll_event *events;
@@ -562,7 +561,7 @@ void *state (void *s_args)
      */
     state_tbl = (int **) malloc(sizeof(int *) * args->number_of_states);
     for (i=0; i<(args->number_of_states); i++)
-        state_tbl[i] = (int *) malloc(sizeof(int) * 2);
+        state_tbl[i] = (int *) malloc(sizeof(int) * 3); // number of columns = 3
 
     // create a new epool instance
     epfd = epoll_create(1);
@@ -587,6 +586,11 @@ void *state (void *s_args)
             ev[j].data.fd = state_tbl[j][1];
             // Add the file descriptor to the interest list for epfd
             epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]); 
+            
+            // Read the initial passages state and save them into the third table column
+            read(state_tbl[j][1], value, 1);
+            lseek(state_tbl[j][1],0,SEEK_SET);
+            state_tbl[j][2] = atoi(value);
 
             j++;
 
@@ -605,15 +609,16 @@ void *state (void *s_args)
                     usleep(BOUNCE_TIME);
                     read(state_tbl[j][1], value, 1);
                     lseek(state_tbl[j][1],0,SEEK_SET);
-                    state = atoi(value);
+                    
+                    cur_state = atoi(value); // current state
 
-                    if (state == !old_state) {
+                    if (cur_state == !state_tbl[j][2]) {
                         sprintf(message, "%d;0;state=%s", state_tbl[j][0], value);
                         // put the message into the queue
                         mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
                         printf("%s\n", message);
                         // set the new state
-                        old_state = state;
+                        state_tbl[j][2] = cur_state;
                         // register again the target file descriptor.
                         epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]);
                         // because it was registered again, first time it triggers with current state, so ignore it again
