@@ -548,6 +548,8 @@ void *state (void *s_args)
     int i;
     int j=0;
     int epfd; // epool file descriptor
+    int old_state = 0;
+    int cur_state;
     struct epoll_event *ev;
     struct epoll_event *events;
     struct state_args *args = (struct state_args*) s_args;
@@ -597,20 +599,27 @@ void *state (void *s_args)
         if (epoll_wait(epfd, events, args->number_of_states, EPOLL_WAIT_TIME)) { // wait for an event
             for (j=0; j < args->number_of_states; j++) {
                 if (events[0].data.fd == state_tbl[j][1]) {
-                    // deregister the target file descriptor from the epoll instance to avoid button bounce
+                    // deregister the target file descriptor from the epoll instance to avoid bounce
                     epoll_ctl(epfd, EPOLL_CTL_DEL, state_tbl[j][1], &ev[j]);
+
+                    usleep(BOUNCE_TIME);
                     read(state_tbl[j][1], value, 1);
                     lseek(state_tbl[j][1],0,SEEK_SET);
-                    sprintf(message, "%d;0;state=%s", state_tbl[j][0], value);
-                    // put the message into the queue
-                    mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
-                    printf("%s\n", message);
-                    // wait a bounce time and then register again the target file descriptor.
-                    usleep(BOUNCE_TIME);
-                    epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]);
-                    // because it was registered again, first time it triggers with current state, so ignore it again
-                    epoll_wait(epfd, events, 1, -1);
-                    break;
+                    state = atoi(value);
+
+                    if (state == !old_state) {
+                        sprintf(message, "%d;0;state=%s", state_tbl[j][0], value);
+                        // put the message into the queue
+                        mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
+                        printf("%s\n", message);
+                        // set the new state
+                        old_state = state;
+                        // register again the target file descriptor.
+                        epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]);
+                        // because it was registered again, first time it triggers with current state, so ignore it again
+                        epoll_wait(epfd, events, 1, -1);
+                        break;
+                    }
                 }
             }
         }
