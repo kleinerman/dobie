@@ -515,13 +515,15 @@ void *buttons (void *b_args)
                     read(bttn_tbl[j][1], value, 1);
                     lseek(bttn_tbl[j][1],0,SEEK_SET);
 
-                    printf("RUIDO BUTTON\n");
 
                     if (strcmp(value, "1") == 0) {
                         sprintf(message, "%d;0;button=1", bttn_tbl[j][0]);
                         // put the message into the queue
                         mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
                         printf("%s\n", message);
+                    }
+                    else {
+                        printf("BUTTON NOISE\n");
                     }
 
                     // wait a bounce time and then register again the target file descriptor.
@@ -591,7 +593,6 @@ void *state (void *s_args)
             lseek(state_tbl[j][1],0,SEEK_SET);
             state_tbl[j][2] = atoi(value);
 
-            printf("ESTADO: %d\n", state_tbl[j][2]);
             j++;
 
         }
@@ -610,7 +611,7 @@ void *state (void *s_args)
                     read(state_tbl[j][1], value, 1);
                     lseek(state_tbl[j][1],0,SEEK_SET);
                     
-                    cur_state = atoi(value); // current state
+                    cur_state = atoi(value); // current state (int)
 
                     if (cur_state == !state_tbl[j][2]) {
                         sprintf(message, "%d;0;state=%s", state_tbl[j][0], value);
@@ -619,15 +620,18 @@ void *state (void *s_args)
                         printf("%s\n", message);
                         // set the new state
                         state_tbl[j][2] = cur_state;
-                        // register again the target file descriptor.
-                        epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]);
-                        // because it was registered again, first time it triggers with current state, so ignore it again
-                        epoll_wait(epfd, events, 1, -1);
-                        break;
-                    }
+                                            }
                     else {
-                        printf("RUIDO STATE\n");
+                        printf("STATE NOISE\n");
                     }
+
+                    // register again the target file descriptor.
+                    epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]);
+                    // because it was registered again, first time it triggers with current state, so ignore it again
+                    epoll_wait(epfd, events, 1, -1);
+
+                    break; // break the FOR loop
+
                 }
             }
         }
