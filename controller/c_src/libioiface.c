@@ -515,10 +515,9 @@ void *buttons (void *b_args)
                     read(bttn_tbl[j][1], value, 1);
                     lseek(bttn_tbl[j][1],0,SEEK_SET);
 
-                    printf("VALOR %s\n",value);
+                    printf("RUIDO BUTTON\n");
 
                     if (strcmp(value, "1") == 0) {
-                        printf("AAAAAAAAAAAAAAAAAAAAAAAA\n");
                         sprintf(message, "%d;0;button=1", bttn_tbl[j][0]);
                         // put the message into the queue
                         mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
@@ -592,6 +591,7 @@ void *state (void *s_args)
             lseek(state_tbl[j][1],0,SEEK_SET);
             state_tbl[j][2] = atoi(value);
 
+            printf("ESTADO: %d\n", state_tbl[j][2]);
             j++;
 
         }
@@ -624,6 +624,9 @@ void *state (void *s_args)
                         // because it was registered again, first time it triggers with current state, so ignore it again
                         epoll_wait(epfd, events, 1, -1);
                         break;
+                    }
+                    else {
+                        printf("RUIDO STATE\n");
                     }
                 }
             }
