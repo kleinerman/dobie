@@ -494,6 +494,50 @@ class DataBase(object):
 
 
 
+
+
+    def getCtrllerMacsNotComm(self):
+        '''
+        Return a list of controller MAC addresses of controllers which doesn't respond
+        to crud messages.
+        '''
+
+        sql = ("SELECT controller.macAddress FROM Controller controller JOIN Passage passage "
+               "ON (controller.id = passage.controllerId) WHERE passage.rowStateId IN ({}, {}, {}) "
+               "UNION "
+               "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
+               "(controller.id = passage.controllerId) JOIN LimitedAccess limitedAccess ON "
+               "(passage.id = limitedAccess.pssgId) WHERE limitedAccess.rowStateId IN ({}, {}, {}) "
+               "UNION "
+               "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
+               "(controller.id = passage.controllerId) JOIN Access access ON "
+               "(passage.id = access.pssgId) WHERE access.rowStateId IN ({}, {}, {}) "
+               "UNION "
+               "SELECT macAddress FROM PersonPendingOperation"
+               "".format(TO_ADD, TO_UPDATE, TO_DELETE, 
+                         TO_ADD, TO_UPDATE, TO_DELETE,
+                         TO_ADD, TO_UPDATE, TO_DELETE)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            ctrllerMacsNotComm = self.cursor.fetchall()
+            ctrllerMacsNotComm = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsNotComm]
+            return ctrllerMacsNotComm
+
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Error getting MAC addresses of not committed controllers')
+
+        except TypeError:
+            self.logger.debug(internalError)
+            raise ControllerError('Error getting MAC addresses of not committed controllers')
+
+
+
+
+
 #----------------------------------Passage----------------------------------------
 
 

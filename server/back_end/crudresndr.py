@@ -8,6 +8,7 @@ import genmngr
 import database
 from config import *
 from msgheaders import *
+#import ctrllermsger
 
 
 class CrudReSndr(genmngr.GenericMngr):
@@ -25,6 +26,8 @@ class CrudReSndr(genmngr.GenericMngr):
         super().__init__('CrudReSender', exitFlag)
 
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+
+        self.ctrllerMsger = None 
     
         self.netToCrudReSndr = queue.Queue()
 
@@ -48,12 +51,12 @@ class CrudReSndr(genmngr.GenericMngr):
                 self.checkExit()
 
 
-                print(ctrllerMac)
-
 
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
                 self.checkExit()
+                ctrllerMacsNotComm = self.dataBase.getCtrllerMacsNotComm()
+                self.ctrllerMsger.verifyIsAlive(ctrllerMacsNotComm)
 
 
 

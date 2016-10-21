@@ -20,6 +20,8 @@ import network
 import msgreceiver
 import crud, crudresndr
 from config import *
+import ctrllermsger
+
 
 import os
 
@@ -56,6 +58,8 @@ class BackEndSrvr(object):
 
         #Creating CRUD Manager (This will run in main thread)
         self.crudMngr = crud.CrudMngr(self.netMngr)
+
+        self.crudReSndr.ctrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
 
 
         self.origSigIntHandler = signal.getsignal(signal.SIGINT)
