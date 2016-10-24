@@ -59,12 +59,12 @@ class CrudMngr(genmngr.GenericMngr):
     Through a RESTful API, this clase manages creations, deletions and modifications in
     the database.
     '''
-    def __init__(self, netMngr):
+    def __init__(self):
 
         #Database object to access DB
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
 
-        self.ctrllerMsger = ctrllermsger.CtrllerMsger(netMngr)
+        self.ctrllerMsger = None
 
 
     #---------------------------------------------------------------------------#

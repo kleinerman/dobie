@@ -521,6 +521,7 @@ class DataBase(object):
 
         try:
             self.cursor.execute(sql)
+            self.connection.commit()
             ctrllerMacsNotComm = self.cursor.fetchall()
             ctrllerMacsNotComm = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsNotComm]
             return ctrllerMacsNotComm

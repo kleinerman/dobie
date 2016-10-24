@@ -3,6 +3,7 @@ import queue
 import logging
 import json
 import re
+import time
 
 import genmngr
 import database
@@ -31,6 +32,12 @@ class CrudReSndr(genmngr.GenericMngr):
     
         self.netToCrudReSndr = queue.Queue()
 
+        #Calculating turns to sleep EXIT_CHECK_TIME
+        self.SLEEP_TURNS = RE_SEND_TIME // EXIT_CHECK_TIME
+
+        #Calculating real resend time just for logging purposes
+        self.REAL_RE_SEND_TIME = self.SLEEP_TURNS * EXIT_CHECK_TIME
+
 
 
 
@@ -54,7 +61,15 @@ class CrudReSndr(genmngr.GenericMngr):
 
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
-                self.checkExit()
+
+                logMsg = ("Sleeping for {} secs to retry sending events."
+                          "".format(self.REAL_RE_SEND_TIME)
+                         )
+                self.logger.info(logMsg)
+                for i in range(self.SLEEP_TURNS):
+                    self.checkExit()
+                    time.sleep(EXIT_CHECK_TIME)
+
                 ctrllerMacsNotComm = self.dataBase.getCtrllerMacsNotComm()
                 self.ctrllerMsger.verifyIsAlive(ctrllerMacsNotComm)
 

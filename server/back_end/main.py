@@ -46,20 +46,26 @@ class BackEndSrvr(object):
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
-        #Creating the Crud Resender Thread
-        self.crudReSndr = crudresndr.CrudReSndr(self.exitFlag)
-
         #Creating the Message Receiver Thread
         self.msgReceiver = msgreceiver.MsgReceiver(self.exitFlag)
+
+        #Creating the Crud Resender Thread
+        self.crudReSndr = crudresndr.CrudReSndr(self.exitFlag)
 
         #Creating the Net Manager Thread 
         self.netMngr = network.NetMngr(self.exitFlag, self.msgReceiver.netToMsgRec,
                                        self.crudReSndr.netToCrudReSndr)
 
         #Creating CRUD Manager (This will run in main thread)
-        self.crudMngr = crud.CrudMngr(self.netMngr)
+        self.crudMngr = crud.CrudMngr()
+        
+        #Creating and setting the ctrllermsger for crudMngr
+        crudCtrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
+        self.crudMngr.ctrllerMsger = crudCtrllerMsger
 
-        self.crudReSndr.ctrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
+        #Creating and setting the ctrllermsger for crudReSndr
+        crudReSndrCtrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
+        self.crudReSndr.ctrllerMsger = crudReSndrCtrllerMsger
 
 
         self.origSigIntHandler = signal.getsignal(signal.SIGINT)
