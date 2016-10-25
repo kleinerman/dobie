@@ -32,12 +32,13 @@ class CrudReSndr(genmngr.GenericMngr):
     
         self.netToCrudReSndr = queue.Queue()
 
-        #Calculating turns to sleep EXIT_CHECK_TIME
-        self.SLEEP_TURNS = RE_SEND_TIME // EXIT_CHECK_TIME
+        #Calculating the number of iterations before sending the message to verify
+        #the controller is alive
+        self.ITERATIONS = RE_SEND_TIME // EXIT_CHECK_TIME
 
-        #Calculating real resend time just for logging purposes
-        self.REAL_RE_SEND_TIME = self.SLEEP_TURNS * EXIT_CHECK_TIME
-
+        #This is the actual iteration. This value is incremented in each iteration
+        #and is initializated to 0.
+        self.iteration = 0
 
 
 
@@ -55,23 +56,25 @@ class CrudReSndr(genmngr.GenericMngr):
             try:
                 #Blocking until Network thread sends an msg or EXIT_CHECK_TIME expires 
                 ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
+                print(ctrllerMac)
                 self.checkExit()
 
 
 
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
+                self.checkExit()
 
-                logMsg = ("Sleeping for {} secs to retry sending events."
-                          "".format(self.REAL_RE_SEND_TIME)
-                         )
-                self.logger.info(logMsg)
-                for i in range(self.SLEEP_TURNS):
-                    self.checkExit()
-                    time.sleep(EXIT_CHECK_TIME)
+                if self.iteration >= self.ITERATIONS:
+                    logMsg = 'Sending "Verify Alive Message" to controllers'
+                    self.logger.info(logMsg)
+                    ctrllerMacsNotComm = self.dataBase.getCtrllerMacsNotComm()
+                    self.ctrllerMsger.verifyIsAlive(ctrllerMacsNotComm)
+                    self.iteration = 0
+                else:
+                    self.iteration +=1
 
-                ctrllerMacsNotComm = self.dataBase.getCtrllerMacsNotComm()
-                self.ctrllerMsger.verifyIsAlive(ctrllerMacsNotComm)
+                    
 
 
 

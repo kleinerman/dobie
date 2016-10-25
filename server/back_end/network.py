@@ -154,6 +154,11 @@ class NetMngr(genmngr.GenericMngr):
             self.netToMsgRec.put(msg)
 
 
+        elif msg.startswith(RVAL):
+            self.netToCrudReSndr.put(self.fdConnObjects[fd]['mac'])
+            
+
+
     #---------------------------------------------------------------------------#
 
 
