@@ -13,6 +13,7 @@ QUEUE_FILE = '/ioiface_queue'
 
 LOGGING_FILE ='logevents.log'
 
+#SERVER_IP = '192.168.1.74'
 SERVER_IP = '10.10.7.74'
 #SERVER_IP = '127.0.0.1'
 SERVER_PORT = 7979
