@@ -126,6 +126,7 @@ class DataBase(object):
 
         # With this client_flag, cursor.rowcount will have found rows instead of affected rows
         self.connection = pymysql.connect(host, user, passwd, dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
+        self.connection.autocommit(True)
         # The following line makes all "fetch" calls return a dictionary instead a tuple 
         self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
@@ -521,7 +522,7 @@ class DataBase(object):
 
         try:
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
             ctrllerMacsNotComm = self.cursor.fetchall()
             ctrllerMacsNotComm = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsNotComm]
             return ctrllerMacsNotComm
@@ -563,6 +564,31 @@ class DataBase(object):
 
 
 
+    def getNotCommPassages(self, ctrllerMac, rowStateId):
+        '''
+        '''
+        
+        sql = ("SELECT passage.* FROM Passage passage JOIN Controller controller ON "
+               "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}' AND "
+               "rowStateId = {}".format(ctrllerMac, rowStateId))
+
+        try:
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+            passage = self.cursor.fetchone()
+
+            while passage:
+                yield passage
+                passage = self.cursor.fetchone()
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Error getting MAC addresses of not committed controllers')
+
+
+
+
     def addPassage(self, passage):
         '''
         Receive a dictionary with passage parametters and save it in DB
@@ -599,7 +625,7 @@ class DataBase(object):
         Mark the passage in database as COMMITTED if it was previously in TO_ADD or
         TO_UPDATE state or delete it if it was previously in TO_DELETE state
         '''
-
+ 
         sql = "SELECT rowStateId FROM Passage WHERE id = {}".format(passageId)
 
         try:

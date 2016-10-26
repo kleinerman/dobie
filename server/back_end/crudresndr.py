@@ -56,9 +56,9 @@ class CrudReSndr(genmngr.GenericMngr):
             try:
                 #Blocking until Network thread sends an msg or EXIT_CHECK_TIME expires 
                 ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
-                print(ctrllerMac)
                 self.checkExit()
-
+                for passage in self.dataBase.getNotCommPassages(ctrllerMac, database.TO_ADD):
+                    self.ctrllerMsger.addPassage(ctrllerMac, passage)
 
 
             except queue.Empty:
