@@ -57,8 +57,33 @@ class CrudReSndr(genmngr.GenericMngr):
                 #Blocking until Network thread sends an msg or EXIT_CHECK_TIME expires 
                 ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
-                for passage in self.dataBase.getNotCommPassages(ctrllerMac, database.TO_ADD):
+                for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_ADD):
                     self.ctrllerMsger.addPassage(ctrllerMac, passage)
+                for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_UPDATE):
+                    self.ctrllerMsger.updPassage(ctrllerMac, passage)
+                for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_DELETE):
+                    self.ctrllerMsger.delPassage(ctrllerMac, passage['id'])
+
+                self.checkExit()
+                for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
+                    #Get the person parameters as a dictionary
+                    person = self.dataBase.getPerson(access['personId'])
+                    #Adding to access dictionary necesary person parameters to add person if it doesn't
+                    #exist in controller
+                    access['cardNumber'] = person['cardNumber']
+                    print(access)
+                    self.ctrllerMsger.addAccess(ctrllerMac, access)
+
+                for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
+                    access.pop('pssgId')
+                    access.pop('personId')
+                    access.pop('allWeek')
+                    print(access)
+                    self.ctrllerMsger.updAccess(ctrllerMac, access)
+
+                for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_DELETE):
+                    self.ctrllerMsger.delAccess(ctrllerMac, access['id'])
+
 
 
             except queue.Empty:
@@ -68,7 +93,7 @@ class CrudReSndr(genmngr.GenericMngr):
                 if self.iteration >= self.ITERATIONS:
                     logMsg = 'Sending "Verify Alive Message" to controllers'
                     self.logger.info(logMsg)
-                    ctrllerMacsNotComm = self.dataBase.getCtrllerMacsNotComm()
+                    ctrllerMacsNotComm = self.dataBase.getUncmtCtrllerMacs()
                     self.ctrllerMsger.verifyIsAlive(ctrllerMacsNotComm)
                     self.iteration = 0
                 else:

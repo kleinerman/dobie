@@ -497,7 +497,7 @@ class DataBase(object):
 
 
 
-    def getCtrllerMacsNotComm(self):
+    def getUncmtCtrllerMacs(self):
         '''
         Return a list of controller MAC addresses of controllers which doesn't respond
         to crud messages.
@@ -564,7 +564,7 @@ class DataBase(object):
 
 
 
-    def getNotCommPassages(self, ctrllerMac, rowStateId):
+    def getUncmtPassages(self, ctrllerMac, rowStateId):
         '''
         '''
         
@@ -579,12 +579,13 @@ class DataBase(object):
             passage = self.cursor.fetchone()
 
             while passage:
+                passage.pop('rowStateId')
                 yield passage
                 passage = self.cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise ControllerError('Error getting MAC addresses of not committed controllers')
+            raise PassageError('Error getting passages of not committed controllers')
 
 
 
@@ -1040,6 +1041,40 @@ class DataBase(object):
         accesses = self.cursor.fetchall()
 
         return accesses
+
+
+
+    def getUncmtAccesses(self, ctrllerMac, rowStateId):
+        '''
+        '''
+
+        sql = ("SELECT access.* FROM Access access JOIN Passage passage ON "
+               "(access.pssgId = passage.id) JOIN Controller controller ON "
+               "(passage.controllerId = controller.id) WHERE "
+               "controller.macAddress = '{}' AND access.rowStateId = {}"
+               "".format(ctrllerMac, rowStateId)
+              )
+
+        try:
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+            access = self.cursor.fetchone()
+
+            while access:
+                access.pop('rowStateId')
+                access['startTime'] = str(access['startTime'])
+                access['endTime'] = str(access['endTime'])
+                access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
+                
+                yield access
+                access = self.cursor.fetchone()
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise AccessError('Error getting accesses of not committed controllers')
+
+
 
 
 
