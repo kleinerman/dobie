@@ -63,8 +63,9 @@ class CrudReSndr(genmngr.GenericMngr):
                     self.ctrllerMsger.updPassage(ctrllerMac, passage)
                 for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_DELETE):
                     self.ctrllerMsger.delPassage(ctrllerMac, passage['id'])
-
                 self.checkExit()
+
+
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
                     #Get the person parameters as a dictionary
                     person = self.dataBase.getPerson(access['personId'])
@@ -83,6 +84,19 @@ class CrudReSndr(genmngr.GenericMngr):
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_DELETE):
                     self.ctrllerMsger.delAccess(ctrllerMac, access['id'])
+                self.checkExit()
+
+
+                for limitedAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD):
+
+                    #Get the person parameters as a dictionary
+                    person = self.dataBase.getPerson(limitedAccess['personId'])
+                    #Adding to access dictionary necesary person parameters to add person if it doesn't
+                    #exist in controller
+                    limitedAccess['cardNumber'] = person['cardNumber']
+                    print(limitedAccess)
+
+
 
 
 

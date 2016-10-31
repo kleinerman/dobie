@@ -1268,6 +1268,60 @@ class DataBase(object):
 
 
 
+    def getUncmtLiAccesses(self, ctrllerMac, rowStateId):
+        '''
+        '''
+
+        secCursor = self.connection.cursor(pymysql.cursors.DictCursor)
+
+
+        sql = ("SELECT limitedAccess.* FROM LimitedAccess limitedAccess JOIN Passage passage ON "
+               "(limitedAccess.pssgId = passage.id) JOIN Controller controller ON "
+               "(passage.controllerId = controller.id) WHERE "
+               "controller.macAddress = '{}' AND limitedAccess.rowStateId = {}"
+               "".format(ctrllerMac, rowStateId)
+              )
+
+        try:
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+            limitedAccess = self.cursor.fetchone()
+
+            while limitedAccess:
+                
+                secSql = ("SELECT expireDate FROM Access WHERE pssgId = {} AND personId = {}"
+                       "".format(limitedAccess['pssgId'], limitedAccess['personId'])
+                      )
+                secCursor.execute(secSql)
+                expireDate = secCursor.fetchone()['expireDate']
+                expireDate = str(expireDate)
+
+
+                limitedAccess.pop('rowStateId')
+                limitedAccess['startTime'] = str(limitedAccess['startTime'])
+                limitedAccess['endTime'] = str(limitedAccess['endTime'])
+                limitedAccess['expireDate'] = expireDate
+
+                yield limitedAccess
+                limitedAccess = self.cursor.fetchone()
+
+        except TypeError:
+            self.logger.debug('Error fetching expireDate.')
+            raise AccessError('Error getting accesses of not committed controllers')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise AccessError('Error getting accesses of not committed controllers')
+
+
+
+
+
+
+
+
+
     def addLiAccess(self, liAccess):
         '''
         Receive a dictionary with limited access parametters and save it in DB.
