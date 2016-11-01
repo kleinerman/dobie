@@ -1275,10 +1275,10 @@ class DataBase(object):
         secCursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
 
-        sql = ("SELECT limitedAccess.* FROM LimitedAccess limitedAccess JOIN Passage passage ON "
-               "(limitedAccess.pssgId = passage.id) JOIN Controller controller ON "
+        sql = ("SELECT liAccess.* FROM LimitedAccess liAccess JOIN Passage passage ON "
+               "(liAccess.pssgId = passage.id) JOIN Controller controller ON "
                "(passage.controllerId = controller.id) WHERE "
-               "controller.macAddress = '{}' AND limitedAccess.rowStateId = {}"
+               "controller.macAddress = '{}' AND liAccess.rowStateId = {}"
                "".format(ctrllerMac, rowStateId)
               )
 
@@ -1286,25 +1286,28 @@ class DataBase(object):
 
             self.cursor.execute(sql)
             self.connection.commit()
-            limitedAccess = self.cursor.fetchone()
+            liAccess = self.cursor.fetchone()
 
-            while limitedAccess:
+            while liAccess:
                 
-                secSql = ("SELECT expireDate FROM Access WHERE pssgId = {} AND personId = {}"
-                       "".format(limitedAccess['pssgId'], limitedAccess['personId'])
+                secSql = ("SELECT id, expireDate FROM Access WHERE pssgId = {} AND personId = {}"
+                       "".format(liAccess['pssgId'], liAccess['personId'])
                       )
                 secCursor.execute(secSql)
-                expireDate = secCursor.fetchone()['expireDate']
+                row = secCursor.fetchone()
+                accessId = row['id']
+                expireDate = row['expireDate']
                 expireDate = str(expireDate)
 
 
-                limitedAccess.pop('rowStateId')
-                limitedAccess['startTime'] = str(limitedAccess['startTime'])
-                limitedAccess['endTime'] = str(limitedAccess['endTime'])
-                limitedAccess['expireDate'] = expireDate
+                liAccess.pop('rowStateId')
+                liAccess['startTime'] = str(liAccess['startTime'])
+                liAccess['endTime'] = str(liAccess['endTime'])
+                liAccess['accessId'] = accessId
+                liAccess['expireDate'] = expireDate
 
-                yield limitedAccess
-                limitedAccess = self.cursor.fetchone()
+                yield liAccess
+                liAccess = self.cursor.fetchone()
 
         except TypeError:
             self.logger.debug('Error fetching expireDate.')

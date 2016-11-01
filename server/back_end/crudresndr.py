@@ -72,14 +72,12 @@ class CrudReSndr(genmngr.GenericMngr):
                     #Adding to access dictionary necesary person parameters to add person if it doesn't
                     #exist in controller
                     access['cardNumber'] = person['cardNumber']
-                    print(access)
                     self.ctrllerMsger.addAccess(ctrllerMac, access)
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
                     access.pop('pssgId')
                     access.pop('personId')
                     access.pop('allWeek')
-                    print(access)
                     self.ctrllerMsger.updAccess(ctrllerMac, access)
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_DELETE):
@@ -87,14 +85,13 @@ class CrudReSndr(genmngr.GenericMngr):
                 self.checkExit()
 
 
-                for limitedAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD):
-
+                for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD):
                     #Get the person parameters as a dictionary
-                    person = self.dataBase.getPerson(limitedAccess['personId'])
+                    person = self.dataBase.getPerson(liAccess['personId'])
                     #Adding to access dictionary necesary person parameters to add person if it doesn't
                     #exist in controller
-                    limitedAccess['cardNumber'] = person['cardNumber']
-                    print(limitedAccess)
+                    liAccess['cardNumber'] = person['cardNumber']
+                    self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
 
 
 
