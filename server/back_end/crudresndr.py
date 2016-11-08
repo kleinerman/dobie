@@ -93,7 +93,15 @@ class CrudReSndr(genmngr.GenericMngr):
                     liAccess['cardNumber'] = person['cardNumber']
                     self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
 
+                for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_UPDATE):
+                    liAccess.pop('accessId')
+                    liAccess.pop('personId')
+                    liAccess.pop('pssgId')
+                    self.ctrllerMsger.updLiAccess(ctrllerMac, liAccess)
 
+                for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_DELETE):
+                    self.ctrllerMsger.delLiAccess(ctrllerMac, liAccess['id'])
+                self.checkExit()
 
 
 
