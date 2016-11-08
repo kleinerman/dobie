@@ -585,6 +585,10 @@ class DataBase(object):
             self.connection.commit()
 
 
+        except TypeError:
+            self.logger.debug('Can not find a Limited Access with this id.')
+            raise IntegrityError('Integrity error updating a Limited Access.')
+
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
             raise OperationalError('Operational error updating a Limited Access.')
@@ -636,6 +640,10 @@ class DataBase(object):
                       )
                 self.cursor.execute(sql)
                 self.connection.commit()
+
+        except TypeError:
+            self.logger.debug('Can not find a Limited Access with this id.')
+            raise IntegrityError('Integrity error deleting a Limited Access.')
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
