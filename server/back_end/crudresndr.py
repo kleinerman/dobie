@@ -105,6 +105,15 @@ class CrudReSndr(genmngr.GenericMngr):
 
 
 
+                for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE):
+                    self.ctrllerMsger.updPerson([ctrllerMac], person)
+                for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_DELETE):
+                    self.ctrllerMsger.delPerson([ctrllerMac], person['id'])
+                self.checkExit()
+
+
+
+
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
                 self.checkExit()

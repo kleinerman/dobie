@@ -734,12 +734,46 @@ class DataBase(object):
         return persons
 
 
+
+
+    def getUncmtPersons(self, ctrllerMac, rowStateId):
+        '''
+        '''
+
+        sql = ("SELECT person.* FROM "
+               "Person person JOIN PersonPendingOperation personPendingOperation ON "
+               "(person.id = personPendingOperation.personId) WHERE "
+               "personPendingOperation.macAddress = '{}' AND personPendingOperation.pendingOp = {}"
+               "".format(ctrllerMac, rowStateId)
+              )
+
+        try:
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+            person = self.cursor.fetchone()
+
+            while person:
+                person.pop('rowStateId')
+                yield person
+                person = self.cursor.fetchone()
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Error getting persons of not committed controllers')
+
+
+
+
+
     def addPerson(self, person):
         '''
         Receive a dictionary with person parametters and save it in DB
         '''
 
-        #RowState should be removed in Person table
+        #The person row is inserted in COMMITTED state since the person is not sent to
+        #controller at the moment it is inserted here. It it sent to the controller when
+        #an access is created.
         sql = ("INSERT INTO Person(name, cardNumber, orgId, rowStateId) VALUES('{}', {}, {}, {})"
                "".format(person['name'], person['cardNumber'], person['orgId'], COMMITTED)
               )
