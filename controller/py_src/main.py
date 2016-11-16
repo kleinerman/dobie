@@ -17,6 +17,7 @@ import posix_ipc
 import signal
 
 import database
+import ioiface
 import events
 import network
 import passage
@@ -44,6 +45,11 @@ class Controller(object):
         self.logger.addHandler(loggingHandler)
 
         self.dataBase = database.DataBase(DB_FILE)
+
+        self.ioIface = ioiface.IoIface(self.dataBase)
+
+        #IoIface Proccess
+        self.ioIfaceProc = None
         
         #Defining a OS queue to get messages from the ioiface
         self.ioIfaceQue = posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
@@ -83,33 +89,6 @@ class Controller(object):
         signal.signal(signal.SIGTERM, self.sigtermHandler)
         signal.signal(signal.SIGINT, self.sigtermHandler)
 
-        #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
-        #by pssg parametters names
-        self.pssgsParams = self.dataBase.getPssgsParams()
-
-        #Dictionary indexed by pssgId containing dictionaries with objects to control the passages 
-        self.pssgsControl = {}
-        for pssgId in self.pssgsParams.keys():
-            self.pssgsControl[pssgId] = { #Passage object to manage the passage
-                                         'pssgObj': passage.Passage(self.pssgsParams[pssgId]),
-                                          #Event object to know when a passage was opened 
-                                          #in a correct way by someone who has access
-                                         'accessPermit': threading.Event(),
-                                          #Lock and datetime object to know when the access
-                                          #was opened
-                                         'lockTimeAccessPermit': threading.Lock(),
-                                         'timeAccessPermit': None,
-                                          #Event object to know when the "cleanerPssgMngr" thread is alive
-                                          #to avoid creating more than once
-                                         'cleanerPssgMngrAlive': threading.Event(),
-                                          #Event to know when the passage was opened
-                                         'openPssg': threading.Event(),
-                                          #Event object to know when the "starterAlrmMngrMngr" thread
-                                          #is alive to avoid creating more than once
-                                         'starterAlrmMngrAlive': threading.Event()
-                                        }
-
-
         #By default our exit code will be success
         self.exitCode = 0
 
@@ -131,48 +110,8 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def getIoIfaceArgs(self):
-        '''
-        This method return a string with all arguments to launch ioiface binary.
-        They are got from Passage table of local DataBase
-        '''
-
-        ioIfaceArgs = ''
-
-        for pssgId in self.pssgsParams:
-
-            for pssgParamName in self.dataBase.getPssgParamsNames():
-                #Since not all the columns names of Passage table are parameters of 
-                #ioiface binary, they should be checked if they are in the IOFACE_ARGS list
-                if pssgParamName in IOIFACE_ARGS:
-                    pssgParamValue = self.pssgsParams[pssgId][pssgParamName]
-                    if pssgParamValue:
-                        ioIfaceArgs += '--{} {} '.format(pssgParamName, pssgParamValue)
-
-        return ioIfaceArgs
 
 
-
-    #---------------------------------------------------------------------------#
-
-    def launchIoIface(self):
-        '''
-        Launch Pssg Iface binary.
-        Returns a process object
-        '''
-
-        ioIfaceCmd = '{} {}'.format(IOIFACE_BIN, self.getIoIfaceArgs())
-
-        logMsg = 'Launching IO Interface with the following command: {}'.format(ioIfaceCmd)
-        self.logger.debug(logMsg)
-
-        ioIfaceProc = subprocess.Popen(ioIfaceCmd, shell=True, 
-                                       stdout=subprocess.PIPE, 
-                                       stderr=subprocess.STDOUT
-                                       )
-        return ioIfaceProc
-
-    #----------------------------------------------------------------------------#
 
     def openPssg(self, pssgId):
         '''
@@ -181,7 +120,7 @@ class Controller(object):
         It also creates a thread to close the passage and buzzer
         '''
 
-        pssgControl = self.pssgsControl[pssgId]
+        pssgControl = self.ioIface.pssgsControl[pssgId]
 
         pssgControl['pssgObj'].release(True)
         self.logger.debug("Releasing the passage {}.".format(pssgId))
@@ -267,7 +206,7 @@ class Controller(object):
         '''
         This method is called each time a passage change its state. (It is opened or closed)
         '''
-        pssgControl = self.pssgsControl[pssgId]
+        pssgControl = self.ioIface.pssgsControl[pssgId]
 
         #Converting "openOrClose" to int type to evaluete it on if statement
         openOrClose = int(openOrClose)
@@ -308,7 +247,7 @@ class Controller(object):
         self.logger.debug('Starting Controller')
         
         #Launching Pssg Iface binary
-        self.launchIoIface()
+        self.ioIface.start()
 
         #Starting the "Event Manager" thread
         self.eventMngr.start()
@@ -337,6 +276,9 @@ class Controller(object):
 #            logMsg = 'The following exception occurred: {}'.format(exception)
 #            self.logger.debug(logMsg)
 #            self.exitCode = 1
+
+        #Sending the terminate signal to IO interface Proccess.
+        self.ioIface.stop()
 
         self.logger.debug('Notifying all threads to finish.')
         self.exitFlag.set()
