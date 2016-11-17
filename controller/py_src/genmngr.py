@@ -47,3 +47,32 @@ class GenericMngr(threading.Thread):
             sys.exit(self.exitCode)
 
 
+
+
+class PssgMngr(GenericMngr):
+
+    '''
+    Generic Thread Manager to create NetMngr, EventMngr and ReSender
+    '''
+
+    def __init__(self, threadName, pssgsReconfFlag, exitFlag):
+
+        #Invoking the parent class constructor, specifying the thread name, 
+        #to have a understandable log file.
+        super().__init__(threadName, exitFlag)
+    
+        #Flag to know when the starterAlarmMngr or cleanerPssgMngr should exit
+        self.pssgsReconfFlag = pssgsReconfFlag
+
+
+
+    def checkExit(self):
+        '''
+        Check if the main thread ask this thread to exit using exitFlag
+        If true, call sys.exit and finish this thread
+        '''
+
+        if self.exitFlag.is_set() or self.pssgsReconfFlag.is_set():
+            logMsg = 'Exiting with code: {}'.format(self.exitCode)
+            self.logger.info(logMsg)
+            sys.exit(self.exitCode)

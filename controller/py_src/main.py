@@ -46,10 +46,9 @@ class Controller(object):
 
         self.dataBase = database.DataBase(DB_FILE)
 
-        self.ioIface = ioiface.IoIface(self.dataBase)
 
-        #IoIface Proccess
-        self.ioIfaceProc = None
+        self.lockIoIface = threading.Lock()
+        self.ioIface = ioiface.IoIface(self.dataBase)
         
         #Defining a OS queue to get messages from the ioiface
         self.ioIfaceQue = posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
@@ -73,7 +72,7 @@ class Controller(object):
         self.exitFlag = threading.Event()
 
         #Creating the CRUD Manager Thread 
-        self.crudMngr = crud.CrudMngr(self.exitFlag)
+        self.crudMngr = crud.CrudMngr(self.lockIoIface, self.ioIface, self.exitFlag)
 
         #Creating the Net Manager Thread 
         self.netMngr = network.NetMngr(netToEvent, netToReSnd, self.crudMngr, self.exitFlag)        
@@ -120,20 +119,24 @@ class Controller(object):
         It also creates a thread to close the passage and buzzer
         '''
 
-        pssgControl = self.ioIface.pssgsControl[pssgId]
+        with self.lockIoIface:
 
-        pssgControl['pssgObj'].release(True)
-        self.logger.debug("Releasing the passage {}.".format(pssgId))
-        pssgControl['pssgObj'].startBzzr(True)
-        self.logger.debug("Starting the buzzer on passage {}.".format(pssgId))
-        pssgControl['accessPermit'].set()
-        pssgControl['timeAccessPermit'] = datetime.datetime.now()
+            pssgControl = self.ioIface.pssgsControl[pssgId]
 
+            pssgControl['pssgObj'].release(True)
+            self.logger.debug("Releasing the passage {}.".format(pssgId))
+            pssgControl['pssgObj'].startBzzr(True)
+            self.logger.debug("Starting the buzzer on passage {}.".format(pssgId))
+            pssgControl['accessPermit'].set()
+            pssgControl['timeAccessPermit'] = datetime.datetime.now()
+    
 
-        if not pssgControl['cleanerPssgMngrAlive'].is_set():
-            pssgControl['cleanerPssgMngrAlive'].set()
-            cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
-            cleanerPssgMngr.start()
+            if not pssgControl['cleanerPssgMngrAlive'].is_set():
+                pssgControl['cleanerPssgMngrAlive'].set()
+                cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, 
+                                                      self.ioIface.pssgsReconfFlag, 
+                                                      self.exitFlag)
+                cleanerPssgMngr.start()
 
 
 
@@ -206,36 +209,41 @@ class Controller(object):
         '''
         This method is called each time a passage change its state. (It is opened or closed)
         '''
-        pssgControl = self.ioIface.pssgsControl[pssgId]
 
-        #Converting "openOrClose" to int type to evaluete it on if statement
-        openOrClose = int(openOrClose)
-        #The state of the passage indicates that was opened
-        if openOrClose:
-            pssgControl['openPssg'].set()
-            #If the passage was open in a permitted way
-            if pssgControl['accessPermit'].is_set():
-                #Creates a StarterAlrmMngrAlive if not was previously created by other access
-                if not pssgControl['starterAlrmMngrAlive'].is_set():
-                    starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, self.exitFlag)
-                    starterAlrmMngr.start()
+        with self.lockIoIface:
 
-            #If the passage was not opened in a permitted way, start the alarm
+            pssgControl = self.ioIface.pssgsControl[pssgId]
+
+            #Converting "openOrClose" to int type to evaluete it on if statement
+            openOrClose = int(openOrClose)
+            #The state of the passage indicates that was opened
+            if openOrClose:
+                pssgControl['openPssg'].set()
+                #If the passage was open in a permitted way
+                if pssgControl['accessPermit'].is_set():
+                    #Creates a StarterAlrmMngrAlive if not was previously created by other access
+                    if not pssgControl['starterAlrmMngrAlive'].is_set():
+                        starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, 
+                                                                  self.ioIface.pssgsReconfFlag, 
+                                                                  self.exitFlag)
+                        starterAlrmMngr.start()
+
+                #If the passage was not opened in a permitted way, start the alarm
+                else:
+                    logMsg = ("Unpermitted access on passage: {}, "
+                              "Starting the alarm.".format(pssgId)
+                             )
+                    self.logger.warning(logMsg)
+                    pssgControl['pssgObj'].startBzzr(True)
+
+            #The state of the passage indicates that was closed
             else:
-                logMsg = ("Unpermitted access on passage: {}, "
-                          "Starting the alarm.".format(pssgId)
+                logMsg = ("The state of the passage: {}, indicates that was closed. "
+                          "Stopping the alarm.".format(pssgId)
                          )
-                self.logger.warning(logMsg)
-                pssgControl['pssgObj'].startBzzr(True)
-
-        #The state of the passage indicates that was closed
-        else:
-            logMsg = ("The state of the passage: {}, indicates that was closed. "
-                      "Stopping the alarm.".format(pssgId)
-                     )
-            self.logger.info(logMsg)
-            pssgControl['openPssg'].clear()
-            pssgControl['pssgObj'].startBzzr(False)
+                self.logger.info(logMsg)
+                pssgControl['openPssg'].clear()
+                pssgControl['pssgObj'].startBzzr(False)
 
 
 

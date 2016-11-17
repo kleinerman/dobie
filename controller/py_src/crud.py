@@ -21,11 +21,14 @@ class CrudMngr(genmngr.GenericMngr):
     '''
     '''
 
-    def __init__(self, exitFlag):
+    def __init__(self, lockIoIface, ioIface, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('CrudMngr', exitFlag)
+
+        self.lockIoIface = lockIoIface
+        self.ioIface = ioIface
 
         #Reference to network manager
         self.netMngr = None
@@ -74,6 +77,11 @@ class CrudMngr(genmngr.GenericMngr):
 
                 crudObject = json.loads(completeJson)
                 self.crudHndlrs[crudCmd](crudObject)
+
+                if crudCmd[0] == 'S':
+                    with self.lockIoIface:
+                        self.ioIface.restart()
+                        
 
                 jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
                 jsonId = '{' + jsonId + '}'

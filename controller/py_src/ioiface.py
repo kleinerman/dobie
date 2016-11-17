@@ -9,6 +9,7 @@ import subprocess
 
 
 import passage
+import database
 from config import *
 
 
@@ -23,13 +24,16 @@ class IoIface(object):
         self.logger = logging.getLogger('Controller')
 
         #Database object
-        self.dataBase = dataBase
+        #self.dataBase = dataBase
 
         #IoIface Proccess
         self.ioIfaceProc = None
         
         #Dictionary indexed by pssgId containing dictionaries with objects to control the passages 
         self.pssgsControl = None
+
+        #Flag to know when the starterAlarmMngr or cleanerPssgMngr should abort and exit 
+        self.pssgsReconfFlag = None
 
 
 
@@ -45,6 +49,9 @@ class IoIface(object):
 
         #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
         #by pssg parametters names
+
+        self.dataBase = database.DataBase(DB_FILE)
+
         pssgsParams = self.dataBase.getPssgsParams()
 
         self.pssgsControl = {}
@@ -95,6 +102,7 @@ class IoIface(object):
                                             stderr=subprocess.STDOUT
                                            )
 
+        self.pssgsReconfFlag = threading.Event()
 
 
 
@@ -117,3 +125,8 @@ class IoIface(object):
 
 
 
+    def restart(self):
+        '''
+        '''
+        self.stop()
+        self.start()
