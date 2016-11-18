@@ -18,13 +18,10 @@ from config import *
 
 class IoIface(object):
 
-    def __init__(self, dataBase):
+    def __init__(self):
 
         #Getting the logger
         self.logger = logging.getLogger('Controller')
-
-        #Database object
-        #self.dataBase = dataBase
 
         #IoIface Proccess
         self.ioIfaceProc = None
@@ -50,9 +47,9 @@ class IoIface(object):
         #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
         #by pssg parametters names
 
-        self.dataBase = database.DataBase(DB_FILE)
+        dataBase = database.DataBase(DB_FILE)
 
-        pssgsParams = self.dataBase.getPssgsParams()
+        pssgsParams = dataBase.getPssgsParams()
 
         self.pssgsControl = {}
         for pssgId in pssgsParams.keys():
@@ -81,7 +78,7 @@ class IoIface(object):
 
         for pssgId in pssgsParams:
 
-            for pssgParamName in self.dataBase.getPssgParamsNames():
+            for pssgParamName in dataBase.getPssgParamsNames():
                 #Since not all the columns names of Passage table are parameters of 
                 #ioiface binary, they should be checked if they are in the IOFACE_ARGS list
                 if pssgParamName in IOIFACE_ARGS:
@@ -113,12 +110,17 @@ class IoIface(object):
         Launch Pssg Iface binary.
         Returns a process object
         '''
+
+        self.pssgsReconfFlag.set()
+
         if self.ioIfaceProc:
             self.logger.info('Stoping IO Interface.')
             self.ioIfaceProc.terminate()
+            self.ioIfaceProc.wait()
         else:
             self.logger.info('IO Interface not running. Nothing to stop.')
-            
+
+
 
 
     #----------------------------------------------------------------------------#

@@ -48,7 +48,7 @@ class Controller(object):
 
 
         self.lockIoIface = threading.Lock()
-        self.ioIface = ioiface.IoIface(self.dataBase)
+        self.ioIface = ioiface.IoIface()
         
         #Defining a OS queue to get messages from the ioiface
         self.ioIfaceQue = posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
