@@ -3,6 +3,30 @@ import datetime
 import logging
 
 
+
+
+class OperationalError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+
+class IntegrityError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+
 class DataBase(object):
     '''
     This object connects the database in the constructor.
@@ -20,6 +44,11 @@ class DataBase(object):
 
         #Getting the logger
         self.logger = logging.getLogger('Controller')
+
+
+    def __del__(self):
+
+        self.connection.close()
 
 
 
@@ -263,5 +292,417 @@ class DataBase(object):
             ppsDictsDict[ppsDict['id']] = ppsDict
 
         return ppsDictsDict
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def addPassage(self, passage):
+        '''
+        Receive a passage dictionary and add it into DB
+        '''
+
+        try:
+
+            sql = ("INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
+                   "rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) "
+                   "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
+                   "".format(passage['id'], passage['i0In'], passage['i1In'], passage['o0In'], 
+                             passage['o1In'], passage['bttnIn'], passage['stateIn'], 
+                             passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
+                             passage['bzzrTime'], passage['alrmTime'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Passage.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error adding a Passage.')
+
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def updPassage(self, passage):
+        '''
+        Receive a passage dictionary and add it into DB
+        '''
+
+        try:
+            sql = ("UPDATE Passage SET i0In = {}, i1In = {}, o0In = {}, o1In = {}, "
+                   "bttnIn = {}, stateIn = {}, rlseOut = {}, bzzrOut = {}, rlseTime = {}, "
+                   "bzzrTime = {}, alrmTime = {} WHERE id = {}"
+                   "".format(passage['i0In'], passage['i1In'], passage['o0In'],
+                             passage['o1In'], passage['bttnIn'], passage['stateIn'],
+                             passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
+                             passage['bzzrTime'], passage['alrmTime'], passage['id'])
+              )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating a passage.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error updating a passage.')
+
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def delPassage(self, passage):
+        '''
+        Receive a passage dictionary and delete it.
+        All access and limited access on these passage will be automatically deleted 
+        by the db engine as "ON DELETE CASCADE" clause is present.
+        Then all the persons who has no access to any passage are also deleted manually.
+        '''
+
+        try:
+            sql = "DELETE FROM Passage WHERE id = {}".format(passage['id'])
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+            sql = ("DELETE FROM Person WHERE id NOT IN "
+                   "(SELECT DISTINCT personId FROM Access) AND id != 1"
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting a passage.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a passage.')
+
+
+
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def addAccess(self, access):
+        '''
+        Receive an access dictionary and add it into DB.
+        The access dictionary include person parametters. This method try to 
+        add this person to database if it is not present.
+        '''
+
+        try:        
+            sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
+                   "".format(access['personId'], access['cardNumber'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit() 
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Person.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.info('The person is already in local DB.')
+        
+
+        try:
+            sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate) VALUES({}, {}, {}, 1, {}, {}, '{}', '{}', '{}')"
+                   "".format(access['id'], access['pssgId'], access['personId'],
+                             access['iSide'], access['oSide'], access['startTime'],
+                             access['endTime'], access['expireDate'])
+                  )
+            self.cursor.execute(sql)
+            
+            #Everytime an all week access is added, all limited accesses should be deleted if exist.
+            sql = ("DELETE FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
+                   "".format(access['pssgId'], access['personId'])
+                  )
+            self.cursor.execute(sql)
+
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding an Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error adding an Access.')
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def updAccess(self, access):
+        '''
+        Receive an access dictionary and update it into DB.
+        '''
+
+        try:
+            sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
+                   "endTime = '{}', expireDate = '{}' WHERE id = {}"
+                   "".format(access['iSide'], access['oSide'], access['startTime'],
+                             access['endTime'], access['expireDate'], access['id'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating an Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error updating an Access.')
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def delAccess(self, access):
+        '''
+        Receive an access dictionary and delete it.
+        Then all the persons who has no access to any passage are also deleted manually.
+        '''
+        try:
+            sql = "DELETE FROM Access WHERE id = {}".format(access['id'])
+            self.cursor.execute(sql)
+
+            sql = ("DELETE FROM Person WHERE id NOT IN "
+                   "(SELECT DISTINCT personId FROM Access) AND id != 1"
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting an Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting an Access.')
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def addLiAccess(self, liAccess):
+        '''
+        Receive a limited access dictionary and add it into DB.
+        The limited access dictionary include person parametters. This method try to 
+        add this person to database if it is not present.
+        '''
+
+        try:
+            sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
+                   "".format(liAccess['personId'], liAccess['cardNumber'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Person.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.info('The person is already in local DB.')
+
+
+        try:
+            sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate) VALUES({}, {}, {}, 0, 0, 0, NULL, NULL, '{}')"
+                   "".format(liAccess['accessId'], liAccess['pssgId'],
+                             liAccess['personId'], liAccess['expireDate'])
+                  )
+            self.cursor.execute(sql)
+
+
+            sql = ("INSERT INTO LimitedAccess(id, pssgId, personId, weekDay, iSide, oSide, startTime, "
+                   "endTime) VALUES({}, {}, {}, {}, {}, {}, '{}', '{}')"
+                   "".format(liAccess['id'], liAccess['pssgId'], liAccess['personId'], liAccess['weekDay'],
+                             liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
+                             liAccess['endTime'])
+
+                  )
+            self.cursor.execute(sql)
+
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Limited Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error adding a Limited Access.')
+
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def updLiAccess(self, liAccess):
+        '''
+        Receive an access dictionary and update it into DB.
+        '''
+
+        try:
+
+            sql = ("SELECT pssgId, personId FROM LimitedAccess WHERE id = {}"
+                   "".format(liAccess['id'])
+                  )
+            self.cursor.execute(sql)
+            row = self.cursor.fetchone()
+            pssgId = row[0]
+            personId = row[1]
+            
+
+            sql = ("UPDATE Access SET expireDate = '{}' WHERE pssgId = {} AND personId = {}"
+                   "".format(liAccess['expireDate'], pssgId, personId)
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+
+            sql = ("UPDATE LimitedAccess SET weekDay = {}, iSide = {}, oSide = {}, "
+                   "startTime = '{}', endTime = '{}' WHERE id = {}"
+                   "".format(liAccess['weekDay'], liAccess['iSide'], liAccess['oSide'],
+                             liAccess['startTime'], liAccess['endTime'], liAccess['id'])
+                  )
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+
+        except TypeError:
+            self.logger.debug('Can not find a Limited Access with this id.')
+            raise IntegrityError('Integrity error updating a Limited Access.')
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating a Limited Access.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error updating a Limited Access.')
+
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def delLiAccess(self, liAccess):
+        '''
+        Receive an access dictionary and delete it.
+        Then all the persons who has no access to any passage are also deleted manually.
+        '''
+        try:
+            sql = "SELECT pssgId, personId FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
+            self.cursor.execute(sql)
+            row = self.cursor.fetchone()
+            pssgId = row[0]
+            personId = row[1]
+            
+            sql = "DELETE FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+            sql = ("SELECT * FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
+                   "".format(pssgId, personId)
+                  )
+            self.cursor.execute(sql)
+            
+            #If there is not more limited access from this person in this passage,
+            #the entry in access table should be deleted and also the person from 
+            #Person table in case this person has not access on any other passage
+            if not self.cursor.fetchone():
+                
+                sql = ("DELETE FROM Access WHERE pssgId = {} AND personId = {}"
+                       "".format(pssgId, personId)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+                 
+                sql = ("DELETE FROM Person WHERE id NOT IN "
+                       "(SELECT DISTINCT personId FROM Access) AND id != 1"
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+        except TypeError:
+            self.logger.debug('Can not find a Limited Access with this id.')
+            raise IntegrityError('Integrity error deleting a Limited Access.')
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting a LimitedAccess.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a LimitedAccess.')
+
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def updPerson(self, person):
+        '''
+        Receive a person dictionary and update it.
+        '''
+        try:
+            sql = ("UPDATE Person SET cardNumber = {} WHERE id = {}"
+                   "".format(person['cardNumber'], person['id'])
+                  )
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating a Person.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a Person.')
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def delPerson(self, person):
+        '''
+        Receive a person dictionary and delete it.
+        All access and limited access on these passage will be automatically deleted 
+        by the db engine as "ON DELETE CASCADE" clause is present.
+        '''
+        try:
+            sql = "DELETE FROM Person WHERE id = {}".format(person['id'])
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting a Person.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a Person.')
 
 

@@ -99,7 +99,7 @@ for pssgIdPersonId in pssgIdsPersonIds:
     pssgId, personId, allWeek = pssgIdPersonId
         
     sqlSentence = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, endTime, expireDate) "
-                   "VALUES({}, {}, {}, 1, 1, '12:20', '23:30', '2016-12-30')".format(pssgId, personId, allWeek)
+                   "VALUES({}, {}, {}, 1, 1, '07:20', '23:30', '2016-12-30')".format(pssgId, personId, allWeek)
                   )
 
     cursor.execute(sqlSentence)
@@ -111,37 +111,37 @@ for pssgIdPersonId in resPssgIdsPersonIds:
     pssgId, personId = pssgIdPersonId[:2]
 
     sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 1, '12:20', '15:30')".format(pssgId, personId)
+                   "VALUES({}, {}, 1, 1, 1, '07:20', '23:40')".format(pssgId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
     sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 2, '12:20', '15:30')".format(pssgId, personId)
+                   "VALUES({}, {}, 1, 1, 2, '07:20', '23:40')".format(pssgId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
     sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 3, '12:20', '15:30')".format(pssgId, personId)
+                   "VALUES({}, {}, 1, 1, 3, '07:20', '23:40')".format(pssgId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
     sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 4, '12:20', '15:30')".format(pssgId, personId)
+                   "VALUES({}, {}, 1, 1, 4, '07:20', '23:40')".format(pssgId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
     sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 5, '12:20', '15:30')".format(pssgId, personId)
+                   "VALUES({}, {}, 1, 1, 5, '07:20', '23:40')".format(pssgId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
     sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 6, '12:20', '15:30')".format(pssgId, personId)
+                   "VALUES({}, {}, 1, 1, 6, '07:20', '23:40')".format(pssgId, personId)
                   )
     cursor.execute(sqlSentence)
 
@@ -176,6 +176,11 @@ sqlSentence = ("INSERT INTO Event(id, description) "
               )
 cursor.execute(sqlSentence)
 
+
+
+#Adding my card
+sqlSentence = "UPDATE Person SET cardNumber = 4300737 WHERE id = 1619"
+cursor.execute(sqlSentence)
 
 
 
