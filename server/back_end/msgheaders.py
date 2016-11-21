@@ -6,6 +6,8 @@ int_EVS  = 0x05
 int_REVS = 0x06
 int_CUD  = 0x07
 int_RCUD = 0x08
+int_VAL  = 0x09
+int_RVAL = 0x0A
 int_END  = 0x1F
 
 
@@ -17,4 +19,6 @@ EVS  = bytes([int_EVS])
 REVS = bytes([int_REVS])
 CUD  = bytes([int_CUD])
 RCUD = bytes([int_RCUD])
+VAL  = bytes([int_VAL])
+RVAL = bytes([int_RVAL])
 END  = bytes([int_END])

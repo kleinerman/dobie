@@ -68,18 +68,20 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, exitFlag):
+    def __init__(self, exitFlag, netToMsgRec, netToCrudReSndr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
 
+        #Queue to send messages to crudReSndr thread
+        self.netToCrudReSndr = netToCrudReSndr
+
+        #Queue to send message to msgReceiver thread
+        self.netToMsgRec = netToMsgRec
+
         #DataBase object 
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
-
-        #MsgReceiver thread
-        self.msgReceiver = msgreceiver.MsgReceiver(exitFlag)
-        self.msgReceiver.start()
 
         #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
@@ -130,17 +132,31 @@ class NetMngr(genmngr.GenericMngr):
         if msg.startswith(EVT):
             response = REVT + b'OK' + END
             self.sendToCtrller(response, scktFd=fd)
-            self.msgReceiver.netToMsgRec.put(msg)
+            self.netToMsgRec.put(msg)
 
 
         elif msg.startswith(EVS):
             response = REVS + b'OK' + END
             self.sendToCtrller(response, scktFd=fd)
-            self.msgReceiver.netToMsgRec.put(msg)
+            self.netToMsgRec.put(msg)
 
 
         elif msg.startswith(RCUD):
-            self.msgReceiver.netToMsgRec.put(msg)
+            #When a response from an update or delete person is received, it is
+            #necessary to know the controller which send that response. For this
+            #reason, the MAC is inserted in the json dictionary.
+            if bytes([msg[1]]) == b'P':
+                index = msg.index(b'}')
+                msg  = (msg[:index] 
+                        + b', "mac": ' + self.fdConnObjects[fd]['mac'].encode('utf8') 
+                        + msg[index:]
+                       )
+            self.netToMsgRec.put(msg)
+
+
+        elif msg.startswith(RVAL):
+            self.netToCrudReSndr.put(self.fdConnObjects[fd]['mac'])
+            
 
 
     #---------------------------------------------------------------------------#
@@ -271,7 +287,8 @@ class NetMngr(genmngr.GenericMngr):
 
                         connObjects = {'socket': ctrllerSckt,
                                        'inBuffer': b'',
-                                       'outBufferQue': queue.Queue()
+                                       'outBufferQue': queue.Queue(),
+                                       'mac': ctrllerMac
                                        #'connected': threading.Event()
                                       }
 
@@ -313,11 +330,31 @@ class NetMngr(genmngr.GenericMngr):
 
                     #We should receive bytes until we receive the end of
                     #the message
-                    msg = self.fdConnObjects[fd]['inBuffer'] + recBytes
-                    if msg.endswith(END):
-                        self.procRecMsg(fd, msg)
-                    else:
-                        self.fdConnObjects[fd]['inBuffer'] = msg
+
+
+                    allBytes = self.fdConnObjects[fd]['inBuffer'] + recBytes
+
+                    try:
+                       while allBytes:
+                           msg = allBytes[:allBytes.index(END)+1]
+                           self.procRecMsg(fd, msg)
+                           allBytes = allBytes[allBytes.index(END)+1:]
+                       self.fdConnObjects[fd]['inBuffer'] = b''
+
+                    except ValueError:
+                        self.fdConnObjects[fd]['inBuffer'] = allBytes
+
+
+
+
+
+
+
+                #msg = self.fdConnObjects[fd]['inBuffer'] + recBytes
+                #    if msg.endswith(END):
+                #        self.procRecMsg(fd, msg)
+                #    else:
+                #        self.fdConnObjects[fd]['inBuffer'] = msg
 
 
                 #This will happen when "event" thread or "reSender" thread
