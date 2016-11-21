@@ -18,8 +18,10 @@ import signal
 import database
 import network
 import msgreceiver
-import crud
+import crud, crudresndr
 from config import *
+import ctrllermsger
+
 
 import os
 
@@ -44,11 +46,26 @@ class BackEndSrvr(object):
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
+        #Creating the Message Receiver Thread
+        self.msgReceiver = msgreceiver.MsgReceiver(self.exitFlag)
+
+        #Creating the Crud Resender Thread
+        self.crudReSndr = crudresndr.CrudReSndr(self.exitFlag)
+
         #Creating the Net Manager Thread 
-        self.netMngr = network.NetMngr(self.exitFlag)        
+        self.netMngr = network.NetMngr(self.exitFlag, self.msgReceiver.netToMsgRec,
+                                       self.crudReSndr.netToCrudReSndr)
 
         #Creating CRUD Manager (This will run in main thread)
-        self.crudMngr = crud.CrudMngr(self.netMngr)
+        self.crudMngr = crud.CrudMngr()
+        
+        #Creating and setting the ctrllermsger for crudMngr
+        crudCtrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
+        self.crudMngr.ctrllerMsger = crudCtrllerMsger
+
+        #Creating and setting the ctrllermsger for crudReSndr
+        crudReSndrCtrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
+        self.crudReSndr.ctrllerMsger = crudReSndrCtrllerMsger
 
 
         self.origSigIntHandler = signal.getsignal(signal.SIGINT)
@@ -79,6 +96,12 @@ class BackEndSrvr(object):
 
 
         self.logger.debug('Starting Server Back End')
+
+        #Starting the "Message Receiver" thread
+        self.msgReceiver.start()
+
+        #Starting the "CRUD Re Sender" thread
+        self.crudReSndr.start()
         
         #Starting the "Event Manager" thread
         self.netMngr.start()

@@ -3,6 +3,7 @@ import logging
 import datetime
 import time
 import os
+import re
 
 import select
 import socket
@@ -13,33 +14,33 @@ import queue
 
 import genmngr
 from config import *
-
+from msgheaders import *
 
 import sys
 import uuid
 
 
 
-int_CON  = 0x01
-int_RCON = 0x02
-int_EVT  = 0x03
-int_REVT = 0x04
-int_EVS  = 0x05
-int_REVS = 0x06
-int_CUD  = 0x07
-int_RCUD = 0x08
-int_END  = 0x1F
-
-
-CON  = bytes([int_CON])
-RCON = bytes([int_RCON])
-EVT  = bytes([int_EVT])
-REVT = bytes([int_REVT])
-EVS  = bytes([int_EVS])
-REVS = bytes([int_REVS])
-CUD  = bytes([int_CUD])
-RCUD = bytes([int_RCUD])
-END  = bytes([int_END])
+#int_CON  = 0x01
+#int_RCON = 0x02
+#int_EVT  = 0x03
+#int_REVT = 0x04
+#int_EVS  = 0x05
+#int_REVS = 0x06
+#int_CUD  = 0x07
+#int_RCUD = 0x08
+#int_END  = 0x1F
+#
+#
+#CON  = bytes([int_CON])
+#RCON = bytes([int_RCON])
+#EVT  = bytes([int_EVT])
+#REVT = bytes([int_REVT])
+#EVS  = bytes([int_EVS])
+#REVS = bytes([int_REVS])
+#CUD  = bytes([int_CUD])
+#RCUD = bytes([int_RCUD])
+#END  = bytes([int_END])
 
 
 #EVT  = b'#'
@@ -96,7 +97,7 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, netToEvent, netToReSnd, exitFlag):
+    def __init__(self, netToEvent, netToReSnd, crudMngr, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
@@ -109,6 +110,9 @@ class NetMngr(genmngr.GenericMngr):
         #Buffer to send bytes to server
         #It is used in POLLOUT event
         self.outBuffer = b''
+
+        #CRUD Manager to send the CRUD commands received from server
+        self.crudMngr = crudMngr
 
         #Queue to send responses to Event Thread
         self.netToEvent = netToEvent
@@ -148,34 +152,27 @@ class NetMngr(genmngr.GenericMngr):
 
 
 
-    #---------------------------------------------------------------------------#
 
-    def sendEvent(self, event):
+
+
+    def sendToServer(self, msg):
         '''
-        This method is called by the "eventMngr" thread each time it receives 
-        an event from the "main" thread.
-        It receives a dictionary as an event which is converted to a JSON bytes
-        to create the event message to send to the server.
         The sequence of bytes is stored in a queue, the "netPoller" is modified
         to tell the "netMngr" there is bytes to send and the "netMngr" thread is
         unblocked from the "poll()" method using the "unblocker" object. 
         Once this happens, the "netMngr" thread pulls the message from queue and 
-        send them to the server.       
+        send them to the server.
         '''
 
         if self.connected.is_set():
 
-            #Converting dictionary to JSON bytes
-            jsonEvent = json.dumps(event).encode('utf8')
-            #Adding headers at beggining and end
-            outMsg = EVT + jsonEvent + END
 
             #Writing the messages in a queue because we can not assure the method
             #"sendEvent()" will not be called again before the "poll()" method wakes
             #up to send the bytes. If we do not do this, we would end up with a mess
             #of bytes in the out buffer.
             #(Not sure if this is necessary or it is the best way to do it)
-            self.outBufferQue.put(outMsg)
+            self.outBufferQue.put(msg)
 
             with self.lockNetPoller:
                 try:
@@ -189,10 +186,31 @@ class NetMngr(genmngr.GenericMngr):
                     #method before POLLNVAL evnt happens to clean "self.connected".
                     #(Not sure if this can occur)                    
                     self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
-            
-        else:
-            self.logger.debug('Can not send event, server is disconnected.')
 
+        else:
+            self.logger.debug('Can not send message, server is disconnected.')
+
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def sendEvent(self, event):
+        '''
+        This method is called by the "eventMngr" thread each time it receives 
+        an event from the "main" thread.
+        It receives a dictionary as an event which is converted to a JSON bytes
+        to create the event message to send to the server using "sendToServer()" 
+        method.
+        '''
+
+
+        #Converting dictionary to JSON bytes
+        jsonEvent = json.dumps(event).encode('utf8')
+        #Adding headers at beggining and end
+        msg = EVT + jsonEvent + END
+        #Sending to the server.
+        self.sendToServer(msg)
 
 
     #---------------------------------------------------------------------------#
@@ -202,34 +220,16 @@ class NetMngr(genmngr.GenericMngr):
         This method is called by the "reSender" thread.
         It receives a list of dictionaries as an events. Each event is converted
         to a JSON bytes delimitted by headers to create the events message to send
-        to the server.
-        The sequence of bytes is stored in a queue, the "netPoller" is modified
-        to tell the "netMngr" there is bytes to send and the "netMngr" thread is
-        unblocked from the "poll()" method using the "unblocker" object. 
-        Once this happens, the "netMngr" thread pulls the message from queue and 
-        send them to the server.
-        See the comments in "SendEvent" message. 
+        to the server using "sendToServer()" method.
         '''
 
-        if self.connected.is_set():
-
-            outMsg = b''
-            for event in eventList:
-                jsonEvent = json.dumps(event).encode('utf8')
-                outMsg += EVS + jsonEvent
-            outMsg += END
-
-            self.outBufferQue.put(outMsg)
-            with self.lockNetPoller:
-                try:
-                    self.netPoller.modify(self.srvSock, select.POLLOUT)
-                    self.unblocker.unblock()
-                except FileNotFoundError:
-                    self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
-
-        else:
-            self.logger.debug('Can not re-send event, server is disconnected.')
-
+        msg = b''
+        for event in eventList:
+            jsonEvent = json.dumps(event).encode('utf8')
+            msg += EVS + jsonEvent
+        msg += END
+        
+        self.sendToServer(msg)
 
 
     #---------------------------------------------------------------------------#
@@ -245,18 +245,31 @@ class NetMngr(genmngr.GenericMngr):
         #This is a response to an event sent to the server
         #It should be delivered to "eventMngr" thread.
         if msg.startswith(REVT):
-            response = msg.strip(REVT+END)
-            response = response.decode('utf8')
-            self.netToEvent.put(response)
+            srvResponse = msg.strip(REVT+END)
+            srvResponse = srvResponse.decode('utf8')
+            self.netToEvent.put(srvResponse)
 
         #This is a response to a set of re-sent events sent to the server
         #It should be delivered to "reSender" thread.
         elif msg.startswith(REVS):
-            response = msg.strip(REVS+END)
-            response = response.decode('utf8')
-            self.netToReSnd.put(response)
-        
+            srvResponse = msg.strip(REVS+END)
+            srvResponse = srvResponse.decode('utf8')
+            self.netToReSnd.put(srvResponse)
 
+        #This will happen when the server send to controller a CRUD message
+        elif msg.startswith(CUD):
+            crudMsg = msg.strip(CUD+END).decode('utf8')
+            self.crudMngr.netToCrud.put(crudMsg)
+#            crudCmd = msg[1:3]
+#            completeJson = crudMsg[2:]
+#            jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
+#            jsonId = '{' + jsonId + '}'
+#            jsonId = jsonId.encode('utf8')
+#            ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
+#            self.sendToServer(ctrllerResponse)
+
+        elif msg.startswith(VAL):
+            self.sendToServer(RVAL + END)
 
 
     def sendConMsg(self):
@@ -290,6 +303,8 @@ class NetMngr(genmngr.GenericMngr):
 
             try:
                 resp = self.srvSock.recv(REC_BYTES)
+                if not resp:
+                    raise ServerNotConnected
                 self.logger.debug('The server respond to CON message with: {}'.format(resp))
                 self.checkExit()
             except socket.timeout:
@@ -365,11 +380,17 @@ class NetMngr(genmngr.GenericMngr):
 
                             #We should receive bytes until we receive the end of
                             #the message
-                            msg = self.inBuffer + recBytes
-                            if msg.endswith(END):
-                                self.procRecMsg(msg)
-                            else:
-                                self.inBuffer = msg
+                            allBytes = self.inBuffer + recBytes
+                            
+                            try:
+                                while allBytes:
+                                    msg = allBytes[:allBytes.index(END)+1]
+                                    self.procRecMsg(msg)
+                                    allBytes = allBytes[allBytes.index(END)+1:]
+                                self.inBuffer = b''
+                            
+                            except ValueError:
+                                self.inBuffer = allBytes
 
 
                         #This will happen when "event" thread or "reSender" thread
@@ -419,7 +440,8 @@ class NetMngr(genmngr.GenericMngr):
             except InvalidConnectionResponse:
                 self.logger.info('The server does not respond OK to connection message')
 
-
+            except ServerNotConnected:
+                self.logger.info('The server disconected during initial connection message')
 
 
 

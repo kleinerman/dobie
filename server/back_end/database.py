@@ -126,6 +126,7 @@ class DataBase(object):
 
         # With this client_flag, cursor.rowcount will have found rows instead of affected rows
         self.connection = pymysql.connect(host, user, passwd, dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
+        self.connection.autocommit(True)
         # The following line makes all "fetch" calls return a dictionary instead a tuple 
         self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
@@ -138,16 +139,14 @@ class DataBase(object):
         If the MAC is not registered, it returns None
         '''
 
-        #Creating a separate connection since this method will be called from
-        #different thread
-        connection = pymysql.connect(self.host, self.user, self.passwd, self.dataBase)
-        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-
         #macAsHex = '{0:0{1}x}'.format(macAsInt, 12)
         sql = "SELECT COUNT(*) FROM Controller WHERE macAddress = '{}'".format(ctrllerMac)
 
-        cursor.execute(sql)
-        return cursor.fetchone()['COUNT(*)']
+        self.cursor.execute(sql)
+        #If commit is not present, once adding the controller via REST 
+        #it is neccesary to restart the server (not sure why)
+        self.connection.commit()
+        return self.cursor.fetchone()['COUNT(*)']
 
 
 
@@ -228,13 +227,13 @@ class DataBase(object):
 
 
 
-    def delOrganization(self, organization):
+    def delOrganization(self, orgId):
         '''
         Receive a dictionary with id organization and delete the organization.
         '''
 
         sql = ("DELETE FROM Organization WHERE id = {}"
-               "".format(organization['id'])
+               "".format(orgId)
               )        
 
         try:
@@ -317,13 +316,13 @@ class DataBase(object):
 
 
 
-    def delZone(self, zone):
+    def delZone(self, zoneId):
         '''
         Receive a dictionary with id zone and delete the zone
         '''
 
         sql = ("DELETE FROM Zone WHERE id = {}"
-               "".format(zone['id'])
+               "".format(zoneId)
               )
 
         try:
@@ -373,10 +372,9 @@ class DataBase(object):
         It returns the id of the added controller.
         '''
 
-        sql = ("INSERT INTO Controller(boardModel, macAddress, ipAddress) "
-               "VALUES('{}', '{}', '{}')"
-               "".format(controller['boardModel'], controller['macAddress'], 
-                         controller['ipAddress'])
+        sql = ("INSERT INTO Controller(boardModel, macAddress) "
+               "VALUES('{}', '{}')"
+               "".format(controller['boardModel'], controller['macAddress'])
               )
 
         try:
@@ -396,13 +394,13 @@ class DataBase(object):
 
 
 
-    def delController(self, controller):
+    def delController(self, controllerId):
         '''
         Receive a dictionary with id controller and delete the controller
         '''
 
         sql = ("DELETE FROM Controller WHERE id = {}"
-               "".format(controller['id'])
+               "".format(controllerId)
               )
 
         try:
@@ -423,10 +421,10 @@ class DataBase(object):
         Receive a dictionary with controller parametters and update it in DB
         '''
 
-        sql = ("UPDATE Controller SET boardModel = '{}', macAddress = '{}', "
-               "ipAddress = '{}' WHERE id = {}"
+        sql = ("UPDATE Controller SET boardModel = '{}', macAddress = '{}' "
+               "WHERE id = {}"
                "".format(controller['boardModel'], controller['macAddress'], 
-                         controller['ipAddress'], controller['id'])
+                         controller['id'])
               )
 
         try:
@@ -497,6 +495,51 @@ class DataBase(object):
 
 
 
+
+
+    def getUncmtCtrllerMacs(self):
+        '''
+        Return a list of controller MAC addresses of controllers which doesn't respond
+        to crud messages.
+        '''
+
+        sql = ("SELECT controller.macAddress FROM Controller controller JOIN Passage passage "
+               "ON (controller.id = passage.controllerId) WHERE passage.rowStateId IN ({}, {}, {}) "
+               "UNION "
+               "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
+               "(controller.id = passage.controllerId) JOIN LimitedAccess limitedAccess ON "
+               "(passage.id = limitedAccess.pssgId) WHERE limitedAccess.rowStateId IN ({}, {}, {}) "
+               "UNION "
+               "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
+               "(controller.id = passage.controllerId) JOIN Access access ON "
+               "(passage.id = access.pssgId) WHERE access.rowStateId IN ({}, {}, {}) "
+               "UNION "
+               "SELECT macAddress FROM PersonPendingOperation"
+               "".format(TO_ADD, TO_UPDATE, TO_DELETE, 
+                         TO_ADD, TO_UPDATE, TO_DELETE,
+                         TO_ADD, TO_UPDATE, TO_DELETE)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            #self.connection.commit()
+            ctrllerMacsNotComm = self.cursor.fetchall()
+            ctrllerMacsNotComm = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsNotComm]
+            return ctrllerMacsNotComm
+
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Error getting MAC addresses of not committed controllers')
+
+        except TypeError:
+            self.logger.debug(internalError)
+            raise ControllerError('Error getting MAC addresses of not committed controllers')
+
+
+
+
+
 #----------------------------------Passage----------------------------------------
 
 
@@ -518,6 +561,32 @@ class DataBase(object):
         passages = self.cursor.fetchall()
         
         return passages
+
+
+
+    def getUncmtPassages(self, ctrllerMac, rowStateId):
+        '''
+        '''
+        
+        sql = ("SELECT passage.* FROM Passage passage JOIN Controller controller ON "
+               "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}' AND "
+               "rowStateId = {}".format(ctrllerMac, rowStateId))
+
+        try:
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+            passage = self.cursor.fetchone()
+
+            while passage:
+                passage.pop('rowStateId')
+                yield passage
+                passage = self.cursor.fetchone()
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PassageError('Error getting passages of not committed controllers')
+
 
 
 
@@ -557,7 +626,7 @@ class DataBase(object):
         Mark the passage in database as COMMITTED if it was previously in TO_ADD or
         TO_UPDATE state or delete it if it was previously in TO_DELETE state
         '''
-
+ 
         sql = "SELECT rowStateId FROM Passage WHERE id = {}".format(passageId)
 
         try:
@@ -665,12 +734,46 @@ class DataBase(object):
         return persons
 
 
+
+
+    def getUncmtPersons(self, ctrllerMac, rowStateId):
+        '''
+        '''
+
+        sql = ("SELECT person.* FROM "
+               "Person person JOIN PersonPendingOperation personPendingOperation ON "
+               "(person.id = personPendingOperation.personId) WHERE "
+               "personPendingOperation.macAddress = '{}' AND personPendingOperation.pendingOp = {}"
+               "".format(ctrllerMac, rowStateId)
+              )
+
+        try:
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+            person = self.cursor.fetchone()
+
+            while person:
+                person.pop('rowStateId')
+                yield person
+                person = self.cursor.fetchone()
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Error getting persons of not committed controllers')
+
+
+
+
+
     def addPerson(self, person):
         '''
         Receive a dictionary with person parametters and save it in DB
         '''
 
-        #RowState should be removed in Person table
+        #The person row is inserted in COMMITTED state since the person is not sent to
+        #controller at the moment it is inserted here. It it sent to the controller when
+        #an access is created.
         sql = ("INSERT INTO Person(name, cardNumber, orgId, rowStateId) VALUES('{}', {}, {}, {})"
                "".format(person['name'], person['cardNumber'], person['orgId'], COMMITTED)
               )
@@ -691,24 +794,193 @@ class DataBase(object):
 
 
 
-    def markPersonToDel(self, personId):
+    def markPerson(self, personId, operation):
         '''
-        Set person row state in state: TO_DELETE (pending to delete).
+        Set person row state in state: TO_DELETE (pending to delete) or
+        TO_UPDATE (pending to update).
+        Receive personId and operation (TO_DELETE or TO_UPDATE).
+        Return a list of controller MAC addresses where the person should 
+        be deleted.
         '''
 
-        sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
-               "".format(TO_DELETE, personId)
-              )
         try:
+
+            sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+                   "".format(operation, personId)
+                  )
             self.cursor.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PersonNotFound('Person not found')
             self.connection.commit()
 
+
+            #To avoid having duplicate MACs in the result list, it is used DISTINCT clause
+            #since we can have a Person having access in more than one passage
+            #and those passage could be on the same controller (with the same MAC)
+            sql = ("SELECT DISTINCT macAddress FROM Controller controller JOIN Passage passage "
+                   "ON (controller.id = passage.controllerId) JOIN Access access "
+                   "ON (passage.id = access.pssgId) JOIN Person person "
+                   "ON (access.personId = person.id) WHERE person.id = {}"
+                   "".format(personId)
+                  )
+
+            self.cursor.execute(sql)
+            ctrllerMacs = self.cursor.fetchall()
+            ctrllerMacs = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacs]
+            
+            #If the person is not present in any controller, we should log this situation and
+            #remove it from the central DB.
+            if ctrllerMacs == []:
+                if operation == TO_DELETE:
+                    logMsg = ("This person is not present in any controller. "
+                              "Removing it from central DB." 
+                             )
+                    self.logger.debug(logMsg)
+                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    self.cursor.execute(sql)
+                    self.connection.commit()
+
+                elif operation == TO_UPDATE:
+                    logMsg = ("This person is not present in any controller. "
+                              "Just modifying it in central DB."
+                             )
+                    self.logger.debug(logMsg)
+                    sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+                       "".format(COMMITTED, personId)
+                          )
+                    self.cursor.execute(sql)
+                    self.connection.commit()
+            else:
+                #Adding in PersonPendingOperation table: personId, mac address and pending operation
+                #Each entry on this table will be removed when each controller answer to the delete 
+                #person message.
+                values = ''
+                for mac in ctrllerMacs:
+                    values += "({}, '{}', {}), ".format(personId, mac, operation)
+                #Removing the last coma and space
+                values = values[:-2]
+                #Using INSERT IGNORE to avoid having duplicates entries on this table (This situation can happen
+                #if the server receive more than once a REST command to delete a person and the controller does not
+                #confirm the deletion of this person.)
+                sql = ("INSERT IGNORE INTO PersonPendingOperation(personId, macAddress, pendingOp) VALUES {}"
+                       "".format(values)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+            #If the list of MACs is void or not, we always return it.
+            return ctrllerMacs
+
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PassageError('Error marking the Person to be deleted.')
+            raise PersonError('Can not add this person')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Can not add this person: wrong argument')
 
+        
+
+
+
+
+    def commitPerson(self, personId, ctrllerMac):
+        '''
+        Receive personId and controller MAC.
+        First of all it determines the pendig operation of that person on that controller.
+
+        If the operation is TO_DELETE: it deletes all the accesses and limited accesses of
+        this person on the passages managed by this controller. 
+        Then it deletes the entry in "PersonPendingOperation" table which has this person id,
+        this MAC and the corresponding pending operation. 
+        If there is not more entries on "PersonPendingOperation" table with this person and 
+        this operation type, it can delete the person definitely from the central database.
+        '''
+
+        try:
+            #Determines the pendig operation of that person on that controller
+            sql = "SELECT rowStateId FROM Person WHERE id = {}".format(personId)
+
+            self.cursor.execute(sql)
+            pendingOp = self.cursor.fetchone()['rowStateId']
+
+            if pendingOp == TO_DELETE:
+
+                #Deleting all the limited accesses of this person on the passages managed by 
+                #this controller
+                sql = ("DELETE FROM LimitedAccess WHERE personId = {} AND pssgId IN "
+                       "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
+                       "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
+                       "".format(personId, ctrllerMac)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit() 
+
+                #Deleting all the accesses of this person on the passages managed by 
+                #this controller
+                sql = ("DELETE FROM Access WHERE personId = {} AND pssgId IN "
+                       "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
+                       "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
+                       "".format(personId, ctrllerMac)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()                
+
+                #Deleting the entry in "PersonPendingOperation" table which has this person id,
+                #this MAC and the corresponding pending operation.
+                sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
+                       "AND pendingOp = {}".format(personId, ctrllerMac, TO_DELETE)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+                #If there is not more entries on "PersonPendingOperation" table with this person and 
+                #this operation type, it can delete the person definitely from the central database.                
+                sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
+                       "AND pendingOp = {}".format(personId, TO_DELETE)
+                      )
+                self.cursor.execute(sql)
+                pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
+                if not pendCtrllersToDel:
+                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    self.cursor.execute(sql)
+                    self.connection.commit()
+
+            elif pendingOp == TO_UPDATE:
+                #Deleting the entry in "PersonPendingOperation" table which has this person id,
+                #this MAC and the corresponding pending operation.
+                sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
+                       "AND pendingOp = {}".format(personId, ctrllerMac, TO_UPDATE)
+                      )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+                #If there is not more entries on "PersonPendingOperation" table with this person and 
+                #this operation type, it can set the person row state as COMMITTED definitely in the 
+                #central database.                
+                sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
+                       "AND pendingOp = {}".format(personId, TO_UPDATE)
+                      )
+                self.cursor.execute(sql)
+                pendCtrllersToUpd = self.cursor.fetchone()['COUNT(*)']
+                if not pendCtrllersToUpd:
+                    sql = "UPDATE Person SET rowStateId = {} WHERE id = {}".format(COMMITTED, personId)
+                    self.cursor.execute(sql)
+                    self.connection.commit()
+
+            else:
+                self.logger.debug('Invalid pending operation in Person table.')
+                raise PersonError('Can not commit this person.')
+
+
+        except TypeError:
+            self.logger.debug('Error fetching something in commitPerson method.')
+            raise PersonError('Can not commit this person.')
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise PersonError('Can not commit this person.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Can not commit this person.')
 
 
 
@@ -803,6 +1075,40 @@ class DataBase(object):
         accesses = self.cursor.fetchall()
 
         return accesses
+
+
+
+    def getUncmtAccesses(self, ctrllerMac, rowStateId):
+        '''
+        '''
+
+        sql = ("SELECT access.* FROM Access access JOIN Passage passage ON "
+               "(access.pssgId = passage.id) JOIN Controller controller ON "
+               "(passage.controllerId = controller.id) WHERE "
+               "controller.macAddress = '{}' AND access.rowStateId = {}"
+               "".format(ctrllerMac, rowStateId)
+              )
+
+        try:
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+            access = self.cursor.fetchone()
+
+            while access:
+                access.pop('rowStateId')
+                access['startTime'] = str(access['startTime'])
+                access['endTime'] = str(access['endTime'])
+                access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
+                
+                yield access
+                access = self.cursor.fetchone()
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise AccessError('Error getting accesses of not committed controllers')
+
+
 
 
 
@@ -992,6 +1298,63 @@ class DataBase(object):
 
 
 #-------------------------------Limited Access---------------------------------
+
+
+
+
+    def getUncmtLiAccesses(self, ctrllerMac, rowStateId):
+        '''
+        '''
+
+        secCursor = self.connection.cursor(pymysql.cursors.DictCursor)
+
+
+        sql = ("SELECT liAccess.* FROM LimitedAccess liAccess JOIN Passage passage ON "
+               "(liAccess.pssgId = passage.id) JOIN Controller controller ON "
+               "(passage.controllerId = controller.id) WHERE "
+               "controller.macAddress = '{}' AND liAccess.rowStateId = {}"
+               "".format(ctrllerMac, rowStateId)
+              )
+
+        try:
+
+            self.cursor.execute(sql)
+            self.connection.commit()
+            liAccess = self.cursor.fetchone()
+
+            while liAccess:
+                
+                secSql = ("SELECT id, expireDate FROM Access WHERE pssgId = {} AND personId = {}"
+                       "".format(liAccess['pssgId'], liAccess['personId'])
+                      )
+                secCursor.execute(secSql)
+                row = secCursor.fetchone()
+                accessId = row['id']
+                expireDate = row['expireDate']
+                expireDate = str(expireDate)
+
+
+                liAccess.pop('rowStateId')
+                liAccess['startTime'] = str(liAccess['startTime'])
+                liAccess['endTime'] = str(liAccess['endTime'])
+                liAccess['accessId'] = accessId
+                liAccess['expireDate'] = expireDate
+
+                yield liAccess
+                liAccess = self.cursor.fetchone()
+
+        except TypeError:
+            self.logger.debug('Error fetching expireDate.')
+            raise AccessError('Error getting accesses of not committed controllers')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise AccessError('Error getting accesses of not committed controllers')
+
+
+
+
+
 
 
 
