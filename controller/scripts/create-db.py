@@ -64,8 +64,8 @@ cursor.execute('''
         startTime   DATETIME,
         endTime     DATETIME,
         expireDate  DATETIME,
-        FOREIGN KEY(personId) REFERENCES Person(id),
-        FOREIGN KEY(pssgId) REFERENCES Passage(id)
+        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
+        FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
     )
     '''
 )
@@ -86,7 +86,9 @@ cursor.execute('''
         oSide      BOOLEAN,
         weekDay    INTEGER,
         startTime  DATETIME,
-        endTime    DATETIME
+        endTime    DATETIME,
+        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
+        FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
     )
     '''
 )

@@ -484,7 +484,7 @@ void *buttons (void *b_args)
         if (args->pssg[i].button != UNDEFINED) {    // if the pssg has button
             bttn_tbl[j][0] = args->pssg[i].id;      // save the pssg id in the first col of the table
 
-            // save the button fd in the second column of the table
+            // save the button pin fd in the second column of the table
             sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].button);
             bttn_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
             if (bttn_tbl[j][1] == -1) {
@@ -557,8 +557,8 @@ void *state (void *s_args)
     ev = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_states);
     events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_states);
 
-    /* Allocate memory for a table. The table has 2 columns and many rows as number of states.
-     * Column 1: the pssg_ID; Column 2: file descriptor of the GPIO value.
+    /* Allocate memory for a table. The table has 3 columns and many rows as number of states.
+     * Column 1: the pssg_ID; Column 2: file descriptor of the GPIO value; Column 3: current pin states
      */
     state_tbl = (int **) malloc(sizeof(int *) * args->number_of_states);
     for (i=0; i<(args->number_of_states); i++)
@@ -575,7 +575,7 @@ void *state (void *s_args)
         if (args->pssg[i].state != UNDEFINED) {     // if the pssg has state
             state_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
 
-            // save the button fd in the second col of the table
+            // save the state pin fd in the second col of the table
             sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].state);
             state_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
             if (state_tbl[j][1] == -1) {

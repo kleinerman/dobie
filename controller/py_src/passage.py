@@ -95,7 +95,7 @@ class Passage(object):
 
 
 
-class CleanerPssgMngr(genmngr.GenericMngr):
+class CleanerPssgMngr(genmngr.PssgMngr):
     '''
     This thread stops the buzzer and close the passage. 
     It is created when the passage is opened. 
@@ -103,7 +103,7 @@ class CleanerPssgMngr(genmngr.GenericMngr):
     When the passage is opened more than once consecutively, the time is prolonged.    
     '''
 
-    def __init__(self, pssgControl, exitFlag):
+    def __init__(self, pssgControl, pssgsReconfFlag, exitFlag):
 
         #Dictionary with variables to control the passage
         self.pssgControl = pssgControl
@@ -114,7 +114,7 @@ class CleanerPssgMngr(genmngr.GenericMngr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('CleanerPssgMngr_{}'.format(self.pssgId), exitFlag)
+        super().__init__('CleanerPssgMngr_{}'.format(self.pssgId), pssgsReconfFlag, exitFlag)
 
         #The following attributes are to manage this variables in a cleaner way.
         self.pssgObj = pssgControl['pssgObj']
@@ -177,7 +177,7 @@ class CleanerPssgMngr(genmngr.GenericMngr):
 
         
 
-class StarterAlrmMngr(genmngr.GenericMngr):
+class StarterAlrmMngr(genmngr.PssgMngr):
     '''
     This thread starts the buzzer when the passage remains opened  
     for more than 
@@ -185,7 +185,7 @@ class StarterAlrmMngr(genmngr.GenericMngr):
     When the passage is opened more than once consecutively, the time is prolonged.    
     '''
 
-    def __init__(self, pssgControl, exitFlag):
+    def __init__(self, pssgControl, pssgsReconfFlag, exitFlag):
 
         #Dictionary with variables to control the passage
         self.pssgControl = pssgControl
@@ -196,7 +196,7 @@ class StarterAlrmMngr(genmngr.GenericMngr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('StarterAlrmMngr_{}'.format(self.pssgId), exitFlag)
+        super().__init__('StarterAlrmMngr_{}'.format(self.pssgId), pssgsReconfFlag, exitFlag)
 
         #The following attributes are to manage this variables in a cleaner way.
         self.pssgObj = pssgControl['pssgObj']
