@@ -27,9 +27,13 @@ CREATE TABLE `Controller` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `boardModel` varchar(40) NOT NULL,
     `macAddress` varchar(12) NOT NULL,
-    `ipAddress` varchar(39) NOT NULL
+    `ipAddress` varchar(39)
 )
 ;
+
+CREATE UNIQUE INDEX macAddressIndex ON Controller (macAddress)
+;
+
 
 CREATE TABLE `Zone` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -71,7 +75,7 @@ CREATE TABLE `Access` (
     `expireDate` date NOT NULL,
     `rowStateId` integer NOT NULL,
     CONSTRAINT `fk_Access_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_Access_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
+    CONSTRAINT `fk_Access_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Access_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
 )
 ;
@@ -89,12 +93,12 @@ CREATE TABLE `LimitedAccess` (
     `startTime` time NOT NULL,
     `endTime` time NOT NULL,
     `rowStateId` integer NOT NULL,
-    CONSTRAINT `fk_LimitedAccess_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`),
-    CONSTRAINT `fk_LimitedAccess_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
+    CONSTRAINT `fk_LimitedAccess_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_LimitedAccess_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_LimitedAccess_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`))
 ;
 
-CREATE UNIQUE INDEX personWeekDayIndex ON LimitedAccess (personId, weekDay)
+CREATE UNIQUE INDEX pssgPersonWeekDayIndex ON LimitedAccess (pssgId, personId, weekDay)
 ;
 
 
@@ -134,13 +138,29 @@ CREATE TABLE `Event` (
     `allowed` boolean,
     `notReason` integer,
     CONSTRAINT `fk_Event_EventType` FOREIGN KEY (`eventTypeId`) REFERENCES `EventType` (`id`),
-    CONSTRAINT `fk_Event_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`),
+    CONSTRAINT `fk_Event_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Event_Latch` FOREIGN KEY (`latchId`) REFERENCES `Latch` (`id`),    
-    CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
+    CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Event_NotReason` FOREIGN KEY (`notReason`) REFERENCES `NotReason` (`id`)
 
 )
 ;
+
+CREATE TABLE `PersonPendingOperation` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `personId` integer NOT NULL,
+    `macAddress` varchar(12) NOT NULL,
+    `pendingOp` integer NOT NULL,
+    CONSTRAINT `fk_PersonPendingOperation_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
+    CONSTRAINT `fk_PersonPendingOperation_RowState` FOREIGN KEY (`pendingOp`) REFERENCES `RowState` (`id`)
+
+)
+;
+
+CREATE UNIQUE INDEX personMacAddressIndex ON PersonPendingOperation (personId, macAddress)
+;
+
+
 
 COMMIT;
 
