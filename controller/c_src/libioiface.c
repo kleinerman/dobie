@@ -245,7 +245,7 @@ int set_gpio_pins (pssg_t *pssg, int number_of_pssgs)
         if (pssg[i].button != UNDEFINED) {
             if ( export_gpio(pssg[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_direction(pssg[i].button, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_edge(pssg[i].button, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(pssg[i].button, RISING) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
         if (pssg[i].state != UNDEFINED) {
             if ( export_gpio(pssg[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
@@ -453,6 +453,7 @@ void *buttons (void *b_args)
 {
     char filename[40];
     char message[50];
+    char value[2] = {'0','\0'};
     int **bttn_tbl;
     int i;  // for cicle index
     int j=0;    // table row index: max value is the (number_of_buttons - 1)
@@ -483,7 +484,7 @@ void *buttons (void *b_args)
         if (args->pssg[i].button != UNDEFINED) {    // if the pssg has button
             bttn_tbl[j][0] = args->pssg[i].id;      // save the pssg id in the first col of the table
 
-            // save the button fd in the second column of the table
+            // save the button pin fd in the second column of the table
             sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].button);
             bttn_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
             if (bttn_tbl[j][1] == -1) {
@@ -509,12 +510,23 @@ void *buttons (void *b_args)
                 if (events[0].data.fd == bttn_tbl[j][1]) {
                     // deregister the target file descriptor from the epoll instance to avoid button bounce
                     epoll_ctl(epfd, EPOLL_CTL_DEL, bttn_tbl[j][1], &ev[j]);
-                    sprintf(message, "%d;0;button=1", bttn_tbl[j][0]);
-                    // put the message into the queue
-                    mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
-                    printf("%s\n", message);
-                    // wait a bounce time and then register again the target file descriptor.
+                    
                     usleep(BOUNCE_TIME);
+                    read(bttn_tbl[j][1], value, 1);
+                    lseek(bttn_tbl[j][1],0,SEEK_SET);
+
+
+                    if (strcmp(value, "1") == 0) {
+                        sprintf(message, "%d;0;button=1", bttn_tbl[j][0]);
+                        // put the message into the queue
+                        mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
+                        printf("%s\n", message);
+                    }
+                    else {
+                        printf("BUTTON NOISE\n");
+                    }
+
+                    // wait a bounce time and then register again the target file descriptor.
                     epoll_ctl(epfd, EPOLL_CTL_ADD, bttn_tbl[j][1], &ev[j]);
                     // because it was registered again, first time it triggers with current state, so ignore it again
                     epoll_wait(epfd, events, 1, -1);
@@ -537,6 +549,7 @@ void *state (void *s_args)
     int i;
     int j=0;
     int epfd; // epool file descriptor
+    int cur_state;
     struct epoll_event *ev;
     struct epoll_event *events;
     struct state_args *args = (struct state_args*) s_args;
@@ -544,12 +557,12 @@ void *state (void *s_args)
     ev = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_states);
     events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_states);
 
-    /* Allocate memory for a table. The table has 2 columns and many rows as number of states.
-     * Column 1: the pssg_ID; Column 2: file descriptor of the GPIO value.
+    /* Allocate memory for a table. The table has 3 columns and many rows as number of states.
+     * Column 1: the pssg_ID; Column 2: file descriptor of the GPIO value; Column 3: current pin states
      */
     state_tbl = (int **) malloc(sizeof(int *) * args->number_of_states);
     for (i=0; i<(args->number_of_states); i++)
-        state_tbl[i] = (int *) malloc(sizeof(int) * 2);
+        state_tbl[i] = (int *) malloc(sizeof(int) * 3); // number of columns = 3
 
     // create a new epool instance
     epfd = epoll_create(1);
@@ -562,7 +575,7 @@ void *state (void *s_args)
         if (args->pssg[i].state != UNDEFINED) {     // if the pssg has state
             state_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
 
-            // save the button fd in the second col of the table
+            // save the state pin fd in the second col of the table
             sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].state);
             state_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
             if (state_tbl[j][1] == -1) {
@@ -574,6 +587,11 @@ void *state (void *s_args)
             ev[j].data.fd = state_tbl[j][1];
             // Add the file descriptor to the interest list for epfd
             epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]); 
+            
+            // Read the initial passages state and save them into the third table column
+            read(state_tbl[j][1], value, 1);
+            lseek(state_tbl[j][1],0,SEEK_SET);
+            state_tbl[j][2] = atoi(value);
 
             j++;
 
@@ -586,20 +604,34 @@ void *state (void *s_args)
         if (epoll_wait(epfd, events, args->number_of_states, EPOLL_WAIT_TIME)) { // wait for an event
             for (j=0; j < args->number_of_states; j++) {
                 if (events[0].data.fd == state_tbl[j][1]) {
-                    // deregister the target file descriptor from the epoll instance to avoid button bounce
+                    // deregister the target file descriptor from the epoll instance to avoid bounce
                     epoll_ctl(epfd, EPOLL_CTL_DEL, state_tbl[j][1], &ev[j]);
+
+                    usleep(BOUNCE_TIME);
                     read(state_tbl[j][1], value, 1);
                     lseek(state_tbl[j][1],0,SEEK_SET);
-                    sprintf(message, "%d;0;state=%s", state_tbl[j][0], value);
-                    // put the message into the queue
-                    mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
-                    printf("%s\n", message);
-                    // wait a bounce time and then register again the target file descriptor.
-                    usleep(BOUNCE_TIME);
+                    
+                    cur_state = atoi(value); // current state (int)
+
+                    if (cur_state == !state_tbl[j][2]) {
+                        sprintf(message, "%d;0;state=%s", state_tbl[j][0], value);
+                        // put the message into the queue
+                        mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
+                        printf("%s\n", message);
+                        // set the new state
+                        state_tbl[j][2] = cur_state;
+                                            }
+                    else {
+                        printf("STATE NOISE\n");
+                    }
+
+                    // register again the target file descriptor.
                     epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]);
                     // because it was registered again, first time it triggers with current state, so ignore it again
                     epoll_wait(epfd, events, 1, -1);
-                    break;
+
+                    break; // break the FOR loop
+
                 }
             }
         }
