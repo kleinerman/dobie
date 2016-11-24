@@ -350,6 +350,10 @@ void *read_card (void *args)
                     card_number = card_number | mask;
                 mask = mask >> 1;   // if the event was D0, only shift the mask 
             }
+            else {                  // EPOLL_WAIT_TIME expires and car_number and mask variables are reinitialized
+                card_number = 0;    // This avoid noise in the card reader channels
+                mask = 33554432;
+            }
         }
 
         if(run) {
