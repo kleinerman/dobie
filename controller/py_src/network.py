@@ -268,8 +268,8 @@ class NetMngr(genmngr.GenericMngr):
 #            ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
 #            self.sendToServer(ctrllerResponse)
 
-        elif msg.startswith(VAL):
-            self.sendToServer(RVAL + END)
+        elif msg.startswith(RPR):
+            self.sendToServer(RRPR + END)
 
 
     def sendConMsg(self):
