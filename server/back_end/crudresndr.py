@@ -9,15 +9,16 @@ import genmngr
 import database
 from config import *
 from msgheaders import *
-#import ctrllermsger
 
 
 class CrudReSndr(genmngr.GenericMngr):
     '''
-    This thread is created by the main thread.
-    When the network thread receives a response from the controller confirmando que el 
-    mismo esta vivo, el network thread nos deja un aviso en nuestra cola y desde aca disparamos
-    reenvia de los crudes pendientes.
+    This thread has two responsibilities.
+    It periodically check which controllers has some CRUD not yet 
+    committed and send to them a RPR (Request to Re Provisioning) message.
+    When a controller which now is alive answer to the previous message with a
+    RRPR (Ready to Re Provisioning) message, this thread send the not comitted
+    CRUDs to this controller.    
     '''
 
     def __init__(self, exitFlag):
@@ -26,14 +27,21 @@ class CrudReSndr(genmngr.GenericMngr):
         #to have a understandable log file.
         super().__init__('CrudReSender', exitFlag)
 
+        #Database object to answer the CRUDs not committed.
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
 
+        #Controller Messanger to resend the corresponding CRUDs.
+        #As the "ctrllerMsger" use the only "netMngr" object and the "netMngr" has to
+        #know this object to send the RRPR message. This attribute is setted after 
+        #creating this object in the main thread.
         self.ctrllerMsger = None 
     
+        #When the network thread receive a RRPR message it put the MAC of
+        #the controller which sends this message in this queue
         self.netToCrudReSndr = queue.Queue()
 
-        #Calculating the number of iterations before sending the message to verify
-        #the controller is alive
+        #Calculating the number of iterations before sending the message to request
+        #re provisioning the controller.
         self.ITERATIONS = RE_SEND_TIME // EXIT_CHECK_TIME
 
         #This is the actual iteration. This value is incremented in each iteration
@@ -49,6 +57,11 @@ class CrudReSndr(genmngr.GenericMngr):
         for queue messages coming from the "Network" thread.
         The queue message is the MAC address of the controller which need CRUDs to be
         resended.
+        When a MAC address is received, this method send all the passages, access,
+        limited access and persons CRUDs for this controller in this order to avoid
+        inconsistency in the controller database.
+        Also, after "self.ITERATIONS" times, it send a RRPR message to all the 
+        controllers which have uncommitted CRUDs 
         '''
 
 
@@ -122,7 +135,7 @@ class CrudReSndr(genmngr.GenericMngr):
                     logMsg = 'Sending "Verify Alive Message" to controllers'
                     self.logger.info(logMsg)
                     ctrllerMacsNotComm = self.dataBase.getUncmtCtrllerMacs()
-                    self.ctrllerMsger.verifyIsAlive(ctrllerMacsNotComm)
+                    self.ctrllerMsger.requestReProvision(ctrllerMacsNotComm)
                     self.iteration = 0
                 else:
                     self.iteration +=1
