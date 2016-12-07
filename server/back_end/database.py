@@ -499,30 +499,27 @@ class DataBase(object):
 
     def getUncmtCtrllerMacs(self):
         '''
-        Return a list of controller MAC addresses of controllers which doesn't respond
+        Return a list of controller MAC addresses of controllers which did not respond
         to crud messages.
         '''
 
         sql = ("SELECT controller.macAddress FROM Controller controller JOIN Passage passage "
-               "ON (controller.id = passage.controllerId) WHERE passage.rowStateId IN ({}, {}, {}) "
+               "ON (controller.id = passage.controllerId) WHERE passage.rowStateId IN ({0}, {1}, {2}) "
                "UNION "
                "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
                "(controller.id = passage.controllerId) JOIN LimitedAccess limitedAccess ON "
-               "(passage.id = limitedAccess.pssgId) WHERE limitedAccess.rowStateId IN ({}, {}, {}) "
+               "(passage.id = limitedAccess.pssgId) WHERE limitedAccess.rowStateId IN ({0}, {1}, {2}) "
                "UNION "
                "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
                "(controller.id = passage.controllerId) JOIN Access access ON "
-               "(passage.id = access.pssgId) WHERE access.rowStateId IN ({}, {}, {}) "
+               "(passage.id = access.pssgId) WHERE access.rowStateId IN ({0}, {1}, {2}) "
                "UNION "
                "SELECT macAddress FROM PersonPendingOperation"
-               "".format(TO_ADD, TO_UPDATE, TO_DELETE, 
-                         TO_ADD, TO_UPDATE, TO_DELETE,
-                         TO_ADD, TO_UPDATE, TO_DELETE)
+               "".format(TO_ADD, TO_UPDATE, TO_DELETE)
               )
 
         try:
             self.cursor.execute(sql)
-            #self.connection.commit()
             ctrllerMacsNotComm = self.cursor.fetchall()
             ctrllerMacsNotComm = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsNotComm]
             return ctrllerMacsNotComm
@@ -566,6 +563,9 @@ class DataBase(object):
 
     def getUncmtPassages(self, ctrllerMac, rowStateId):
         '''
+        This method is an iterator, in each iteration it returns a passage
+        not committed with the state "rowStateId" from the controller
+        with the MAC address "ctrllerMac"
         '''
         
         sql = ("SELECT passage.* FROM Passage passage JOIN Controller controller ON "
@@ -579,6 +579,7 @@ class DataBase(object):
             passage = self.cursor.fetchone()
 
             while passage:
+                #Removing the rowStateId as this field should not be sent to the controller
                 passage.pop('rowStateId')
                 yield passage
                 passage = self.cursor.fetchone()
@@ -738,6 +739,9 @@ class DataBase(object):
 
     def getUncmtPersons(self, ctrllerMac, rowStateId):
         '''
+        This method is an iterator, in each iteration it returns a person
+        not committed with the state "rowStateId" from the controller
+        with the MAC address "ctrllerMac"
         '''
 
         sql = ("SELECT person.* FROM "
@@ -754,6 +758,7 @@ class DataBase(object):
             person = self.cursor.fetchone()
 
             while person:
+                #Removing the rowStateId as this field should not be sent to the controller
                 person.pop('rowStateId')
                 yield person
                 person = self.cursor.fetchone()
@@ -1080,6 +1085,9 @@ class DataBase(object):
 
     def getUncmtAccesses(self, ctrllerMac, rowStateId):
         '''
+        This method is an iterator, in each iteration it returns a access
+        not committed with the state "rowStateId" from the controller
+        with the MAC address "ctrllerMac"
         '''
 
         sql = ("SELECT access.* FROM Access access JOIN Passage passage ON "
@@ -1096,7 +1104,10 @@ class DataBase(object):
             access = self.cursor.fetchone()
 
             while access:
+                #Removing rowStateId as it should not be sent to the controller
                 access.pop('rowStateId')
+                #As the database retrieves the dates and times as datetime types
+                #they are converted to string to be sent to the controller
                 access['startTime'] = str(access['startTime'])
                 access['endTime'] = str(access['endTime'])
                 access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
@@ -1304,6 +1315,9 @@ class DataBase(object):
 
     def getUncmtLiAccesses(self, ctrllerMac, rowStateId):
         '''
+        This method is an iterator, in each iteration it returns a liAccess
+        not committed with the state "rowStateId" from the controller
+        with the MAC address "ctrllerMac"
         '''
 
         secCursor = self.connection.cursor(pymysql.cursors.DictCursor)
@@ -1323,20 +1337,23 @@ class DataBase(object):
             liAccess = self.cursor.fetchone()
 
             while liAccess:
-                
+                #There are some fields from access table that should be sent to the controller
+                #when adding or updating a limited access and should be added the "liAccess" dictionary
                 secSql = ("SELECT id, expireDate FROM Access WHERE pssgId = {} AND personId = {}"
-                       "".format(liAccess['pssgId'], liAccess['personId'])
-                      )
+                          "".format(liAccess['pssgId'], liAccess['personId'])
+                         )
                 secCursor.execute(secSql)
                 row = secCursor.fetchone()
                 accessId = row['id']
                 expireDate = row['expireDate']
                 expireDate = str(expireDate)
 
-
+                #Removing rowStateId field as it should not be sent to the controller.
                 liAccess.pop('rowStateId')
+                #Converting datetime types to string types.
                 liAccess['startTime'] = str(liAccess['startTime'])
                 liAccess['endTime'] = str(liAccess['endTime'])
+                #Adding fields from access to liAccess dictionary.
                 liAccess['accessId'] = accessId
                 liAccess['expireDate'] = expireDate
 
