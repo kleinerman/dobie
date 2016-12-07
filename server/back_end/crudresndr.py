@@ -78,16 +78,17 @@ class CrudReSndr(genmngr.GenericMngr):
                     self.ctrllerMsger.delPassage(ctrllerMac, passage['id'])
                 self.checkExit()
 
-
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
-                    #Get the person parameters as a dictionary
+                    #"cardNumber" parameter is not present in access dictionary, but should be sent
+                    #when sending a CRUD access to controller.
+                    #Get the person parameters as a dictionary.
                     person = self.dataBase.getPerson(access['personId'])
-                    #Adding to access dictionary necesary person parameters to add person if it doesn't
-                    #exist in controller
+                    #Adding "cardNumber" to access dictionary.
                     access['cardNumber'] = person['cardNumber']
                     self.ctrllerMsger.addAccess(ctrllerMac, access)
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
+                    #The following parameters should not be sent when updating an access.
                     access.pop('pssgId')
                     access.pop('personId')
                     access.pop('allWeek')
@@ -99,14 +100,16 @@ class CrudReSndr(genmngr.GenericMngr):
 
 
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD):
-                    #Get the person parameters as a dictionary
+                    #"cardNumber" parameter is not present in liAccess dictionary, but should be sent
+                    #when sending a CRUD liAccess to controller.
+                    #Get the person parameters as a dictionary.
                     person = self.dataBase.getPerson(liAccess['personId'])
-                    #Adding to access dictionary necesary person parameters to add person if it doesn't
-                    #exist in controller
+                    #Adding "cardNumber" to liAccess dictionary.
                     liAccess['cardNumber'] = person['cardNumber']
                     self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
 
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_UPDATE):
+                    #The following parameters should not be sent when updating an access.
                     liAccess.pop('accessId')
                     liAccess.pop('personId')
                     liAccess.pop('pssgId')
@@ -117,10 +120,15 @@ class CrudReSndr(genmngr.GenericMngr):
                 self.checkExit()
 
 
-
+                #Persons never colud be in state TO_ADD. For this reason,
+                #only TO_UPDATE or TO_DELETE state is retrieved
                 for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE):
+                    #"updPerson" method receive a list of MAC addresses to update. Because in this case only one
+                    #controller is being updated, a list with only the MAC address of the controller is created.
                     self.ctrllerMsger.updPerson([ctrllerMac], person)
                 for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_DELETE):
+                    #"delPerson" method receive a list of MAC addresses to update. Because in this case only one
+                    #controller is being updated, a list with only the MAC address of the controller is created.
                     self.ctrllerMsger.delPerson([ctrllerMac], person['id'])
                 self.checkExit()
 
@@ -132,10 +140,14 @@ class CrudReSndr(genmngr.GenericMngr):
                 self.checkExit()
 
                 if self.iteration >= self.ITERATIONS:
-                    logMsg = 'Sending "Verify Alive Message" to controllers'
-                    self.logger.info(logMsg)
+                    logMsg = 'Checking if there are controllers which need to be re provisioned.'
+                    self.logger.debug(logMsg)
+                    #Getting the MAC addresses of controllers which has uncommitted CRUDs.
                     ctrllerMacsNotComm = self.dataBase.getUncmtCtrllerMacs()
-                    self.ctrllerMsger.requestReProvision(ctrllerMacsNotComm)
+                    if ctrllerMacsNotComm:
+                        logMsg = 'Sending Request Re Provision Message to: {}'.format(', '.join(ctrllerMacsNotComm))
+                        self.logger.info(logMsg)
+                        self.ctrllerMsger.requestReProvision(ctrllerMacsNotComm)
                     self.iteration = 0
                 else:
                     self.iteration +=1
