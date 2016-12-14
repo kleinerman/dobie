@@ -638,15 +638,23 @@ class DataBase(object):
                 sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
                        "".format(COMMITTED, passageId)
                       )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
             elif rowState == TO_DELETE:
                 sql = ("DELETE FROM Passage WHERE id = {}"
                        "".format(passageId)
                       )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+            elif rowState == COMMITTED:
+                self.logger.info("Passage already committed.")
+
             else:
                 self.logger.error("Invalid state detected in Passage table.")
+                raise PassageError('Error committing this passage.')
 
-            self.cursor.execute(sql)
-            self.connection.commit()
                 
 
         except pymysql.err.IntegrityError as integrityError:
@@ -906,9 +914,9 @@ class DataBase(object):
             sql = "SELECT rowStateId FROM Person WHERE id = {}".format(personId)
 
             self.cursor.execute(sql)
-            pendingOp = self.cursor.fetchone()['rowStateId']
+            rowState = self.cursor.fetchone()['rowStateId']
 
-            if pendingOp == TO_DELETE:
+            if rowState == TO_DELETE:
 
                 #Deleting all the limited accesses of this person on the passages managed by 
                 #this controller
@@ -950,7 +958,7 @@ class DataBase(object):
                     self.cursor.execute(sql)
                     self.connection.commit()
 
-            elif pendingOp == TO_UPDATE:
+            elif rowState == TO_UPDATE:
                 #Deleting the entry in "PersonPendingOperation" table which has this person id,
                 #this MAC and the corresponding pending operation.
                 sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
@@ -972,8 +980,11 @@ class DataBase(object):
                     self.cursor.execute(sql)
                     self.connection.commit()
 
+            elif rowState == COMMITTED:
+                self.logger.info('Person already committed.')
+
             else:
-                self.logger.debug('Invalid pending operation in Person table.')
+                self.logger.debug('Invalid state detected in Person table.')
                 raise PersonError('Can not commit this person.')
 
 
@@ -1250,15 +1261,22 @@ class DataBase(object):
                 sql = ("UPDATE Access SET rowStateId = {} WHERE id = {}"
                        "".format(COMMITTED, accessId)
                       )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
             elif rowState == TO_DELETE:
                 sql = ("DELETE FROM Access WHERE id = {}"
                        "".format(accessId)
                       )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+            elif rowState == COMMITTED:
+                self.logger.info("Access already committed.")
+
             else:
                 self.logger.error("Invalid state detected in Access table.")
-
-            self.cursor.execute(sql)
-            self.connection.commit()
+                raise AccessError('Error committing this access.')
 
 
         except pymysql.err.IntegrityError as integrityError:
@@ -1577,11 +1595,12 @@ class DataBase(object):
                    self.cursor.execute(sql)
                    self.connection.commit()
 
+            elif rowState == COMMITTED:
+                self.logger.info("Limited access already committed.")
+
             else:
                 self.logger.error("Invalid state detected in Limited Access table.")
-
-            self.cursor.execute(sql)
-            self.connection.commit()
+                raise AccessError('Error committing this limited access.')
 
 
         except KeyError:
