@@ -15,9 +15,9 @@ class CrudReSndr(genmngr.GenericMngr):
     '''
     This thread has two responsibilities.
     It periodically check which controllers has some CRUD not yet 
-    committed and send to them a RPR (Request to Re Provisioning) message.
+    committed and send to them a RRC (Request to Re Provisioning) message.
     When a controller which now is alive answer to the previous message with a
-    RRPR (Ready to Re Provisioning) message, this thread send the not comitted
+    RRRE (Ready to Re Provisioning) message, this thread send the not comitted
     CRUDs to this controller.    
     '''
 
@@ -32,11 +32,11 @@ class CrudReSndr(genmngr.GenericMngr):
 
         #Controller Messanger to resend the corresponding CRUDs.
         #As the "ctrllerMsger" use the only "netMngr" object and the "netMngr" has to
-        #know this object to send the RRPR message. This attribute is setted after 
+        #know this object to send the RRRE message. This attribute is setted after 
         #creating this object in the main thread.
         self.ctrllerMsger = None 
     
-        #When the network thread receive a RRPR message it put the MAC of
+        #When the network thread receive a RRRE message it put the MAC of
         #the controller which sends this message in this queue
         self.netToCrudReSndr = queue.Queue()
 
@@ -60,7 +60,7 @@ class CrudReSndr(genmngr.GenericMngr):
         When a MAC address is received, this method send all the passages, access,
         limited access and persons CRUDs for this controller in this order to avoid
         inconsistency in the controller database.
-        Also, after "self.ITERATIONS" times, it send a RRPR message to all the 
+        Also, after "self.ITERATIONS" times, it send a RRRE message to all the 
         controllers which have uncommitted CRUDs 
         '''
 
@@ -147,7 +147,7 @@ class CrudReSndr(genmngr.GenericMngr):
                     if ctrllerMacsNotComm:
                         logMsg = 'Sending Request Re Provision Message to: {}'.format(', '.join(ctrllerMacsNotComm))
                         self.logger.info(logMsg)
-                        self.ctrllerMsger.requestReProvision(ctrllerMacsNotComm)
+                        self.ctrllerMsger.requestReSendCruds(ctrllerMacsNotComm)
                     self.iteration = 0
                 else:
                     self.iteration +=1

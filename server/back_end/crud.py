@@ -486,6 +486,48 @@ class CrudMngr(genmngr.GenericMngr):
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
 
 
+
+
+
+        @app.route('/api/v1.0/controller/<int:controllerId>/reprov', methods=['PUT'])
+        @auth.login_required
+        def reProvController(controllerId):
+            '''
+            Re provision all CRUD of a controller.
+            '''
+            try:
+                controller = {}
+                controller['id'] = controllerId
+                for param in ctrllerNeedKeys:
+                    controller[param] = request.json[param]
+                self.dataBase.reProvController(controller)
+                self.ctrllerMsger.requestReProv(controller['macAddress'])
+
+                return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
+
+            except database.ControllerNotFound as controllerNotFound:
+                raise NotFound(str(controllerNotFound))
+            except database.ControllerError as controllerError:
+                raise ConflictError(str(controllerError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
+
+
+
+
+
+
+
+
+
+
+
+
 #--------------------------------------Passage------------------------------------------
 
 

@@ -536,6 +536,52 @@ class DataBase(object):
 
 
 
+    def reProvController(self, controller):
+        '''
+        This method is called by CRUD module when it is necessary to 
+        reprovision an entire controller.
+        It sets all passages, access and limited access in state TO_ADD.
+        Receive a dictionary with controller parametters and update it in central DB
+        because MAC address and board model can change.
+        '''
+        try:
+
+            sql = ("UPDATE Controller SET boardModel = '{}', macAddress = '{}' WHERE id = {}"
+                   "".format(controller['boardModel'], controller['macAddress'], controller['id'])
+                  )
+            self.cursor.execute(sql)
+
+
+            sql = ("UPDATE Passage SET rowStateId = {} WHERE controllerId = {}"
+                   "".format(TO_ADD, controller['id'])
+                  )
+            self.cursor.execute(sql)
+
+            sql = ("UPDATE Access SET rowStateId = {} WHERE pssgId IN "
+                   "(SELECT id FROM Passage WHERE controllerId = {}) AND allWeek = 1"
+                   "".format(TO_ADD, controller['id'])
+                  )
+            self.cursor.execute(sql)
+
+            sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE pssgId IN "
+                   "(SELECT id FROM Passage WHERE controllerId = {})"
+                   "".format(TO_ADD, controller['id'])
+                  )
+            self.cursor.execute(sql)
+        
+
+        #This exception can happen when updating using the same MAC of an
+        #existing controller
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ControllerError('Error reprovisioning the controller.')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Error reprovisioning the controller.')
+
+
+
 
 #----------------------------------Passage----------------------------------------
 
