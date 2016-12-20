@@ -131,13 +131,19 @@ class NetMngr(genmngr.GenericMngr):
         #It should be delivered to "eventMngr" thread.
         if msg.startswith(EVT):
             response = REVT + b'OK' + END
-            self.sendToCtrller(response, scktFd=fd)
+            try:
+                self.sendToCtrller(response, scktFd=fd)
+            except CtrllerDisconnected:
+                self.logger.warning("Controller not connected to receive the response")
             self.netToMsgRec.put(msg)
 
 
         elif msg.startswith(EVS):
             response = REVS + b'OK' + END
-            self.sendToCtrller(response, scktFd=fd)
+            try:
+                self.sendToCtrller(response, scktFd=fd)
+            except CtrllerDisconnected:
+                self.logger.warning("Controller not connected to receive the response")
             self.netToMsgRec.put(msg)
 
 
@@ -179,12 +185,14 @@ class NetMngr(genmngr.GenericMngr):
                 ctrllerSckt = self.fdConnObjects[scktFd]['socket']
 
         except KeyError:
-            self.logger.warning('Controller not connected.')
-            return
+            self.logger.debug('Controller not connected.')
+            raise CtrllerDisconnected
 
         outBufferQue.put(msg)
         with self.lockNetPoller:
             self.netPoller.modify(ctrllerSckt, select.POLLOUT)
+
+
 
 
 

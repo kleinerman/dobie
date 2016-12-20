@@ -445,24 +445,42 @@ class DataBase(object):
 
 
 
-    def getControllerMac(self, passageId):
+    def getControllerMac(self, controllerId=None, passageId=None):
         '''
-        Return the controller MAC address receiving the passage ID
+        Return the controller MAC address receiving the controller ID or passage ID
         '''
 
+        if (controllerId and passageId) or (not controllerId and not passageId):
+            self.logger.debug("Incorrect arguments calling getControllerMac method.")
+            raise ControllerError('Error getting the controller.')
+            
 
-        sql = ("SELECT controller.macAddress FROM Controller controller JOIN "
-               "Passage passage ON (controller.id = passage.controllerId) WHERE "
-               "passage.id = {}".format(passageId)
-              )
+        if controllerId:
+            sql = ("SELECT controller.macAddress FROM Controller controller WHERE "
+                   "id = {}".format(controllerId)
+                  )
+            try:
+                self.cursor.execute(sql)
+                return self.cursor.fetchone()['macAddress']
 
-        try:
-            self.cursor.execute(sql)
-            return self.cursor.fetchone()['macAddress']
+            except TypeError:
+                self.logger.debug('This controller id has not any MAC associated.')
+                raise ControllerNotFound('Controller not found')
 
-        except TypeError:
-            self.logger.debug('This passage id has not MAC registered')
-            raise PassageNotFound('Passage not found')
+
+        else:
+            sql = ("SELECT controller.macAddress FROM Controller controller JOIN "
+                   "Passage passage ON (controller.id = passage.controllerId) WHERE "
+                   "passage.id = {}".format(passageId)
+                  )
+
+            try:
+                self.cursor.execute(sql)
+                return self.cursor.fetchone()['macAddress']
+
+            except TypeError:
+                self.logger.debug('This passage id is not present in any controller.')
+                raise PassageNotFound('Passage not found')
 
 
 
@@ -536,7 +554,7 @@ class DataBase(object):
 
 
 
-    def reProvController(self, controller):
+    def reProvController(self, controllerId):
         '''
         This method is called by CRUD module when it is necessary to 
         reprovision an entire controller.
@@ -546,32 +564,24 @@ class DataBase(object):
         '''
         try:
 
-            sql = ("UPDATE Controller SET boardModel = '{}', macAddress = '{}' WHERE id = {}"
-                   "".format(controller['boardModel'], controller['macAddress'], controller['id'])
-                  )
-            self.cursor.execute(sql)
-
-
             sql = ("UPDATE Passage SET rowStateId = {} WHERE controllerId = {}"
-                   "".format(TO_ADD, controller['id'])
+                   "".format(TO_ADD, controllerId)
                   )
             self.cursor.execute(sql)
 
             sql = ("UPDATE Access SET rowStateId = {} WHERE pssgId IN "
                    "(SELECT id FROM Passage WHERE controllerId = {}) AND allWeek = 1"
-                   "".format(TO_ADD, controller['id'])
+                   "".format(TO_ADD, controllerId)
                   )
             self.cursor.execute(sql)
 
             sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE pssgId IN "
                    "(SELECT id FROM Passage WHERE controllerId = {})"
-                   "".format(TO_ADD, controller['id'])
+                   "".format(TO_ADD, controllerId)
                   )
             self.cursor.execute(sql)
         
 
-        #This exception can happen when updating using the same MAC of an
-        #existing controller
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise ControllerError('Error reprovisioning the controller.')
