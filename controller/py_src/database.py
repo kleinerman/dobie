@@ -303,8 +303,9 @@ class DataBase(object):
         '''
 
         try:
-
-            sql = ("INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
+            #Using REPLACE instead of INSERT to answer with OK when the Crud Resender Module of
+            #the server send a limited access CRUD before the client respond and avoid integrity error.
+            sql = ("REPLACE INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
                    "rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) "
                    "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
                    "".format(passage['id'], passage['i0In'], passage['i1In'], passage['o0In'], 
@@ -419,6 +420,12 @@ class DataBase(object):
         
 
         try:
+            #Using REPLACE instead of INSERT because we could be in a situation of replacing
+            #a limited access with a full access with the same ID.
+            #Also, the crud resender module of a server can send a CRUD again before the client
+            #answer, receiving it twice. In this situation it is important to answer to the server
+            #with OK to avoid server continue sending the CRUD. If INSERT will be used, a constraint
+            #error will happen and the client will never answer with OK.
             sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate) VALUES({}, {}, {}, 1, {}, {}, '{}', '{}', '{}')"
                    "".format(access['id'], access['pssgId'], access['personId'],
@@ -524,6 +531,12 @@ class DataBase(object):
 
 
         try:
+            #Using REPLACE instead of INSERT because we could be in a situation of replacing
+            #a full access with a limited access with the same ID.
+            #Also, the crud resender module of a server can send a CRUD again before the client
+            #answer, receiving it twice. In this situation it is important to answer to the server
+            #with OK to avoid server continue sending the CRUD. If INSERT will be used, a constraint
+            #error will happen and the client will never answer with OK.
             sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate) VALUES({}, {}, {}, 0, 0, 0, NULL, NULL, '{}')"
                    "".format(liAccess['accessId'], liAccess['pssgId'],
@@ -531,8 +544,9 @@ class DataBase(object):
                   )
             self.cursor.execute(sql)
 
-
-            sql = ("INSERT INTO LimitedAccess(id, pssgId, personId, weekDay, iSide, oSide, startTime, "
+            #Using REPLACE instead of INSERT to answer with OK when the Crud Resender Module of
+            #the server send a limited access CRUD before the client respond and avoid integrity error.
+            sql = ("REPLACE INTO LimitedAccess(id, pssgId, personId, weekDay, iSide, oSide, startTime, "
                    "endTime) VALUES({}, {}, {}, {}, {}, {}, '{}', '{}')"
                    "".format(liAccess['id'], liAccess['pssgId'], liAccess['personId'], liAccess['weekDay'],
                              liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
