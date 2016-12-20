@@ -12,6 +12,7 @@ from flask_httpauth import HTTPBasicAuth
 
 import genmngr
 import database
+import network
 import ctrllermsger
 from config import *
 
@@ -424,6 +425,9 @@ class CrudMngr(genmngr.GenericMngr):
             except KeyError:
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(prsnNeedKeys)))
 
+
+
+
 #--------------------------------------Controller------------------------------------------
 
         ctrllerNeedKeys = ('boardModel', 'macAddress')
@@ -496,15 +500,14 @@ class CrudMngr(genmngr.GenericMngr):
             Re provision all CRUD of a controller.
             '''
             try:
-                controller = {}
-                controller['id'] = controllerId
-                for param in ctrllerNeedKeys:
-                    controller[param] = request.json[param]
-                self.dataBase.reProvController(controller)
-                self.ctrllerMsger.requestReProv(controller['macAddress'])
+                self.dataBase.reProvController(controllerId)
+                ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
+                self.ctrllerMsger.requestReProv(ctrllerMac)
 
                 return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
 
+            except network.CtrllerDisconnected:
+                raise NotFound("Controller not connected")
             except database.ControllerNotFound as controllerNotFound:
                 raise NotFound(str(controllerNotFound))
             except database.ControllerError as controllerError:
@@ -516,11 +519,6 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
             except KeyError:
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
-
-
-
-
-
 
 
 
@@ -552,7 +550,7 @@ class CrudMngr(genmngr.GenericMngr):
                 passage.pop('zoneId')
                 passage.pop('controllerId')
                 # Get the controller mac address
-                ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
                 self.ctrllerMsger.addPassage(ctrllerMac, passage)
 
                 uri = url_for('modPassage', pssgId=pssgId, _external=True)
@@ -588,14 +586,14 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.updPassage(passage)
                     passage.pop('zoneId')
                     passage.pop('controllerId')
-                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                    ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
                     self.ctrllerMsger.updPassage(ctrllerMac, passage)
 
                     return jsonify({'status': 'OK', 'message': 'Passage updated'}), OK
 
                 elif request.method == 'DELETE':
                     self.dataBase.markPassageToDel(pssgId)
-                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                    ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
                     self.ctrllerMsger.delPassage(ctrllerMac, pssgId)
                     return jsonify({'status': 'OK', 'message': 'Passage deleted'}), OK
 
@@ -648,7 +646,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Get the controller mac address
                 pssgId = access['pssgId']
-                ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
 
                 self.ctrllerMsger.addAccess(ctrllerMac, access)
 
@@ -697,7 +695,7 @@ class CrudMngr(genmngr.GenericMngr):
                     self.dataBase.updAccess(access)
 
                     pssgId = self.dataBase.getPssgId(accessId=accessId)
-                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                    ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
                     self.ctrllerMsger.updAccess(ctrllerMac, access)
 
                     return jsonify({'status': 'OK', 'message': 'Access updated'}), OK
@@ -705,7 +703,7 @@ class CrudMngr(genmngr.GenericMngr):
                 elif request.method == 'DELETE':
                     self.dataBase.markAccessToDel(accessId)
                     pssgId = self.dataBase.getPssgId(accessId=accessId)
-                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                    ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
                     self.ctrllerMsger.delAccess(ctrllerMac, accessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
@@ -768,7 +766,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Get the controller mac address
                 pssgId = liAccess['pssgId']
-                ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
 
                 self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
 
@@ -822,7 +820,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                     self.dataBase.updLiAccess(liAccess)
                     pssgId = self.dataBase.getPssgId(liAccessId=liAccessId)
-                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                    ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
                     self.ctrllerMsger.updLiAccess(ctrllerMac,liAccess)
 
                     return jsonify({'status': 'OK', 'message': 'Limited Access updated'}), OK
@@ -830,7 +828,7 @@ class CrudMngr(genmngr.GenericMngr):
                 elif request.method == 'DELETE':
                     self.dataBase.markLiAccessToDel(liAccessId)
                     pssgId = self.dataBase.getPssgId(liAccessId=liAccessId)
-                    ctrllerMac = self.dataBase.getControllerMac(pssgId)
+                    ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
                     self.ctrllerMsger.delLiAccess(ctrllerMac, liAccessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
