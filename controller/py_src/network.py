@@ -150,7 +150,10 @@ class NetMngr(genmngr.GenericMngr):
         #"event" and "reSender" threads can access to it simultaneously
         self.connected = threading.Event()
 
-
+        #Database connection should be created in run method
+        #It is only used to clear the database when receiving
+        #RRP message.
+        self.dataBase = None
 
 
 
@@ -271,6 +274,11 @@ class NetMngr(genmngr.GenericMngr):
         elif msg.startswith(RRC):
             self.sendToServer(RRRE + END)
 
+        elif msg.startswith(RRP):
+            self.dataBase.clearDatabase()
+            self.sendToServer(RRRE + END)
+
+
 
     def sendConMsg(self):
         '''
@@ -333,6 +341,9 @@ class NetMngr(genmngr.GenericMngr):
         When there is no connection to the server, this method tries to reconnect to 
         the server every "RECONNECT_TIME"
         '''
+
+        #This connection is used only to clear the DB when receiving RRP message
+        self.dataBase = database.DataBase(DB_FILE)
 
         while True:
 

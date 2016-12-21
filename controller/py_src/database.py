@@ -403,23 +403,16 @@ class DataBase(object):
         add this person to database if it is not present.
         '''
 
-        try:        
-            sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
+        try:
+            #Using REPLACE because the second time an access is added
+            #with the same person, an INSERT would throw an integrity error.
+            sql = ("REPLACE INTO Person(id, cardNumber) VALUES({}, {})"
                    "".format(access['personId'], access['cardNumber'])
                   )
             self.cursor.execute(sql)
             self.connection.commit() 
 
-        except sqlite3.OperationalError as operationalError:
-            self.logger.debug(operationalError)
-            raise OperationalError('Operational error adding a Person.')
 
-        except sqlite3.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            self.logger.info('The person is already in local DB.')
-        
-
-        try:
             #Using REPLACE instead of INSERT because we could be in a situation of replacing
             #a limited access with a full access with the same ID.
             #Also, the crud resender module of a server can send a CRUD again before the client
@@ -515,22 +508,15 @@ class DataBase(object):
         '''
 
         try:
-            sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
+            #Using REPLACE because the second time a limited access is added
+            #with the same person, an INSERT would throw an integrity error.
+            sql = ("REPLACE INTO Person(id, cardNumber) VALUES({}, {})"
                    "".format(liAccess['personId'], liAccess['cardNumber'])
                   )
             self.cursor.execute(sql)
             self.connection.commit()
 
-        except sqlite3.OperationalError as operationalError:
-            self.logger.debug(operationalError)
-            raise OperationalError('Operational error adding a Person.')
 
-        except sqlite3.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            self.logger.info('The person is already in local DB.')
-
-
-        try:
             #Using REPLACE instead of INSERT because we could be in a situation of replacing
             #a full access with a limited access with the same ID.
             #Also, the crud resender module of a server can send a CRUD again before the client
@@ -719,4 +705,42 @@ class DataBase(object):
             self.logger.debug(integrityError)
             raise IntegrityError('Integrity error deleting a Person.')
 
+
+    #---------------------------------------------------------------------------#
+
+    def clearDatabase(self):
+        '''
+        Remove all LimitedAccess, Access, Persons, Passages and Events
+        This method is called when the controller receive from server
+        RRP message
+        '''
+
+        try:
+            sql = "DELETE FROM LimitedAccess"
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+            sql = "DELETE FROM Access"
+            self.cursor.execute(sql)
+            self.connection.commit()
+            
+            sql = "DELETE FROM Person WHERE id != 1"
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+            sql = "DELETE FROM Passage"
+            self.cursor.execute(sql)
+            self.connection.commit()
+            
+            sql = "DELETE FROM Events"
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting a Person.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a Person.')
 
