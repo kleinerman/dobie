@@ -1110,12 +1110,20 @@ class DataBase(object):
 
     def getPerson(self, personId):
         '''
-        Receive person id and returns a dictionary with person parameters
+        Receive person id and returns a dictionary with person parameters.
+        IMPORTANT NOTE: As this method is called while "getUncmtAccesses" and
+        "getUncmtLiAccesses" is yielding rows, it need a different cursor to avoid
+        overwritting the "self.cursor" being used by those methods.
+        This situation happens in the run methdo of "CrudReSndr" class.
+        This method is also called by "addAccess" and "addLiAccess" in "CrudMngr" class.
+        On those situations it would not be necessary this but there is no problem
+        to do it in this way too.
         '''
+
         sql = "SELECT id, name, cardNumber FROM Person WHERE id = {}".format(personId)
-        #cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-        self.cursor.execute(sql)
-        person = self.cursor.fetchone()
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+        cursor.execute(sql)
+        person = cursor.fetchone()
 
         if not person:
             raise PersonNotFound('Person not found')
