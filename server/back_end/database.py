@@ -622,23 +622,26 @@ class DataBase(object):
         This method is an iterator, in each iteration it returns a passage
         not committed with the state "rowStateId" from the controller
         with the MAC address "ctrllerMac"
+        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration and between each iteration another method can be executed using
+        "self.cursor", a separated cursor is created.
         '''
-        
+
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)        
         sql = ("SELECT passage.* FROM Passage passage JOIN Controller controller ON "
                "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}' AND "
                "rowStateId = {}".format(ctrllerMac, rowStateId))
 
         try:
 
-            self.cursor.execute(sql)
-            self.connection.commit()
-            passage = self.cursor.fetchone()
+            cursor.execute(sql)
+            passage = cursor.fetchone()
 
             while passage:
                 #Removing the rowStateId as this field should not be sent to the controller
                 passage.pop('rowStateId')
                 yield passage
-                passage = self.cursor.fetchone()
+                passage = cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -806,8 +809,12 @@ class DataBase(object):
         This method is an iterator, in each iteration it returns a person
         not committed with the state "rowStateId" from the controller
         with the MAC address "ctrllerMac"
+        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration and between each iteration another method can be executed using
+        "self.cursor", a separated cursor is created.
         '''
 
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         sql = ("SELECT person.* FROM "
                "Person person JOIN PersonPendingOperation personPendingOperation ON "
                "(person.id = personPendingOperation.personId) WHERE "
@@ -817,15 +824,14 @@ class DataBase(object):
 
         try:
 
-            self.cursor.execute(sql)
-            self.connection.commit()
-            person = self.cursor.fetchone()
+            cursor.execute(sql)
+            person = cursor.fetchone()
 
             while person:
                 #Removing the rowStateId as this field should not be sent to the controller
                 person.pop('rowStateId')
                 yield person
-                person = self.cursor.fetchone()
+                person = cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -1111,23 +1117,14 @@ class DataBase(object):
     def getPerson(self, personId):
         '''
         Receive person id and returns a dictionary with person parameters.
-        IMPORTANT NOTE: As this method is called while "getUncmtAccesses" and
-        "getUncmtLiAccesses" is yielding rows, it need a different cursor to avoid
-        overwritting the "self.cursor" being used by those methods.
-        This situation happens in the run methdo of "CrudReSndr" class.
-        This method is also called by "addAccess" and "addLiAccess" in "CrudMngr" class.
-        On those situations it would not be necessary this but there is no problem
-        to do it in this way too.
         '''
 
         sql = "SELECT id, name, cardNumber FROM Person WHERE id = {}".format(personId)
-        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-        cursor.execute(sql)
-        person = cursor.fetchone()
+        self.cursor.execute(sql)
+        person = self.cursor.fetchone()
 
         if not person:
             raise PersonNotFound('Person not found')
-
         return person
 
 
@@ -1163,8 +1160,14 @@ class DataBase(object):
         This method is an iterator, in each iteration it returns a access
         not committed with the state "rowStateId" from the controller
         with the MAC address "ctrllerMac"
+        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration and between each iteration another method can be executed using
+        "self.cursor", a separated cursor is created. In this case, between each iteration,
+        "getPerson" method is executed which would use the same cursor.
         '''
 
+
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         sql = ("SELECT access.* FROM Access access JOIN Passage passage ON "
                "(access.pssgId = passage.id) JOIN Controller controller ON "
                "(passage.controllerId = controller.id) WHERE "
@@ -1173,10 +1176,8 @@ class DataBase(object):
               )
 
         try:
-
-            self.cursor.execute(sql)
-            self.connection.commit()
-            access = self.cursor.fetchone()
+            cursor.execute(sql)
+            access = cursor.fetchone()
 
             while access:
                 #Removing rowStateId as it should not be sent to the controller
@@ -1188,7 +1189,7 @@ class DataBase(object):
                 access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
                 
                 yield access
-                access = self.cursor.fetchone()
+                access = cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -1400,8 +1401,13 @@ class DataBase(object):
         This method is an iterator, in each iteration it returns a liAccess
         not committed with the state "rowStateId" from the controller
         with the MAC address "ctrllerMac"
+        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration and between each iteration another method can be executed using
+        "self.cursor", a separated cursor is created. In this case, between each iteration,
+        "getPerson" method is executed which would use the same cursor.
         '''
 
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         secCursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
 
@@ -1414,9 +1420,8 @@ class DataBase(object):
 
         try:
 
-            self.cursor.execute(sql)
-            self.connection.commit()
-            liAccess = self.cursor.fetchone()
+            cursor.execute(sql)
+            liAccess = cursor.fetchone()
 
             while liAccess:
                 #There are some fields from access table that should be sent to the controller
@@ -1440,7 +1445,7 @@ class DataBase(object):
                 liAccess['expireDate'] = expireDate
 
                 yield liAccess
-                liAccess = self.cursor.fetchone()
+                liAccess = cursor.fetchone()
 
         except TypeError:
             self.logger.debug('Error fetching expireDate.')
