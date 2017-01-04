@@ -404,9 +404,13 @@ class DataBase(object):
         '''
 
         try:
-            #Using REPLACE because the second time an access is added
+            #Using INSERT OR IGNORE because the second time an access is added
             #with the same person, an INSERT would throw an integrity error.
-            sql = ("REPLACE INTO Person(id, cardNumber) VALUES({}, {})"
+            #Using REPLACE was a problem because REPLACE = (DELETE and INSERT) and DELETE
+            #a Person will delete the previous accesses added because the Access
+            #table has ON CASCADE DELETE clause on personId columns. On this situation we 
+            #always end up with only one limited access row for this person
+            sql = ("INSERT OR IGNORE INTO Person(id, cardNumber) VALUES({}, {})"
                    "".format(access['personId'], access['cardNumber'])
                   )
             self.cursor.execute(sql)
@@ -508,9 +512,13 @@ class DataBase(object):
         '''
 
         try:
-            #Using REPLACE because the second time a limited access is added
+            #Using INSERT OR IGNORE because the second time a limited access is added
             #with the same person, an INSERT would throw an integrity error.
-            sql = ("REPLACE INTO Person(id, cardNumber) VALUES({}, {})"
+            #Using REPLACE was a problem because REPLACE = (DELETE and INSERT) and DELETE
+            #a Person will delete the previous limited accesses added because the LimitedAccess
+            #table has ON CASCADE DELETE clause on personId columns. On this situation we 
+            #always end up with only one limited access row for this person
+            sql = ("INSERT OR IGNORE INTO Person(id, cardNumber) VALUES({}, {})"
                    "".format(liAccess['personId'], liAccess['cardNumber'])
                   )
             self.cursor.execute(sql)
