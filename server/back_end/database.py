@@ -711,18 +711,19 @@ class DataBase(object):
                 self.logger.info("Passage already committed.")
 
             else:
-                self.logger.error("Invalid state detected in Passage table.")
-                raise PassageError('Error committing this passage.')
+                self.logger.error("Invalid state detected in passage table.")
+                raise PassageError('Error committing a passage.')
 
-                
-
-        except pymysql.err.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            raise PassageError('Error committing this passage.')
 
         except TypeError:
-            self.logger.debug('Error fetching the passage.')
-            raise PassageError('Error committing this passage.')
+            self.logger.debug('Error fetching a passage.')
+            self.logger.warning('The passage to commit is not in data base.')
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.warning('Error committing a passage.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            self.logger.warning('Error committing a passage.')
 
 
 
@@ -1051,14 +1052,14 @@ class DataBase(object):
 
 
         except TypeError:
-            self.logger.debug('Error fetching something in commitPerson method.')
-            raise PersonError('Can not commit this person.')
+            self.logger.debug('Error fetching a person.')
+            self.logger.warning('The person to commit is not in data base.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PersonError('Can not commit this person.')
+            self.logger.warning('Error committing a person.')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise PersonError('Can not commit this person.')
+            self.logger.warning('Error committing a person.')
 
 
 
@@ -1344,13 +1345,20 @@ class DataBase(object):
                 raise AccessError('Error committing this access.')
 
 
+        except TypeError:
+            self.logger.debug('Error fetching an access.')
+            self.logger.warning('The access to commit is not in data base.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise AccessError('Error committing this access.')
+            self.logger.warning('Error committing an access.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            self.logger.warning('Error committing an access.')
 
-        except TypeError:
-            self.logger.debug('Error fetching the access.')
-            raise AccessError('Error committing this access.')
+
+
+
+
 
 
 
@@ -1638,7 +1646,7 @@ class DataBase(object):
 
                 self.cursor.execute(sql)
                 row = self.cursor.fetchone() #KeyError exception could be raised here
-                pssgId = row['pssgId']
+                pssgId = row['pssgId']       #Me parece que es TypeError y no KeyError
                 personId = row['personId']
         
                 sql = ("DELETE FROM LimitedAccess WHERE id = {}"
@@ -1672,17 +1680,19 @@ class DataBase(object):
                 raise AccessError('Error committing this limited access.')
 
 
-        except KeyError:
-            self.logger.debug('Error fetching something in commitLiAccess method.')
-            raise AccessError('Error committing this limited access.')
-
-        except pymysql.err.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            raise AccessError('Error committing this limited access.')
 
         except TypeError:
-            self.logger.debug('Error fetching the limited access.')
-            raise AccessError('Error committing this limited access.')
+            self.logger.debug('Error fetching a limited access.')
+            self.logger.warning('The limited access to commit is not in data base.')
+        except KeyError:
+            self.logger.debug('Error fetching a limited access.')
+            self.logger.warning('Error committing a limited access.')
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.warning('Error committing a limited access.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            self.logger.warning('Error committing a limited access.')
 
 
 
