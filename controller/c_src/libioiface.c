@@ -245,7 +245,7 @@ int set_gpio_pins (pssg_t *pssg, int number_of_pssgs)
         if (pssg[i].button != UNDEFINED) {
             if ( export_gpio(pssg[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_direction(pssg[i].button, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_edge(pssg[i].button, RISING) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(pssg[i].button, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
         if (pssg[i].state != UNDEFINED) {
             if ( export_gpio(pssg[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
