@@ -80,30 +80,36 @@ class CrudMngr(genmngr.GenericMngr):
                 crudMsg = self.netToCrud.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
 
-                #Getting the CRUD command and the JSON object
-                crudCmd = crudMsg[0:2]
-                completeJson = crudMsg[2:]
+                if crudMsg == RRP:
+                    self.dataBase.clearDatabase()
+                    self.netMngr.sendToServer(RRRE + END)
 
-                crudObject = json.loads(completeJson)
-                #Calling the corresponding DB method according to the CRUD command received
-                self.crudHndlrs[crudCmd](crudObject)
+                else:
 
-                #If the CRUD command do a modification in a passage, it is necessary to 
-                #relaunch the ioIface
-                if crudCmd[0] == 'S':
-                    with self.lockIoIface:
-                        self.ioIface.restart()
+                    #Getting the CRUD command and the JSON object
+                    crudCmd = crudMsg[0:2]
+                    completeJson = crudMsg[2:]
+
+                    crudObject = json.loads(completeJson)
+                    #Calling the corresponding DB method according to the CRUD command received
+                    self.crudHndlrs[crudCmd](crudObject)
+
+                    #If the CRUD command do a modification in a passage, it is necessary to 
+                    #relaunch the ioIface
+                    if crudCmd[0] == 'S':
+                        with self.lockIoIface:
+                            self.ioIface.restart()
                         
-                #If we are at this point of code means that the database method executed 
-                #did not throw an exception and therefore we can answer with OK to the server.
-                #Getting the ID from the json to create the response to answer the server.
-                jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
-                jsonId = '{' + jsonId + '}'
-                jsonId = jsonId.encode('utf8')
-                crudCmd = crudCmd.encode('utf8')
-                ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
-                #Send the response to the server
-                self.netMngr.sendToServer(ctrllerResponse)
+                    #If we are at this point of code means that the database method executed 
+                    #did not throw an exception and therefore we can answer with OK to the server.
+                    #Getting the ID from the json to create the response to answer the server.
+                    jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
+                    jsonId = '{' + jsonId + '}'
+                    jsonId = jsonId.encode('utf8')
+                    crudCmd = crudCmd.encode('utf8')
+                    ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
+                    #Send the response to the server
+                    self.netMngr.sendToServer(ctrllerResponse)
 
     
             except queue.Empty:

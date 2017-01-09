@@ -37,7 +37,9 @@ class DataBase(object):
     def __init__(self, dbFile):
 
         #Connecting to the database
-        self.connection = sqlite3.connect(dbFile)
+        self.connection = sqlite3.connect(dbFile, isolation_level=None)
+#        self.connection.isolation_level = None
+#        print(self.connection.isolation_level)
         self.cursor = self.connection.cursor()
         #Enabling foreing keys
         self.cursor.execute('PRAGMA foreign_keys = ON')
@@ -746,9 +748,9 @@ class DataBase(object):
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
-            raise OperationalError('Operational error deleting a Person.')
+            raise OperationalError('Operational error clearing the data base.')
 
         except sqlite3.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise IntegrityError('Integrity error deleting a Person.')
+            raise IntegrityError('Integrity error clearing the data base.')
 

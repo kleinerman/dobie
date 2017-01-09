@@ -263,20 +263,13 @@ class NetMngr(genmngr.GenericMngr):
         elif msg.startswith(CUD):
             crudMsg = msg.strip(CUD+END).decode('utf8')
             self.crudMngr.netToCrud.put(crudMsg)
-#            crudCmd = msg[1:3]
-#            completeJson = crudMsg[2:]
-#            jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
-#            jsonId = '{' + jsonId + '}'
-#            jsonId = jsonId.encode('utf8')
-#            ctrllerResponse = RCUD + crudCmd + b'OK' + jsonId + END
-#            self.sendToServer(ctrllerResponse)
+
+        elif msg.startswith(RRP):
+            self.crudMngr.netToCrud.put(RRP)
 
         elif msg.startswith(RRC):
             self.sendToServer(RRRE + END)
 
-        elif msg.startswith(RRP):
-            self.dataBase.clearDatabase()
-            self.sendToServer(RRRE + END)
 
 
 
