@@ -1684,9 +1684,9 @@ class DataBase(object):
         except TypeError:
             self.logger.debug('Error fetching a limited access.')
             self.logger.warning('The limited access to commit is not in data base.')
-        except KeyError:
-            self.logger.debug('Error fetching a limited access.')
-            self.logger.warning('Error committing a limited access.')
+#        except KeyError:
+#            self.logger.debug('Error fetching a limited access.')
+#            self.logger.warning('Error committing a limited access.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             self.logger.warning('Error committing a limited access.')

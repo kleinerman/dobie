@@ -326,13 +326,21 @@ class NetMngr(genmngr.GenericMngr):
                 #This will happen when the controller sends us bytes.
                 elif pollEvnt & select.POLLIN:
                     ctrllerSckt = self.fdConnObjects[fd]['socket']
-                    recBytes = ctrllerSckt.recv(REC_BYTES)
-                    self.logger.debug('Receiving: {}'.format(recBytes))
+                    try:
+                        recBytes = ctrllerSckt.recv(REC_BYTES)
+                        self.logger.debug('Receiving: {}'.format(recBytes))
+                    #The following exception was seen when the NetMngr Thread
+                    #on the controller broken
+                    except ConnectionResetError:
+                        self.logger.warning('Controller lost the connection.')
+                        ctrllerSckt.close()
+                        continue
 
                     #Receiving b'' means the controller closed the connection
                     #On this situation we should close the socket and the
                     #next call to "poll()" will throw a POLLNVAL event
                     if not recBytes:
+                        self.logger.warning('Controller closed the connection.')
                         ctrllerSckt.close()
                         continue
 
