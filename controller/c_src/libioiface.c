@@ -520,7 +520,7 @@ void *buttons (void *b_args)
                     lseek(bttn_tbl[j][1],0,SEEK_SET);
 
 
-                    if (strcmp(value, "1") == 0) {
+                    if (strcmp(value, "0") == 0) {
                         sprintf(message, "%d;0;button=1", bttn_tbl[j][0]);
                         // put the message into the queue
                         mq_send(args->mq, message, strlen(message), 1); // the '\0' is not sent in the queue
