@@ -305,9 +305,10 @@ class DataBase(object):
         '''
 
         try:
-            #Using REPLACE instead of INSERT to answer with OK when the Crud Resender Module of
+            #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender Module of
             #the server send a limited access CRUD before the client respond and avoid integrity error.
-            sql = ("REPLACE INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
+            #Using REPLACE is not good since it has to DELETE and INSERT always.
+            sql = ("INSERT OR IGNORE INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
                    "rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) "
                    "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
                    "".format(passage['id'], passage['i0In'], passage['i1In'], passage['o0In'], 
