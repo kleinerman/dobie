@@ -445,24 +445,42 @@ class DataBase(object):
 
 
 
-    def getControllerMac(self, passageId):
+    def getControllerMac(self, controllerId=None, passageId=None):
         '''
-        Return the controller MAC address receiving the passage ID
+        Return the controller MAC address receiving the controller ID or passage ID
         '''
 
+        if (controllerId and passageId) or (not controllerId and not passageId):
+            self.logger.debug("Incorrect arguments calling getControllerMac method.")
+            raise ControllerError('Error getting the controller.')
+            
 
-        sql = ("SELECT controller.macAddress FROM Controller controller JOIN "
-               "Passage passage ON (controller.id = passage.controllerId) WHERE "
-               "passage.id = {}".format(passageId)
-              )
+        if controllerId:
+            sql = ("SELECT controller.macAddress FROM Controller controller WHERE "
+                   "id = {}".format(controllerId)
+                  )
+            try:
+                self.cursor.execute(sql)
+                return self.cursor.fetchone()['macAddress']
 
-        try:
-            self.cursor.execute(sql)
-            return self.cursor.fetchone()['macAddress']
+            except TypeError:
+                self.logger.debug('This controller id has not any MAC associated.')
+                raise ControllerNotFound('Controller not found')
 
-        except TypeError:
-            self.logger.debug('This passage id has not MAC registered')
-            raise PassageNotFound('Passage not found')
+
+        else:
+            sql = ("SELECT controller.macAddress FROM Controller controller JOIN "
+                   "Passage passage ON (controller.id = passage.controllerId) WHERE "
+                   "passage.id = {}".format(passageId)
+                  )
+
+            try:
+                self.cursor.execute(sql)
+                return self.cursor.fetchone()['macAddress']
+
+            except TypeError:
+                self.logger.debug('This passage id is not present in any controller.')
+                raise PassageNotFound('Passage not found')
 
 
 
@@ -499,30 +517,27 @@ class DataBase(object):
 
     def getUncmtCtrllerMacs(self):
         '''
-        Return a list of controller MAC addresses of controllers which doesn't respond
+        Return a list of controller MAC addresses of controllers which did not respond
         to crud messages.
         '''
 
         sql = ("SELECT controller.macAddress FROM Controller controller JOIN Passage passage "
-               "ON (controller.id = passage.controllerId) WHERE passage.rowStateId IN ({}, {}, {}) "
+               "ON (controller.id = passage.controllerId) WHERE passage.rowStateId IN ({0}, {1}, {2}) "
                "UNION "
                "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
                "(controller.id = passage.controllerId) JOIN LimitedAccess limitedAccess ON "
-               "(passage.id = limitedAccess.pssgId) WHERE limitedAccess.rowStateId IN ({}, {}, {}) "
+               "(passage.id = limitedAccess.pssgId) WHERE limitedAccess.rowStateId IN ({0}, {1}, {2}) "
                "UNION "
                "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
                "(controller.id = passage.controllerId) JOIN Access access ON "
-               "(passage.id = access.pssgId) WHERE access.rowStateId IN ({}, {}, {}) "
+               "(passage.id = access.pssgId) WHERE access.rowStateId IN ({0}, {1}, {2}) "
                "UNION "
                "SELECT macAddress FROM PersonPendingOperation"
-               "".format(TO_ADD, TO_UPDATE, TO_DELETE, 
-                         TO_ADD, TO_UPDATE, TO_DELETE,
-                         TO_ADD, TO_UPDATE, TO_DELETE)
+               "".format(TO_ADD, TO_UPDATE, TO_DELETE)
               )
 
         try:
             self.cursor.execute(sql)
-            #self.connection.commit()
             ctrllerMacsNotComm = self.cursor.fetchall()
             ctrllerMacsNotComm = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsNotComm]
             return ctrllerMacsNotComm
@@ -536,6 +551,44 @@ class DataBase(object):
             self.logger.debug(internalError)
             raise ControllerError('Error getting MAC addresses of not committed controllers')
 
+
+
+
+    def reProvController(self, controllerId):
+        '''
+        This method is called by CRUD module when it is necessary to 
+        reprovision an entire controller.
+        It sets all passages, access and limited access in state TO_ADD.
+        Receive a dictionary with controller parametters and update it in central DB
+        because MAC address and board model can change.
+        '''
+        try:
+
+            sql = ("UPDATE Passage SET rowStateId = {} WHERE controllerId = {}"
+                   "".format(TO_ADD, controllerId)
+                  )
+            self.cursor.execute(sql)
+
+            sql = ("UPDATE Access SET rowStateId = {} WHERE pssgId IN "
+                   "(SELECT id FROM Passage WHERE controllerId = {}) AND allWeek = 1"
+                   "".format(TO_ADD, controllerId)
+                  )
+            self.cursor.execute(sql)
+
+            sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE pssgId IN "
+                   "(SELECT id FROM Passage WHERE controllerId = {})"
+                   "".format(TO_ADD, controllerId)
+                  )
+            self.cursor.execute(sql)
+        
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ControllerError('Error reprovisioning the controller.')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Error reprovisioning the controller.')
 
 
 
@@ -566,22 +619,29 @@ class DataBase(object):
 
     def getUncmtPassages(self, ctrllerMac, rowStateId):
         '''
+        This method is an iterator, in each iteration it returns a passage
+        not committed with the state "rowStateId" from the controller
+        with the MAC address "ctrllerMac"
+        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration and between each iteration another method can be executed using
+        "self.cursor", a separated cursor is created.
         '''
-        
+
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)        
         sql = ("SELECT passage.* FROM Passage passage JOIN Controller controller ON "
                "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}' AND "
                "rowStateId = {}".format(ctrllerMac, rowStateId))
 
         try:
 
-            self.cursor.execute(sql)
-            self.connection.commit()
-            passage = self.cursor.fetchone()
+            cursor.execute(sql)
+            passage = cursor.fetchone()
 
             while passage:
+                #Removing the rowStateId as this field should not be sent to the controller
                 passage.pop('rowStateId')
                 yield passage
-                passage = self.cursor.fetchone()
+                passage = cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -637,24 +697,33 @@ class DataBase(object):
                 sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
                        "".format(COMMITTED, passageId)
                       )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
             elif rowState == TO_DELETE:
                 sql = ("DELETE FROM Passage WHERE id = {}"
                        "".format(passageId)
                       )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+            elif rowState == COMMITTED:
+                self.logger.info("Passage already committed.")
+
             else:
-                self.logger.error("Invalid state detected in Passage table.")
+                self.logger.error("Invalid state detected in passage table.")
+                raise PassageError('Error committing a passage.')
 
-            self.cursor.execute(sql)
-            self.connection.commit()
-                
-
-        except pymysql.err.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            raise PassageError('Error committing this passage.')
 
         except TypeError:
-            self.logger.debug('Error fetching the passage.')
-            raise PassageError('Error committing this passage.')
+            self.logger.debug('Error fetching a passage.')
+            self.logger.warning('The passage to commit is not in data base.')
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.warning('Error committing a passage.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            self.logger.warning('Error committing a passage.')
 
 
 
@@ -738,8 +807,15 @@ class DataBase(object):
 
     def getUncmtPersons(self, ctrllerMac, rowStateId):
         '''
+        This method is an iterator, in each iteration it returns a person
+        not committed with the state "rowStateId" from the controller
+        with the MAC address "ctrllerMac"
+        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration and between each iteration another method can be executed using
+        "self.cursor", a separated cursor is created.
         '''
 
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         sql = ("SELECT person.* FROM "
                "Person person JOIN PersonPendingOperation personPendingOperation ON "
                "(person.id = personPendingOperation.personId) WHERE "
@@ -749,14 +825,14 @@ class DataBase(object):
 
         try:
 
-            self.cursor.execute(sql)
-            self.connection.commit()
-            person = self.cursor.fetchone()
+            cursor.execute(sql)
+            person = cursor.fetchone()
 
             while person:
+                #Removing the rowStateId as this field should not be sent to the controller
                 person.pop('rowStateId')
                 yield person
-                person = self.cursor.fetchone()
+                person = cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -901,9 +977,9 @@ class DataBase(object):
             sql = "SELECT rowStateId FROM Person WHERE id = {}".format(personId)
 
             self.cursor.execute(sql)
-            pendingOp = self.cursor.fetchone()['rowStateId']
+            rowState = self.cursor.fetchone()['rowStateId']
 
-            if pendingOp == TO_DELETE:
+            if rowState == TO_DELETE:
 
                 #Deleting all the limited accesses of this person on the passages managed by 
                 #this controller
@@ -945,7 +1021,7 @@ class DataBase(object):
                     self.cursor.execute(sql)
                     self.connection.commit()
 
-            elif pendingOp == TO_UPDATE:
+            elif rowState == TO_UPDATE:
                 #Deleting the entry in "PersonPendingOperation" table which has this person id,
                 #this MAC and the corresponding pending operation.
                 sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
@@ -967,20 +1043,23 @@ class DataBase(object):
                     self.cursor.execute(sql)
                     self.connection.commit()
 
+            elif rowState == COMMITTED:
+                self.logger.info('Person already committed.')
+
             else:
-                self.logger.debug('Invalid pending operation in Person table.')
+                self.logger.debug('Invalid state detected in Person table.')
                 raise PersonError('Can not commit this person.')
 
 
         except TypeError:
-            self.logger.debug('Error fetching something in commitPerson method.')
-            raise PersonError('Can not commit this person.')
+            self.logger.debug('Error fetching a person.')
+            self.logger.warning('The person to commit is not in data base.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PersonError('Can not commit this person.')
+            self.logger.warning('Error committing a person.')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise PersonError('Can not commit this person.')
+            self.logger.warning('Error committing a person.')
 
 
 
@@ -1038,16 +1117,15 @@ class DataBase(object):
 
     def getPerson(self, personId):
         '''
-        Receive person id and returns a dictionary with person parameters
+        Receive person id and returns a dictionary with person parameters.
         '''
+
         sql = "SELECT id, name, cardNumber FROM Person WHERE id = {}".format(personId)
-        #cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         self.cursor.execute(sql)
         person = self.cursor.fetchone()
 
         if not person:
             raise PersonNotFound('Person not found')
-
         return person
 
 
@@ -1080,8 +1158,17 @@ class DataBase(object):
 
     def getUncmtAccesses(self, ctrllerMac, rowStateId):
         '''
+        This method is an iterator, in each iteration it returns a access
+        not committed with the state "rowStateId" from the controller
+        with the MAC address "ctrllerMac"
+        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration and between each iteration another method can be executed using
+        "self.cursor", a separated cursor is created. In this case, between each iteration,
+        "getPerson" method is executed which would use the same cursor.
         '''
 
+
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         sql = ("SELECT access.* FROM Access access JOIN Passage passage ON "
                "(access.pssgId = passage.id) JOIN Controller controller ON "
                "(passage.controllerId = controller.id) WHERE "
@@ -1090,19 +1177,20 @@ class DataBase(object):
               )
 
         try:
-
-            self.cursor.execute(sql)
-            self.connection.commit()
-            access = self.cursor.fetchone()
+            cursor.execute(sql)
+            access = cursor.fetchone()
 
             while access:
+                #Removing rowStateId as it should not be sent to the controller
                 access.pop('rowStateId')
+                #As the database retrieves the dates and times as datetime types
+                #they are converted to string to be sent to the controller
                 access['startTime'] = str(access['startTime'])
                 access['endTime'] = str(access['endTime'])
                 access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
                 
                 yield access
-                access = self.cursor.fetchone()
+                access = cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -1239,24 +1327,38 @@ class DataBase(object):
                 sql = ("UPDATE Access SET rowStateId = {} WHERE id = {}"
                        "".format(COMMITTED, accessId)
                       )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
             elif rowState == TO_DELETE:
                 sql = ("DELETE FROM Access WHERE id = {}"
                        "".format(accessId)
                       )
+                self.cursor.execute(sql)
+                self.connection.commit()
+
+            elif rowState == COMMITTED:
+                self.logger.info("Access already committed.")
+
             else:
                 self.logger.error("Invalid state detected in Access table.")
+                raise AccessError('Error committing this access.')
 
-            self.cursor.execute(sql)
-            self.connection.commit()
-
-
-        except pymysql.err.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            raise AccessError('Error committing this access.')
 
         except TypeError:
-            self.logger.debug('Error fetching the access.')
-            raise AccessError('Error committing this access.')
+            self.logger.debug('Error fetching an access.')
+            self.logger.warning('The access to commit is not in data base.')
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.warning('Error committing an access.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            self.logger.warning('Error committing an access.')
+
+
+
+
+
 
 
 
@@ -1304,8 +1406,16 @@ class DataBase(object):
 
     def getUncmtLiAccesses(self, ctrllerMac, rowStateId):
         '''
+        This method is an iterator, in each iteration it returns a liAccess
+        not committed with the state "rowStateId" from the controller
+        with the MAC address "ctrllerMac"
+        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration and between each iteration another method can be executed using
+        "self.cursor", a separated cursor is created. In this case, between each iteration,
+        "getPerson" method is executed which would use the same cursor.
         '''
 
+        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         secCursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
 
@@ -1318,30 +1428,32 @@ class DataBase(object):
 
         try:
 
-            self.cursor.execute(sql)
-            self.connection.commit()
-            liAccess = self.cursor.fetchone()
+            cursor.execute(sql)
+            liAccess = cursor.fetchone()
 
             while liAccess:
-                
+                #There are some fields from access table that should be sent to the controller
+                #when adding or updating a limited access and should be added the "liAccess" dictionary
                 secSql = ("SELECT id, expireDate FROM Access WHERE pssgId = {} AND personId = {}"
-                       "".format(liAccess['pssgId'], liAccess['personId'])
-                      )
+                          "".format(liAccess['pssgId'], liAccess['personId'])
+                         )
                 secCursor.execute(secSql)
                 row = secCursor.fetchone()
                 accessId = row['id']
                 expireDate = row['expireDate']
                 expireDate = str(expireDate)
 
-
+                #Removing rowStateId field as it should not be sent to the controller.
                 liAccess.pop('rowStateId')
+                #Converting datetime types to string types.
                 liAccess['startTime'] = str(liAccess['startTime'])
                 liAccess['endTime'] = str(liAccess['endTime'])
+                #Adding fields from access to liAccess dictionary.
                 liAccess['accessId'] = accessId
                 liAccess['expireDate'] = expireDate
 
                 yield liAccess
-                liAccess = self.cursor.fetchone()
+                liAccess = cursor.fetchone()
 
         except TypeError:
             self.logger.debug('Error fetching expireDate.')
@@ -1534,7 +1646,7 @@ class DataBase(object):
 
                 self.cursor.execute(sql)
                 row = self.cursor.fetchone() #KeyError exception could be raised here
-                pssgId = row['pssgId']
+                pssgId = row['pssgId']       #Me parece que es TypeError y no KeyError
                 personId = row['personId']
         
                 sql = ("DELETE FROM LimitedAccess WHERE id = {}"
@@ -1560,24 +1672,27 @@ class DataBase(object):
                    self.cursor.execute(sql)
                    self.connection.commit()
 
+            elif rowState == COMMITTED:
+                self.logger.info("Limited access already committed.")
+
             else:
                 self.logger.error("Invalid state detected in Limited Access table.")
-
-            self.cursor.execute(sql)
-            self.connection.commit()
+                raise AccessError('Error committing this limited access.')
 
 
-        except KeyError:
-            self.logger.debug('Error fetching something in commitLiAccess method.')
-            raise AccessError('Error committing this limited access.')
-
-        except pymysql.err.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            raise AccessError('Error committing this limited access.')
 
         except TypeError:
-            self.logger.debug('Error fetching the limited access.')
-            raise AccessError('Error committing this limited access.')
+            self.logger.debug('Error fetching a limited access.')
+            self.logger.warning('The limited access to commit is not in data base.')
+#        except KeyError:
+#            self.logger.debug('Error fetching a limited access.')
+#            self.logger.warning('Error committing a limited access.')
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.warning('Error committing a limited access.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            self.logger.warning('Error committing a limited access.')
 
 
 

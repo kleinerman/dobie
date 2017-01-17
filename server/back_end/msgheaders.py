@@ -6,8 +6,9 @@ int_EVS  = 0x05
 int_REVS = 0x06
 int_CUD  = 0x07
 int_RCUD = 0x08
-int_VAL  = 0x09
-int_RVAL = 0x0A
+int_RRC  = 0x09 #Request Resend Curds
+int_RRP  = 0x0A #Request Re Provision the entire controller
+int_RRRE = 0x0B #Response to Request Resend Crud or Reprovision
 int_END  = 0x1F
 
 
@@ -19,6 +20,7 @@ EVS  = bytes([int_EVS])
 REVS = bytes([int_REVS])
 CUD  = bytes([int_CUD])
 RCUD = bytes([int_RCUD])
-VAL  = bytes([int_VAL])
-RVAL = bytes([int_RVAL])
+RRC  = bytes([int_RRC])
+RRP  = bytes([int_RRP])
+RRRE = bytes([int_RRRE])
 END  = bytes([int_END])

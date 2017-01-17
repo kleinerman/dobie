@@ -131,13 +131,19 @@ class NetMngr(genmngr.GenericMngr):
         #It should be delivered to "eventMngr" thread.
         if msg.startswith(EVT):
             response = REVT + b'OK' + END
-            self.sendToCtrller(response, scktFd=fd)
+            try:
+                self.sendToCtrller(response, scktFd=fd)
+            except CtrllerDisconnected:
+                self.logger.warning("Controller not connected to receive the response")
             self.netToMsgRec.put(msg)
 
 
         elif msg.startswith(EVS):
             response = REVS + b'OK' + END
-            self.sendToCtrller(response, scktFd=fd)
+            try:
+                self.sendToCtrller(response, scktFd=fd)
+            except CtrllerDisconnected:
+                self.logger.warning("Controller not connected to receive the response")
             self.netToMsgRec.put(msg)
 
 
@@ -154,7 +160,7 @@ class NetMngr(genmngr.GenericMngr):
             self.netToMsgRec.put(msg)
 
 
-        elif msg.startswith(RVAL):
+        elif msg.startswith(RRRE):
             self.netToCrudReSndr.put(self.fdConnObjects[fd]['mac'])
             
 
@@ -179,12 +185,14 @@ class NetMngr(genmngr.GenericMngr):
                 ctrllerSckt = self.fdConnObjects[scktFd]['socket']
 
         except KeyError:
-            self.logger.warning('Controller not connected.')
-            return
+            self.logger.debug('Controller not connected.')
+            raise CtrllerDisconnected
 
         outBufferQue.put(msg)
         with self.lockNetPoller:
             self.netPoller.modify(ctrllerSckt, select.POLLOUT)
+
+
 
 
 
@@ -315,31 +323,53 @@ class NetMngr(genmngr.GenericMngr):
 
 
 
-                #This will happen when the server sends to us bytes.
+                #This will happen when the controller sends us bytes.
                 elif pollEvnt & select.POLLIN:
                     ctrllerSckt = self.fdConnObjects[fd]['socket']
-                    recBytes = ctrllerSckt.recv(REC_BYTES)
-                    self.logger.debug('Receiving: {}'.format(recBytes))
+                    try:
+                        recBytes = ctrllerSckt.recv(REC_BYTES)
+                        self.logger.debug('Receiving: {}'.format(recBytes))
+                    #The following exception was seen when the NetMngr Thread
+                    #on the controller broken
+                    except ConnectionResetError:
+                        self.logger.warning('Controller lost the connection.')
+                        ctrllerSckt.close()
+                        continue
 
                     #Receiving b'' means the controller closed the connection
                     #On this situation we should close the socket and the
                     #next call to "poll()" will throw a POLLNVAL event
                     if not recBytes:
+                        self.logger.warning('Controller closed the connection.')
                         ctrllerSckt.close()
                         continue
 
-                    #We should receive bytes until we receive the end of
-                    #the message
 
+                    #If the other side sends us two or more message very fast, is very
+                    #common to receive more than one message contiguously in a call to recv().
+                    #For this reason we should consider the message until the END delimiter
+                    #and store the rest. The rest could be an entire message or a part. 
 
+                    #"allBytes" is the previous accumulated bytes that not complete
+                    #an entire message plus the new received bytes. When theres is not
+                    #accumulated bytes, "inBuffer" is empty.
                     allBytes = self.fdConnObjects[fd]['inBuffer'] + recBytes
-
                     try:
-                       while allBytes:
-                           msg = allBytes[:allBytes.index(END)+1]
-                           self.procRecMsg(fd, msg)
-                           allBytes = allBytes[allBytes.index(END)+1:]
-                       self.fdConnObjects[fd]['inBuffer'] = b''
+                        while allBytes:
+                            #When "allBytes" does not contain END delimiter, a ValueError
+                            #exception will occur and we should store "allBytes" in the
+                            #"inBuffer" to concatenate it with the next reception.
+                            msg = allBytes[:allBytes.index(END)+1]
+                            #Processing an entire message
+                            self.procRecMsg(fd, msg)
+                            #Saving in "allBytes" variable the rest of the bytes after the
+                            #first END delimiter. This could be one or more complete messages
+                            #or a part of a message or a combination of both.
+                            allBytes = allBytes[allBytes.index(END)+1:]
+                        #If the while loop can finish (no exception was thrwon), that means
+                        #there is no bytes to store for the next reception. For this reason
+                        #we should clean up "inBuffer".
+                        self.fdConnObjects[fd]['inBuffer'] = b''
 
                     except ValueError:
                         self.fdConnObjects[fd]['inBuffer'] = allBytes
