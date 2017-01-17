@@ -9,15 +9,16 @@ import genmngr
 import database
 from config import *
 from msgheaders import *
-#import ctrllermsger
 
 
 class CrudReSndr(genmngr.GenericMngr):
     '''
-    This thread is created by the main thread.
-    When the network thread receives a response from the controller confirmando que el 
-    mismo esta vivo, el network thread nos deja un aviso en nuestra cola y desde aca disparamos
-    reenvia de los crudes pendientes.
+    This thread has two responsibilities.
+    It periodically check which controllers has some CRUD not yet 
+    committed and send to them a RRC (Request to Re Provisioning) message.
+    When a controller which now is alive answer to the previous message with a
+    RRRE (Ready to Re Provisioning) message, this thread send the not comitted
+    CRUDs to this controller.    
     '''
 
     def __init__(self, exitFlag):
@@ -26,14 +27,21 @@ class CrudReSndr(genmngr.GenericMngr):
         #to have a understandable log file.
         super().__init__('CrudReSender', exitFlag)
 
+        #Database object to answer the CRUDs not committed.
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
 
+        #Controller Messanger to resend the corresponding CRUDs.
+        #As the "ctrllerMsger" use the only "netMngr" object and the "netMngr" has to
+        #know this object to send the RRRE message. This attribute is setted after 
+        #creating this object in the main thread.
         self.ctrllerMsger = None 
     
+        #When the network thread receive a RRRE message it put the MAC of
+        #the controller which sends this message in this queue
         self.netToCrudReSndr = queue.Queue()
 
-        #Calculating the number of iterations before sending the message to verify
-        #the controller is alive
+        #Calculating the number of iterations before sending the message to request
+        #re provisioning the controller.
         self.ITERATIONS = RE_SEND_TIME // EXIT_CHECK_TIME
 
         #This is the actual iteration. This value is incremented in each iteration
@@ -49,6 +57,11 @@ class CrudReSndr(genmngr.GenericMngr):
         for queue messages coming from the "Network" thread.
         The queue message is the MAC address of the controller which need CRUDs to be
         resended.
+        When a MAC address is received, this method send all the passages, access,
+        limited access and persons CRUDs for this controller in this order to avoid
+        inconsistency in the controller database.
+        Also, after "self.ITERATIONS" times, it send a RRRE message to all the 
+        controllers which have uncommitted CRUDs 
         '''
 
 
@@ -65,16 +78,17 @@ class CrudReSndr(genmngr.GenericMngr):
                     self.ctrllerMsger.delPassage(ctrllerMac, passage['id'])
                 self.checkExit()
 
-
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
-                    #Get the person parameters as a dictionary
+                    #"cardNumber" parameter is not present in access dictionary, but should be sent
+                    #when sending a CRUD access to controller.
+                    #Get the person parameters as a dictionary.
                     person = self.dataBase.getPerson(access['personId'])
-                    #Adding to access dictionary necesary person parameters to add person if it doesn't
-                    #exist in controller
+                    #Adding "cardNumber" to access dictionary.
                     access['cardNumber'] = person['cardNumber']
                     self.ctrllerMsger.addAccess(ctrllerMac, access)
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
+                    #The following parameters should not be sent when updating an access.
                     access.pop('pssgId')
                     access.pop('personId')
                     access.pop('allWeek')
@@ -86,14 +100,16 @@ class CrudReSndr(genmngr.GenericMngr):
 
 
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD):
-                    #Get the person parameters as a dictionary
+                    #"cardNumber" parameter is not present in liAccess dictionary, but should be sent
+                    #when sending a CRUD liAccess to controller.
+                    #Get the person parameters as a dictionary.
                     person = self.dataBase.getPerson(liAccess['personId'])
-                    #Adding to access dictionary necesary person parameters to add person if it doesn't
-                    #exist in controller
+                    #Adding "cardNumber" to liAccess dictionary.
                     liAccess['cardNumber'] = person['cardNumber']
                     self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
 
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_UPDATE):
+                    #The following parameters should not be sent when updating an access.
                     liAccess.pop('accessId')
                     liAccess.pop('personId')
                     liAccess.pop('pssgId')
@@ -104,10 +120,15 @@ class CrudReSndr(genmngr.GenericMngr):
                 self.checkExit()
 
 
-
+                #Persons never colud be in state TO_ADD. For this reason,
+                #only TO_UPDATE or TO_DELETE state is retrieved
                 for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE):
+                    #"updPerson" method receive a list of MAC addresses to update. Because in this case only one
+                    #controller is being updated, a list with only the MAC address of the controller is created.
                     self.ctrllerMsger.updPerson([ctrllerMac], person)
                 for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_DELETE):
+                    #"delPerson" method receive a list of MAC addresses to update. Because in this case only one
+                    #controller is being updated, a list with only the MAC address of the controller is created.
                     self.ctrllerMsger.delPerson([ctrllerMac], person['id'])
                 self.checkExit()
 
@@ -119,10 +140,14 @@ class CrudReSndr(genmngr.GenericMngr):
                 self.checkExit()
 
                 if self.iteration >= self.ITERATIONS:
-                    logMsg = 'Sending "Verify Alive Message" to controllers'
-                    self.logger.info(logMsg)
+                    logMsg = 'Checking if there are controllers which need to be re provisioned.'
+                    self.logger.debug(logMsg)
+                    #Getting the MAC addresses of controllers which has uncommitted CRUDs.
                     ctrllerMacsNotComm = self.dataBase.getUncmtCtrllerMacs()
-                    self.ctrllerMsger.verifyIsAlive(ctrllerMacsNotComm)
+                    if ctrllerMacsNotComm:
+                        logMsg = 'Sending Request Re Provision Message to: {}'.format(', '.join(ctrllerMacsNotComm))
+                        self.logger.info(logMsg)
+                        self.ctrllerMsger.requestReSendCruds(ctrllerMacsNotComm)
                     self.iteration = 0
                 else:
                     self.iteration +=1

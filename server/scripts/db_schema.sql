@@ -23,6 +23,9 @@ CREATE TABLE `Person` (
 )
 ;
 
+CREATE UNIQUE INDEX cardNumberIndex ON Person (cardNumber)
+;
+
 CREATE TABLE `Controller` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `boardModel` varchar(40) NOT NULL,
