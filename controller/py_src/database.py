@@ -37,7 +37,9 @@ class DataBase(object):
     def __init__(self, dbFile):
 
         #Connecting to the database
-        self.connection = sqlite3.connect(dbFile)
+        self.connection = sqlite3.connect(dbFile, isolation_level=None)
+#        self.connection.isolation_level = None
+#        print(self.connection.isolation_level)
         self.cursor = self.connection.cursor()
         #Enabling foreing keys
         self.cursor.execute('PRAGMA foreign_keys = ON')
@@ -303,8 +305,10 @@ class DataBase(object):
         '''
 
         try:
-
-            sql = ("INSERT INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
+            #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender Module of
+            #the server send a limited access CRUD before the client respond and avoid integrity error.
+            #Using REPLACE is not good since it has to DELETE and INSERT always.
+            sql = ("INSERT OR IGNORE INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
                    "rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) "
                    "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
                    "".format(passage['id'], passage['i0In'], passage['i1In'], passage['o0In'], 
@@ -402,23 +406,26 @@ class DataBase(object):
         add this person to database if it is not present.
         '''
 
-        try:        
-            sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
+        try:
+            #Using INSERT OR IGNORE because the second time an access is added
+            #with the same person, an INSERT would throw an integrity error.
+            #Using REPLACE was a problem because REPLACE = (DELETE and INSERT) and DELETE
+            #a Person will delete the previous accesses added because the Access
+            #table has ON CASCADE DELETE clause on personId columns. On this situation we 
+            #always end up with only one limited access row for this person
+            sql = ("INSERT OR IGNORE INTO Person(id, cardNumber) VALUES({}, {})"
                    "".format(access['personId'], access['cardNumber'])
                   )
             self.cursor.execute(sql)
             self.connection.commit() 
 
-        except sqlite3.OperationalError as operationalError:
-            self.logger.debug(operationalError)
-            raise OperationalError('Operational error adding a Person.')
 
-        except sqlite3.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            self.logger.info('The person is already in local DB.')
-        
-
-        try:
+            #Using REPLACE instead of INSERT because we could be in a situation of replacing
+            #a limited access with a full access with the same ID.
+            #Also, the crud resender module of a server can send a CRUD again before the client
+            #answer, receiving it twice. In this situation it is important to answer to the server
+            #with OK to avoid server continue sending the CRUD. If INSERT will be used, a constraint
+            #error will happen and the client will never answer with OK.
             sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate) VALUES({}, {}, {}, 1, {}, {}, '{}', '{}', '{}')"
                    "".format(access['id'], access['pssgId'], access['personId'],
@@ -508,22 +515,25 @@ class DataBase(object):
         '''
 
         try:
-            sql = ("INSERT INTO Person(id, cardNumber) VALUES({}, {})"
+            #Using INSERT OR IGNORE because the second time a limited access is added
+            #with the same person, an INSERT would throw an integrity error.
+            #Using REPLACE was a problem because REPLACE = (DELETE and INSERT) and DELETE
+            #a Person will delete the previous limited accesses added because the LimitedAccess
+            #table has ON CASCADE DELETE clause on personId columns. On this situation we 
+            #always end up with only one limited access row for this person
+            sql = ("INSERT OR IGNORE INTO Person(id, cardNumber) VALUES({}, {})"
                    "".format(liAccess['personId'], liAccess['cardNumber'])
                   )
             self.cursor.execute(sql)
             self.connection.commit()
 
-        except sqlite3.OperationalError as operationalError:
-            self.logger.debug(operationalError)
-            raise OperationalError('Operational error adding a Person.')
 
-        except sqlite3.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            self.logger.info('The person is already in local DB.')
-
-
-        try:
+            #Using REPLACE instead of INSERT because we could be in a situation of replacing
+            #a full access with a limited access with the same ID.
+            #Also, the crud resender module of a server can send a CRUD again before the client
+            #answer, receiving it twice. In this situation it is important to answer to the server
+            #with OK to avoid server continue sending the CRUD. If INSERT will be used, a constraint
+            #error will happen and the client will never answer with OK.
             sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate) VALUES({}, {}, {}, 0, 0, 0, NULL, NULL, '{}')"
                    "".format(liAccess['accessId'], liAccess['pssgId'],
@@ -531,8 +541,9 @@ class DataBase(object):
                   )
             self.cursor.execute(sql)
 
-
-            sql = ("INSERT INTO LimitedAccess(id, pssgId, personId, weekDay, iSide, oSide, startTime, "
+            #Using REPLACE instead of INSERT to answer with OK when the Crud Resender Module of
+            #the server send a limited access CRUD before the client respond and avoid integrity error.
+            sql = ("REPLACE INTO LimitedAccess(id, pssgId, personId, weekDay, iSide, oSide, startTime, "
                    "endTime) VALUES({}, {}, {}, {}, {}, {}, '{}', '{}')"
                    "".format(liAccess['id'], liAccess['pssgId'], liAccess['personId'], liAccess['weekDay'],
                              liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
@@ -705,4 +716,42 @@ class DataBase(object):
             self.logger.debug(integrityError)
             raise IntegrityError('Integrity error deleting a Person.')
 
+
+    #---------------------------------------------------------------------------#
+
+    def clearDatabase(self):
+        '''
+        Remove all LimitedAccess, Access, Persons, Passages and Events
+        This method is called when the controller receive from server
+        RRP message
+        '''
+
+        try:
+            sql = "DELETE FROM LimitedAccess"
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+            sql = "DELETE FROM Access"
+            self.cursor.execute(sql)
+            self.connection.commit()
+            
+            sql = "DELETE FROM Person WHERE id != 1"
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+            sql = "DELETE FROM Passage"
+            self.cursor.execute(sql)
+            self.connection.commit()
+            
+            sql = "DELETE FROM Events"
+            self.cursor.execute(sql)
+            self.connection.commit()
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error clearing the data base.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error clearing the data base.')
 

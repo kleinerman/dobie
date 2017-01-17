@@ -52,16 +52,21 @@ class GenericMngr(threading.Thread):
 class PssgMngr(GenericMngr):
 
     '''
-    Generic Thread Manager to create NetMngr, EventMngr and ReSender
+    Generic Thread Manager to create starterAlarmMngr and cleanerPssgMngr
+    threads. This thread inherits from "GenericMngr". It differs from his
+    parent receiving "pssgsReconfFlag" in the constructor, and overwriting
+    "checkExit" method, checking this flag and "exitFlag" as well.
     '''
 
     def __init__(self, threadName, pssgsReconfFlag, exitFlag):
 
-        #Invoking the parent class constructor, specifying the thread name, 
-        #to have a understandable log file.
+        #Invoking the parent class constructor.
         super().__init__(threadName, exitFlag)
     
         #Flag to know when the starterAlarmMngr or cleanerPssgMngr should exit
+        #This will happen when a new passage is added, updated or deleted and 
+        #and we should kill all the existing "starterAlarmMngr" or/and 
+        #"cleanerPssgMngr" running.
         self.pssgsReconfFlag = pssgsReconfFlag
 
 
@@ -69,6 +74,7 @@ class PssgMngr(GenericMngr):
     def checkExit(self):
         '''
         Check if the main thread ask this thread to exit using exitFlag
+        or crud thread ask this thread to exit using pssgsReconfFlag. 
         If true, call sys.exit and finish this thread
         '''
 
