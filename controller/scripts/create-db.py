@@ -70,7 +70,6 @@ cursor.execute('''
     '''
 )
 
-
 cursor.execute('''CREATE UNIQUE INDEX pssgPersonIndex
                   ON Access (pssgId, personId)
                '''
@@ -82,9 +81,9 @@ cursor.execute('''
         id         INTEGER PRIMARY KEY,
         pssgId     INTEGER,
         personId   INTEGER,
+        weekDay    INTEGER, 
         iSide      BOOLEAN,
         oSide      BOOLEAN,
-        weekDay    INTEGER,
         startTime  DATETIME,
         endTime    DATETIME,
         FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
@@ -92,6 +91,13 @@ cursor.execute('''
     )
     '''
 )
+
+cursor.execute('''CREATE UNIQUE INDEX pssgPersonWeekDayIndex
+                  ON LimitedAccess (pssgId, personId, weekDay)
+               '''
+)
+
+
 
 
 cursor.execute('''
