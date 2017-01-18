@@ -4,7 +4,7 @@ SIM_PERSON_QUANT = 5000
 SIM_LIM_ACCESS_QUANT = 500
 
 IOIFACE_BIN = '../c_src/ioiface'
-IOIFACE_ARGS = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut']
+IOIFACE_ARGS = ['pssgNum', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut']
 
 
 DB_FILE = 'access.db'

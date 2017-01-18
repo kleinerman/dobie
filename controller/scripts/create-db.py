@@ -34,7 +34,8 @@ cursor.execute('''CREATE UNIQUE INDEX cardNumberIndex
 
 cursor.execute('''
     CREATE TABLE Passage (
-        id       INTEGER PRIMARY KEY, 
+        pssgNum  INTEGER PRIMARY KEY,
+        id       INTEGER,
         i0In     INTEGER, 
         i1In     INTEGER,
         o0In     INTEGER,
@@ -64,11 +65,12 @@ cursor.execute('''
         startTime   DATETIME,
         endTime     DATETIME,
         expireDate  DATETIME,
-        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
-        FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
+        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE
     )
     '''
 )
+
+#FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
 
 cursor.execute('''CREATE UNIQUE INDEX pssgPersonIndex
                   ON Access (pssgId, personId)
@@ -86,8 +88,7 @@ cursor.execute('''
         oSide      BOOLEAN,
         startTime  DATETIME,
         endTime    DATETIME,
-        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
-        FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
+        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE
     )
     '''
 )
