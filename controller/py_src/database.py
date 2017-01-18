@@ -291,7 +291,7 @@ class DataBase(object):
             for i, ppName in enumerate(ppsNames):
                 ppsDict[ppName] = ppsTuple[i]
             #Each dictionary is indexed in the master dictionary "ppsDictsDict" by the passage id 
-            ppsDictsDict[ppsDict['id']] = ppsDict
+            ppsDictsDict[ppsDict['pssgNum']] = ppsDict
 
         return ppsDictsDict
 
@@ -305,17 +305,12 @@ class DataBase(object):
         '''
 
         try:
-            #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender Module of
-            #the server send a limited access CRUD before the client respond and avoid integrity error.
-            #Using REPLACE is not good since it has to DELETE and INSERT always.
-            sql = ("INSERT OR IGNORE INTO Passage(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, "
-                   "rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) "
-                   "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
-                   "".format(passage['id'], passage['i0In'], passage['i1In'], passage['o0In'], 
-                             passage['o1In'], passage['bttnIn'], passage['stateIn'], 
-                             passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
-                             passage['bzzrTime'], passage['alrmTime'])
+            sql = ("UPDATE Passage SET id = {}, rlseTime = {}, bzzrTime = {}, alrmTime = {} "
+                   "WHERE pssgNum = {}"
+                   "".format(passage['id'], passage['rlseTime'], passage['bzzrTime'],
+                             passage['alrmTime'], passage['pssgNum'])
                   )
+
             self.cursor.execute(sql)
             self.connection.commit()
 
