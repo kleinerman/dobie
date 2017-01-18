@@ -26,16 +26,28 @@ CREATE TABLE `Person` (
 CREATE UNIQUE INDEX cardNumberIndex ON Person (cardNumber)
 ;
 
+
+CREATE TABLE `CtrllerModel` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `name` varchar(40) NOT NULL,
+    `boardModel` varchar(40) NOT NULL,
+    `pssgsQuant` integer NOT NULL
+)
+;
+
+
 CREATE TABLE `Controller` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `boardModel` varchar(40) NOT NULL,
+    `ctrllerModelId` integer NOT NULL,
     `macAddress` varchar(12) NOT NULL,
-    `ipAddress` varchar(39)
+    `ipAddress` varchar(39),
+    CONSTRAINT `fk_Controller_CtrllerModel` FOREIGN KEY (`ctrllerModelId`) REFERENCES `CtrllerModel` (`id`)
 )
 ;
 
 CREATE UNIQUE INDEX macAddressIndex ON Controller (macAddress)
 ;
+
 
 
 CREATE TABLE `Zone` (
@@ -44,21 +56,15 @@ CREATE TABLE `Zone` (
 )
 ;
 
+
 CREATE TABLE `Passage` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `i0In` integer NOT NULL,
-    `i1In` integer NOT NULL,
-    `o0In` integer NOT NULL,
-    `o1In` integer NOT NULL,
-    `bttnIn` integer NOT NULL,
-    `stateIn` integer NOT NULL,
-    `rlseOut` integer NOT NULL,
-    `bzzrOut` integer NOT NULL,
+    `controllerId` integer NOT NULL,
+    `pssgNum` integer NOT NULL,
     `rlseTime` integer NOT NULL,
     `bzzrTime` integer NOT NULL,
     `alrmTime` integer NOT NULL,
     `zoneId` integer NOT NULL,
-    `controllerId` integer NOT NULL,
     `rowStateId` integer NOT NULL,
     CONSTRAINT `fk_Passage_Controller` FOREIGN KEY (`controllerId`) REFERENCES `Controller` (`id`),
     CONSTRAINT `fk_Passage_Zone` FOREIGN KEY (`zoneId`) REFERENCES `Zone` (`id`),
