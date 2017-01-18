@@ -430,7 +430,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 #--------------------------------------Controller------------------------------------------
 
-        ctrllerNeedKeys = ('boardModel', 'macAddress')
+        ctrllerNeedKeys = ('ctrllerModelId', 'macAddress')
 
         @app.route('/api/v1.0/controller', methods=['POST'])
         @auth.login_required
@@ -529,9 +529,7 @@ class CrudMngr(genmngr.GenericMngr):
 #--------------------------------------Passage------------------------------------------
 
 
-        pssgNeedKeys = ('i0In', 'i1In', 'o0In', 'o1In', 'bttnIn',
-                        'stateIn', 'rlseOut', 'bzzrOut', 'rlseTime',
-                        'bzzrTime', 'alrmTime', 'zoneId', 'controllerId')
+        pssgNeedKeys = ('pssgNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId')
 
         @app.route('/api/v1.0/passage', methods=['POST'])
         @auth.login_required
