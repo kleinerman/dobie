@@ -72,6 +72,11 @@ CREATE TABLE `Passage` (
 )
 ;
 
+CREATE UNIQUE INDEX CtrllerPssgNumIndex ON Passage (controllerId, pssgNum)
+;
+
+
+
 CREATE TABLE `Access` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `pssgId` integer NOT NULL,
