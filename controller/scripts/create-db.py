@@ -33,9 +33,8 @@ cursor.execute('''CREATE UNIQUE INDEX cardNumberIndex
 
 
 cursor.execute('''
-    CREATE TABLE Passage (
-        pssgNum  INTEGER PRIMARY KEY,
-        id       INTEGER,
+    CREATE TABLE PssgPinout (
+        id       INTEGER PRIMARY KEY,
         i0In     INTEGER, 
         i1In     INTEGER,
         o0In     INTEGER,
@@ -43,13 +42,30 @@ cursor.execute('''
         bttnIn   INTEGER,
         stateIn  INTEGER,
         rlseOut  INTEGER,
-        bzzrOut  INTEGER,
-        rlseTime INTEGER,
-        bzzrTime INTEGER,
-        alrmTime INTEGER
+        bzzrOut  INTEGER
     )
     '''
 )
+
+
+
+cursor.execute('''
+    CREATE TABLE Passage (
+        id       INTEGER PRIMARY KEY,
+        pssgNum  INTEGER,
+        rlseTime INTEGER,
+        bzzrTime INTEGER,
+        alrmTime INTEGER,
+        FOREIGN KEY(pssgNum) REFERENCES PssgPinout(id) ON DELETE CASCADE
+    )
+    '''
+)
+
+cursor.execute('''CREATE UNIQUE INDEX pssgNumIndex
+                  ON Passage (pssgNum)
+               '''
+)
+
 
 
 #----------------Access Table-----------------#
@@ -65,7 +81,8 @@ cursor.execute('''
         startTime   DATETIME,
         endTime     DATETIME,
         expireDate  DATETIME,
-        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE
+        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
+        FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
     )
     '''
 )
@@ -88,7 +105,8 @@ cursor.execute('''
         oSide      BOOLEAN,
         startTime  DATETIME,
         endTime    DATETIME,
-        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE
+        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
+        FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
     )
     '''
 )
