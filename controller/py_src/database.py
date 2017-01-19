@@ -244,12 +244,12 @@ class DataBase(object):
 
     #---------------------------------------------------------------------------#
 
-    def getPssgParamsNames(self):
+    def getPssgPinoutParamsNames(self):
         '''
         Getting Passage Params Names from SQL database
         '''
 
-        sql = "SELECT * FROM Passage"
+        sql = "SELECT * FROM PssgPinout"
         self.cursor.execute(sql)
 
         #To leave the DB unlocked for other threads, it is necesary to
@@ -263,19 +263,19 @@ class DataBase(object):
 
     #---------------------------------------------------------------------------#
 
-    def getPssgsParams(self):
+    def getPssgsPinoutParams(self):
         '''
         Get the arguments of passages to call ioiface external program.
         pps = Passage Parametters
 
         '''
         #Getting the list with all Passage Parametters
-        ppsNames = self.getPssgParamsNames()
+        ppsNames = self.getPssgPinoutParamsNames()
         #Joining it in a string separated by ','
         ppsNamesStr = ', '.join(ppsNames)
 
-        sql = "SELECT {} FROM Passage".format(ppsNamesStr)
-                      
+        sql = "SELECT {} FROM PssgPinout".format(ppsNamesStr)
+
         self.cursor.execute(sql)
         ppsTuplesList = self.cursor.fetchall()
         self.connection.commit()
@@ -291,9 +291,67 @@ class DataBase(object):
             for i, ppName in enumerate(ppsNames):
                 ppsDict[ppName] = ppsTuple[i]
             #Each dictionary is indexed in the master dictionary "ppsDictsDict" by the passage id 
-            ppsDictsDict[ppsDict['pssgNum']] = ppsDict
+            ppsDictsDict[ppsDict['id']] = ppsDict
 
         return ppsDictsDict
+
+
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def getPssgsParams(self):
+        '''
+        Get the arguments of passages to call ioiface external program.
+        pps = Passage Parametters
+
+        '''
+        #Getting the list with all Passage Parametters
+#        ppsNames = self.getPssgParamsNames()
+        ppsNames = ['id', 'rlseOut', 'bzzrOut', 'rlseTime', 'bzzrTime', 'alrmTime']
+        #Joining it in a string separated by ','
+#        ppsNamesStr = ', '.join(ppsNames)
+#        print(ppsNamesStr)
+
+#        sql = "SELECT {} FROM PssgPinout".format(ppsNamesStr)
+ 
+        sql = ("SELECT passage.id, pssgPinout.rlseOut, pssgPinout.bzzrOut, passage.rlseTime, "
+               "passage.bzzrTime, passage.alrmTime FROM PssgPinout JOIN Passage ON "
+               "(PssgPinout.id = Passage.pssgNum)"
+              )
+                     
+        self.cursor.execute(sql)
+        ppsTuplesList = self.cursor.fetchall()
+        self.connection.commit()
+
+        #Dictionary containing dictionaries with all the pps indexed by the pps name.
+        #This dictionary is indexed by the passage id
+        ppsDictsDict = {}
+
+        for ppsTuple in ppsTuplesList:
+            #Dictionary with all the pps for each passage indexed by the name of parametters.
+            ppsDict = {}
+
+            for i, ppName in enumerate(ppsNames):
+                ppsDict[ppName] = ppsTuple[i]
+            #Each dictionary is indexed in the master dictionary "ppsDictsDict" by the passage id 
+            ppsDictsDict[ppsDict['id']] = ppsDict
+
+        return ppsDictsDict
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -304,13 +362,16 @@ class DataBase(object):
         Receive a passage dictionary and add it into DB
         '''
 
-        try:
-            sql = ("UPDATE Passage SET id = {}, rlseTime = {}, bzzrTime = {}, alrmTime = {} "
-                   "WHERE pssgNum = {}"
-                   "".format(passage['id'], passage['rlseTime'], passage['bzzrTime'],
-                             passage['alrmTime'], passage['pssgNum'])
-                  )
 
+        try:
+            #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender Module of
+            #the server send a limited access CRUD before the client respond and avoid integrity error.
+            #Using REPLACE is not good since it has to DELETE and INSERT always.
+            sql = ("INSERT OR IGNORE INTO Passage(id, pssgNum, rlseTime, bzzrTime, alrmTime) "
+                   "VALUES({}, {}, {}, {}, {})"
+                   "".format(passage['id'], passage['pssgNum'], passage['rlseTime'],
+                             passage['bzzrTime'], passage['alrmTime'])
+                  )
             self.cursor.execute(sql)
             self.connection.commit()
 
@@ -334,13 +395,11 @@ class DataBase(object):
         '''
 
         try:
-            sql = ("UPDATE Passage SET i0In = {}, i1In = {}, o0In = {}, o1In = {}, "
-                   "bttnIn = {}, stateIn = {}, rlseOut = {}, bzzrOut = {}, rlseTime = {}, "
+            sql = ("UPDATE Passage SET pssgNum = {}, rlseTime = {}, "
                    "bzzrTime = {}, alrmTime = {} WHERE id = {}"
-                   "".format(passage['i0In'], passage['i1In'], passage['o0In'],
-                             passage['o1In'], passage['bttnIn'], passage['stateIn'],
-                             passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'],
-                             passage['bzzrTime'], passage['alrmTime'], passage['id'])
+                   "".format(passage['pssgNum'], passage['rlseTime'], 
+                             passage['bzzrTime'], passage['alrmTime'], 
+                             passage['id'])
               )
             self.cursor.execute(sql)
             self.connection.commit()

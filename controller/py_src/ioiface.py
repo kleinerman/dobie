@@ -83,15 +83,18 @@ class IoIface(object):
         #In the followng section we generate the arguments to pass to the ioIface external program
         ioIfaceArgs = ''
 
-        for pssgId in pssgsParams:
+        
+        pssgsPinoutParams = dataBase.getPssgsPinoutParams()
 
-            for pssgParamName in dataBase.getPssgParamsNames():
+        for pinoutId in pssgsPinoutParams:
+
+            for pssgPinoutParamName in dataBase.getPssgPinoutParamsNames():
                 #Since not all the columns names of Passage table are parameters of 
                 #ioiface binary, they should be checked if they are in the IOFACE_ARGS list
-                if pssgParamName in IOIFACE_ARGS:
-                    pssgParamValue = pssgsParams[pssgId][pssgParamName]
-                    if pssgParamValue:
-                        ioIfaceArgs += '--{} {} '.format(pssgParamName, pssgParamValue)
+                if pssgPinoutParamName in IOIFACE_ARGS:
+                    pssgPinoutParamValue = pssgsPinoutParams[pinoutId][pssgPinoutParamName]
+                    if pssgPinoutParamValue:
+                        ioIfaceArgs += '--{} {} '.format(pssgPinoutParamName, pssgPinoutParamValue)
 
 
 
