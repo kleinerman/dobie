@@ -34,12 +34,18 @@ class DataBase(object):
     save events and delete them
     '''
 
-    def __init__(self, dbFile):
+    def __init__(self, dbFile, fetchAsDict=None):
 
         #Connecting to the database
         self.connection = sqlite3.connect(dbFile, isolation_level=None)
 #        self.connection.isolation_level = None
 #        print(self.connection.isolation_level)
+
+        if fetchAsDict:
+            self.connection.row_factory = sqlite3.Row
+            
+
+
         self.cursor = self.connection.cursor()
         #Enabling foreing keys
         self.cursor.execute('PRAGMA foreign_keys = ON')
@@ -343,6 +349,20 @@ class DataBase(object):
 
 
 
+    def getPssgIdPssgNum(self):
+        '''
+        '''
+        sql = "SELECT pssgNum, id FROM Passage"
+
+        self.cursor.execute(sql)
+        pssgIdPssgNumList = self.cursor.fetchall()
+
+        pssgIdPssgNumDict = {}
+
+        for pssgIdPssgNum in pssgIdPssgNumList:
+            pssgIdPssgNumDict[pssgIdPssgNum[0]] = pssgIdPssgNum[1]
+
+        return pssgIdPssgNumDict
 
 
 
