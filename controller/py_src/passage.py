@@ -95,7 +95,7 @@ class Passage(object):
 
 
 
-class CleanerPssgMngr(genmngr.PssgMngr):
+class CleanerPssgMngr(genmngr.GenericMngr):
     '''
     This thread stops the buzzer and close the passage. 
     It is created when the passage is opened. 
@@ -103,7 +103,7 @@ class CleanerPssgMngr(genmngr.PssgMngr):
     When the passage is opened more than once consecutively, the time is prolonged.    
     '''
 
-    def __init__(self, pssgControl, pssgsReconfFlag, exitFlag):
+    def __init__(self, pssgControl, exitFlag):
 
         #Dictionary with variables to control the passage
         self.pssgControl = pssgControl
@@ -114,7 +114,7 @@ class CleanerPssgMngr(genmngr.PssgMngr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('CleanerPssgMngr_{}'.format(self.pssgId), pssgsReconfFlag, exitFlag)
+        super().__init__('CleanerPssgMngr_{}'.format(self.pssgId), exitFlag)
 
         #The following attributes are to manage this variables in a cleaner way.
         self.pssgObj = pssgControl['pssgObj']
@@ -177,7 +177,7 @@ class CleanerPssgMngr(genmngr.PssgMngr):
 
         
 
-class StarterAlrmMngr(genmngr.PssgMngr):
+class StarterAlrmMngr(genmngr.GenericMngr):
     '''
     This thread starts the buzzer when the passage remains opened  
     for more than 
@@ -185,7 +185,7 @@ class StarterAlrmMngr(genmngr.PssgMngr):
     When the passage is opened more than once consecutively, the time is prolonged.    
     '''
 
-    def __init__(self, pssgControl, pssgsReconfFlag, exitFlag):
+    def __init__(self, pssgControl, exitFlag):
 
         #Dictionary with variables to control the passage
         self.pssgControl = pssgControl
@@ -196,7 +196,7 @@ class StarterAlrmMngr(genmngr.PssgMngr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('StarterAlrmMngr_{}'.format(self.pssgId), pssgsReconfFlag, exitFlag)
+        super().__init__('StarterAlrmMngr_{}'.format(self.pssgId), exitFlag)
 
         #The following attributes are to manage this variables in a cleaner way.
         self.pssgObj = pssgControl['pssgObj']
@@ -237,5 +237,70 @@ class StarterAlrmMngr(genmngr.PssgMngr):
         self.starterAlrmMngrAlive.clear()
 
 
+
+
+
+
+
+class PssgsControl(object):
+
+    def __init__(self):
+
+        #Getting the logger
+        self.logger = logging.getLogger('Controller')
+
+        #Dictionary indexed by pssgId containing dictionaries with objects to control the passages 
+        self.controlParams = None
+
+
+        self.pssgIdPssgNum = None
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def loadParams(self):
+        '''
+        Start the IO Interface process.
+        Leave self.ioIfaceProc and self.pssgsControl with new objects.
+        '''
+
+
+        #Database connection should be done here and can not be done in the constructor
+        #since this method is run by the mainThread and also run by crud thread when
+        #a passage is added, updated or deleted.
+        dataBase = database.DataBase(DB_FILE)
+
+        self.pssgIdPssgNum = dataBase.getPssgIdPssgNum()
+
+
+        #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
+        #by pssg parametters names
+        pssgsParams = dataBase.getPssgsParams()
+
+        #The following structure is a dict indexed by the pssgIds. Each value is another dict
+        #with object, event and variables to control each passage. Each time a passage is added,
+        #updated or deleted, this structure should be regenerated and all the thread running for 
+        #the passage like "cleanerPssgMngr" or "starterAlrmMngr" should be killed.
+        self.params = {}
+        for pssgId in pssgsParams.keys():
+            self.params[pssgId] = { #Passage object to manage the passage
+                                   'pssgObj': Passage(pssgsParams[pssgId]),
+                                    #Event object to know when a passage was opened 
+                                    #in a correct way by someone who has access
+                                   'accessPermit': threading.Event(),
+                                    #Lock and datetime object to know when the access
+                                    #was opened
+                                   'lockTimeAccessPermit': threading.Lock(),
+                                   'timeAccessPermit': None,
+                                    #Event object to know when the "cleanerPssgMngr" thread is alive
+                                    #to avoid creating more than once
+                                   'cleanerPssgMngrAlive': threading.Event(),
+                                    #Event to know when the passage was opened
+                                   'openPssg': threading.Event(),
+                                    #Event object to know when the "starterAlrmMngrMngr" thread
+                                    #is alive to avoid creating more than once
+                                   'starterAlrmMngrAlive': threading.Event()
+                                  }
 
 

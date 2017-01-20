@@ -46,9 +46,7 @@ class Controller(object):
 
         self.dataBase = database.DataBase(DB_FILE)
 
-
-        self.lockIoIface = threading.Lock()
-        self.ioIface = ioiface.IoIface()
+        self.ioIface = ioiface.IoIface(self.dataBase)
         
         #Defining a OS queue to get messages from the ioiface
         self.ioIfaceQue = posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
@@ -71,8 +69,12 @@ class Controller(object):
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
+
+        self.lockPssgsControl = threading.Lock()
+        self.pssgsControl = passage.PssgsControl()
+
         #Creating the CRUD Manager Thread 
-        self.crudMngr = crud.CrudMngr(self.lockIoIface, self.ioIface, self.exitFlag)
+        self.crudMngr = crud.CrudMngr(self.lockPssgsControl, self.pssgsControl, self.exitFlag)
 
         #Creating the Net Manager Thread 
         self.netMngr = network.NetMngr(netToEvent, netToReSnd, self.crudMngr, self.exitFlag)        
@@ -119,9 +121,9 @@ class Controller(object):
         It also creates a thread to close the passage and buzzer
         '''
 
-        with self.lockIoIface:
+        with self.lockPssgsControl:
 
-            pssgControl = self.ioIface.pssgsControl[pssgId]
+            pssgControl = self.pssgsControl.params[pssgId]
 
             pssgControl['pssgObj'].release(True)
             self.logger.debug("Releasing the passage {}.".format(pssgId))
@@ -133,9 +135,7 @@ class Controller(object):
 
             if not pssgControl['cleanerPssgMngrAlive'].is_set():
                 pssgControl['cleanerPssgMngrAlive'].set()
-                cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, 
-                                                      self.ioIface.pssgsReconfFlag, 
-                                                      self.exitFlag)
+                cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
                 cleanerPssgMngr.start()
 
 
@@ -210,9 +210,9 @@ class Controller(object):
         This method is called each time a passage change its state. (It is opened or closed)
         '''
 
-        with self.lockIoIface:
+        with self.lockPssgsControl:
 
-            pssgControl = self.ioIface.pssgsControl[pssgId]
+            pssgControl = self.pssgsControl.params[pssgId]
 
             #Converting "openOrClose" to int type to evaluete it on if statement
             openOrClose = int(openOrClose)
@@ -223,9 +223,7 @@ class Controller(object):
                 if pssgControl['accessPermit'].is_set():
                     #Creates a StarterAlrmMngrAlive if not was previously created by other access
                     if not pssgControl['starterAlrmMngrAlive'].is_set():
-                        starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, 
-                                                                  self.ioIface.pssgsReconfFlag, 
-                                                                  self.exitFlag)
+                        starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, self.exitFlag)
                         starterAlrmMngr.start()
 
                 #If the passage was not opened in a permitted way, start the alarm
@@ -257,6 +255,8 @@ class Controller(object):
         #Launching Pssg Iface binary
         self.ioIface.start()
 
+        self.pssgsControl.loadParams()
+
         #Starting the "Event Manager" thread
         self.eventMngr.start()
 
@@ -271,11 +271,19 @@ class Controller(object):
                 ioIfaceData = self.ioIfaceQue.receive()
                 ioIfaceData = ioIfaceData[0].decode('utf8')
                 print(ioIfaceData)
-                pssgId, side, varField = ioIfaceData.split(';')
-                pssgId = int(pssgId)
-                side = int(side)
-                command, value  = varField.split('=')
-                self.handlers[command](pssgId, side, value)
+                pssgNum, side, varField = ioIfaceData.split(';')
+                pssgNum = int(pssgNum)
+
+                try:
+                    pssgId = self.pssgsControl.pssgIdPssgNum[pssgNum]
+                    pssgId = int(pssgId)
+
+                    side = int(side)
+                    command, value  = varField.split('=')
+                    self.handlers[command](pssgId, side, value)
+
+                except KeyError:
+                    self.logger.debug('Passage not configured.')
             
         except posix_ipc.SignalError:
             self.logger.debug('IO Interface Queue was interrupted by a OS signal.')
