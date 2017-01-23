@@ -40,19 +40,14 @@ class IoIface(object):
         #In the followng section we generate the arguments to pass to the ioIface external program
         ioIfaceArgs = ''
 
-        
-        pssgsPinoutParams = self.dataBase.getPssgsPinoutParams()
+        gpioNames = self.dataBase.getGpioNames()
+        gpiosPssgs = self.dataBase.getGpiosPssgs()
 
-        for pinoutId in pssgsPinoutParams:
-
-            for pssgPinoutParamName in self.dataBase.getPssgPinoutParamsNames():
-                #Since not all the columns names of Passage table are parameters of 
-                #ioiface binary, they should be checked if they are in the IOFACE_ARGS list
-                if pssgPinoutParamName in IOIFACE_ARGS:
-                    pssgPinoutParamValue = pssgsPinoutParams[pinoutId][pssgPinoutParamName]
-                    if pssgPinoutParamValue:
-                        ioIfaceArgs += '--{} {} '.format(pssgPinoutParamName, pssgPinoutParamValue)
-
+        for gpiosPssg in gpiosPssgs:
+            for gpioName in gpioNames:
+                gpioNumber = gpiosPssg[gpioName]
+                if gpioNumber:
+                    ioIfaceArgs += '--{} {} '.format(gpioName, gpioNumber)
 
 
         #With the arguments to pass to the ioIface program, it is lauched using Popen
