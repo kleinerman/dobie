@@ -33,7 +33,7 @@ cursor.execute('''CREATE UNIQUE INDEX cardNumberIndex
 
 
 cursor.execute('''
-    CREATE TABLE PssgPinout (
+    CREATE TABLE PssgGpios (
         id       INTEGER PRIMARY KEY,
         i0In     INTEGER, 
         i1In     INTEGER,
@@ -56,7 +56,7 @@ cursor.execute('''
         rlseTime INTEGER,
         bzzrTime INTEGER,
         alrmTime INTEGER,
-        FOREIGN KEY(pssgNum) REFERENCES PssgPinout(id) ON DELETE CASCADE
+        FOREIGN KEY(pssgNum) REFERENCES PssgGpios(id) ON DELETE CASCADE
     )
     '''
 )

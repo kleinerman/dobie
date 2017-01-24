@@ -238,7 +238,8 @@ class StarterAlrmMngr(genmngr.GenericMngr):
 
 
 
-
+class PassageNotConfigured(Exception):
+    pass
 
 
 
@@ -276,31 +277,41 @@ class PssgsControl(object):
 
         #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
         #by pssg parametters names
-        pssgsParams = dataBase.getPssgsParams()
+        paramsPssgs = dataBase.getParamsPssgs()
 
         #The following structure is a dict indexed by the pssgIds. Each value is another dict
         #with object, event and variables to control each passage. Each time a passage is added,
         #updated or deleted, this structure should be regenerated and all the thread running for 
         #the passage like "cleanerPssgMngr" or "starterAlrmMngr" should be killed.
         self.params = {}
-        for pssgId in pssgsParams.keys():
-            self.params[pssgId] = { #Passage object to manage the passage
-                                   'pssgObj': Passage(pssgsParams[pssgId]),
-                                    #Event object to know when a passage was opened 
-                                    #in a correct way by someone who has access
-                                   'accessPermit': threading.Event(),
-                                    #Lock and datetime object to know when the access
-                                    #was opened
-                                   'lockTimeAccessPermit': threading.Lock(),
-                                   'timeAccessPermit': None,
-                                    #Event object to know when the "cleanerPssgMngr" thread is alive
-                                    #to avoid creating more than once
-                                   'cleanerPssgMngrAlive': threading.Event(),
-                                    #Event to know when the passage was opened
-                                   'openPssg': threading.Event(),
-                                    #Event object to know when the "starterAlrmMngrMngr" thread
-                                    #is alive to avoid creating more than once
-                                   'starterAlrmMngrAlive': threading.Event()
-                                  }
+        for paramsPssg in paramsPssgs:
+            self.params[paramsPssg['pssgNum']] = {'pssgId': paramsPssg['id'],
+                                                  #Passage object to manage the passage
+                                                  'pssgObj': Passage(paramsPssg),
+                                                  #Event object to know when a passage was opened 
+                                                  #in a correct way by someone who has access
+                                                  'accessPermit': threading.Event(),
+                                                  #Lock and datetime object to know when the access
+                                                  #was opened
+                                                  'lockTimeAccessPermit': threading.Lock(),
+                                                  'timeAccessPermit': None,
+                                                  #Event object to know when the "cleanerPssgMngr" thread is alive
+                                                  #to avoid creating more than once
+                                                  'cleanerPssgMngrAlive': threading.Event(),
+                                                  #Event to know when the passage was opened
+                                                  'openPssg': threading.Event(),
+                                                  #Event object to know when the "starterAlrmMngrMngr" thread
+                                                  #is alive to avoid creating more than once
+                                                  'starterAlrmMngrAlive': threading.Event()
+                                                 }
+
+
+    def getPssgId(self, pssgNum):
+        '''
+        '''
+        try:
+            return self.params[pssgNum]['pssgId']
+        except KeyError:
+            raise PassageNotConfigured
 
 
