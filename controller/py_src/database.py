@@ -254,7 +254,7 @@ class DataBase(object):
         Getting Passage GPIO Names from SQL database
         '''
 
-        sql = "SELECT * FROM PssgPinout"
+        sql = "SELECT * FROM PssgGpios"
         self.cursor.execute(sql)
 
         #To leave the DB unlocked for other threads, it is necesary to
@@ -275,7 +275,7 @@ class DataBase(object):
         by GPIO name
         '''
 
-        sql = "SELECT * FROM PssgPinout"
+        sql = "SELECT * FROM PssgGpios"
         self.cursor.execute(sql)
         gpiosPssgs = self.cursor.fetchall()
 
@@ -286,44 +286,24 @@ class DataBase(object):
 
     #---------------------------------------------------------------------------#
 
-    def getPssgsParams(self):
+    def getParamsPssgs(self):
         '''
         Get the arguments of passages to call ioiface external program.
         pps = Passage Parametters
 
         '''
-        #Getting the list with all Passage Parametters
-#        ppsNames = self.getPssgParamsNames()
-        ppsNames = ['id', 'rlseOut', 'bzzrOut', 'rlseTime', 'bzzrTime', 'alrmTime']
-        #Joining it in a string separated by ','
-#        ppsNamesStr = ', '.join(ppsNames)
-#        print(ppsNamesStr)
-
-#        sql = "SELECT {} FROM PssgPinout".format(ppsNamesStr)
  
-        sql = ("SELECT passage.id, pssgPinout.rlseOut, pssgPinout.bzzrOut, passage.rlseTime, "
-               "passage.bzzrTime, passage.alrmTime FROM PssgPinout JOIN Passage ON "
-               "(PssgPinout.id = Passage.pssgNum)"
+        sql = ("SELECT Passage.id, Passage.pssgNum, PssgGpios.rlseOut, PssgGpios.bzzrOut, "
+               "Passage.rlseTime, Passage.bzzrTime, Passage.alrmTime FROM "
+               "PssgGpios JOIN Passage ON (PssgGpios.id = Passage.pssgNum)"
               )
                      
         self.cursor.execute(sql)
-        ppsTuplesList = self.cursor.fetchall()
-        self.connection.commit()
+        paramsPssgs = self.cursor.fetchall()
 
-        #Dictionary containing dictionaries with all the pps indexed by the pps name.
-        #This dictionary is indexed by the passage id
-        ppsDictsDict = {}
+        return paramsPssgs
 
-        for ppsTuple in ppsTuplesList:
-            #Dictionary with all the pps for each passage indexed by the name of parametters.
-            ppsDict = {}
 
-            for i, ppName in enumerate(ppsNames):
-                ppsDict[ppName] = ppsTuple[i]
-            #Each dictionary is indexed in the master dictionary "ppsDictsDict" by the passage id 
-            ppsDictsDict[ppsDict['id']] = ppsDict
-
-        return ppsDictsDict
 
 
 
