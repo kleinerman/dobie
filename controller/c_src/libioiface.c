@@ -8,8 +8,8 @@
 #include <pthread.h>
 #include <mqueue.h>
 #include <unistd.h>
-#include <libioiface.h>
 #include <signal.h>
+#include <libioiface.h>
 
 int run = 1;
 
@@ -220,37 +220,72 @@ int gpio_set_edge(unsigned int gpio, unsigned int edge)
 int set_gpio_pins (pssg_t *pssg, int number_of_pssgs)
 {
     int i;
+    char gpio_cmd[70];
 
     for (i = 0; i < number_of_pssgs; i++) {
         if (pssg[i].i0In != UNDEFINED) {
             if ( export_gpio(pssg[i].i0In) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_direction(pssg[i].i0In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_edge(pssg[i].i0In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+
+#ifdef RPi
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",pssg[i].i0In);
+            system(gpio_cmd);
+#endif
         }
         if (pssg[i].i1In != UNDEFINED) {
             if ( export_gpio(pssg[i].i1In) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_direction(pssg[i].i1In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_edge(pssg[i].i1In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+
+#ifdef RPi
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",pssg[i].i1In);
+            system(gpio_cmd);
+#endif
+
         }
         if (pssg[i].o0In != UNDEFINED) {
             if ( export_gpio(pssg[i].o0In) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_direction(pssg[i].o0In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_edge(pssg[i].o0In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+#ifdef RPi
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",pssg[i].o0In);
+            system(gpio_cmd);
+#endif
+
         }
         if (pssg[i].o1In != UNDEFINED) {
             if ( export_gpio(pssg[i].o1In) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_direction(pssg[i].o1In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_edge(pssg[i].o1In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+
+#ifdef RPi
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",pssg[i].o1In);
+            system(gpio_cmd);
+#endif
+
         }
         if (pssg[i].button != UNDEFINED) {
             if ( export_gpio(pssg[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_direction(pssg[i].button, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_edge(pssg[i].button, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+
+#ifdef RPi
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d up",pssg[i].button);
+            system(gpio_cmd);
+#endif
+
         }
         if (pssg[i].state != UNDEFINED) {
             if ( export_gpio(pssg[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_direction(pssg[i].state, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
             if ( gpio_set_edge(pssg[i].state, BOTH) == RETURN_FAILURE ) return RETURN_FAILURE;
+
+#ifdef RPi
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d up",pssg[i].state);
+            system(gpio_cmd);
+#endif
+
         }
         if (pssg[i].buzzer != UNDEFINED) {
             if ( export_gpio(pssg[i].buzzer) == RETURN_FAILURE ) return RETURN_FAILURE;
