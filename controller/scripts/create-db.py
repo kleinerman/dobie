@@ -120,26 +120,26 @@ cursor.execute('''CREATE UNIQUE INDEX pssgPersonWeekDayIndex
 
 
 cursor.execute('''
-    CREATE TABLE Events (
+    CREATE TABLE Event (
         id          INTEGER PRIMARY KEY,
         pssgId      INTEGER,
-        eventType   INTEGER,
+        eventTypeId INTEGER,
         dateTime    DATETIME,
-        latchType   INTEGER,   
+        latchId     INTEGER,   
         personId    INTEGER,
         side        BOOLEAN,
         allowed     BOOLEAN,
-        notReason   INTEGER,
-        FOREIGN KEY(eventType) REFERENCES Event(id),
-        FOREIGN KEY(latchType) REFERENCES Latch(id),
-        FOREIGN KEY(notReason) REFERENCES NotReason(id)
+        notReasonId INTEGER,
+        FOREIGN KEY(eventTypeId) REFERENCES EventType(id),
+        FOREIGN KEY(latchId) REFERENCES Latch(id),
+        FOREIGN KEY(notReasonId) REFERENCES NotReason(id)
    )
     '''
 )
 
 
 cursor.execute('''
-    CREATE TABLE Event (
+    CREATE TABLE EventType (
         id          INTEGER PRIMARY KEY,
         description TEXT
 

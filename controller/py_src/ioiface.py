@@ -77,22 +77,21 @@ class IoIface(object):
 
         if self.ioIfaceProc:
             self.logger.info('Stoping IO Interface.')
-            #Ask ioIface external program to finish (sending SIGTERM signal)
-            self.ioIfaceProc.terminate()
-            #Wait until it finish (It does not finish instantly). If we do not
-            #wait, we end launching "ioIface" before the previous finish and a mess happen
-            self.ioIfaceProc.wait()
+            #We comment the following line because when SIGTERM is received in the main python
+            #program seems that the "ioiface" also receive that signal. If we send here the 
+            #signal again, we do not permit "ioiface" finished in a clean way.
+            #self.ioIfaceProc.terminate()
+            #Wait until it finish (It does not finish instantly)
+            try:
+                self.ioIfaceProc.wait(timeout=IOIFACE_WAIT_FINISH_TIME)
+                self.logger.debug('IO Interface stopped.')
+            except subprocess.TimeoutExpired:
+                self.logger.warning('IO Interface not responding. Nothing to stop.')
         else:
-            self.logger.info('IO Interface not running. Nothing to stop.')
+            self.logger.warning('IO Interface not running. Nothing to stop.')
 
 
 
 
     #----------------------------------------------------------------------------#
 
-    def restart(self):
-        '''
-        This method call stop and start secuentially
-        '''
-        self.stop()
-        self.start()

@@ -34,7 +34,7 @@ class DataBase(object):
     save events and delete them
     '''
 
-    def __init__(self, dbFile, fetchAsDict=None):
+    def __init__(self, dbFile):
 
         #Connecting to the database
         self.connection = sqlite3.connect(dbFile, isolation_level=None)
@@ -134,8 +134,6 @@ class DataBase(object):
             return (False, None, 1)
 
 
-        print(params)
-
 
     
     #---------------------------------------------------------------------------#
@@ -154,23 +152,24 @@ class DataBase(object):
 
         allowed = int(event['allowed'])
 
-        if event['notReason']:
-            notReason = event['notReason']
+        if event['notReasonId']:
+            notReasonId = event['notReasonId']
         else:
-            notReason = 'NULL'
+            notReasonId = 'NULL'
             
 
-        sql = ("INSERT INTO Events"
-               "(pssgId, eventType, dateTime, latchType, "
-               "personId, side, allowed, notReason) "
+        sql = ("INSERT INTO Event"
+               "(pssgId, eventTypeId, dateTime, latchId, "
+               "personId, side, allowed, notReasonId) "
                "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
-               "".format(event['pssgId'], event['eventType'], 
-                         event['dateTime'], event['latchType'], 
-                         personId, side, allowed, notReason)
+               "".format(event['pssgId'], event['eventTypeId'], 
+                         event['dateTime'], event['latchId'], 
+                         personId, side, allowed, notReasonId)
               )
 
         self.cursor.execute(sql)
-        self.connection.commit()
+        #self.connection.commit()
+
 
 
 
@@ -181,46 +180,44 @@ class DataBase(object):
         On each iteration over this method, it returns a list with
         "evtsQtty" events.
         '''
-        
-        sql = ("SELECT id, pssgId, eventType, dateTime, latchType, "
-               "personId, side, allowed, notReason FROM Events "
+
+        sql = ("SELECT id, pssgId, eventTypeId, dateTime, latchId, "
+               "personId, side, allowed, notReasonId FROM Event "
                "LIMIT {}".format(evtsQtty)
               )
 
         self.cursor.execute(sql)
-        evtTupleList = self.cursor.fetchall()
+        savedEvents = self.cursor.fetchall()
 
-        while evtTupleList:
-
+        while savedEvents:
             #List with a dictionary for each event
-            evtDictList = []
-            #List with events id of the database
-            evtIdList = []
+            toReSendEvents = []
+            #List with id of events
+            eventIds = []
 
-            #Creating a dictionary for each row retrieved from the DB
-            #and appending it to "evtDictList".
-            #Apending the event id of DB to "evtIdList"
-            for evtTuple in evtTupleList:
-                evtDict = {'pssgId' : evtTuple[1],
-                           'eventType' : evtTuple[2],
-                           'dateTime' : evtTuple[3],
-                           'latchType' : evtTuple[4],
-                           'personId' : evtTuple[5],
-                           'side' : evtTuple[6],
-                           'allowed' : bool(evtTuple[7]),
-                           'notReason' : evtTuple[8]
-                          }
+            #Although "fetchone" method returns a list of object that can
+            #be treated as a dictionary, a new dictionary is generated since
+            #it is converted to a json object by the "reSendEvents" method of
+            #network manager (with this objects which can be treated as a
+            #dictionary the convertion could not work), and also it is
+            #necessary remove the id and convert the "allowed" column to bool.
+            for savedEvent in savedEvents:
+                toReSendEvent = {'pssgId' : savedEvent['pssgId'],
+                                 'eventTypeId' : savedEvent['eventTypeId'],
+                                 'dateTime' : savedEvent['dateTime'],
+                                 'latchId' : savedEvent['latchId'],
+                                 'personId' : savedEvent['personId'],
+                                 'side' : savedEvent['side'],
+                                 'allowed' : bool(savedEvent['allowed']),
+                                 'notReasonId' : savedEvent['notReasonId']
+                                }
+                toReSendEvents.append(toReSendEvent)
+                eventIds.append(savedEvent['id'])
 
-                evtDictList.append(evtDict)
-                evtIdList.append(evtTuple[0])
-
-            #This commit is to avoid leaving the database locked. (Not sure if necessary)            
-            #self.connection.commit()
-            yield evtIdList, evtDictList
+            yield eventIds, toReSendEvents
             self.cursor.execute(sql)
-            evtTupleList = self.cursor.fetchall()
+            savedEvents = self.cursor.fetchall()
 
-        #self.connection.commit()
 
 
 
@@ -237,10 +234,10 @@ class DataBase(object):
         #Creating a single string with all ids comma separated
         evtIds = ', '.join(evtIdList)
         
-        sql = "DELETE FROM Events WHERE id IN ({})".format(evtIds)
+        sql = "DELETE FROM Event WHERE id IN ({})".format(evtIds)
 
         self.cursor.execute(sql)
-        self.connection.commit()
+        #self.connection.commit()
 
 
 
@@ -305,35 +302,6 @@ class DataBase(object):
 
 
 
-
-
-
-    def getPssgIdPssgNum(self):
-        '''
-        '''
-        sql = "SELECT pssgNum, id FROM Passage"
-
-        self.cursor.execute(sql)
-        pssgIdPssgNumList = self.cursor.fetchall()
-
-        pssgIdPssgNumDict = {}
-
-        for pssgIdPssgNum in pssgIdPssgNumList:
-            pssgIdPssgNumDict[pssgIdPssgNum[0]] = pssgIdPssgNum[1]
-
-        return pssgIdPssgNumDict
-
-
-
-
-
-
-
-
-
-
-
-
     #---------------------------------------------------------------------------#
 
     def addPassage(self, passage):
@@ -352,7 +320,7 @@ class DataBase(object):
                              passage['bzzrTime'], passage['alrmTime'])
                   )
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
 
         except sqlite3.OperationalError as operationalError:
@@ -381,7 +349,7 @@ class DataBase(object):
                              passage['id'])
               )
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
 
         except sqlite3.OperationalError as operationalError:
@@ -408,14 +376,14 @@ class DataBase(object):
         try:
             sql = "DELETE FROM Passage WHERE id = {}".format(passage['id'])
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
 
             sql = ("DELETE FROM Person WHERE id NOT IN "
                    "(SELECT DISTINCT personId FROM Access) AND id != 1"
                   )
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -450,7 +418,7 @@ class DataBase(object):
                    "".format(access['personId'], access['cardNumber'])
                   )
             self.cursor.execute(sql)
-            self.connection.commit() 
+            #self.connection.commit() 
 
 
             #Using REPLACE instead of INSERT because we could be in a situation of replacing
@@ -473,7 +441,7 @@ class DataBase(object):
                   )
             self.cursor.execute(sql)
 
-            self.connection.commit()
+            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -499,7 +467,7 @@ class DataBase(object):
                              access['endTime'], access['expireDate'], access['id'])
                   )
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -526,7 +494,7 @@ class DataBase(object):
                    "(SELECT DISTINCT personId FROM Access) AND id != 1"
                   )
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -558,7 +526,7 @@ class DataBase(object):
                    "".format(liAccess['personId'], liAccess['cardNumber'])
                   )
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
 
             #Using REPLACE instead of INSERT because we could be in a situation of replacing
@@ -567,8 +535,10 @@ class DataBase(object):
             #answer, receiving it twice. In this situation it is important to answer to the server
             #with OK to avoid server continue sending the CRUD. If INSERT will be used, a constraint
             #error will happen and the client will never answer with OK.
+            #Important Note: iSide and oSide should be filled with "1", because the way "canAccess"
+            #method work. The real iSide an oSide is in the LimitedAccess table.
             sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
-                   "endTime, expireDate) VALUES({}, {}, {}, 0, 0, 0, NULL, NULL, '{}')"
+                   "endTime, expireDate) VALUES({}, {}, {}, 0, 1, 1, NULL, NULL, '{}')"
                    "".format(liAccess['accessId'], liAccess['pssgId'],
                              liAccess['personId'], liAccess['expireDate'])
                   )
@@ -585,7 +555,7 @@ class DataBase(object):
                   )
             self.cursor.execute(sql)
 
-            self.connection.commit()
+            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -620,7 +590,7 @@ class DataBase(object):
                    "".format(liAccess['expireDate'], pssgId, personId)
                   )
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
 
 
@@ -631,7 +601,7 @@ class DataBase(object):
                   )
 
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
 
         except TypeError:
@@ -665,7 +635,7 @@ class DataBase(object):
             
             sql = "DELETE FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
             sql = ("SELECT * FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
                    "".format(pssgId, personId)
@@ -681,14 +651,14 @@ class DataBase(object):
                        "".format(pssgId, personId)
                       )
                 self.cursor.execute(sql)
-                self.connection.commit()
+                #self.connection.commit()
 
                  
                 sql = ("DELETE FROM Person WHERE id NOT IN "
                        "(SELECT DISTINCT personId FROM Access) AND id != 1"
                       )
                 self.cursor.execute(sql)
-                self.connection.commit()
+                #self.connection.commit()
 
         except TypeError:
             self.logger.debug('Can not find a Limited Access with this id.')
@@ -716,7 +686,7 @@ class DataBase(object):
                    "".format(person['cardNumber'], person['id'])
                   )
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -739,7 +709,7 @@ class DataBase(object):
         try:
             sql = "DELETE FROM Person WHERE id = {}".format(person['id'])
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -762,23 +732,23 @@ class DataBase(object):
         try:
             sql = "DELETE FROM LimitedAccess"
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
             sql = "DELETE FROM Access"
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
             
             sql = "DELETE FROM Person WHERE id != 1"
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
             sql = "DELETE FROM Passage"
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
             
-            sql = "DELETE FROM Events"
+            sql = "DELETE FROM Event"
             self.cursor.execute(sql)
-            self.connection.commit()
+            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
