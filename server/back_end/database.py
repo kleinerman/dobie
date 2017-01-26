@@ -167,11 +167,11 @@ class DataBase(object):
 
 
             sql = ("INSERT INTO "
-                   "Event(eventTypeId, pssgId, dateTime, latchId, personId, side, allowed, notReason) "
+                   "Event(eventTypeId, pssgId, dateTime, latchId, personId, side, allowed, notReasonId) "
                    "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
-                   "".format(event['eventType'], event['pssgId'], event['dateTime'],
-                             event['latchType'], event['personId'], event['side'],
-                             event['allowed'], event['notReason']
+                   "".format(event['eventTypeId'], event['pssgId'], event['dateTime'],
+                             event['latchId'], event['personId'], event['side'],
+                             event['allowed'], event['notReasonId']
                             ) 
 
                   )
