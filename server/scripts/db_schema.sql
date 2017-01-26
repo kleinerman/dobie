@@ -150,12 +150,12 @@ CREATE TABLE `Event` (
     `personId` integer,
     `side` boolean,
     `allowed` boolean,
-    `notReason` integer,
+    `notReasonId` integer,
     CONSTRAINT `fk_Event_EventType` FOREIGN KEY (`eventTypeId`) REFERENCES `EventType` (`id`),
     CONSTRAINT `fk_Event_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Event_Latch` FOREIGN KEY (`latchId`) REFERENCES `Latch` (`id`),    
     CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_Event_NotReason` FOREIGN KEY (`notReason`) REFERENCES `NotReason` (`id`)
+    CONSTRAINT `fk_Event_NotReason` FOREIGN KEY (`notReasonId`) REFERENCES `NotReason` (`id`)
 
 )
 ;
