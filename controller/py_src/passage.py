@@ -272,8 +272,6 @@ class PssgsControl(object):
         #a passage is added, updated or deleted.
         dataBase = database.DataBase(DB_FILE)
 
-        self.pssgIdPssgNum = dataBase.getPssgIdPssgNum()
-
 
         #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
         #by pssg parametters names

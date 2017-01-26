@@ -43,7 +43,7 @@ cursor.execute(sqlSentence)
 
 
 #Filling Event Table
-sqlSentence = ("INSERT INTO Event(id, description) "
+sqlSentence = ("INSERT INTO EventType(id, description) "
                "VALUES (1, 'Person opening a passage with card'), " 
                       "(2, 'Person opening a passage with button'), "
                       "(3, 'The passage remains opened')"

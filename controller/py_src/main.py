@@ -154,7 +154,7 @@ class Controller(object):
             with self.lockPssgsControl:
                 pssgId = self.pssgsControl.getPssgId(pssgNum)
 
-            allowed, personId, notReason = self.dataBase.canAccess(pssgId, side, cardNumber)
+            allowed, personId, notReasonId = self.dataBase.canAccess(pssgId, side, cardNumber)
 
             if allowed:
                 self.openPssg(pssgNum)
@@ -162,13 +162,13 @@ class Controller(object):
             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         
             event = {'pssgId' : pssgId, 
-                     'eventType' : 1,
+                     'eventTypeId' : 1,
                      'dateTime' : dateTime,
-                     'latchType' : 1,
+                     'latchId' : 1,
                      'personId' : personId,
                      'side' : side,
                      'allowed' : allowed,
-                     'notReason' : notReason 
+                     'notReasonId' : notReasonId
                     }
 
             #Sending the event to the "Event Manager" thread
@@ -199,13 +199,13 @@ class Controller(object):
 
 
             event = {'pssgId' : pssgId,
-                     'eventType' : 2,
+                     'eventTypeId' : 2,
                      'dateTime' : dateTime,
-                     'latchType' : 3,
+                     'latchId' : 3,
                      'personId' : 1,
                      'side' : side,
                      'allowed' : True,
-                     'notReason' : None
+                     'notReasonId' : None
                     }
 
             #Sending the event to the "Event Manager" thread
