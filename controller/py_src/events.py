@@ -137,23 +137,20 @@ class ReSender(genmngr.GenericMngr):
     def run(self):
         '''
         '''
-        self.dataBase = database.DataBase(DB_FILE)
+        dataBase = database.DataBase(DB_FILE)
 
-        for eventIdList, eventList in self.dataBase.getNEvents(RE_SEND_EVTS_QUANT):
-            noConnection = True
-            while noConnection:
-                self.netMngr.reSendEvents(eventList)
+        for eventIds, toReSendEvents in dataBase.getNEvents(RE_SEND_EVTS_QUANT):
+            eventsSent = False
+            while not eventsSent:
+                self.netMngr.reSendEvents(toReSendEvents)
                 try:
                     eventsResponse = self.netToReSnd.get(timeout=WAIT_RESP_TIME)
                     if eventsResponse == 'OK':
                         self.logger.debug('The server confirms the reception of the events.')
-                        self.dataBase.delEvents(eventIdList)
-                        noConnection = False
+                        dataBase.delEvents(eventIds)
+                        eventsSent = True
                     else:
-                        logMsg = ('The server could not save the events correctly, '
-                                  'saving the event in local DB.'
-                                 )
-                        self.logger.warning(logMsg)
+                        self.logger.warning('The server could not save the events correctly.')
                         raise queue.Empty
                 except queue.Empty:
                     logMsg = ("Sleeping for {} secs to retry sending events."
