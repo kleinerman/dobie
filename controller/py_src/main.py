@@ -64,7 +64,7 @@ class Controller(object):
         netToEvent = queue.Queue()
 
         #Queue used to send responses from netMngr thread to ReSender thread
-        netToReSnd = queue.Queue()
+        self.netToReSnd = queue.Queue()
 
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
@@ -78,14 +78,17 @@ class Controller(object):
         self.crudMngr = crud.CrudMngr(self.lockPssgsControl, self.pssgsControl, self.exitFlag)
 
         #Creating the Net Manager Thread 
-        self.netMngr = network.NetMngr(netToEvent, netToReSnd, self.crudMngr, self.exitFlag)        
+        self.netMngr = network.NetMngr(netToEvent, self.netToReSnd, self.crudMngr, self.exitFlag)        
 
         #Setting internal crudMngr reference to netMngr thread to be able to answer
         #once the CRUD where commited in DB
         self.crudMngr.netMngr = self.netMngr
 
+        #Flag to know if Resender Thread is alive
+        self.resenderAlive = threading.Event()
+
         #Creating the Event Manager Thread giving to it the previous event queue
-        self.eventMngr = events.EventMngr(self.mainToEvent, self.netMngr, netToEvent, netToReSnd, self.exitFlag)
+        self.eventMngr = events.EventMngr(self.mainToEvent, self.netMngr, netToEvent, self.netToReSnd, self.resenderAlive, self.exitFlag)
 
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
         signal.signal(signal.SIGTERM, self.sigtermHandler)
@@ -292,6 +295,13 @@ class Controller(object):
 
         #Starting the "CRUD Manager" thread
         self.crudMngr.start()
+
+        #Starting the "Re Sender" thread because in the database there may be events to resend 
+        if not self.resenderAlive.is_set():
+            self.resenderAlive.set()
+            reSender = events.ReSender(self.netMngr, self.netToReSnd, self.resenderAlive, self.exitFlag)
+            reSender.start()
+
         
         try:
             while True:
