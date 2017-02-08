@@ -95,7 +95,7 @@ class CrudMngr(genmngr.GenericMngr):
                     self.crudHndlrs[crudCmd](crudObject)
 
                     #If the CRUD command do a modification in a passage, it is necessary to 
-                    #relaunch the ioIface
+                    #load the passage params again in pssgsControl object
                     if crudCmd[0] == 'S':
                         with self.lockPssgsControl:
                             self.pssgsControl.loadParams()
