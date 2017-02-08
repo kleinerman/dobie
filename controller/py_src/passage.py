@@ -12,9 +12,6 @@ from config import *
 
 
 
-class UnspecifiedGpio(Exception):
-    pass
-
 
 class Passage(object):
     '''
@@ -250,20 +247,19 @@ class PssgsControl(object):
         #Getting the logger
         self.logger = logging.getLogger('Controller')
 
-        #Dictionary indexed by pssgId containing dictionaries with objects to control the passages 
-        self.controlParams = None
-
-
-        self.pssgIdPssgNum = None
-
+        #Dictionary indexed by pssgNum containing dictionaries with objects to control the passages 
+        self.params = None
 
 
     #---------------------------------------------------------------------------#
 
+
+
     def loadParams(self):
         '''
-        Start the IO Interface process.
-        Leave self.ioIfaceProc and self.pssgsControl with new objects.
+        This method load passage params from DB in "params" dictionary.
+        This method is called when the main program starts or when a CRUD of
+        passage is received. 
         '''
 
 
@@ -277,10 +273,9 @@ class PssgsControl(object):
         #by pssg parametters names
         paramsPssgs = dataBase.getParamsPssgs()
 
-        #The following structure is a dict indexed by the pssgIds. Each value is another dict
+        #The following structure is a dict indexed by the pssgNums. Each value is another dict
         #with object, event and variables to control each passage. Each time a passage is added,
-        #updated or deleted, this structure should be regenerated and all the thread running for 
-        #the passage like "cleanerPssgMngr" or "starterAlrmMngr" should be killed.
+        #updated or deleted, this structure should be regenerated.
         self.params = {}
         for paramsPssg in paramsPssgs:
             self.params[paramsPssg['pssgNum']] = {'pssgId': paramsPssg['id'],
@@ -306,7 +301,9 @@ class PssgsControl(object):
 
     def getPssgId(self, pssgNum):
         '''
+        Return the pssgId receiving the pssgNum.
         '''
+
         try:
             return self.params[pssgNum]['pssgId']
         except KeyError:
