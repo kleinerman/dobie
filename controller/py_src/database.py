@@ -156,6 +156,12 @@ class DataBase(object):
             notReasonId = event['notReasonId']
         else:
             notReasonId = 'NULL'
+
+        if event['latchId']:
+            latchId = event['latchId']
+        else:
+            latchId = 'NULL'
+
             
 
         sql = ("INSERT INTO Event"
@@ -163,8 +169,8 @@ class DataBase(object):
                "personId, side, allowed, notReasonId) "
                "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
                "".format(event['pssgId'], event['eventTypeId'], 
-                         event['dateTime'], event['latchId'], 
-                         personId, side, allowed, notReasonId)
+                         event['dateTime'], latchId, personId,
+                         side, allowed, notReasonId)
               )
 
         self.cursor.execute(sql)

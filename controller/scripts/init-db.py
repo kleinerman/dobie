@@ -46,7 +46,8 @@ cursor.execute(sqlSentence)
 sqlSentence = ("INSERT INTO EventType(id, description) "
                "VALUES (1, 'Person opening a passage with card'), " 
                       "(2, 'Person opening a passage with button'), "
-                      "(3, 'The passage remains opened')"
+                      "(3, 'The passage remains opened'), "
+                      "(4, 'The passage was forced')"
               )
 cursor.execute(sqlSentence)
 

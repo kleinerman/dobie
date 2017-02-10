@@ -233,9 +233,9 @@ class Controller(object):
 
         try:
             with self.lockPssgsControl:
-                #pssgId is not used in this method. We just want to raise
-                #PassageNotConfigured exception if the passage is not confiugred
-                self.pssgsControl.getPssgId(pssgNum)
+                #pssgId is used just to create the event below we get it here to raise
+                #"PassageNotConfigured" exception if the passage is not confiugred
+                pssgId = self.pssgsControl.getPssgId(pssgNum)
                 pssgControl = self.pssgsControl.params[pssgNum]
 
                 #Converting "openOrClose" to int type to evaluete it on if statement
@@ -250,13 +250,32 @@ class Controller(object):
                             starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, self.exitFlag)
                             starterAlrmMngr.start()
 
-                    #If the passage was not opened in a permitted way, start the alarm
+                    #If the passage was not opened in a permitted way, start the alarm and 
+                    #send to server or store locally an event
                     else:
                         logMsg = ("Unpermitted access on passage: {}, "
                                   "Starting the alarm.".format(pssgNum)
                                  )
                         self.logger.warning(logMsg)
                         pssgControl['pssgObj'].startBzzr(True)
+
+                        dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
+                        event = {'pssgId' : pssgId,
+                                 'eventTypeId' : 4,
+                                 'dateTime' : dateTime,
+                                 'latchId' : None,
+                                 'personId' : 1,
+                                 'side' : side,
+                                 'allowed' : False,
+                                 'notReasonId' : None
+                                }
+
+                        #Sending the event to the "Event Manager" thread
+                        self.mainToEvent.put(event)
+
+
+
 
                 #The state of the passage indicates that was closed
                 else:
