@@ -148,7 +148,10 @@ class DataBase(object):
         else:
             personId = 'NULL'
 
-        side = event['side']
+        if event['side']:
+            side = event['side']
+        else:
+            side = 'NULL'
 
         allowed = int(event['allowed'])
 

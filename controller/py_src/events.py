@@ -21,7 +21,7 @@ class EventMngr(genmngr.GenericMngr):
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
 
-    def __init__(self, mainToEvent, netMngr, netToEvent, netToReSnd, resenderAlive, exitFlag):
+    def __init__(self, eventQueue, netMngr, netToEvent, netToReSnd, resenderAlive, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
@@ -31,7 +31,7 @@ class EventMngr(genmngr.GenericMngr):
         #self.dataBase = None
 
         #Queue to receive message from the Main thread.
-        self.mainToEvent = mainToEvent
+        self.eventQueue = eventQueue
 
         #Queue to send messages to net.
         self.netMngr = netMngr
@@ -65,7 +65,7 @@ class EventMngr(genmngr.GenericMngr):
             #self.logger.debug('Sender Thread waiting from MGT or Asynchronous Receiver messages ...')
             try:
                 #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
-                event = self.mainToEvent.get(timeout=EXIT_CHECK_TIME)
+                event = self.eventQueue.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
                 self.netMngr.sendEvent(event)
                 try:

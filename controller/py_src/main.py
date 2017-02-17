@@ -58,7 +58,7 @@ class Controller(object):
                         }
 
         #Queue used to send events to eventThread
-        self.mainToEvent = queue.Queue()
+        self.eventQueue = queue.Queue()
         
         #Queue used to send responses from netMngr thread to event thread
         netToEvent = queue.Queue()
@@ -88,7 +88,7 @@ class Controller(object):
         self.resenderAlive = threading.Event()
 
         #Creating the Event Manager Thread giving to it the previous event queue
-        self.eventMngr = events.EventMngr(self.mainToEvent, self.netMngr, netToEvent, self.netToReSnd, self.resenderAlive, self.exitFlag)
+        self.eventMngr = events.EventMngr(self.eventQueue, self.netMngr, netToEvent, self.netToReSnd, self.resenderAlive, self.exitFlag)
 
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
         signal.signal(signal.SIGTERM, self.sigtermHandler)
@@ -175,7 +175,7 @@ class Controller(object):
                     }
 
             #Sending the event to the "Event Manager" thread
-            self.mainToEvent.put(event)
+            self.eventQueue.put(event)
 
 
         except passage.PassageNotConfigured:
@@ -212,7 +212,7 @@ class Controller(object):
                     }
 
             #Sending the event to the "Event Manager" thread
-            self.mainToEvent.put(event)
+            self.eventQueue.put(event)
 
         except passage.PassageNotConfigured:
             logMsg = 'Button pressed on passage {} but it is not configured'.format(pssgNum)
@@ -247,7 +247,7 @@ class Controller(object):
                     if pssgControl['accessPermit'].is_set():
                         #Creates a StarterAlrmMngrAlive if not was previously created by other access
                         if not pssgControl['starterAlrmMngrAlive'].is_set():
-                            starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, self.exitFlag)
+                            starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, self.eventQueue, self.exitFlag)
                             starterAlrmMngr.start()
 
                     #If the passage was not opened in a permitted way, start the alarm and 
@@ -266,13 +266,13 @@ class Controller(object):
                                  'dateTime' : dateTime,
                                  'latchId' : None,
                                  'personId' : 1,
-                                 'side' : side,
+                                 'side' : None,
                                  'allowed' : False,
                                  'notReasonId' : None
                                 }
 
                         #Sending the event to the "Event Manager" thread
-                        self.mainToEvent.put(event)
+                        self.eventQueue.put(event)
 
 
 
@@ -317,6 +317,7 @@ class Controller(object):
 
         #Starting the "Re Sender" thread because in the database there may be events to resend 
         if not self.resenderAlive.is_set():
+            self.logger.info('Starting the Re Sender thread to resend events of local DB.')
             self.resenderAlive.set()
             reSender = events.ReSender(self.netMngr, self.netToReSnd, self.resenderAlive, self.exitFlag)
             reSender.start()

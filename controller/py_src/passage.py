@@ -182,10 +182,13 @@ class StarterAlrmMngr(genmngr.GenericMngr):
     When the passage is opened more than once consecutively, the time is prolonged.    
     '''
 
-    def __init__(self, pssgControl, exitFlag):
+    def __init__(self, pssgControl, eventQueue, exitFlag):
 
         #Dictionary with variables to control the passage
         self.pssgControl = pssgControl
+
+        #Queue to send events to Event Manager when the alarm start
+        self.eventQueue = eventQueue
 
         #Getting the pssgId for logging purpouses. It is got in this way 
         #to avoid passing it in constructor of the class.
@@ -221,13 +224,29 @@ class StarterAlrmMngr(genmngr.GenericMngr):
             self.checkExit()
 
             with self.lockTimeAccessPermit:
-                elapsedTime = datetime.datetime.now() - self.pssgControl['timeAccessPermit']
+                nowDateTime = datetime.datetime.now()
+                elapsedTime = nowDateTime - self.pssgControl['timeAccessPermit']
 
             elapsedTime = int(elapsedTime.total_seconds())
 
             if elapsedTime >= self.alrmTime:
                 self.logger.debug("Starting the alarm on passage {}.".format(self.pssgId))
                 self.pssgObj.startBzzr(True)
+
+
+                dateTime = nowDateTime.strftime('%Y-%m-%d %H:%M')
+                event = {'pssgId' : self.pssgId,
+                         'eventTypeId' : 3,
+                         'dateTime' : dateTime,
+                         'latchId' : None,
+                         'personId' : 1,
+                         'side' : None,
+                         'allowed' : False,
+                         'notReasonId' : None
+                        }
+                #Sending the event to the "Event Manager" thread
+                self.eventQueue.put(event)
+
                 alive = False
 
         #Notifying that this thread has died
