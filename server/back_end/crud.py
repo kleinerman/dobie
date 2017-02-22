@@ -344,6 +344,71 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+#----------------------------------VisitorsPassages------------------------------------
+
+        visitorsPssgsNeedKeys = ('name',)
+
+        @app.route('/api/v1.0/visitorspassages', methods=['POST'])
+        @auth.login_required
+        def addVisitorsPssgs():
+            ''' 
+            Add a new Visitors Passages into the database.
+            '''     
+            try:    
+                visitorsPssgs = {}
+                for param in visitorsPssgsNeedKeys:
+                    visitorsPssgs[param] = request.json[param]
+                visitorsPssgsId = self.dataBase.addVisitorsPssgs(visitorsPssgs)
+                uri = url_for('modVisitorsPssgs', visitorsPssgsId=visitorsPssgsId, _external=True)
+                return jsonify({'status': 'OK', 'message': 'Visitors Passage added', 'code': CREATED, 'uri': uri}), CREATED
+
+            except database.VisitorsPssgsError as visitorsPssgsError:
+                raise ConflictError(str(visitorsPssgsError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(visitorsPssgsNeedKeys)))
+
+
+
+
+
+        @app.route('/api/v1.0/visitorspassages/<int:visitorsPssgsId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def modVisitorsPssgs(visitorsPssgsId):
+            '''
+            Update or delete a Visitors Passages in the database.
+            '''
+            try:
+                if request.method == 'PUT':
+                    visitorsPssgs = {}
+                    visitorsPssgs['id'] = visitorsPssgsId
+                    for param in visitorsPssgsNeedKeys:
+                        visitorsPssgs[param] = request.json[param]
+                    self.dataBase.updVisitorsPssgs(visitorsPssgs)
+                    return jsonify({'status': 'OK', 'message': 'Visitors Passages updated'}), OK
+
+                elif request.method == 'DELETE':
+                    self.dataBase.delVisitorsPssgs(visitorsPssgsId)
+                    return jsonify({'status': 'OK', 'message': 'Controller deleted'}), OK
+
+            except database.VisitorsPssgsNotFound as visitorsPssgsNotFound:
+                raise NotFound(str(visitorsPssgsNotFound))
+            except database.VisitorsPssgsError as visitorsPssgsError:
+                raise ConflictError(str(visitorsPssgsError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitorsPssgsNeedKeys)))
+
+
+
 #-------------------------------------Person------------------------------------------
 
         prsnNeedKeys = ('name', 'cardNumber', 'orgId')

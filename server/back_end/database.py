@@ -62,6 +62,25 @@ class ZoneNotFound(ZoneError):
     pass
 
 
+
+class VisitorsPssgsError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class VisitorsPssgsNotFound(ZoneError):
+    '''
+    '''
+    pass
+
+
+
+
 class ControllerError(Exception):
     '''
     '''
@@ -359,6 +378,79 @@ class DataBase(object):
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
             raise ZoneError('Can not update this zone: wrong argument')
+
+
+
+#----------------------------------Visitors Passage-----------------------------------
+
+
+    def addVisitorsPssgs(self, visitorsPssgs):
+        '''
+        Receive a dictionary with Visitors Passagess parametters 
+        and save it in DB. It returns the id of the added Visitor Passages.
+        '''
+
+        sql = ("INSERT INTO VisitorsPassages(name) VALUES('{}')"
+               "".format(visitorsPssgs['name'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+            return self.cursor.lastrowid
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not add this Visitors Passages')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitorsPssgsError('Can not add this Visitors Passages: wrong argument')
+
+
+
+    def delVisitorsPssgs(self, visitorsPssgsId):
+        '''
+        Receive a dictionary with Visitors Passage id and delete the Visitor Passage
+        '''
+
+        sql = ("DELETE FROM VisitorsPassages WHERE id = {}"
+               "".format(visitorsPssgsId)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise VisitorsPssgsNotFound('Visitors Passages not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not delete this Visitors Passages')
+
+
+
+
+    def updVisitorsPssgs(self, visitorsPssgs):
+        '''
+        Receive a dictionary with Visitors Passages parametters and update it in DB
+        '''
+
+        sql = ("UPDATE VisitorsPassages SET name = '{}' WHERE id = {}"
+               "".format(visitorsPssgs['name'], visitorsPssgs['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise VisitorsPssgsNotFound('Visitors Passages not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not update this Visitors Passages')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitorsPssgsError('Can not update this Visitors Passages: wrong argument')
 
 
 
