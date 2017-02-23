@@ -83,14 +83,14 @@ CREATE TABLE `VisitorsPassages` (
 
 CREATE TABLE `VisitorsPassagesPassage` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `visitorsPassagesId` integer NOT NULL,
+    `visitorsPssgsId` integer NOT NULL,
     `pssgId` integer NOT NULL,
-    CONSTRAINT `fk_VisitorsPassagesPassage_VisitorsPassages` FOREIGN KEY (`visitorsPassagesId`) REFERENCES `VisitorsPassages` (`id`),
+    CONSTRAINT `fk_VisitorsPassagesPassage_VisitorsPassages` FOREIGN KEY (`visitorsPssgsId`) REFERENCES `VisitorsPassages` (`id`),
     CONSTRAINT `fk_VisitorsPassagesPassage_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`)
 )
 ;
 
-CREATE UNIQUE INDEX VisitorsPassagesPassageIndex ON VisitorsPassagesPassage (visitorsPassagesId, pssgId)
+CREATE UNIQUE INDEX VisitorsPassagesPassageIndex ON VisitorsPassagesPassage (visitorsPssgsId, pssgId)
 ;
 
 

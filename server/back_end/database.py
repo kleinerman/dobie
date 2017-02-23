@@ -455,6 +455,52 @@ class DataBase(object):
 
 
 
+    def addPssgToVisitorsPssgs(self, visitorsPssgsId, pssgId):
+        '''
+        '''
+
+        sql = ("INSERT INTO VisitorsPassagesPassage(visitorsPssgsId, pssgId) "
+               "VALUES ({}, {})".format(visitorsPssgsId, pssgId)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+            return self.cursor.lastrowid
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not add this passage to Visitors Passage')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitorsPssgsError('Can not add this passage to Visitors Passage: wrong argument')
+
+
+
+
+    def delPssgFromVisitorsPssgs(self, visitorsPssgsId, pssgId):
+        '''
+        '''
+
+        sql = ("DELETE FROM VisitorsPassagesPassage WHERE "
+               "visitorsPssgsId = {} AND pssgId = {}"
+               "".format(visitorsPssgsId, pssgId)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise VisitorsPssgsNotFound('Passage not found in Visitors Passages.')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not delete this Passage from Visitors Passages')
+
+
+
+
+
 #----------------------------------Controller----------------------------------------
 
 

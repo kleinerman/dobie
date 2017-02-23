@@ -375,7 +375,6 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-
         @app.route('/api/v1.0/visitorspassages/<int:visitorsPssgsId>', methods=['PUT', 'DELETE'])
         @auth.login_required
         def modVisitorsPssgs(visitorsPssgsId):
@@ -406,6 +405,49 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
             except KeyError:
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitorsPssgsNeedKeys)))
+
+
+
+
+
+
+
+
+
+        @app.route('/api/v1.0/visitorspassages/<int:visitorsPssgsId>/passage/<int:pssgId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def pssgInVisitorsPssgs(visitorsPssgsId, pssgId):
+            ''' 
+            Add a new Visitors Passages into the database.
+            '''
+            try:
+                if request.method == 'PUT':
+                    self.dataBase.addPssgToVisitorsPssgs(visitorsPssgsId, pssgId)
+                    return jsonify({'status': 'OK', 'message': 'Passage added to Visitors Passages'}), OK
+                elif request.method == 'DELETE':
+                    self.dataBase.delPssgFromVisitorsPssgs(visitorsPssgsId, pssgId)
+                    return jsonify({'status': 'OK', 'message': 'Passage deleted from Visitors Passages'}), OK
+
+            except database.VisitorsPssgsError as visitorsPssgsError:
+                raise ConflictError(str(visitorsPssgsError))
+            except database.VisitorsPssgsNotFound as visitorsPssgsNotFound:
+                raise NotFound(str(visitorsPssgsNotFound))
+
+
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
+
+
+
+
+
+
 
 
 
