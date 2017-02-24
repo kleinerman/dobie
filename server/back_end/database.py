@@ -384,6 +384,21 @@ class DataBase(object):
 #----------------------------------Visitors Passage-----------------------------------
 
 
+
+
+    def getVisitorsPssgss(self):
+        '''
+        Return a dictionary with all Zones
+        '''
+        sql = ('SELECT * FROM VisitorsPassages')
+        self.cursor.execute(sql)
+        visitorsPssgss = self.cursor.fetchall()
+
+        return visitorsPssgss
+
+
+
+
     def addVisitorsPssgs(self, visitorsPssgs):
         '''
         Receive a dictionary with Visitors Passagess parametters 
@@ -734,24 +749,53 @@ class DataBase(object):
 #----------------------------------Passage----------------------------------------
 
 
-    def getPassages(self, zoneId):
+    def getPassages(self, zoneId=None, visitorsPssgsId=None):
         '''
-        Return a dictionary with all passages in a Zone
+        Return a dictionary with all passages in a Zone or in a visitorsPassages
+        according to the argument received
         '''
-        # check if the zoneId exists in the database
-        sql = ("SELECT * FROM Zone WHERE id='{}'".format(zoneId))
-        self.cursor.execute(sql)
-        zone = self.cursor.fetchall()
 
-        if not zone:
-            raise ZoneNotFound('Zone not found')
+        if not zoneId and not visitorsPssgsId:
+            raise PassageNotFound
+
+        elif zoneId:
+
+            # check if the zoneId exists in the database
+            sql = ("SELECT * FROM Zone WHERE id='{}'".format(zoneId))
+            self.cursor.execute(sql)
+            zone = self.cursor.fetchall()
+
+            if not zone:
+                raise ZoneNotFound('Zone not found')
        
-        # Get all persons from the organization
-        sql = ("SELECT * FROM Passage WHERE zoneId='{}'".format(zoneId))
-        self.cursor.execute(sql)
-        passages = self.cursor.fetchall()
+            # Get all persons from the organization
+            sql = ("SELECT * FROM Passage WHERE zoneId='{}'".format(zoneId))
+            self.cursor.execute(sql)
+            passages = self.cursor.fetchall()
         
-        return passages
+            return passages
+
+        elif visitorsPssgsId:
+            sql = ("SELECT COUNT(*) FROM VisitorsPassages WHERE id='{}'".format(visitorsPssgsId))
+            self.cursor.execute(sql)
+            
+            if self.cursor.fetchone()['COUNT(*)']:
+        
+                sql = ("SELECT Passage.* from Passage JOIN VisitorsPassagesPassage "
+                       "ON (Passage.id = VisitorsPassagesPassage.pssgId) "
+                       "WHERE VisitorsPassagesPassage.visitorsPssgsId = {}"
+                       "".format(visitorsPssgsId)
+                      )
+                self.cursor.execute(sql)
+                passages = self.cursor.fetchall()
+                return passages
+
+            else:
+                raise VisitorsPssgsNotFound('Visitors Passages not found')
+
+
+            
+            
 
 
 

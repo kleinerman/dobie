@@ -85,8 +85,8 @@ CREATE TABLE `VisitorsPassagesPassage` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `visitorsPssgsId` integer NOT NULL,
     `pssgId` integer NOT NULL,
-    CONSTRAINT `fk_VisitorsPassagesPassage_VisitorsPassages` FOREIGN KEY (`visitorsPssgsId`) REFERENCES `VisitorsPassages` (`id`),
-    CONSTRAINT `fk_VisitorsPassagesPassage_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`)
+    CONSTRAINT `fk_VisitorsPassagesPassage_VisitorsPassages` FOREIGN KEY (`visitorsPssgsId`) REFERENCES `VisitorsPassages` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_VisitorsPassagesPassage_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE
 )
 ;
 
