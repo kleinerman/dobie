@@ -309,7 +309,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 ## For GET method
                 if request.method == 'GET':
-                    passages = self.dataBase.getPassages(zoneId)
+                    passages = self.dataBase.getPassages(zoneId=zoneId)
                     
                     for passage in passages:
                         passage['uri'] = url_for('modPassage', pssgId=passage['id'], _external=True)
@@ -348,19 +348,28 @@ class CrudMngr(genmngr.GenericMngr):
 
         visitorsPssgsNeedKeys = ('name',)
 
-        @app.route('/api/v1.0/visitorspassages', methods=['POST'])
+        @app.route('/api/v1.0/visitorspassages', methods=['POST', 'GET'])
         @auth.login_required
-        def addVisitorsPssgs():
+        def visitorsPssgss():
             ''' 
             Add a new Visitors Passages into the database.
             '''     
             try:    
-                visitorsPssgs = {}
-                for param in visitorsPssgsNeedKeys:
-                    visitorsPssgs[param] = request.json[param]
-                visitorsPssgsId = self.dataBase.addVisitorsPssgs(visitorsPssgs)
-                uri = url_for('modVisitorsPssgs', visitorsPssgsId=visitorsPssgsId, _external=True)
-                return jsonify({'status': 'OK', 'message': 'Visitors Passage added', 'code': CREATED, 'uri': uri}), CREATED
+                ## For GET method
+                if request.method == 'GET':
+                    visitorsPssgss = self.dataBase.getVisitorsPssgss()
+                    for visitorsPssgs in visitorsPssgss:
+                        visitorsPssgs['uri'] = url_for('visitorsPssgs', visitorsPssgsId=visitorsPssgs['id'], _external=True)
+                        visitorsPssgs.pop('id')
+                    return jsonify(visitorsPssgss)
+                ## For POST method
+                elif request.method == 'POST':
+                    visitorsPssgs = {}
+                    for param in visitorsPssgsNeedKeys:
+                        visitorsPssgs[param] = request.json[param]
+                    visitorsPssgsId = self.dataBase.addVisitorsPssgs(visitorsPssgs)
+                    uri = url_for('visitorsPssgs', visitorsPssgsId=visitorsPssgsId, _external=True)
+                    return jsonify({'status': 'OK', 'message': 'Visitors Passage added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.VisitorsPssgsError as visitorsPssgsError:
                 raise ConflictError(str(visitorsPssgsError))
@@ -375,14 +384,26 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/visitorspassages/<int:visitorsPssgsId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/visitorspassages/<int:visitorsPssgsId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
-        def modVisitorsPssgs(visitorsPssgsId):
+        def visitorsPssgs(visitorsPssgsId):
             '''
             Update or delete a Visitors Passages in the database.
             '''
             try:
-                if request.method == 'PUT':
+
+    
+                ## For GET method
+                if request.method == 'GET':
+                    passages = self.dataBase.getPassages(visitorsPssgsId=visitorsPssgsId)
+
+                    for passage in passages:
+                        passage['uri'] = url_for('modPassage', pssgId=passage['id'], _external=True)
+                        passage.pop('id')
+                    return jsonify(passages)
+
+
+                elif request.method == 'PUT':
                     visitorsPssgs = {}
                     visitorsPssgs['id'] = visitorsPssgsId
                     for param in visitorsPssgsNeedKeys:
