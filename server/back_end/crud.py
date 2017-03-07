@@ -657,7 +657,7 @@ class CrudMngr(genmngr.GenericMngr):
 #--------------------------------------Passage------------------------------------------
 
 
-        pssgNeedKeys = ('pssgNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId')
+        pssgNeedKeys = ('description', 'pssgNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId')
 
         @app.route('/api/v1.0/passage', methods=['POST'])
         @auth.login_required
@@ -673,6 +673,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Passage dictionary modified for the controller database (same server passage id)
                 passage['id'] = pssgId
+                passage.pop('description')
                 passage.pop('zoneId')
                 passage.pop('controllerId')
                 # Get the controller mac address
@@ -710,6 +711,7 @@ class CrudMngr(genmngr.GenericMngr):
                     for param in pssgNeedKeys:
                         passage[param] = request.json[param]
                     self.dataBase.updPassage(passage)
+                    passage.pop('description')
                     passage.pop('zoneId')
                     passage.pop('controllerId')
                     ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)

@@ -59,8 +59,9 @@ CREATE TABLE `Zone` (
 
 CREATE TABLE `Passage` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `controllerId` integer NOT NULL,
     `pssgNum` integer NOT NULL,
+    `description` varchar(40),
+    `controllerId` integer NOT NULL,
     `rlseTime` integer NOT NULL,
     `bzzrTime` integer NOT NULL,
     `alrmTime` integer NOT NULL,

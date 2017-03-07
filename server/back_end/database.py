@@ -838,10 +838,11 @@ class DataBase(object):
         It returns the id of the added passage
         '''
 
-        sql = ("INSERT INTO Passage(pssgNum, controllerId, rlseTime, bzzrTime, alrmTime, "
-               "zoneId, rowStateId) VALUES({}, {}, {}, {}, {}, {}, {})"
-               "".format(passage['pssgNum'], passage['controllerId'], passage['rlseTime'], 
-                         passage['bzzrTime'], passage['alrmTime'], passage['zoneId'], TO_ADD)
+        sql = ("INSERT INTO Passage(pssgNum, description, controllerId, rlseTime, bzzrTime, "
+               "alrmTime, zoneId, rowStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {})"
+               "".format(passage['pssgNum'], passage['description'], passage['controllerId'], 
+                         passage['rlseTime'], passage['bzzrTime'], passage['alrmTime'], 
+                         passage['zoneId'], TO_ADD)
               )
 
 
@@ -931,11 +932,11 @@ class DataBase(object):
         Receive a dictionary with passage parametters and update it in DB
         '''
 
-        sql = ("UPDATE Passage SET pssgNum = {}, controllerId = {}, rlseTime = {}, "
+        sql = ("UPDATE Passage SET pssgNum = {}, description = '{}', controllerId = {}, rlseTime = {}, "
                "bzzrTime = {}, alrmTime = {}, zoneId = {}, rowStateId = {} WHERE id = {}"
-               "".format(passage['pssgNum'], passage['controllerId'], passage['rlseTime'], 
-                         passage['bzzrTime'], passage['alrmTime'], passage['zoneId'],
-                         TO_UPDATE, passage['id'])
+               "".format(passage['pssgNum'], passage['description'], passage['controllerId'],
+                         passage['rlseTime'], passage['bzzrTime'], passage['alrmTime'],
+                         passage['zoneId'], TO_UPDATE, passage['id'])
               )
 
         try:
