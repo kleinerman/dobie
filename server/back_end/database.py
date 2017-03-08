@@ -1308,7 +1308,6 @@ class DataBase(object):
 
 #-------------------------------Access-----------------------------------
 
-
     def getAccesses(self, personId):
 
         '''
@@ -1327,7 +1326,49 @@ class DataBase(object):
         self.cursor.execute(sql)
         accesses = self.cursor.fetchall()
 
+        for access in accesses:
+
+            access['startTime'] = str(access['startTime'])
+            access['endTime'] = str(access['endTime'])
+            access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+
+            if not access['allWeek']:
+                access['limitedAccess'] = self.getLiAccesses(access['pssgId'], personId)
+
         return accesses
+
+
+
+
+    def getLiAccesses(self, pssgId, personId):
+
+        '''
+        Return a dictionary with all access with the personId
+        '''
+        # check if the person id exist in the database
+        sql = ("SELECT * FROM Person WHERE id = '{}'".format(personId))
+        self.cursor.execute(sql)
+        person = self.cursor.fetchall()
+
+        if not person:
+            raise PersonNotFound('Person not found')
+
+        # Get all persons from the organization
+        sql = ("SELECT * FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
+               "".format(pssgId, personId)
+              )
+        self.cursor.execute(sql)
+        liAccesses = self.cursor.fetchall()
+
+        for liAccess in liAccesses:
+                           
+            liAccess['startTime'] = str(liAccess['startTime'])
+            liAccess['endTime'] = str(liAccess['endTime'])
+
+
+        return liAccesses
+
+
 
 
 
