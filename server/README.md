@@ -64,30 +64,27 @@ Recall that ExecStart= line is needed to drop inherited ExecStart.
 Running on Docker (database server)
 -----------------------------------
 
-In order to run Dobie's back\_end using Docker containers, you should set up a MariaDB database container
+In order to run Dobie's back-end using Docker containers, you should set up a MariaDB database container
 
-1. Download the official MariaDB image:
-
+*Download the official MariaDB image:*
 
 ```
 $ docker pull mariadb:latest
 ```
 
-2. Create a non-ephemeral storage for the database
-
+*Create a non-ephemeral storage for the database*
 
 ```
 $ docker volume create --name database-volume
 ```
 
-3. Launch the database container:
-
+*Launch the database container:*
 
 ```
 $ docker run --name database-container -v database-volume:/var/lib/mysql -d -e MYSQL_ROOT_PASSWORD=mypass mariadb:latest
 ```
 
-4. Set MariaDB listen on all interfaces:
+*Set MariaDB listen on all interfaces:*
 
 Modify a local version of my.cnf to listen on all interfaces and copy into the container
 
@@ -95,10 +92,35 @@ Modify a local version of my.cnf to listen on all interfaces and copy into the c
 $ docker cp my.cnf database-container:/etc/mysql/my.cnf
 ```
 
-5. Restart the MariaDB container:
-
+*Restart the MariaDB container:*
 
 ```
 $ docker restart database-container
+```
+
+
+Running on Docker (back-end server)
+-----------------------------------
+
+In this step, we are going to set up the main Python process.
+
+
+Use the Dockerfile (located on this repo) to build the Python container for the back-end server.
+Put the Dockerfile on a directory and run the following command in the same directory:
+
+```
+$ docker build -t "python\_flask:latest" .
+```
+
+*Clone the Dobie repository*:
+
+```
+$ git clone https://USER@github.com/jkleinerman/ConPass.git
+```
+
+*Launch the Docker container*:
+
+```
+docker run -it -p 5000:5000 -v /home/USER/ConPass/server/back\_end:/data python\_flask:latest python /data/main.py
 ```
 
