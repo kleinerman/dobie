@@ -1025,8 +1025,12 @@ class DataBase(object):
         #The person row is inserted in COMMITTED state since the person is not sent to
         #controller at the moment it is inserted here. It it sent to the controller when
         #an access is created.
-        sql = ("INSERT INTO Person(name, cardNumber, orgId, rowStateId) VALUES('{}', {}, {}, {})"
-               "".format(person['name'], person['cardNumber'], person['orgId'], COMMITTED)
+
+        if not person['visitedOrgId']:
+            person['visitedOrgId'] = 'NULL'
+
+        sql = ("INSERT INTO Person(name, cardNumber, orgId, visitedOrgId, rowStateId) VALUES('{}', {}, {}, {}, {})"
+               "".format(person['name'], person['cardNumber'], person['orgId'], person['visitedOrgId'], COMMITTED)
               )
 
         try:
@@ -1192,7 +1196,8 @@ class DataBase(object):
                 self.cursor.execute(sql)
                 pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
                 if not pendCtrllersToDel:
-                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    #sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    sql = "UPDATE Person SET rowStateId = {} WHERE id = {}".format(DELETED, personId)
                     self.cursor.execute(sql)
                     self.connection.commit()
 
@@ -1220,6 +1225,9 @@ class DataBase(object):
 
             elif rowState == COMMITTED:
                 self.logger.info('Person already committed.')
+
+            elif rowState == DELETED:
+                self.logger.info('Person already deleted.')
 
             else:
                 self.logger.debug('Invalid state detected in Person table.')
@@ -1268,9 +1276,11 @@ class DataBase(object):
         '''
         Receive a dictionary with id organization
         '''
+        if not person['visitedOrgId']:
+            person['visitedOrgId'] = 'NULL'
 
-        sql = ("UPDATE Person SET name = '{}', cardNumber = {}, orgId = {} WHERE id = {}"
-               "".format(person['name'], person['cardNumber'], person['orgId'], person['id'])
+        sql = ("UPDATE Person SET name = '{}', cardNumber = {}, orgId = {}, visitedOrgId = {} WHERE id = {}"
+               "".format(person['name'], person['cardNumber'], person['orgId'], person['visitedOrgId'], person['id'])
               )
 
         try:
@@ -1333,7 +1343,7 @@ class DataBase(object):
             access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
 
             if not access['allWeek']:
-                access['limitedAccess'] = self.getLiAccesses(access['pssgId'], personId)
+                access['liAccesses'] = self.getLiAccesses(access['pssgId'], personId)
 
         return accesses
 
