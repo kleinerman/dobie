@@ -71,8 +71,14 @@ class CrudReSndr(genmngr.GenericMngr):
                 ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
                 for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_ADD):
+                    passage.pop('description')
+                    passage.pop('controllerId')
+                    passage.pop('zoneId')
                     self.ctrllerMsger.addPassage(ctrllerMac, passage)
                 for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_UPDATE):
+                    passage.pop('description')
+                    passage.pop('controllerId')
+                    passage.pop('zoneId')
                     self.ctrllerMsger.updPassage(ctrllerMac, passage)
                 for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_DELETE):
                     self.ctrllerMsger.delPassage(ctrllerMac, passage['id'])

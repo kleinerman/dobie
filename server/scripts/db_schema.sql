@@ -17,8 +17,10 @@ CREATE TABLE `Person` (
     `name` varchar(40) NOT NULL,
     `cardNumber` integer NOT NULL,
     `orgId` integer NOT NULL,
+    `visitedOrgId` integer,
     `rowStateId` integer NOT NULL,
     CONSTRAINT `fk_Person_Organization` FOREIGN KEY (`orgId`) REFERENCES `Organization` (`id`),
+    CONSTRAINT `fk_Person_VisitedOrganization` FOREIGN KEY (`visitedOrgId`) REFERENCES `Organization` (`id`),
     CONSTRAINT `fk_Person_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
 )
 ;

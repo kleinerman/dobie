@@ -474,7 +474,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 #-------------------------------------Person------------------------------------------
 
-        prsnNeedKeys = ('name', 'cardNumber', 'orgId')
+        prsnNeedKeys = ('name', 'cardNumber', 'orgId', 'visitedOrgId')
 
         @app.route('/api/v1.0/person', methods=['POST'])
         @auth.login_required
@@ -515,10 +515,11 @@ class CrudMngr(genmngr.GenericMngr):
                     accesses = self.dataBase.getAccesses(personId)
                     for access in accesses:
                         access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
-                        # Convert to string the following values for jsonify
-                        ##access['startTime'] = str(access['startTime'])
-                        ##access['endTime'] = str(access['endTime'])
-                        ##access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+                        try:
+                            for liAccess in access['liAccesses']:
+                                liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
+                        except KeyError:
+                            pass
                         # Remove id
                         access.pop('id')
 
