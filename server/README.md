@@ -109,7 +109,7 @@ Use the Dockerfile (located on this repo) to build the Python container for the 
 Put the Dockerfile on a directory and run the following command in the same directory:
 
 ```
-$ docker build -t "python\_flask:latest" .
+$ docker build -t "python_flask:latest" .
 ```
 
 *Clone the Dobie repository*:
@@ -121,6 +121,6 @@ $ git clone https://USER@github.com/jkleinerman/ConPass.git
 *Launch the Docker container*:
 
 ```
-docker run -it -p 5000:5000 -v /home/USER/ConPass/server/back\_end:/data python\_flask:latest python /data/main.py
+docker run -it -p 5000:5000 -v /home/USER/ConPass/server/back_end:/data python_flask:latest python /data/main.py
 ```
 
