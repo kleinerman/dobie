@@ -1088,10 +1088,14 @@ class DataBase(object):
             if ctrllerMacs == []:
                 if operation == TO_DELETE:
                     logMsg = ("This person is not present in any controller. "
-                              "Removing it from central DB." 
+                              "marking it as deleted in central DB." 
                              )
                     self.logger.debug(logMsg)
-                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+#                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+                       "".format(DELETED, personId)
+                          )
+                    
                     self.cursor.execute(sql)
                     self.connection.commit()
 
