@@ -219,6 +219,11 @@ class CrudMngr(genmngr.GenericMngr):
             DELETE: Delete an organization
             '''
             try:
+                #If somebody is trying to modify/delete the "Unknown" of "Visitors"
+                #organization via REST, we should respond with 404 (Not Found)
+                if orgId in (1, 2):
+                    raise database.OrganizationNotFound('Organization not found')
+
                 ## For GET method
                 if request.method == 'GET':
                     persons = self.dataBase.getPersons(orgId)
@@ -509,7 +514,12 @@ class CrudMngr(genmngr.GenericMngr):
             GET: Return a JSON with all accesses that this person has
             PUT/DELETE: Update or delete a Zone in the database.
             '''
+
             try:
+                #If somebody is trying to modify/delete the "Unknown" person
+                #via REST, we should respond with 404 (Not Found)
+                if personId == 1:
+                    raise database.PersonNotFound('Person not found')
                 ## For GET method
                 if request.method == 'GET':
                     accesses = self.dataBase.getAccesses(personId)
@@ -532,7 +542,9 @@ class CrudMngr(genmngr.GenericMngr):
                     for param in prsnNeedKeys:
                         person[param] = request.json[param]
                     self.dataBase.updPerson(person)
+                    person.pop('name')
                     person.pop('orgId')
+                    person.pop('visitedOrgId')
                     ctrllerMacsToUpdPrsn = self.dataBase.markPerson(personId, database.TO_UPDATE)
                     self.ctrllerMsger.updPerson(ctrllerMacsToUpdPrsn, person)
                     return jsonify({'status': 'OK', 'message': 'Person updated'}), OK
