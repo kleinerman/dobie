@@ -66,10 +66,10 @@ Running on Docker (database server)
 
 In order to run Dobie's back-end using Docker containers, you should set up a MariaDB database container
 
-*Download the official MariaDB image:*
+*Build the image using the Dockerfile*
 
 ```
-$ docker pull mariadb:latest
+$ docker build -t="aryklein/database:0.1" .
 ```
 
 *Create a non-ephemeral storage for the database*
@@ -81,35 +81,28 @@ $ docker volume create --name database-volume
 *Launch the database container:*
 
 ```
-$ docker run --name database-container -v database-volume:/var/lib/mysql -d -e MYSQL_ROOT_PASSWORD=mypass mariadb:latest
+$ docker run --name database -v database-volume:/var/lib/mysql -d aryklein/database:0.1
 ```
 
-*Set MariaDB listen on all interfaces:*
-
-Modify a local version of my.cnf to listen on all interfaces and copy into the container
+*Create (if necessary) the database, user and tables:*
 
 ```
-$ docker cp my.cnf database-container:/etc/mysql/my.cnf
+$ docker exec -it bash database
+# root@92d8a1825168:/# /tmp/db_create_drop.sh --create
+# root@92d8a1825168:/# exit
 ```
-
-*Restart the MariaDB container:*
-
-```
-$ docker restart database-container
-```
-
 
 Running on Docker (back-end server)
 -----------------------------------
 
-In this step, we are going to set up the main Python process.
+In this step, we are going to set up the back-end process.
 
 
-Use the Dockerfile (located on this repo) to build the Python container for the back-end server.
+Use the Dockerfile (located on this repository) to build the Python container for the back-end server.
 Put the Dockerfile on a directory and run the following command in the same directory:
 
 ```
-$ docker build -t "python_flask:latest" .
+$ docker build -t "backend:0.1" .
 ```
 
 *Clone the Dobie repository*:
@@ -121,6 +114,6 @@ $ git clone https://USER@github.com/jkleinerman/ConPass.git
 *Launch the Docker container*:
 
 ```
-docker run -it -p 5000:5000 -v /home/USER/ConPass/server/back_end:/data python_flask:latest python /data/main.py
+docker run -it -p 5000:5000 -v /home/USER/ConPass/server/back_end:/opt/app backend:0.1 python /opt/app/main.py
 ```
 
