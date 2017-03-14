@@ -87,7 +87,7 @@ $ docker run --name database -v database-volume:/var/lib/mysql -d aryklein/datab
 *Create (if necessary) the database, user and tables:*
 
 ```
-$ docker exec -it bash database
+$ docker exec -it database bash
 # root@92d8a1825168:/# /tmp/db_create_drop.sh --create
 # root@92d8a1825168:/# exit
 ```
@@ -102,7 +102,7 @@ Use the Dockerfile (located on this repository) to build the Python container fo
 Put the Dockerfile on a directory and run the following command in the same directory:
 
 ```
-$ docker build -t "backend:0.1" .
+$ docker build -t="aryklein/backend:0.1" .
 ```
 
 *Clone the Dobie repository*:
@@ -114,6 +114,6 @@ $ git clone https://USER@github.com/jkleinerman/ConPass.git
 *Launch the Docker container*:
 
 ```
-docker run -it -p 5000:5000 -v /home/USER/ConPass/server/back_end:/opt/app backend:0.1 python /opt/app/main.py
+docker run -p 5000:5000 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
 ```
 
