@@ -225,8 +225,8 @@ class DataBase(object):
         It returns the id of the added organization.
         '''
 
-        sql = ("INSERT INTO Organization(name) VALUES('{}')"
-               "".format(organization['name'])
+        sql = ("INSERT INTO Organization(name, rowStateId) VALUES('{}', {})"
+               "".format(organization['name'], COMMITTED)
               )
         
         try:
@@ -246,14 +246,42 @@ class DataBase(object):
 
 
 
+#    def delOrganization(self, orgId):
+#        '''
+#        Receive a dictionary with id organization and delete the organization.
+#        '''
+#
+#        sql = ("DELETE FROM Organization WHERE id = {}"
+#               "".format(orgId)
+#              )        
+#
+#        try:
+#            self.cursor.execute(sql)
+#            if self.cursor.rowcount < 1:
+#                raise OrganizationNotFound('Organization not found')
+#            self.connection.commit()
+#
+#        except pymysql.err.IntegrityError as integrityError:
+#            self.logger.debug(integrityError)
+#            raise OrganizationError('Can not delete this organization')
+
+
+
+
+
     def delOrganization(self, orgId):
         '''
-        Receive a dictionary with id organization and delete the organization.
+        Receive a dictionary with organization parametters and update it in DB
         '''
 
-        sql = ("DELETE FROM Organization WHERE id = {}"
-               "".format(orgId)
-              )        
+        if self.getPersons(orgId):
+            sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+                   "".format(TO_DELETE, orgId)
+                  )
+        else:
+            sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+                   "".format(DELETED, orgId)
+                  )
 
         try:
             self.cursor.execute(sql)
@@ -263,7 +291,14 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise OrganizationError('Can not delete this organization')
+            raise OrganizationError('Can not update this organization')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not update this organization: wrong argument')
+
+
+
+
 
 
 
@@ -291,6 +326,45 @@ class DataBase(object):
 
 
 
+    def delOrgIfEmpty(self, personId):
+        '''
+        Mark the organization that personId belongs to as DELETED if the organization
+        is marked as TO_DELETE and there is not more persons in this organization
+        
+        '''
+
+        sql = ("SELECT Organization.id FROM Organization JOIN Person "
+               "ON (Organization.id = Person.orgId) WHERE Person.id = {}"
+               "".format(personId)
+              )
+        try:
+            self.cursor.execute(sql)
+            orgId = self.cursor.fetchone()['id']
+
+
+            sql = ("SELECT COUNT(*) FROM Person WHERE orgId = {} AND rowStateId != {}"
+                   "".format(orgId, DELETED)
+                  )
+            self.cursor.execute(sql)
+            personCount = self.cursor.fetchone()['COUNT(*)']
+
+            if not personCount:
+                sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+                       "".format(DELETED, orgId)
+                      )
+                self.cursor.execute(sql)
+
+
+        except TypeError:
+            self.logger.debug('OrgNoPres')
+            raise OrganizationError('Can not get organization from person')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise OrganizationError('Can not get organization from person')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not get organization from person')
 
 
 
@@ -1088,16 +1162,16 @@ class DataBase(object):
             if ctrllerMacs == []:
                 if operation == TO_DELETE:
                     logMsg = ("This person is not present in any controller. "
-                              "marking it as deleted in central DB." 
+                              "Marking it as deleted in central DB." 
                              )
                     self.logger.debug(logMsg)
-#                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
                     sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
                        "".format(DELETED, personId)
                           )
-                    
                     self.cursor.execute(sql)
                     self.connection.commit()
+
+                    self.delOrgIfEmpty(personId)
 
                 elif operation == TO_UPDATE:
                     logMsg = ("This person is not present in any controller. "

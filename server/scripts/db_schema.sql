@@ -8,7 +8,8 @@ CREATE TABLE `RowState` (
 
 CREATE TABLE `Organization` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `name` varchar(40) NOT NULL
+    `name` varchar(40) NOT NULL,
+    `rowStateId` integer NOT NULL
 )
 ;
 
