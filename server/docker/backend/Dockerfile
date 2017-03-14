@@ -9,5 +9,4 @@ pip install PyMySQL
 # Expose ports:
 # - 7979: controller connection port
 # - 5000: REST API
-EXPOSE 7979
-EXPOSE 5000
+EXPOSE 7979 5000
