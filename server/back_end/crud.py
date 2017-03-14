@@ -245,6 +245,10 @@ class CrudMngr(genmngr.GenericMngr):
                 # Delete an organization
                 elif request.method == 'DELETE':
                     self.dataBase.delOrganization(orgId)
+                    for person in self.dataBase.getPersons(orgId):
+                        ctrllerMacsToDelPrsn = self.dataBase.markPerson(person['id'], database.TO_DELETE)
+                        self.ctrllerMsger.delPerson(ctrllerMacsToDelPrsn, person['id'])
+                        
                     return jsonify({'status': 'OK', 'message': 'Organization deleted'}), OK
 
             except database.OrganizationNotFound as organizationNotFound:
