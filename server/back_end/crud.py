@@ -245,7 +245,7 @@ class CrudMngr(genmngr.GenericMngr):
                 # Delete an organization
                 elif request.method == 'DELETE':
                     self.dataBase.delOrganization(orgId)
-                    for person in self.dataBase.getPersons(orgId):
+                    for person in self.dataBase.getPersons(orgId, includeDeleted=False):
                         ctrllerMacsToDelPrsn = self.dataBase.markPerson(person['id'], database.TO_DELETE)
                         self.ctrllerMsger.delPerson(ctrllerMacsToDelPrsn, person['id'])
                         

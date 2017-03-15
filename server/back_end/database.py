@@ -246,35 +246,14 @@ class DataBase(object):
 
 
 
-#    def delOrganization(self, orgId):
-#        '''
-#        Receive a dictionary with id organization and delete the organization.
-#        '''
-#
-#        sql = ("DELETE FROM Organization WHERE id = {}"
-#               "".format(orgId)
-#              )        
-#
-#        try:
-#            self.cursor.execute(sql)
-#            if self.cursor.rowcount < 1:
-#                raise OrganizationNotFound('Organization not found')
-#            self.connection.commit()
-#
-#        except pymysql.err.IntegrityError as integrityError:
-#            self.logger.debug(integrityError)
-#            raise OrganizationError('Can not delete this organization')
-
-
-
-
 
     def delOrganization(self, orgId):
         '''
-        Receive a dictionary with organization parametters and update it in DB
+        Mark de Organization as TO_DELETE state if it has persons on it
+        or as DELETED if there is not more persons on it
         '''
 
-        if self.getPersons(orgId):
+        if self.getPersons(orgId, includeDeleted=False):
             sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
                    "".format(TO_DELETE, orgId)
                   )
@@ -326,37 +305,44 @@ class DataBase(object):
 
 
 
-    def delOrgIfEmpty(self, personId):
+    def delOrgIfNeed(self, personId):
         '''
         Mark the organization that personId belongs to as DELETED if the organization
         is marked as TO_DELETE and there is not more persons in this organization
         
         '''
 
-        sql = ("SELECT Organization.id FROM Organization JOIN Person "
-               "ON (Organization.id = Person.orgId) WHERE Person.id = {}"
-               "".format(personId)
-              )
         try:
-            self.cursor.execute(sql)
-            orgId = self.cursor.fetchone()['id']
 
-
-            sql = ("SELECT COUNT(*) FROM Person WHERE orgId = {} AND rowStateId != {}"
-                   "".format(orgId, DELETED)
+            #Getting the orgId this person belong to
+            sql = ("SELECT Organization.id, Organization.rowStateId FROM Organization "
+                   "JOIN Person ON (Organization.id = Person.orgId) WHERE Person.id = {}"
+                   "".format(personId)
                   )
             self.cursor.execute(sql)
-            personCount = self.cursor.fetchone()['COUNT(*)']
+            row = self.cursor.fetchone()
+            orgId, rowStateId = row['id'], row['rowStateId']
 
-            if not personCount:
-                sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
-                       "".format(DELETED, orgId)
+            if rowStateId == TO_DELETE:
+
+                #Gets the number of people who belong to this organization and who have
+                #not yet been eliminated
+                sql = ("SELECT COUNT(*) FROM Person WHERE orgId = {} AND rowStateId != {}"
+                       "".format(orgId, DELETED)
                       )
                 self.cursor.execute(sql)
+                personCount = self.cursor.fetchone()['COUNT(*)']
+
+                #If personCount is 0, the organization can be deleted.
+                if personCount == 0:
+                    sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+                           "".format(DELETED, orgId)
+                          )
+                    self.cursor.execute(sql)
 
 
         except TypeError:
-            self.logger.debug('OrgNoPres')
+            self.logger.debug('TypeError fetching orgId or count of persons')
             raise OrganizationError('Can not get organization from person')
 
         except pymysql.err.IntegrityError as integrityError:
@@ -1032,24 +1018,43 @@ class DataBase(object):
 
 #-------------------------------Person-----------------------------------
 
-    def getPersons(self, orgId):
+    def getPersons(self, orgId, includeDeleted=True):
         '''
-        Return a dictionary with all persons in an organization
+        Return a dictionary with all persons in an organization,
+        By default the method also retrieve the persons mark as DELETED.
+        If "includeDeleted" flag is set to False, it will only return all
+        the persons not marked as DELETED
         '''
-        # check if the organization id exist in the database
-        sql = ("SELECT * FROM Organization WHERE id='{}'".format(orgId))
-        self.cursor.execute(sql)
-        organization = self.cursor.fetchall()
+        
+        try:
+        
+            #check if the organization id exist in the database
+            sql = ("SELECT * FROM Organization WHERE id='{}'".format(orgId))
+            self.cursor.execute(sql)
+            organization = self.cursor.fetchone()
 
-        if not organization:
-            raise OrganizationNotFound('Organization not found')
+            if not organization:
+                raise OrganizationNotFound('Organization not found')
         
-        # Get all persons from the organization
-        sql = ("SELECT * FROM Person WHERE orgId='{}'".format(orgId))
-        self.cursor.execute(sql)
-        persons = self.cursor.fetchall()
+            # Get all persons from the organization
+            if includeDeleted:
+                sql = "SELECT * FROM Person WHERE orgId = {}".format(orgId)
+
+            else:
+                sql = ("SELECT * FROM Person WHERE orgId = {} AND rowStateId != {}"
+                       "".format(orgId, DELETED)
+                      )
+            self.cursor.execute(sql)
+            persons = self.cursor.fetchall()
         
-        return persons
+            return persons
+
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not get persons from this organization')
+
+
 
 
 
@@ -1171,7 +1176,7 @@ class DataBase(object):
                     self.cursor.execute(sql)
                     self.connection.commit()
 
-                    self.delOrgIfEmpty(personId)
+                    self.delOrgIfNeed(personId)
 
                 elif operation == TO_UPDATE:
                     logMsg = ("This person is not present in any controller. "
@@ -1278,6 +1283,9 @@ class DataBase(object):
                     sql = "UPDATE Person SET rowStateId = {} WHERE id = {}".format(DELETED, personId)
                     self.cursor.execute(sql)
                     self.connection.commit()
+
+                self.delOrgIfNeed(personId)
+
 
             elif rowState == TO_UPDATE:
                 #Deleting the entry in "PersonPendingOperation" table which has this person id,
