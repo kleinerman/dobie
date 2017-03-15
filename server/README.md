@@ -114,6 +114,6 @@ $ git clone https://USER@github.com/jkleinerman/ConPass.git
 *Launch the Docker container*:
 
 ```
-docker run -p 5000:5000 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
+docker run --name backend -p 5000:5000 -p 7979:7979 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
 ```
 
