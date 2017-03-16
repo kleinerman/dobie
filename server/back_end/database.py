@@ -1148,6 +1148,22 @@ class DataBase(object):
             self.connection.commit()
 
 
+
+            #If the operation is TO_DELETE, and we still have access pending to add (TO_ADD),
+            #those accesses should be deleted in central DB and the controller should never
+            #be aware of this situationu
+            if operation == TO_DELETE:
+                sql = ("DELETE FROM LimitedAccess WHERE rowStateId = {} AND personId = {}"
+                       "".format(TO_ADD, personId)
+                      )
+                self.cursor.execute(sql)
+
+                sql = ("DELETE FROM Access WHERE rowStateId = {} AND personId = {}"
+                       "".format(TO_ADD, personId)
+                      )
+                self.cursor.execute(sql)
+
+
             #To avoid having duplicate MACs in the result list, it is used DISTINCT clause
             #since we can have a Person having access in more than one passage
             #and those passage could be on the same controller (with the same MAC)
@@ -1161,7 +1177,7 @@ class DataBase(object):
             self.cursor.execute(sql)
             ctrllerMacs = self.cursor.fetchall()
             ctrllerMacs = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacs]
-            
+
             #If the person is not present in any controller, we should log this situation and
             #remove it from the central DB.
             if ctrllerMacs == []:
