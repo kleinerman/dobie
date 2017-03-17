@@ -219,9 +219,9 @@ class CrudMngr(genmngr.GenericMngr):
             DELETE: Delete an organization
             '''
             try:
-                #If somebody is trying to modify/delete the "Unknown" of "Visitors"
+                #If somebody is trying to modify/delete the "Visitors"
                 #organization via REST, we should respond with 404 (Not Found)
-                if orgId in (1, 2):
+                if orgId == 1:
                     raise database.OrganizationNotFound('Organization not found')
 
                 ## For GET method
