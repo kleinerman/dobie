@@ -17,7 +17,7 @@ CREATE TABLE `Person` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL,
     `cardNumber` integer NOT NULL,
-    `orgId` integer NOT NULL,
+    `orgId` integer,
     `visitedOrgId` integer,
     `rowStateId` integer NOT NULL,
     CONSTRAINT `fk_Person_Organization` FOREIGN KEY (`orgId`) REFERENCES `Organization` (`id`),
