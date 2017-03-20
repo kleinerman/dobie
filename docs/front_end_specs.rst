@@ -99,3 +99,51 @@ The following REST method should be sent to the server:
     "status": "OK", 
     "uri": "http://10.10.7.74:5000/api/v1.0/organization/5"
   }
+  
+  
+Update Organization
+~~~~~~~~~~~~~~~~~~~
+
+When “Edit” button is pressed the following window will appear:
+
+.. image:: images_front_end_specs/upd_organization.png
+
+The following REST method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://10.10.7.74:5000/api/v1.0/organization/5
+  
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Tarjeta Provencred"}
+  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 133
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Tue, 07 Mar 2017 19:52:06 GMT
+  
+  {
+    "code": 201, 
+    "message": "Organization added", 
+    "status": "OK", 
+    "uri": "http://10.10.7.74:5000/api/v1.0/organization/5"
+  }
+  
+  
+  
+
+  
