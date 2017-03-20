@@ -64,4 +64,11 @@ To get from the server the current list of organizations, the following REST met
     }
   ]
 
+Add Organization
+~~~~~~~~~~~~~~~~
+
+When “New” button is pressed the following pop-up will appear:
+
+
+
 
