@@ -188,4 +188,71 @@ an organizations should be selected first.
 .. image:: images_front_end_specs/person.png
 
 To get from server the current list of organizations, see `Get Organizations`_ section.
+
+Get Persons
+~~~~~~~~~~~
+
+To get from server the current list of persons, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://10.10.7.74:5000/api/v1.0/person
+
+**Response:**
+
+.. code-block::
+  
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 950
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Mon, 20 Mar 2017 20:38:49 GMT
+  
+  [
+    {
+      "cardNumber": 4300737, 
+      "name": "Jorge Kleinerman", 
+      "orgId": 2, 
+      "rowStateId": 3, 
+      "uri": "http://10.10.7.74:5000/api/v1.0/person/2", 
+      "visitedOrgId": null
+    }, 
+    {
+      "cardNumber": 9038876, 
+      "name": "Manuel Bobadilla", 
+      "orgId": 2, 
+      "rowStateId": 3, 
+      "uri": "http://10.10.7.74:5000/api/v1.0/person/4", 
+      "visitedOrgId": null
+    }, 
+    {
+      "cardNumber": 4994413, 
+      "name": "Paola Ceballos", 
+      "orgId": 2, 
+      "rowStateId": 3, 
+      "uri": "http://10.10.7.74:5000/api/v1.0/person/6", 
+      "visitedOrgId": null
+    }, 
+    {
+      "cardNumber": 4300757, 
+      "name": "Carlos Vazquez", 
+      "orgId": 2, 
+      "rowStateId": 4, 
+      "uri": "http://10.10.7.74:5000/api/v1.0/person/8", 
+      "visitedOrgId": null
+    }, 
+    {
+      "cardNumber": 5377768, 
+      "name": "Pedro Juearez", 
+      "orgId": 2, 
+      "rowStateId": 2, 
+      "uri": "http://10.10.7.74:5000/api/v1.0/person/9", 
+      "visitedOrgId": null
+    }
+  ]
+
   
