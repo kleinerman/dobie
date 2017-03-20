@@ -192,7 +192,7 @@ To get from server the current list of organizations, see `Get Organizations`_ s
 Get Persons
 ~~~~~~~~~~~
 
-To get from server the current list of persons, the following REST method should be sent:
+To get from server the current list of persons in each organization, the following REST method should be sent:
 
 **Method:** GET
 
