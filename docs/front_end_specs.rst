@@ -18,4 +18,4 @@ Organization
 This screen is used to “add”, “edit” or “delete”organizations in the building.
 For the system, an organization is just a name to group a set of persons.
 
-
+.. image:: images_front_end_specs/organization.png
