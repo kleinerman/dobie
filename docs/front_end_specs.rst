@@ -19,3 +19,49 @@ This screen is used to “add”, “edit” or “delete”organizations in the
 For the system, an organization is just a name to group a set of persons.
 
 .. image:: images_front_end_specs/organization.png
+
+
+To get from the server the current list of organizations, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://10.10.7.74:5000/api/v1.0/organization
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 481
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Mon, 20 Mar 2017 14:49:41 GMT
+  
+  [
+    {
+      "name": "Visitors", 
+      "rowStateId": 3, 
+      "uri": "http://10.10.7.74:5000/api/v1.0/organization/1"
+    }, 
+    {
+      "name": "Building Networks", 
+      "rowStateId": 3, 
+      "uri": "http://10.10.7.74:5000/api/v1.0/organization/2"
+    }, 
+    {
+      "name": "Datacenter", 
+      "rowStateId": 4, 
+      "uri": "http://10.10.7.74:5000/api/v1.0/organization/3"
+    }, 
+    {
+      "name": "Movistel", 
+      "rowStateId": 5, 
+      "uri": "http://10.10.7.74:5000/api/v1.0/organization/4"
+    }
+  ]
+
+
