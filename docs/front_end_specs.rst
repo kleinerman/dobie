@@ -20,8 +20,8 @@ For the system, an organization is just a name to group a set of persons.
 
 .. image:: images_front_end_specs/organization.png
 
-Get Organizations
-~~~~~~~~~~~~~~~~~
+.. _Get Organizations
+~~~~~~~~~~~~~~~~~~~~~
 
 To get from the server the current list of organizations, the following REST method should be sent:
 
@@ -178,4 +178,14 @@ The following REST method should be sent to the server:
 
 
 
+
+Persons
+-------
+
+This screen is used to “add”, “edit” or “delete” persons. For any of this actions,
+an organizations should be selected first.
+
+.. image:: images_front_end_specs/person.png
+
+To get from server the current list of organizations, see Get Organization_ section.
   
