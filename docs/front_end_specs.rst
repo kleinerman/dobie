@@ -70,5 +70,5 @@ Add Organization
 When “New” button is pressed the following pop-up will appear:
 
 
-
+.. image:: images_front_end_specs/add_organization.png
 
