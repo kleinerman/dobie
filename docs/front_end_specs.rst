@@ -129,14 +129,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Carlos Juarez", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
-  
-For a visit:
-  
-.. code-block::
-  
-  {"name": "Lucas Torres", "cardNumber": 9136304, "orgId": 3, "visitedOrgId": 4}
-  
+  {"name": "Tarjeta Provencred"}
   
 
 **Response:**
@@ -221,7 +214,6 @@ To get from server the current list of persons in each organization, the followi
 .. code-block::
 
   
-
 **Response:**
 
 .. code-block::
@@ -292,6 +284,18 @@ The following REST method should be sent to the server:
 .. code-block::
 
   http://10.10.7.74:5000/api/v1.0/person
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Carlos Juarez", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  
+For a visit:
+  
+.. code-block::
+  
+  {"name": "Lucas Torres", "cardNumber": 9136304, "orgId": 3, "visitedOrgId": 4}
 
 **Response:**
 
