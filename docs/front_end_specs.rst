@@ -20,6 +20,8 @@ For the system, an organization is just a name to group a set of persons.
 
 .. image:: images_front_end_specs/organization.png
 
+Get Organizations
+~~~~~~~~~~~~~~~~~
 
 To get from the server the current list of organizations, the following REST method should be sent:
 
