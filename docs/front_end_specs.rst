@@ -144,6 +144,46 @@ The following REST method should be sent to the server:
   }
   
   
+Delete Organization
+~~~~~~~~~~~~~~~~~~~
+
+When “Delete” button is pressed the following pop-up will appear:
+
+.. image:: images_front_end_specs/del_organization.png
+
+The following REST method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://10.10.7.74:5000/api/v1.0/organization/5
   
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Tarjeta Provencred"}
+  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 133
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Tue, 07 Mar 2017 19:52:06 GMT
+  
+  {
+    "code": 201, 
+    "message": "Organization added", 
+    "status": "OK", 
+    "uri": "http://10.10.7.74:5000/api/v1.0/organization/5"
+  }
 
   
