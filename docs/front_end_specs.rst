@@ -82,6 +82,12 @@ The following REST method should be sent to the server:
 .. code-block::
 
   http://10.10.7.74:5000/api/v1.0/organization
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Tarjeta Naranja"}
 
 **Response:**
 
@@ -123,7 +129,14 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Tarjeta Provencred"}
+  {"name": "Carlos Juarez", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  
+For a visit:
+  
+.. code-block::
+  
+  {"name": "Lucas Torres", "cardNumber": 9136304, "orgId": 3, "visitedOrgId": 4}
+  
   
 
 **Response:**
@@ -201,6 +214,13 @@ To get from server the current list of persons in each organization, the followi
 .. code-block::
 
   http://10.10.7.74:5000/api/v1.0/person
+  
+
+**JSON**
+
+.. code-block::
+
+  
 
 **Response:**
 
@@ -255,4 +275,37 @@ To get from server the current list of persons in each organization, the followi
     }
   ]
 
+ 
+Add Person
+~~~~~~~~~~
+
+When “New” button is pressed the following pop-up will appear:
+
+.. image:: images_front_end_specs/add_person.png
+
+The following REST method should be sent to the server:
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://10.10.7.74:5000/api/v1.0/person
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 133
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Tue, 07 Mar 2017 19:52:06 GMT
   
+  {
+    "code": 201, 
+    "message": "Organization added", 
+    "status": "OK", 
+    "uri": "http://10.10.7.74:5000/api/v1.0/organization/5"
+  }
