@@ -1,20 +1,17 @@
-Dobie's infrastructure
-======================
+Dobie infrastructure
+====================
 
-Running on Docker (host configuration)
---------------------------------------
+Installing Docker
+-----------------
 
-In order to run Dobie back\_end server in a Docker container you should follow this procedure:
-
-
-**Install Docker in your host:**
+**1) Install Docker in your host:**
 
 ```
 $ sudo pacman -S docker
 
 ```
 
-**Start and Enable the service:**
+**2) Start and Enable the service:**
 
 
 ```
@@ -35,7 +32,7 @@ $ sudo newgrp docker
 ```
 
 
-**Storage driver**
+**3) Storage driver**
 
 Storage driver, a.k.a. graph driver has huge impact on performance. Its job is to store layers of container
 images efficiently, that is when several images share a layer, only one layer uses disk space. The default,
@@ -61,30 +58,30 @@ ExecStart=/usr/bin/dockerd -H fd:// -s overlay2
 Recall that ExecStart= line is needed to drop inherited ExecStart.
 
 
-Running on Docker (database server)
------------------------------------
+Running the database server on Docker
+-------------------------------------
 
-In order to run Dobie's back-end using Docker containers, you should set up a MariaDB database container
+In order to run Dobie's backend using Docker containers, you should set up a MariaDB database container
 
-*Build the image using the Dockerfile*
+**1) Build the image using the Dockerfile**
 
 ```
 $ docker build -t="aryklein/database:0.1" .
 ```
 
-*Create a non-ephemeral storage for the database*
+**2) Create a non-ephemeral storage for the database**
 
 ```
 $ docker volume create --name database-volume
 ```
 
-*Launch the database container:*
+**3) Launch the database container:**
 
 ```
 $ docker run --name database -v database-volume:/var/lib/mysql -d aryklein/database:0.1
 ```
 
-*Create (if necessary) the database, user and tables:*
+**4) Create (if necessary) the database, user and tables:**
 
 ```
 $ docker exec -it database bash
@@ -92,28 +89,27 @@ $ docker exec -it database bash
 # root@92d8a1825168:/# exit
 ```
 
-Running on Docker (back-end server)
+Running the Dobie backend on Docker
 -----------------------------------
 
-In this step, we are going to set up the back-end process.
+In this step, we are going to set up the backend process.
 
 
-Use the Dockerfile (located on this repository) to build the Python container for the back-end server.
+Use the Dockerfile (located on this repository) to build the Python container for the backend server.
 Put the Dockerfile on a directory and run the following command in the same directory:
 
 ```
 $ docker build -t="aryklein/backend:0.1" .
 ```
 
-*Clone the Dobie repository*:
+**1) Clone the Dobie repository**:
 
 ```
-$ git clone https://USER@github.com/jkleinerman/ConPass.git
+$ git clone https://github.com/jkleinerman/ConPass.git
 ```
 
-*Launch the Docker container*:
+**2)Launch the Docker container**:
 
 ```
 docker run --name backend -p 5000:5000 -p 7979:7979 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
 ```
-
