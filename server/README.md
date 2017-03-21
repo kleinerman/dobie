@@ -108,7 +108,7 @@ $ docker build -t="aryklein/backend:0.1" .
 $ git clone https://github.com/jkleinerman/ConPass.git
 ```
 
-**2)Launch the Docker container**:
+**2) Launch the Docker container**:
 
 ```
 docker run --name backend -p 5000:5000 -p 7979:7979 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
