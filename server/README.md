@@ -73,12 +73,13 @@ $ cd build/files
 $ wget https://raw.githubusercontent.com/jkleinerman/ConPass/master/server/docker/database/files/db_create_drop.sh
 $ wget https://raw.githubusercontent.com/jkleinerman/ConPass/master/server/docker/database/files/db_schema.sql
 $ cd ..
+$ wget https://raw.githubusercontent.com/jkleinerman/ConPass/master/server/docker/database/Dockerfile
 ```
 
 And then, in the `build` directory:
 
 ```
-$ docker build -t="aryklein/database:0.1" https://github.com/jkleinerman/ConPass/edit/master/server/docker/database/Dockerfile
+$ docker build -t="aryklein/database:0.1" .
 ```
 
 **2) Create a non-ephemeral storage for the database**
@@ -97,7 +98,7 @@ $ docker run --name database -v database-volume:/var/lib/mysql -d aryklein/datab
 
 ```
 $ docker exec -it database bash
-# root@92d8a1825168:/# /tmp/db_create_drop.sh --create
+# root@92d8a1825168:/# bash /tmp/db_create_drop.sh --create
 # root@92d8a1825168:/# exit
 ```
 
@@ -106,12 +107,11 @@ Running the Dobie backend on Docker
 
 In this step, we are going to set up the backend process.
 
-
 Use the Dockerfile (located on this repository) to build the Python container for the backend server.
 Put the Dockerfile on a directory and run the following command in the same directory:
 
 ```
-$ docker build -t="aryklein/backend:0.1" https://github.com/jkleinerman/ConPass/edit/master/server/docker/backend/Dockerfile
+$ docker build -t="aryklein/backend:0.1" https://raw.githubusercontent.com/jkleinerman/ConPass/master/server/docker/backend/Dockerfile
 ```
 
 **1) Clone the Dobie repository**:
