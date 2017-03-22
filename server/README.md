@@ -65,8 +65,20 @@ In order to run Dobie's backend using Docker containers, you should set up a Mar
 
 **1) Build the image using the Dockerfile**
 
+Before building the image, you must download these files and put them into a `files` directory:
+
 ```
-$ docker build -t="aryklein/database:0.1" .
+$ mkdir -p build/files
+$ cd build/files
+$ wget https://raw.githubusercontent.com/jkleinerman/ConPass/master/server/docker/database/files/db_create_drop.sh
+$ wget https://raw.githubusercontent.com/jkleinerman/ConPass/master/server/docker/database/files/db_schema.sql
+$ cd ..
+```
+
+And then, in the `build` directory:
+
+```
+$ docker build -t="aryklein/database:0.1" https://github.com/jkleinerman/ConPass/edit/master/server/docker/database/Dockerfile
 ```
 
 **2) Create a non-ephemeral storage for the database**
@@ -99,7 +111,7 @@ Use the Dockerfile (located on this repository) to build the Python container fo
 Put the Dockerfile on a directory and run the following command in the same directory:
 
 ```
-$ docker build -t="aryklein/backend:0.1" .
+$ docker build -t="aryklein/backend:0.1" https://github.com/jkleinerman/ConPass/edit/master/server/docker/backend/Dockerfile
 ```
 
 **1) Clone the Dobie repository**:
@@ -109,6 +121,8 @@ $ git clone https://github.com/jkleinerman/ConPass.git
 ```
 
 **2) Launch the Docker container**:
+
+You must map the cloned repository into the container's directory `/opt/app` using Docker volumes. So if the cloned repository is on `/home/USER/ConPass` you should run:
 
 ```
 docker run --name backend -p 5000:5000 -p 7979:7979 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
