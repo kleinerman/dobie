@@ -23,7 +23,7 @@ cursor.execute(sqlSentence)
 
 
 #Creating a record for unknown person (for example when somebody press the button)
-cursor.execute("INSERT INTO Person(id, cardNumber) VALUES(1, 0)")
+#cursor.execute("INSERT INTO Person(id, cardNumber) VALUES(1, 0)")
 
 
 

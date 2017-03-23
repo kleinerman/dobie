@@ -205,7 +205,7 @@ class Controller(object):
                      'eventTypeId' : 2,
                      'dateTime' : dateTime,
                      'latchId' : 3,
-                     'personId' : 1,
+                     'personId' : None,
                      'side' : side,
                      'allowed' : True,
                      'notReasonId' : None
@@ -265,7 +265,7 @@ class Controller(object):
                                  'eventTypeId' : 4,
                                  'dateTime' : dateTime,
                                  'latchId' : None,
-                                 'personId' : 1,
+                                 'personId' : None,
                                  'side' : None,
                                  'allowed' : False,
                                  'notReasonId' : None
