@@ -130,8 +130,10 @@ cursor.execute('''
         side        BOOLEAN,
         allowed     BOOLEAN,
         notReasonId INTEGER,
+        FOREIGN KEY(pssgId) REFERENCES Passage(id),
         FOREIGN KEY(eventTypeId) REFERENCES EventType(id),
         FOREIGN KEY(latchId) REFERENCES Latch(id),
+        FOREIGN KEY(personId) REFERENCES Person(id),
         FOREIGN KEY(notReasonId) REFERENCES NotReason(id)
    )
     '''
