@@ -13,7 +13,6 @@ $ sudo pacman -S docker
 
 **2) Start and Enable the service:**
 
-
 ```
 $ sudo systemctl start docker.service
 $ sudo systemctl enable docker.service
@@ -40,7 +39,6 @@ most compatible option, devicemapper offers suboptimal performance, which is out
 Additionally, devicemappper is not recommended in production. As Arch linux ships new kernels, there's no point
 using the compatibility option. A good, modern choice is overlay2. To see current storage driver, run:
 
-
 ```
 $ docker info | head
 ```
@@ -57,6 +55,14 @@ ExecStart=/usr/bin/dockerd -H fd:// -s overlay2
 
 Recall that ExecStart= line is needed to drop inherited ExecStart.
 
+Creating the docker network
+---------------------------
+
+Before creating docker images and container, it's necessary to create a virtual network for the containers
+
+```
+$ docker network create --subnet=172.18.0.0/24 --gateway=172.18.0.1 --driver=bridge network_01
+```
 
 Running the database server on Docker
 -------------------------------------
@@ -91,7 +97,7 @@ $ docker volume create --name database-volume
 **3) Launch the database container:**
 
 ```
-$ docker run --name database -v database-volume:/var/lib/mysql -d aryklein/database:0.1
+$ docker run --net network_01 --ip 172.18.0.2 --name database -v database-volume:/var/lib/mysql -d aryklein/database:0.1
 ```
 
 **4) Create (if necessary) the database, user and tables:**
@@ -125,5 +131,5 @@ $ git clone https://github.com/jkleinerman/ConPass.git
 You must map the cloned repository into the container's directory `/opt/app` using Docker volumes. So if the cloned repository is on `/home/USER/ConPass` you should run:
 
 ```
-docker run --name backend -p 5000:5000 -p 7979:7979 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
+docker run --name backend --net network_01 --ip 172.18.0.3 -p 5000:5000 -p 7979:7979 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
 ```
