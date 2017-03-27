@@ -131,5 +131,5 @@ $ git clone https://github.com/jkleinerman/ConPass.git
 You must map the cloned repository into the container's directory `/opt/app` using Docker volumes. So if the cloned repository is on `/home/USER/ConPass` you should run:
 
 ```
-docker run --name backend --net network_01 --ip 172.18.0.3 -p 5000:5000 -p 7979:7979 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
+docker run -d --name backend --net network_01 --ip 172.18.0.3 -p 5000:5000 -p 7979:7979 -v /home/USER/ConPass/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
 ```
