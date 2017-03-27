@@ -4,7 +4,7 @@ LOGGER_NAME = 'BackEndSrvr'
 
 LOGGING_FILE ='logevents.log'
 
-DB_HOST = '172.17.0.2'
+DB_HOST = '172.18.0.2'
 DB_USER = 'conpass_usr'
 DB_PASSWD = 'qwe123qwe'
 DB_DATABASE = 'conpass_db'
