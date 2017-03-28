@@ -413,3 +413,40 @@ The following REST method should be sent to the server:
   
   
 A pop-up will inform to the user this situation.
+
+
+
+Delete Person
+~~~~~~~~~~~~~
+
+When “Delete” button is pressed a pop-up will appear asking if the user is sure of this operation.
+
+The following REST method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://10.10.7.74:5000/api/v1.0/person/7
+
+If the person was deleted successfully, the server will answer with the following response:
+
+**Response:**
+
+.. code-block::
+
+  Response:
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 53
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Wed, 08 Mar 2017 15:12:55 GMT
+  
+  {
+    "message": "Person deleted", 
+    "status": "OK"
+  }
+
+A pop up should inform that situation.
