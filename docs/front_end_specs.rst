@@ -67,7 +67,7 @@ To get from the server the current list of organizations, the following REST met
   ]
 
 
-**rowStateId** is a field that indicates the state of this person into the system
+**rowStateId** is a field that indicates the state of the organization into the system
 
 To get all posible state the following method should be sent to the server:
 
@@ -112,8 +112,7 @@ To get all posible state the following method should be sent to the server:
     }
   ]
 
-
-
+The organizations in state: "Deleted" should not be shown.
 
 
 Add Organization
@@ -312,7 +311,7 @@ To get from server the current list of persons in each organization, the followi
     }
   ]
 
-**rowStateId** is a field that indicates the state of this person into the system
+**rowStateId** is a field that indicates the state of the person into the system
 
 To get all posible state the following method should be sent to the server:
 
@@ -357,6 +356,7 @@ To get all posible state the following method should be sent to the server:
     }
   ]
 
+The persons in state: "Deleted" should not be shown.
 
  
 Add Person
