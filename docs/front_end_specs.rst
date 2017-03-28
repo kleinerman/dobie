@@ -66,6 +66,56 @@ To get from the server the current list of organizations, the following REST met
     }
   ]
 
+
+**rowStateId** is a field that indicates the state of this person into the system
+
+To get all posible state the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://10.10.7.74:5000/api/v1.0/rowstate
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 272
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Mon, 27 Mar 2017 20:49:28 GMT
+  
+  [
+    {
+      "description": "To Add", 
+      "id": 1
+    }, 
+    {
+      "description": "To Update", 
+      "id": 2
+    }, 
+    {
+      "description": "Committed", 
+      "id": 3
+    }, 
+    {
+      "description": "To Delete", 
+      "id": 4
+    }, 
+    {
+      "description": "Deleted", 
+      "id": 5
+    }
+  ]
+
+
+
+
+
 Add Organization
 ~~~~~~~~~~~~~~~~
 
