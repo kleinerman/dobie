@@ -332,12 +332,7 @@ The following REST method should be sent to the server:
 
   {"name": "Carlos Juarez", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
   
-For a visit:
   
-.. code-block::
-  
-  {"name": "Lucas Torres", "cardNumber": 9136304, "orgId": 3, "visitedOrgId": 4}
-
 **Response:**
 
 .. code-block::
