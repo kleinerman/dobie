@@ -349,3 +349,24 @@ The following REST method should be sent to the server:
     "status": "OK", 
     "uri": "http://10.10.7.74:5000/api/v1.0/organization/5"
   }
+
+
+If the “cardNumber” is in use, the following response will arrive:
+
+**Response:**
+
+.. code-block::
+  
+  HTTP/1.0 409 CONFLICT
+  Content-Type: application/json
+  Content-Length: 198
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Wed, 08 Mar 2017 14:39:13 GMT
+  
+  {
+    "code": 409, 
+    "error": "The request could not be completed due to a conflict with the current state of the target resource", 
+    "message": "Can not add this person", 
+    "status": "conflict"
+  }
+
