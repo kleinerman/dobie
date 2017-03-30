@@ -7,8 +7,9 @@ import queue
 import sys
 import time
 
-from flask import Flask, jsonify, request, abort, url_for
+from flask import Flask, jsonify, request, abort, url_for, g
 from flask_httpauth import HTTPBasicAuth
+from passlib.apps import custom_app_context as pwd_context
 
 import genmngr
 import database
@@ -77,7 +78,7 @@ class CrudMngr(genmngr.GenericMngr):
 
         app = Flask(__name__)
         auth = HTTPBasicAuth()
-
+       
         
         ## Error hanlders
         #
@@ -146,13 +147,27 @@ class CrudMngr(genmngr.GenericMngr):
             return response
  
 
-        # For API authentication
-        @auth.get_password
-        def get_password(username):
-            if username == USER:
-                return PASSWD
-            else:
-                return None
+#        # For API authentication
+#        @auth.get_password
+#        def get_password(username):
+#            if username == USER:
+#                return PASSWD
+#            else:
+#                return None
+
+
+
+        @auth.verify_password
+        def verify_password(username, password):
+            '''
+            '''
+            user = self.dataBase.getUser(username)
+
+            if user and pwd_context.verify(password, user['passwdHash']):
+                g.user = user
+                return True
+            return False
+
 
 
         # Global API protection:
@@ -162,6 +177,46 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def before_request():
                 pass
+
+
+
+#------------------------------------User----------------------------------------------
+        @app.route('/api/v1.0/user', methods=['GET'])
+        def user():
+            '''
+            GET: Return a list with all persons in the organization
+            '''
+            g.user.pop('passwdHash')
+            return jsonify(g.user)
+
+
+
+#------------------------------------RowState----------------------------------------------
+        @app.route('/api/v1.0/rowstate', methods=['GET'])
+        def rowState():
+            '''
+            GET: Return a list with all persons in the organization
+            '''
+            try:
+                ## For GET method
+                rowStates = self.dataBase.getRowStates()
+
+                return jsonify(rowStates)
+
+
+            except database.OrganizationNotFound as organizationNotFound:
+                raise NotFound(str(organizationNotFound))
+            except database.OrganizationError as organizationError:
+                raise ConflictError(str(organizationError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+
+
 
 
 
@@ -520,10 +575,6 @@ class CrudMngr(genmngr.GenericMngr):
             '''
 
             try:
-                #If somebody is trying to modify/delete the "Unknown" person
-                #via REST, we should respond with 404 (Not Found)
-                if personId == 1:
-                    raise database.PersonNotFound('Person not found')
                 ## For GET method
                 if request.method == 'GET':
                     accesses = self.dataBase.getAccesses(personId)

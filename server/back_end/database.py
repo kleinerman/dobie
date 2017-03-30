@@ -203,6 +203,38 @@ class DataBase(object):
 
 
 
+
+
+#-------------------------------------User--------------------------------------------
+
+    def getUser(self, username):
+        '''
+        Return a dictionary with user fields if exists, if not it returns None
+        '''
+        sql = "SELECT * from User WHERE username = '{}'".format(username)
+        self.cursor.execute(sql)
+        user = self.cursor.fetchone()
+        return user
+
+
+
+
+#----------------------------------Row State------------------------------------------
+
+    def getRowStates(self):
+        '''
+        Return a a dictionary with all rowStates
+        '''
+        sql = ('SELECT * FROM RowState')
+        self.cursor.execute(sql)
+        rowStates = self.cursor.fetchall()
+
+        return rowStates
+
+
+
+
+
 #----------------------------------Organization----------------------------------------
 
 
