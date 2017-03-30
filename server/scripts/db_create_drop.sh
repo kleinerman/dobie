@@ -22,6 +22,9 @@ function create {
 
 
 
+
+        INSERT INTO Role(id, description) VALUES (1, 'Administrator'), (2, 'Viewer');
+        INSERT INTO User(description, username, passwdHash, roleId) VALUES ('Administrator', 'admin', '\$6\$rounds=656000\$oxLnGfVARJJvIJBa\$8O5u6FgcpcrrF/zETJQzHir.Ul/c16egLLybLcEYIgk0EHyy.5yWYzWc7jQRC9UyatclEVLgd.gC8qC.hrFGv1', 1);
         INSERT INTO RowState(id, description) VALUES (1, 'To Add'), (2, 'To Update'), (3, 'Committed'), (4, 'To Delete'), (5, 'Deleted');
         INSERT INTO Organization(id, name, rowStateId) VALUES(1, 'Visitors', 3);
         INSERT INTO Person(id, name, cardNumber, orgId, rowStateId) VALUES(1, 'Unknown', 0, NULL, 3);
