@@ -6,10 +6,11 @@ import json
 import queue
 import sys
 import time
+import crypt
 
 from flask import Flask, jsonify, request, abort, url_for, g
 from flask_httpauth import HTTPBasicAuth
-from passlib.apps import custom_app_context as pwd_context
+
 
 import genmngr
 import database
@@ -22,8 +23,6 @@ from config import *
 BAD_REQUEST = 400
 CREATED = 201
 OK = 200
-USER = 'conpass'
-PASSWD = 'password'
 
 
 # Exceptions used by Flask errorhandler decorator
@@ -147,26 +146,31 @@ class CrudMngr(genmngr.GenericMngr):
             return response
  
 
-#        # For API authentication
-#        @auth.get_password
-#        def get_password(username):
-#            if username == USER:
-#                return PASSWD
-#            else:
-#                return None
-
-
 
         @auth.verify_password
         def verify_password(username, password):
             '''
             '''
+            #Retrieve user parameters from database
             user = self.dataBase.getUser(username)
 
-            if user and pwd_context.verify(password, user['passwdHash']):
-                g.user = user
-                return True
+            if user:
+
+                #Get the password hashed and salted from user parameters
+                passwdHash = user['passwdHash']
+                #Get only the salt from the previous variable
+                salt = passwdHash.split('$')[2]
+                #With the password passed in the request, recalculing the hash
+                #using MD5 ($1) algorithm and the stored salt and comparing the result
+                #with the stored hash
+                if crypt.crypt(password, '$1${}'.format(salt)) == passwdHash:
+                    #If the username and password is correct, save the user parameters in "g"
+                    #flask object to be able to use them in user resource and return True
+                    g.user = user
+                    return True
             return False
+
+
 
 
 
@@ -181,7 +185,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 #------------------------------------User----------------------------------------------
-        @app.route('/api/v1.0/user', methods=['GET'])
+        @app.route('/api/v1.0/login', methods=['GET'])
         def user():
             '''
             GET: Return a list with all persons in the organization
