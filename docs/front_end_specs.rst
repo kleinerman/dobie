@@ -25,8 +25,16 @@ To validate the username and password, it is necessary to get the following reso
 
 .. code-block::
 
+  This is temporary
+  -----------------
 
-
+  Returns 200 OK if valid username and passwrod.
+  Returns 403 Forbidden if incorrect user and password.
+  
+  Default username = admin
+  Default password = admin
+  
+  
 
 Organization
 ------------
