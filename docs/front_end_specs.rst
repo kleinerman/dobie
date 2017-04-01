@@ -11,6 +11,22 @@ the system will show different tabs and options.
 
 .. image:: images_front_end_specs/login.png
 
+To validate the username and password, it is necessary to get the following resource.
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://10.10.7.74:5000/api/v1.0/login
+
+**Response:**
+
+.. code-block::
+
+
+
 
 Organization
 ------------
