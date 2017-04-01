@@ -62,6 +62,25 @@ class ZoneNotFound(ZoneError):
     pass
 
 
+
+class VisitorsPssgsError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class VisitorsPssgsNotFound(ZoneError):
+    '''
+    '''
+    pass
+
+
+
+
 class ControllerError(Exception):
     '''
     '''
@@ -167,11 +186,11 @@ class DataBase(object):
 
 
             sql = ("INSERT INTO "
-                   "Event(eventTypeId, pssgId, dateTime, latchId, personId, side, allowed, notReason) "
+                   "Event(eventTypeId, pssgId, dateTime, latchId, personId, side, allowed, notReasonId) "
                    "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
-                   "".format(event['eventType'], event['pssgId'], event['dateTime'],
-                             event['latchType'], event['personId'], event['side'],
-                             event['allowed'], event['notReason']
+                   "".format(event['eventTypeId'], event['pssgId'], event['dateTime'],
+                             event['latchId'], event['personId'], event['side'],
+                             event['allowed'], event['notReasonId']
                             ) 
 
                   )
@@ -181,6 +200,38 @@ class DataBase(object):
 
             except pymysql.err.IntegrityError as integrityError:
                 self.logger.debug(integrityError)
+
+
+
+
+
+#-------------------------------------User--------------------------------------------
+
+    def getUser(self, username):
+        '''
+        Return a dictionary with user fields if exists, if not it returns None
+        '''
+        sql = "SELECT * from User WHERE username = '{}'".format(username)
+        self.cursor.execute(sql)
+        user = self.cursor.fetchone()
+        return user
+
+
+
+
+#----------------------------------Row State------------------------------------------
+
+    def getRowStates(self):
+        '''
+        Return a a dictionary with all rowStates
+        '''
+        sql = ('SELECT * FROM RowState')
+        self.cursor.execute(sql)
+        rowStates = self.cursor.fetchall()
+
+        return rowStates
+
+
 
 
 
@@ -206,8 +257,8 @@ class DataBase(object):
         It returns the id of the added organization.
         '''
 
-        sql = ("INSERT INTO Organization(name) VALUES('{}')"
-               "".format(organization['name'])
+        sql = ("INSERT INTO Organization(name, rowStateId) VALUES('{}', {})"
+               "".format(organization['name'], COMMITTED)
               )
         
         try:
@@ -227,14 +278,21 @@ class DataBase(object):
 
 
 
+
     def delOrganization(self, orgId):
         '''
-        Receive a dictionary with id organization and delete the organization.
+        Mark de Organization as TO_DELETE state if it has persons on it
+        or as DELETED if there is not more persons on it
         '''
 
-        sql = ("DELETE FROM Organization WHERE id = {}"
-               "".format(orgId)
-              )        
+        if self.getPersons(orgId, includeDeleted=False):
+            sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+                   "".format(TO_DELETE, orgId)
+                  )
+        else:
+            sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+                   "".format(DELETED, orgId)
+                  )
 
         try:
             self.cursor.execute(sql)
@@ -244,7 +302,14 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise OrganizationError('Can not delete this organization')
+            raise OrganizationError('Can not update this organization')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not update this organization: wrong argument')
+
+
+
+
 
 
 
@@ -272,6 +337,52 @@ class DataBase(object):
 
 
 
+    def delOrgIfNeed(self, personId):
+        '''
+        Mark the organization that personId belongs to as DELETED if the organization
+        is marked as TO_DELETE and there is not more persons in this organization
+        
+        '''
+
+        try:
+
+            #Getting the orgId this person belong to
+            sql = ("SELECT Organization.id, Organization.rowStateId FROM Organization "
+                   "JOIN Person ON (Organization.id = Person.orgId) WHERE Person.id = {}"
+                   "".format(personId)
+                  )
+            self.cursor.execute(sql)
+            row = self.cursor.fetchone()
+            orgId, rowStateId = row['id'], row['rowStateId']
+
+            if rowStateId == TO_DELETE:
+
+                #Gets the number of people who belong to this organization and who have
+                #not yet been eliminated
+                sql = ("SELECT COUNT(*) FROM Person WHERE orgId = {} AND rowStateId != {}"
+                       "".format(orgId, DELETED)
+                      )
+                self.cursor.execute(sql)
+                personCount = self.cursor.fetchone()['COUNT(*)']
+
+                #If personCount is 0, the organization can be deleted.
+                if personCount == 0:
+                    sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+                           "".format(DELETED, orgId)
+                          )
+                    self.cursor.execute(sql)
+
+
+        except TypeError:
+            self.logger.debug('TypeError fetching orgId or count of persons')
+            raise OrganizationError('Can not get organization from person')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise OrganizationError('Can not get organization from person')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not get organization from person')
 
 
 
@@ -362,6 +473,140 @@ class DataBase(object):
 
 
 
+#----------------------------------Visitors Passage-----------------------------------
+
+
+
+
+    def getVisitorsPssgss(self):
+        '''
+        Return a dictionary with all Zones
+        '''
+        sql = ('SELECT * FROM VisitorsPassages')
+        self.cursor.execute(sql)
+        visitorsPssgss = self.cursor.fetchall()
+
+        return visitorsPssgss
+
+
+
+
+    def addVisitorsPssgs(self, visitorsPssgs):
+        '''
+        Receive a dictionary with Visitors Passagess parametters 
+        and save it in DB. It returns the id of the added Visitor Passages.
+        '''
+
+        sql = ("INSERT INTO VisitorsPassages(name) VALUES('{}')"
+               "".format(visitorsPssgs['name'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+            return self.cursor.lastrowid
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not add this Visitors Passages')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitorsPssgsError('Can not add this Visitors Passages: wrong argument')
+
+
+
+    def delVisitorsPssgs(self, visitorsPssgsId):
+        '''
+        Receive a dictionary with Visitors Passage id and delete the Visitor Passage
+        '''
+
+        sql = ("DELETE FROM VisitorsPassages WHERE id = {}"
+               "".format(visitorsPssgsId)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise VisitorsPssgsNotFound('Visitors Passages not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not delete this Visitors Passages')
+
+
+
+
+    def updVisitorsPssgs(self, visitorsPssgs):
+        '''
+        Receive a dictionary with Visitors Passages parametters and update it in DB
+        '''
+
+        sql = ("UPDATE VisitorsPassages SET name = '{}' WHERE id = {}"
+               "".format(visitorsPssgs['name'], visitorsPssgs['id'])
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise VisitorsPssgsNotFound('Visitors Passages not found')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not update this Visitors Passages')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitorsPssgsError('Can not update this Visitors Passages: wrong argument')
+
+
+
+
+    def addPssgToVisitorsPssgs(self, visitorsPssgsId, pssgId):
+        '''
+        '''
+
+        sql = ("INSERT INTO VisitorsPassagesPassage(visitorsPssgsId, pssgId) "
+               "VALUES ({}, {})".format(visitorsPssgsId, pssgId)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            self.connection.commit()
+            return self.cursor.lastrowid
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not add this passage to Visitors Passage')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitorsPssgsError('Can not add this passage to Visitors Passage: wrong argument')
+
+
+
+
+    def delPssgFromVisitorsPssgs(self, visitorsPssgsId, pssgId):
+        '''
+        '''
+
+        sql = ("DELETE FROM VisitorsPassagesPassage WHERE "
+               "visitorsPssgsId = {} AND pssgId = {}"
+               "".format(visitorsPssgsId, pssgId)
+              )
+
+        try:
+            self.cursor.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise VisitorsPssgsNotFound('Passage not found in Visitors Passages.')
+            self.connection.commit()
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise VisitorsPssgsError('Can not delete this Passage from Visitors Passages')
+
+
+
+
 
 #----------------------------------Controller----------------------------------------
 
@@ -372,9 +617,9 @@ class DataBase(object):
         It returns the id of the added controller.
         '''
 
-        sql = ("INSERT INTO Controller(boardModel, macAddress) "
-               "VALUES('{}', '{}')"
-               "".format(controller['boardModel'], controller['macAddress'])
+        sql = ("INSERT INTO Controller(ctrllerModelId, macAddress) "
+               "VALUES({}, '{}')"
+               "".format(controller['ctrllerModelId'], controller['macAddress'])
               )
 
         try:
@@ -421,9 +666,9 @@ class DataBase(object):
         Receive a dictionary with controller parametters and update it in DB
         '''
 
-        sql = ("UPDATE Controller SET boardModel = '{}', macAddress = '{}' "
+        sql = ("UPDATE Controller SET ctrllerModelId = {}, macAddress = '{}' "
                "WHERE id = {}"
-               "".format(controller['boardModel'], controller['macAddress'], 
+               "".format(controller['ctrllerModelId'], controller['macAddress'], 
                          controller['id'])
               )
 
@@ -596,24 +841,53 @@ class DataBase(object):
 #----------------------------------Passage----------------------------------------
 
 
-    def getPassages(self, zoneId):
+    def getPassages(self, zoneId=None, visitorsPssgsId=None):
         '''
-        Return a dictionary with all passages in a Zone
+        Return a dictionary with all passages in a Zone or in a visitorsPassages
+        according to the argument received
         '''
-        # check if the zoneId exists in the database
-        sql = ("SELECT * FROM Zone WHERE id='{}'".format(zoneId))
-        self.cursor.execute(sql)
-        zone = self.cursor.fetchall()
 
-        if not zone:
-            raise ZoneNotFound('Zone not found')
+        if not zoneId and not visitorsPssgsId:
+            raise PassageNotFound
+
+        elif zoneId:
+
+            # check if the zoneId exists in the database
+            sql = ("SELECT * FROM Zone WHERE id='{}'".format(zoneId))
+            self.cursor.execute(sql)
+            zone = self.cursor.fetchall()
+
+            if not zone:
+                raise ZoneNotFound('Zone not found')
        
-        # Get all persons from the organization
-        sql = ("SELECT * FROM Passage WHERE zoneId='{}'".format(zoneId))
-        self.cursor.execute(sql)
-        passages = self.cursor.fetchall()
+            # Get all persons from the organization
+            sql = ("SELECT * FROM Passage WHERE zoneId='{}'".format(zoneId))
+            self.cursor.execute(sql)
+            passages = self.cursor.fetchall()
         
-        return passages
+            return passages
+
+        elif visitorsPssgsId:
+            sql = ("SELECT COUNT(*) FROM VisitorsPassages WHERE id='{}'".format(visitorsPssgsId))
+            self.cursor.execute(sql)
+            
+            if self.cursor.fetchone()['COUNT(*)']:
+        
+                sql = ("SELECT Passage.* from Passage JOIN VisitorsPassagesPassage "
+                       "ON (Passage.id = VisitorsPassagesPassage.pssgId) "
+                       "WHERE VisitorsPassagesPassage.visitorsPssgsId = {}"
+                       "".format(visitorsPssgsId)
+                      )
+                self.cursor.execute(sql)
+                passages = self.cursor.fetchall()
+                return passages
+
+            else:
+                raise VisitorsPssgsNotFound('Visitors Passages not found')
+
+
+            
+            
 
 
 
@@ -656,14 +930,11 @@ class DataBase(object):
         It returns the id of the added passage
         '''
 
-        sql = ("INSERT INTO Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, "
-               "bzzrOut, rlseTime, bzzrTime, alrmTime, zoneId, controllerId, rowStateId) "
-               "VALUES({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})"
-               "".format(passage['i0In'], passage['i1In'], passage['o0In'],
-                         passage['o1In'], passage['bttnIn'], passage['stateIn'],
-                         passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'], 
-                         passage['bzzrTime'], passage['alrmTime'], passage['zoneId'],
-                         passage['controllerId'], TO_ADD) 
+        sql = ("INSERT INTO Passage(pssgNum, description, controllerId, rlseTime, bzzrTime, "
+               "alrmTime, zoneId, rowStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {})"
+               "".format(passage['pssgNum'], passage['description'], passage['controllerId'], 
+                         passage['rlseTime'], passage['bzzrTime'], passage['alrmTime'], 
+                         passage['zoneId'], TO_ADD)
               )
 
 
@@ -753,15 +1024,11 @@ class DataBase(object):
         Receive a dictionary with passage parametters and update it in DB
         '''
 
-        sql = ("UPDATE Passage SET i0In = {}, i1In = {}, o0In = {}, o1In = {}, "
-               "bttnIn = {}, stateIn = {}, rlseOut = {}, bzzrOut = {}, "
-               "rlseTime = {}, bzzrTime = {}, alrmTime = {}, zoneId = {}, "
-               "controllerId = {}, rowStateId = {} WHERE id = {}"
-               "".format(passage['i0In'], passage['i1In'], passage['o0In'],
-                         passage['o1In'], passage['bttnIn'], passage['stateIn'],
-                         passage['rlseOut'], passage['bzzrOut'], passage['rlseTime'], 
-                         passage['bzzrTime'], passage['alrmTime'], passage['zoneId'],
-                         passage['controllerId'], TO_UPDATE, passage['id'])
+        sql = ("UPDATE Passage SET pssgNum = {}, description = '{}', controllerId = {}, rlseTime = {}, "
+               "bzzrTime = {}, alrmTime = {}, zoneId = {}, rowStateId = {} WHERE id = {}"
+               "".format(passage['pssgNum'], passage['description'], passage['controllerId'],
+                         passage['rlseTime'], passage['bzzrTime'], passage['alrmTime'],
+                         passage['zoneId'], TO_UPDATE, passage['id'])
               )
 
         try:
@@ -783,24 +1050,43 @@ class DataBase(object):
 
 #-------------------------------Person-----------------------------------
 
-    def getPersons(self, orgId):
+    def getPersons(self, orgId, includeDeleted=True):
         '''
-        Return a dictionary with all persons in an organization
+        Return a dictionary with all persons in an organization,
+        By default the method also retrieve the persons mark as DELETED.
+        If "includeDeleted" flag is set to False, it will only return all
+        the persons not marked as DELETED
         '''
-        # check if the organization id exist in the database
-        sql = ("SELECT * FROM Organization WHERE id='{}'".format(orgId))
-        self.cursor.execute(sql)
-        organization = self.cursor.fetchall()
+        
+        try:
+        
+            #check if the organization id exist in the database
+            sql = ("SELECT * FROM Organization WHERE id='{}'".format(orgId))
+            self.cursor.execute(sql)
+            organization = self.cursor.fetchone()
 
-        if not organization:
-            raise OrganizationNotFound('Organization not found')
+            if not organization:
+                raise OrganizationNotFound('Organization not found')
         
-        # Get all persons from the organization
-        sql = ("SELECT * FROM Person WHERE orgId='{}'".format(orgId))
-        self.cursor.execute(sql)
-        persons = self.cursor.fetchall()
+            # Get all persons from the organization
+            if includeDeleted:
+                sql = "SELECT * FROM Person WHERE orgId = {}".format(orgId)
+
+            else:
+                sql = ("SELECT * FROM Person WHERE orgId = {} AND rowStateId != {}"
+                       "".format(orgId, DELETED)
+                      )
+            self.cursor.execute(sql)
+            persons = self.cursor.fetchall()
         
-        return persons
+            return persons
+
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not get persons from this organization')
+
+
 
 
 
@@ -850,8 +1136,12 @@ class DataBase(object):
         #The person row is inserted in COMMITTED state since the person is not sent to
         #controller at the moment it is inserted here. It it sent to the controller when
         #an access is created.
-        sql = ("INSERT INTO Person(name, cardNumber, orgId, rowStateId) VALUES('{}', {}, {}, {})"
-               "".format(person['name'], person['cardNumber'], person['orgId'], COMMITTED)
+
+        if not person['visitedOrgId']:
+            person['visitedOrgId'] = 'NULL'
+
+        sql = ("INSERT INTO Person(name, cardNumber, orgId, visitedOrgId, rowStateId) VALUES('{}', {}, {}, {}, {})"
+               "".format(person['name'], person['cardNumber'], person['orgId'], person['visitedOrgId'], COMMITTED)
               )
 
         try:
@@ -890,6 +1180,22 @@ class DataBase(object):
             self.connection.commit()
 
 
+
+            #If the operation is TO_DELETE, and we still have access pending to add (TO_ADD),
+            #those accesses should be deleted in central DB and the controller should never
+            #be aware of this situationu
+            if operation == TO_DELETE:
+                sql = ("DELETE FROM LimitedAccess WHERE rowStateId = {} AND personId = {}"
+                       "".format(TO_ADD, personId)
+                      )
+                self.cursor.execute(sql)
+
+                sql = ("DELETE FROM Access WHERE rowStateId = {} AND personId = {}"
+                       "".format(TO_ADD, personId)
+                      )
+                self.cursor.execute(sql)
+
+
             #To avoid having duplicate MACs in the result list, it is used DISTINCT clause
             #since we can have a Person having access in more than one passage
             #and those passage could be on the same controller (with the same MAC)
@@ -903,18 +1209,22 @@ class DataBase(object):
             self.cursor.execute(sql)
             ctrllerMacs = self.cursor.fetchall()
             ctrllerMacs = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacs]
-            
+
             #If the person is not present in any controller, we should log this situation and
             #remove it from the central DB.
             if ctrllerMacs == []:
                 if operation == TO_DELETE:
                     logMsg = ("This person is not present in any controller. "
-                              "Removing it from central DB." 
+                              "Marking it as deleted in central DB." 
                              )
                     self.logger.debug(logMsg)
-                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+                       "".format(DELETED, personId)
+                          )
                     self.cursor.execute(sql)
                     self.connection.commit()
+
+                    self.delOrgIfNeed(personId)
 
                 elif operation == TO_UPDATE:
                     logMsg = ("This person is not present in any controller. "
@@ -1017,9 +1327,13 @@ class DataBase(object):
                 self.cursor.execute(sql)
                 pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
                 if not pendCtrllersToDel:
-                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    #sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    sql = "UPDATE Person SET rowStateId = {} WHERE id = {}".format(DELETED, personId)
                     self.cursor.execute(sql)
                     self.connection.commit()
+
+                self.delOrgIfNeed(personId)
+
 
             elif rowState == TO_UPDATE:
                 #Deleting the entry in "PersonPendingOperation" table which has this person id,
@@ -1045,6 +1359,9 @@ class DataBase(object):
 
             elif rowState == COMMITTED:
                 self.logger.info('Person already committed.')
+
+            elif rowState == DELETED:
+                self.logger.info('Person already deleted.')
 
             else:
                 self.logger.debug('Invalid state detected in Person table.')
@@ -1093,9 +1410,11 @@ class DataBase(object):
         '''
         Receive a dictionary with id organization
         '''
+        if not person['visitedOrgId']:
+            person['visitedOrgId'] = 'NULL'
 
-        sql = ("UPDATE Person SET name = '{}', cardNumber = {}, orgId = {} WHERE id = {}"
-               "".format(person['name'], person['cardNumber'], person['orgId'], person['id'])
+        sql = ("UPDATE Person SET name = '{}', cardNumber = {}, orgId = {}, visitedOrgId = {} WHERE id = {}"
+               "".format(person['name'], person['cardNumber'], person['orgId'], person['visitedOrgId'], person['id'])
               )
 
         try:
@@ -1133,7 +1452,6 @@ class DataBase(object):
 
 #-------------------------------Access-----------------------------------
 
-
     def getAccesses(self, personId):
 
         '''
@@ -1152,7 +1470,49 @@ class DataBase(object):
         self.cursor.execute(sql)
         accesses = self.cursor.fetchall()
 
+        for access in accesses:
+
+            access['startTime'] = str(access['startTime'])
+            access['endTime'] = str(access['endTime'])
+            access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+
+            if not access['allWeek']:
+                access['liAccesses'] = self.getLiAccesses(access['pssgId'], personId)
+
         return accesses
+
+
+
+
+    def getLiAccesses(self, pssgId, personId):
+
+        '''
+        Return a dictionary with all access with the personId
+        '''
+        # check if the person id exist in the database
+        sql = ("SELECT * FROM Person WHERE id = '{}'".format(personId))
+        self.cursor.execute(sql)
+        person = self.cursor.fetchall()
+
+        if not person:
+            raise PersonNotFound('Person not found')
+
+        # Get all persons from the organization
+        sql = ("SELECT * FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
+               "".format(pssgId, personId)
+              )
+        self.cursor.execute(sql)
+        liAccesses = self.cursor.fetchall()
+
+        for liAccess in liAccesses:
+                           
+            liAccess['startTime'] = str(liAccess['startTime'])
+            liAccess['endTime'] = str(liAccess['endTime'])
+
+
+        return liAccesses
+
+
 
 
 

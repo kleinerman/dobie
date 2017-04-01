@@ -71,8 +71,14 @@ class CrudReSndr(genmngr.GenericMngr):
                 ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
                 for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_ADD):
+                    passage.pop('description')
+                    passage.pop('controllerId')
+                    passage.pop('zoneId')
                     self.ctrllerMsger.addPassage(ctrllerMac, passage)
                 for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_UPDATE):
+                    passage.pop('description')
+                    passage.pop('controllerId')
+                    passage.pop('zoneId')
                     self.ctrllerMsger.updPassage(ctrllerMac, passage)
                 for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_DELETE):
                     self.ctrllerMsger.delPassage(ctrllerMac, passage['id'])
@@ -123,6 +129,9 @@ class CrudReSndr(genmngr.GenericMngr):
                 #Persons never colud be in state TO_ADD. For this reason,
                 #only TO_UPDATE or TO_DELETE state is retrieved
                 for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE):
+                    person.pop('name')
+                    person.pop('orgId')
+                    person.pop('visitedOrgId')
                     #"updPerson" method receive a list of MAC addresses to update. Because in this case only one
                     #controller is being updated, a list with only the MAC address of the controller is created.
                     self.ctrllerMsger.updPerson([ctrllerMac], person)

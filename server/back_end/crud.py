@@ -6,9 +6,11 @@ import json
 import queue
 import sys
 import time
+import crypt
 
-from flask import Flask, jsonify, request, abort, url_for
+from flask import Flask, jsonify, request, abort, url_for, g
 from flask_httpauth import HTTPBasicAuth
+
 
 import genmngr
 import database
@@ -21,8 +23,6 @@ from config import *
 BAD_REQUEST = 400
 CREATED = 201
 OK = 200
-USER = 'conpass'
-PASSWD = 'password'
 
 
 # Exceptions used by Flask errorhandler decorator
@@ -77,7 +77,7 @@ class CrudMngr(genmngr.GenericMngr):
 
         app = Flask(__name__)
         auth = HTTPBasicAuth()
-
+       
         
         ## Error hanlders
         #
@@ -146,13 +146,32 @@ class CrudMngr(genmngr.GenericMngr):
             return response
  
 
-        # For API authentication
-        @auth.get_password
-        def get_password(username):
-            if username == USER:
-                return PASSWD
-            else:
-                return None
+
+        @auth.verify_password
+        def verify_password(username, password):
+            '''
+            '''
+            #Retrieve user parameters from database
+            user = self.dataBase.getUser(username)
+
+            if user:
+
+                #Get the password hashed and salted from user parameters
+                passwdHash = user['passwdHash']
+                #Get only the salt from the previous variable
+                salt = passwdHash.split('$')[2]
+                #With the password passed in the request, recalculing the hash
+                #using MD5 ($1) algorithm and the stored salt and comparing the result
+                #with the stored hash
+                if crypt.crypt(password, '$1${}'.format(salt)) == passwdHash:
+                    #If the username and password is correct, save the user parameters in "g"
+                    #flask object to be able to use them in user resource and return True
+                    g.user = user
+                    return True
+            return False
+
+
+
 
 
         # Global API protection:
@@ -162,6 +181,46 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def before_request():
                 pass
+
+
+
+#------------------------------------User----------------------------------------------
+        @app.route('/api/v1.0/login', methods=['GET'])
+        def user():
+            '''
+            GET: Return a list with all persons in the organization
+            '''
+            g.user.pop('passwdHash')
+            return jsonify(g.user)
+
+
+
+#------------------------------------RowState----------------------------------------------
+        @app.route('/api/v1.0/rowstate', methods=['GET'])
+        def rowState():
+            '''
+            GET: Return a list with all persons in the organization
+            '''
+            try:
+                ## For GET method
+                rowStates = self.dataBase.getRowStates()
+
+                return jsonify(rowStates)
+
+
+            except database.OrganizationNotFound as organizationNotFound:
+                raise NotFound(str(organizationNotFound))
+            except database.OrganizationError as organizationError:
+                raise ConflictError(str(organizationError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+
+
 
 
 
@@ -219,6 +278,11 @@ class CrudMngr(genmngr.GenericMngr):
             DELETE: Delete an organization
             '''
             try:
+                #If somebody is trying to modify/delete the "Visitors"
+                #organization via REST, we should respond with 404 (Not Found)
+                if orgId == 1:
+                    raise database.OrganizationNotFound('Organization not found')
+
                 ## For GET method
                 if request.method == 'GET':
                     persons = self.dataBase.getPersons(orgId)
@@ -240,6 +304,10 @@ class CrudMngr(genmngr.GenericMngr):
                 # Delete an organization
                 elif request.method == 'DELETE':
                     self.dataBase.delOrganization(orgId)
+                    for person in self.dataBase.getPersons(orgId, includeDeleted=False):
+                        ctrllerMacsToDelPrsn = self.dataBase.markPerson(person['id'], database.TO_DELETE)
+                        self.ctrllerMsger.delPerson(ctrllerMacsToDelPrsn, person['id'])
+                        
                     return jsonify({'status': 'OK', 'message': 'Organization deleted'}), OK
 
             except database.OrganizationNotFound as organizationNotFound:
@@ -309,7 +377,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 ## For GET method
                 if request.method == 'GET':
-                    passages = self.dataBase.getPassages(zoneId)
+                    passages = self.dataBase.getPassages(zoneId=zoneId)
                     
                     for passage in passages:
                         passage['uri'] = url_for('modPassage', pssgId=passage['id'], _external=True)
@@ -344,9 +412,137 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+#----------------------------------VisitorsPassages------------------------------------
+
+        visitorsPssgsNeedKeys = ('name',)
+
+        @app.route('/api/v1.0/visitorspassages', methods=['POST', 'GET'])
+        @auth.login_required
+        def visitorsPssgss():
+            ''' 
+            Add a new Visitors Passages into the database.
+            '''     
+            try:    
+                ## For GET method
+                if request.method == 'GET':
+                    visitorsPssgss = self.dataBase.getVisitorsPssgss()
+                    for visitorsPssgs in visitorsPssgss:
+                        visitorsPssgs['uri'] = url_for('visitorsPssgs', visitorsPssgsId=visitorsPssgs['id'], _external=True)
+                        visitorsPssgs.pop('id')
+                    return jsonify(visitorsPssgss)
+                ## For POST method
+                elif request.method == 'POST':
+                    visitorsPssgs = {}
+                    for param in visitorsPssgsNeedKeys:
+                        visitorsPssgs[param] = request.json[param]
+                    visitorsPssgsId = self.dataBase.addVisitorsPssgs(visitorsPssgs)
+                    uri = url_for('visitorsPssgs', visitorsPssgsId=visitorsPssgsId, _external=True)
+                    return jsonify({'status': 'OK', 'message': 'Visitors Passage added', 'code': CREATED, 'uri': uri}), CREATED
+
+            except database.VisitorsPssgsError as visitorsPssgsError:
+                raise ConflictError(str(visitorsPssgsError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(visitorsPssgsNeedKeys)))
+
+
+
+
+        @app.route('/api/v1.0/visitorspassages/<int:visitorsPssgsId>', methods=['GET', 'PUT', 'DELETE'])
+        @auth.login_required
+        def visitorsPssgs(visitorsPssgsId):
+            '''
+            Update or delete a Visitors Passages in the database.
+            '''
+            try:
+
+    
+                ## For GET method
+                if request.method == 'GET':
+                    passages = self.dataBase.getPassages(visitorsPssgsId=visitorsPssgsId)
+
+                    for passage in passages:
+                        passage['uri'] = url_for('modPassage', pssgId=passage['id'], _external=True)
+                        passage.pop('id')
+                    return jsonify(passages)
+
+
+                elif request.method == 'PUT':
+                    visitorsPssgs = {}
+                    visitorsPssgs['id'] = visitorsPssgsId
+                    for param in visitorsPssgsNeedKeys:
+                        visitorsPssgs[param] = request.json[param]
+                    self.dataBase.updVisitorsPssgs(visitorsPssgs)
+                    return jsonify({'status': 'OK', 'message': 'Visitors Passages updated'}), OK
+
+                elif request.method == 'DELETE':
+                    self.dataBase.delVisitorsPssgs(visitorsPssgsId)
+                    return jsonify({'status': 'OK', 'message': 'Controller deleted'}), OK
+
+            except database.VisitorsPssgsNotFound as visitorsPssgsNotFound:
+                raise NotFound(str(visitorsPssgsNotFound))
+            except database.VisitorsPssgsError as visitorsPssgsError:
+                raise ConflictError(str(visitorsPssgsError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitorsPssgsNeedKeys)))
+
+
+
+
+
+
+
+
+
+        @app.route('/api/v1.0/visitorspassages/<int:visitorsPssgsId>/passage/<int:pssgId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def pssgInVisitorsPssgs(visitorsPssgsId, pssgId):
+            ''' 
+            Add a new Visitors Passages into the database.
+            '''
+            try:
+                if request.method == 'PUT':
+                    self.dataBase.addPssgToVisitorsPssgs(visitorsPssgsId, pssgId)
+                    return jsonify({'status': 'OK', 'message': 'Passage added to Visitors Passages'}), OK
+                elif request.method == 'DELETE':
+                    self.dataBase.delPssgFromVisitorsPssgs(visitorsPssgsId, pssgId)
+                    return jsonify({'status': 'OK', 'message': 'Passage deleted from Visitors Passages'}), OK
+
+            except database.VisitorsPssgsError as visitorsPssgsError:
+                raise ConflictError(str(visitorsPssgsError))
+            except database.VisitorsPssgsNotFound as visitorsPssgsNotFound:
+                raise NotFound(str(visitorsPssgsNotFound))
+
+
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
+
+
+
+
+
+
+
+
+
 #-------------------------------------Person------------------------------------------
 
-        prsnNeedKeys = ('name', 'cardNumber', 'orgId')
+        prsnNeedKeys = ('name', 'cardNumber', 'orgId', 'visitedOrgId')
 
         @app.route('/api/v1.0/person', methods=['POST'])
         @auth.login_required
@@ -381,16 +577,18 @@ class CrudMngr(genmngr.GenericMngr):
             GET: Return a JSON with all accesses that this person has
             PUT/DELETE: Update or delete a Zone in the database.
             '''
+
             try:
                 ## For GET method
                 if request.method == 'GET':
                     accesses = self.dataBase.getAccesses(personId)
                     for access in accesses:
                         access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
-                        # Convert to string the following values for jsonify
-                        access['startTime'] = str(access['startTime'])
-                        access['endTime'] = str(access['endTime'])
-                        access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+                        try:
+                            for liAccess in access['liAccesses']:
+                                liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
+                        except KeyError:
+                            pass
                         # Remove id
                         access.pop('id')
 
@@ -403,7 +601,9 @@ class CrudMngr(genmngr.GenericMngr):
                     for param in prsnNeedKeys:
                         person[param] = request.json[param]
                     self.dataBase.updPerson(person)
+                    person.pop('name')
                     person.pop('orgId')
+                    person.pop('visitedOrgId')
                     ctrllerMacsToUpdPrsn = self.dataBase.markPerson(personId, database.TO_UPDATE)
                     self.ctrllerMsger.updPerson(ctrllerMacsToUpdPrsn, person)
                     return jsonify({'status': 'OK', 'message': 'Person updated'}), OK
@@ -430,7 +630,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 #--------------------------------------Controller------------------------------------------
 
-        ctrllerNeedKeys = ('boardModel', 'macAddress')
+        ctrllerNeedKeys = ('ctrllerModelId', 'macAddress')
 
         @app.route('/api/v1.0/controller', methods=['POST'])
         @auth.login_required
@@ -529,9 +729,7 @@ class CrudMngr(genmngr.GenericMngr):
 #--------------------------------------Passage------------------------------------------
 
 
-        pssgNeedKeys = ('i0In', 'i1In', 'o0In', 'o1In', 'bttnIn',
-                        'stateIn', 'rlseOut', 'bzzrOut', 'rlseTime',
-                        'bzzrTime', 'alrmTime', 'zoneId', 'controllerId')
+        pssgNeedKeys = ('description', 'pssgNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId')
 
         @app.route('/api/v1.0/passage', methods=['POST'])
         @auth.login_required
@@ -547,6 +745,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Passage dictionary modified for the controller database (same server passage id)
                 passage['id'] = pssgId
+                passage.pop('description')
                 passage.pop('zoneId')
                 passage.pop('controllerId')
                 # Get the controller mac address
@@ -584,6 +783,7 @@ class CrudMngr(genmngr.GenericMngr):
                     for param in pssgNeedKeys:
                         passage[param] = request.json[param]
                     self.dataBase.updPassage(passage)
+                    passage.pop('description')
                     passage.pop('zoneId')
                     passage.pop('controllerId')
                     ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
