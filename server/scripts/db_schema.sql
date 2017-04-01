@@ -1,5 +1,26 @@
 BEGIN;
 
+CREATE TABLE `Role` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `description` varchar(20) NOT NULL
+)
+;
+
+CREATE TABLE `User` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `description` varchar(64) NOT NULL,
+    `username` varchar(32) NOT NULL,
+    `passwdHash` varchar(128) NOT NULL,
+    `roleId` integer NOT NULL,
+    CONSTRAINT `fk_User_Role` FOREIGN KEY (`roleId`) REFERENCES `Role` (`id`)
+)
+;
+
+CREATE UNIQUE INDEX usernameIndex ON User (username)
+;
+
+
+
 CREATE TABLE `RowState` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `description` varchar(20) NOT NULL
@@ -8,7 +29,8 @@ CREATE TABLE `RowState` (
 
 CREATE TABLE `Organization` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `name` varchar(40) NOT NULL
+    `name` varchar(40) NOT NULL,
+    `rowStateId` integer NOT NULL
 )
 ;
 
@@ -16,9 +38,11 @@ CREATE TABLE `Person` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL,
     `cardNumber` integer NOT NULL,
-    `orgId` integer NOT NULL,
+    `orgId` integer,
+    `visitedOrgId` integer,
     `rowStateId` integer NOT NULL,
     CONSTRAINT `fk_Person_Organization` FOREIGN KEY (`orgId`) REFERENCES `Organization` (`id`),
+    CONSTRAINT `fk_Person_VisitedOrganization` FOREIGN KEY (`visitedOrgId`) REFERENCES `Organization` (`id`),
     CONSTRAINT `fk_Person_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
 )
 ;
@@ -26,16 +50,28 @@ CREATE TABLE `Person` (
 CREATE UNIQUE INDEX cardNumberIndex ON Person (cardNumber)
 ;
 
+
+CREATE TABLE `CtrllerModel` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `name` varchar(40) NOT NULL,
+    `boardModel` varchar(40) NOT NULL,
+    `pssgsQuant` integer NOT NULL
+)
+;
+
+
 CREATE TABLE `Controller` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `boardModel` varchar(40) NOT NULL,
+    `ctrllerModelId` integer NOT NULL,
     `macAddress` varchar(12) NOT NULL,
-    `ipAddress` varchar(39)
+    `ipAddress` varchar(39),
+    CONSTRAINT `fk_Controller_CtrllerModel` FOREIGN KEY (`ctrllerModelId`) REFERENCES `CtrllerModel` (`id`)
 )
 ;
 
 CREATE UNIQUE INDEX macAddressIndex ON Controller (macAddress)
 ;
+
 
 
 CREATE TABLE `Zone` (
@@ -44,27 +80,46 @@ CREATE TABLE `Zone` (
 )
 ;
 
+
 CREATE TABLE `Passage` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `i0In` integer NOT NULL,
-    `i1In` integer NOT NULL,
-    `o0In` integer NOT NULL,
-    `o1In` integer NOT NULL,
-    `bttnIn` integer NOT NULL,
-    `stateIn` integer NOT NULL,
-    `rlseOut` integer NOT NULL,
-    `bzzrOut` integer NOT NULL,
+    `pssgNum` integer NOT NULL,
+    `description` varchar(40),
+    `controllerId` integer NOT NULL,
     `rlseTime` integer NOT NULL,
     `bzzrTime` integer NOT NULL,
     `alrmTime` integer NOT NULL,
     `zoneId` integer NOT NULL,
-    `controllerId` integer NOT NULL,
     `rowStateId` integer NOT NULL,
     CONSTRAINT `fk_Passage_Controller` FOREIGN KEY (`controllerId`) REFERENCES `Controller` (`id`),
     CONSTRAINT `fk_Passage_Zone` FOREIGN KEY (`zoneId`) REFERENCES `Zone` (`id`),
     CONSTRAINT `fk_Passage_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
 )
 ;
+
+CREATE UNIQUE INDEX CtrllerPssgNumIndex ON Passage (controllerId, pssgNum)
+;
+
+CREATE TABLE `VisitorsPassages` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `name` varchar(40) NOT NULL
+)
+;
+
+CREATE TABLE `VisitorsPassagesPassage` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `visitorsPssgsId` integer NOT NULL,
+    `pssgId` integer NOT NULL,
+    CONSTRAINT `fk_VisitorsPassagesPassage_VisitorsPassages` FOREIGN KEY (`visitorsPssgsId`) REFERENCES `VisitorsPassages` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_VisitorsPassagesPassage_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE
+)
+;
+
+CREATE UNIQUE INDEX VisitorsPassagesPassageIndex ON VisitorsPassagesPassage (visitorsPssgsId, pssgId)
+;
+
+
+
 
 CREATE TABLE `Access` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -139,12 +194,12 @@ CREATE TABLE `Event` (
     `personId` integer,
     `side` boolean,
     `allowed` boolean,
-    `notReason` integer,
+    `notReasonId` integer,
     CONSTRAINT `fk_Event_EventType` FOREIGN KEY (`eventTypeId`) REFERENCES `EventType` (`id`),
     CONSTRAINT `fk_Event_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Event_Latch` FOREIGN KEY (`latchId`) REFERENCES `Latch` (`id`),    
     CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_Event_NotReason` FOREIGN KEY (`notReason`) REFERENCES `NotReason` (`id`)
+    CONSTRAINT `fk_Event_NotReason` FOREIGN KEY (`notReasonId`) REFERENCES `NotReason` (`id`)
 
 )
 ;
