@@ -39,7 +39,7 @@ To validate the username and password, it is necessary to get the following reso
 Organization
 ------------
 
-This screen is used to “add”, “edit” or “delete”organizations in the building.
+This screen is used to “add”, “edit” or “delete” organizations in the building.
 For the system, an organization is just a name to group a set of persons.
 
 .. image:: images_front_end_specs/organization.png
@@ -93,7 +93,7 @@ To get from the server the current list of organizations, the following REST met
 
 **rowStateId** is a field that indicates the state of the organization into the system
 
-To get all posible state the following method should be sent to the server:
+To get all posible states, the following method should be sent to the server:
 
 **Method:** GET
 
@@ -136,7 +136,7 @@ To get all posible state the following method should be sent to the server:
     }
   ]
 
-The organizations in state: "Deleted" should not be shown.
+The organizations in state: "Deleted" should not be shown and the other states should be shown in a different color.
 
 
 Add Organization
@@ -380,7 +380,7 @@ To get all posible state the following method should be sent to the server:
     }
   ]
 
-The persons in state: "Deleted" should not be shown.
+The persons in state: "Deleted" should not be shown and the other states should be shown in a different color. 
 
  
 Add Person
