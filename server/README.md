@@ -1,11 +1,9 @@
-Dobie infrastructure
-====================
+# Dobie infrastructure
 
-Installing Docker
------------------
+## Installing Docker
 
-Archlinux host
-~~~~~~~~~~~~~~
+### Archlinux host
+
 
 **1) Install Docker in your host:**
 
@@ -59,8 +57,7 @@ ExecStart=/usr/bin/dockerd -H fd:// -s overlay2
 Recall that ExecStart= line is needed to drop inherited ExecStart.
 
 
-Ubuntu 16.04 host
-~~~~~~~~~~~~~~~~~
+### Ubuntu 16.04 host
 
 **1) Install packages to allow apt to use a repository over HTTPS:**
 
@@ -96,8 +93,7 @@ $ sudo apt-get install docker-ce
 ```
 
 
-Creating the docker network
----------------------------
+## Creating the docker network
 
 Before creating docker images and container, it's necessary to create a virtual network for the containers
 
@@ -105,8 +101,7 @@ Before creating docker images and container, it's necessary to create a virtual 
 $ docker network create --subnet=172.18.0.0/24 --gateway=172.18.0.1 --driver=bridge network_01
 ```
 
-Running the database server on Docker
--------------------------------------
+## Running the database server on Docker
 
 In order to run Dobie's backend using Docker containers, you should set up a MariaDB database container
 
@@ -150,8 +145,7 @@ $ docker exec -it database bash
 # root@92d8a1825168:/# exit
 ```
 
-Running the Dobie backend on Docker
------------------------------------
+## Running the Dobie backend on Docker
 
 In this step, we are going to set up the backend process.
 
@@ -175,3 +169,4 @@ You must map the cloned repository into the container's directory `/opt/app` usi
 ```
 docker run -d --name backend --net network_01 --ip 172.18.0.3 -p 5000:5000 -p 7979:7979 -v /home/USER/dobie/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
 ```
+
