@@ -4,6 +4,9 @@ Dobie infrastructure
 Installing Docker
 -----------------
 
+Archlinux host
+~~~~~~~~~~~~~~
+
 **1) Install Docker in your host:**
 
 ```
@@ -55,6 +58,44 @@ ExecStart=/usr/bin/dockerd -H fd:// -s overlay2
 
 Recall that ExecStart= line is needed to drop inherited ExecStart.
 
+
+Ubuntu 16.04 host
+~~~~~~~~~~~~~~~~~
+
+**1) Install packages to allow apt to use a repository over HTTPS:**
+
+```
+$ sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+
+```
+
+**2) Add Docker's official GPG key:**
+
+```
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+```
+
+**3) Add docker's repository:**
+
+```
+$ sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+```
+
+**4) Install Docker**
+
+```
+$ sudo apt-get update
+$ sudo apt-get install docker-ce
+```
+
+
 Creating the docker network
 ---------------------------
 
@@ -73,13 +114,14 @@ In order to run Dobie's backend using Docker containers, you should set up a Mar
 
 Before building the image, you must download these files and put them into a `files` directory:
 
+
 ```
 $ mkdir -p build/files
 $ cd build/files
-$ wget https://raw.githubusercontent.com/jkleinerman/dobie/master/server/docker/database/files/db_create_drop.sh
-$ wget https://raw.githubusercontent.com/jkleinerman/dobie/master/server/docker/database/files/db_schema.sql
+$ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/database/files/db_create_drop.sh
+$ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/database/files/db_schema.sql
 $ cd ..
-$ wget https://raw.githubusercontent.com/jkleinerman/dobie/master/server/docker/database/Dockerfile
+$ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/database/Dockerfile
 ```
 
 And then, in the `build` directory:
@@ -117,13 +159,13 @@ Use the Dockerfile (located on this repository) to build the Python container fo
 Put the Dockerfile on a directory and run the following command in the same directory:
 
 ```
-$ docker build -t="aryklein/backend:0.1" https://raw.githubusercontent.com/jkleinerman/dobie/master/server/docker/backend/Dockerfile
+$ docker build -t="aryklein/backend:0.1" https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/backend/Dockerfile
 ```
 
 **1) Clone the Dobie repository**:
 
 ```
-$ git clone https://github.com/jkleinerman/dobie.git
+$ git clone https://github.com/kleinerman/dobie.git
 ```
 
 **2) Launch the Docker container**:
