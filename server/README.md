@@ -79,7 +79,7 @@ $ cd build/files
 $ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/scripts/db_create_drop.sh
 $ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/scripts/db_schema.sql
 $ cd ..
-$ wget https://raw.githubusercontent.com/jkleinerman/dobie/master/server/docker/database/Dockerfile
+$ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/database/Dockerfile
 ```
 
 And then, in the `build` directory:
