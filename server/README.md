@@ -76,8 +76,8 @@ Before building the image, you must download these files and put them into a `fi
 ```
 $ mkdir -p build/files
 $ cd build/files
-$ wget https://raw.githubusercontent.com/jkleinerman/dobie/master/server/docker/database/files/db_create_drop.sh
-$ wget https://raw.githubusercontent.com/jkleinerman/dobie/master/server/docker/database/files/db_schema.sql
+$ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/scripts/db_create_drop.sh
+$ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/scripts/db_schema.sql
 $ cd ..
 $ wget https://raw.githubusercontent.com/jkleinerman/dobie/master/server/docker/database/Dockerfile
 ```
