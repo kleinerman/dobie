@@ -117,13 +117,13 @@ Use the Dockerfile (located on this repository) to build the Python container fo
 Put the Dockerfile on a directory and run the following command in the same directory:
 
 ```
-$ docker build -t="aryklein/backend:0.1" https://raw.githubusercontent.com/jkleinerman/dobie/master/server/docker/backend/Dockerfile
+$ docker build -t="aryklein/backend:0.1" https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/backend/Dockerfile
 ```
 
 **1) Clone the Dobie repository**:
 
 ```
-$ git clone https://github.com/jkleinerman/dobie.git
+$ git clone https://github.com/kleinerman/dobie.git
 ```
 
 **2) Launch the Docker container**:
