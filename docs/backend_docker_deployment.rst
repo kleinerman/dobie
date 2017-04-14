@@ -155,6 +155,7 @@ $ docker volume create --name database-volume
 **4) Create (if necessary) the database, user and tables:**
 
 .. code-block::
+
   $ docker exec -it database bash
   # root@92d8a1825168:/# bash /tmp/db_create_drop.sh --create
   # root@92d8a1825168:/# exit
