@@ -1,6 +1,17 @@
 Dobie infrastructure
 ====================
 
+Clone dobie repository
+-----------------------
+
+.. code-block::
+
+  $ mkdir -p dobie-project/repo/
+  $ cd dobie-project/repo/
+  $ git clone https://github.com/kleinerman/dobie.git .
+
+
+
 Installing Docker
 -----------------
 
@@ -149,7 +160,7 @@ $ docker volume create --name database-volume
 
 .. code-block::
 
-  $ docker run --net network_01 --ip 172.18.0.2 --name database -v database-volume:/var/lib/mysql -d aryklein/database:0.1
+  $ docker run -d --name database --hostname database --net network_01 --ip 172.18.0.2 -v database-volume:/var/lib/mysql database:1
 
 
 **4) Create (if necessary) the database, user and tables:**
