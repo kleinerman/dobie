@@ -134,19 +134,16 @@ Before building the image, you must download these files and put them into a `fi
 
 .. code-block::
 
-  $ mkdir -p build/files
-  $ cd build/files
-  $ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/scripts/db_create_drop.sh
-  $ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/scripts/db_schema.sql
-  $ cd ..
+  $ mkdir -p dobie-project/dockerfiles/database
+  $ cd dobie-project/dockerfiles/database
   $ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/database/Dockerfile
 
 
-And then, in the `build` directory:
+Now we can build the database container:
 
 .. code-block::
 
-  $ docker build -t="aryklein/database:0.1" .
+  $ docker build -t database:1 .
 
 
 **2) Create a non-ephemeral storage for the database**
@@ -163,7 +160,7 @@ $ docker volume create --name database-volume
   $ docker run -d --name database --hostname database --net network_01 --ip 172.18.0.2 -v database-volume:/var/lib/mysql database:1
 
 
-**4) Create (if necessary) the database, user and tables:**
+**4) Create database, user and tables:**
 
 .. code-block::
 
