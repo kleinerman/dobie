@@ -162,14 +162,43 @@ $ docker volume create --name database-volume
 
 **4) Create database, user and tables:**
 
+To create the database, user and tables, we should run a script which is located in the repository. This script need the mariadb client or mysql client package to connect the database.
+If you don't have this package installed, install it in the following way:
+
+**In Arch Linux:**
+
 .. code-block::
 
-  $ docker exec -it database bash
-  # root@92d8a1825168:/# bash /tmp/db_create_drop.sh --create
-  # root@92d8a1825168:/# exit
+  # pacman -S mariadb-clients
+  
+**In Ubuntu Linux:**
+
+.. code-block::
+
+  # apt-get install mariadb-client
+
+Now we can run the script:
+
+.. code-block::
+
+  $ cd dobie-project/repo/server/scripts
+  $ ./db_create_drop.sh -c 172.18.0.2
+
+The ip passed as a second argument to the script is the database container ip.
+If we want to drop the database we can use the -d option:
+
+.. code-block::
+
+  $ ./db_create_drop.sh -d 172.18.0.2
+
+If we want to drop and create again a clean database, we can use the -r option:
+
+.. code-block::
+
+  $ ./db_create_drop.sh -r 172.18.0.2
 
 
-Running the Dobie backend on Docker
+Running Dobie backend on Docker
 -----------------------------------
 
 In this step, we are going to set up the backend process.
