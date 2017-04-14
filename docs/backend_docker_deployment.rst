@@ -4,6 +4,9 @@ Dobie infrastructure
 Installing Docker
 -----------------
 
+Arch Linux host
+~~~~~~~~~~~~~~~
+
 **1) Install Docker in your host:**
 
 .. code-block::
@@ -57,6 +60,47 @@ To set your own choice of storage driver, create a Drop-in snippet and use `-s` 
 
 
 Recall that ExecStart= line is needed to drop inherited ExecStart.
+
+
+Ubuntu 16.04 Linux host
+~~~~~~~~~~~~~~~~~~~~~~~
+
+**1) Install packages to allow apt to use a repository over HTTPS:**
+
+.. code-block::
+
+  $ sudo apt-get install \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      software-properties-common
+
+
+
+**2) Add Docker's official GPG key:**
+
+.. code-block::
+
+  $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+
+**3) Add docker's repository:**
+
+.. code-block::
+
+  $ sudo add-apt-repository \
+     "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable"
+
+
+**4) Install Docker**
+
+.. code-block::
+
+  $ sudo apt-get update
+  $ sudo apt-get install docker-ce
+
 
 Creating the docker network
 ---------------------------
