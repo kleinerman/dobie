@@ -6,11 +6,8 @@ Clone dobie repository
 
 .. code-block::
 
-  $ mkdir -p dobie-project/repo/
-  $ cd dobie-project/repo/
-  $ git clone https://github.com/kleinerman/dobie.git .
-
-
+  $ git clone https://github.com/kleinerman/dobie.git
+  
 
 Installing Docker
 -----------------
@@ -128,22 +125,11 @@ Running the database server on Docker
 
 In order to run Dobie's backend using Docker containers, you should set up a MariaDB database container
 
-**1) Build the image using the Dockerfile**
-
-Before building the image, you must download the Dockerfile and put it on a directory:
+**1) Build the image using the Dockerfile from the repository**
 
 .. code-block::
 
-  $ mkdir -p dobie-project/dockerfiles/database
-  $ cd dobie-project/dockerfiles/database
-  $ wget https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/database/Dockerfile
-
-
-Now we can build the database container:
-
-.. code-block::
-
-  $ docker build -t database:1 .
+  $ docker build -t database:1 https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/database/Dockerfile
 
 
 **2) Create a non-ephemeral storage for the database**
@@ -204,27 +190,18 @@ Running Dobie backend on Docker
 
 In this step, we are going to set up the backend process.
 
-Before building the image, you must download the Dockerfile and put it on a directory:
 
-Use the Dockerfile (located on this repository) to build the Python container for the backend server.
-Put the Dockerfile on a directory and run the following command in the same directory:
-
-.. code-block::
-  
-  $ docker build -t="aryklein/backend:0.1"  https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/backend/Dockerfile
-
-
-**1) Clone the Dobie repository**:
+**1) Build the image using the Dockerfile from the repository**
 
 .. code-block::
 
-  $ git clone https://github.com/kleinerman/dobie.git
+  $ docker build -t backend:1  https://raw.githubusercontent.com/kleinerman/dobie/master/server/docker/backend/Dockerfile
 
 
 **2) Launch the Docker container**:
 
-You must map the cloned repository into the container's directory `/opt/app` using Docker volumes. So if the cloned repository is on `/home/USER/dobie` you should run:
+You must map the cloned repository into the container's directory `/opt/dobie-server` using Docker volumes. So if the cloned repository is on /home/USER/dobie you should run:
 
 .. code-block::
   
-  docker run -d --name backend --net network_01 --ip 172.18.0.3 -p 5000:5000 -p 7979:7979 -v /home/USER/dobie/server/back_end:/opt/app aryklein/backend:0.1 python /opt/app/main.py
+  docker run -d --name backend --hostname backend --net network_01 --ip 172.18.0.3 -p 5000:5000 -p 7979:7979 -v /home/USER/dobie/server/back_end:/opt/dobie-server backend:1 python /opt/dobie-server/main.py
