@@ -3,9 +3,9 @@
 
 
 function create {
-    mysql -u root -pqwe123qwe -e "CREATE USER 'conpass_usr'@'%' IDENTIFIED BY 'qwe123qwe'; 
-                         CREATE DATABASE conpass_db; 
-                         GRANT ALL ON conpass_db.* TO conpass_usr;"
+    mysql -u root -pqwe123qwe -h $1 -e "CREATE USER 'dobie_usr'@'%' IDENTIFIED BY 'qwe123qwe'; 
+                                        CREATE DATABASE dobie_db; 
+                                        GRANT ALL ON dobie_db.* TO dobie_usr;"
 
 
     #SCRIPTDIR="$(dirname "$(readlink -f "$0")")"
@@ -14,11 +14,11 @@ function create {
 
 
 
-    mysql -u conpass_usr -pqwe123qwe conpass_db < ${SCRIPTDIR}/db_schema.sql   
+    mysql -u dobie_usr -pqwe123qwe -h $1 dobie_db < ${SCRIPTDIR}/db_schema.sql   
 
 
 
-    mysql -u conpass_usr -pqwe123qwe conpass_db -e "
+    mysql -u dobie_usr -pqwe123qwe -h $1 dobie_db -e "
 
 
 
@@ -40,26 +40,25 @@ function create {
 
 function drop {
 
-    mysql -u root -pqwe123qwe -e "DROP USER 'conpass_usr';
-                                  DROP DATABASE conpass_db;"
+    mysql -u root -pqwe123qwe -h $1 -e "DROP USER 'dobie_usr';
+                                        DROP DATABASE dobie_db;"
 
 }
 
 
-
 case "$1" in
-    --create)
-    create
+    -c)
+    create $2
     ;;
-    --drop)
-    drop
+    -d)
+    drop $2
     ;;
-    --regenerate)
-    drop
-    create
+    -r)
+    drop $2
+    create $2
     ;;
   *)
-    echo "Usage: $0 {create|drop|regenerate}"
+    echo "Usage: $0 {-c|-d|-r} DATABASE_SERVER_IP"
     exit 1
     ;;
 esac
