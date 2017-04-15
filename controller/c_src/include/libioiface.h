@@ -1,5 +1,6 @@
 #ifndef LIBIOIFACE_H
 #define LIBIOIFACE_H
+#define RPi
 #include <mqueue.h>
 #define IN 1
 #define OUT 0
