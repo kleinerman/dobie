@@ -130,7 +130,7 @@ In order to run Dobie's backend using Docker containers, you should set up a Mar
 
 **1) Build the image using the Dockerfile**
 
-Before building the image, you must download these files and put them into a `files` directory:
+Before building the image, you must download the Dockerfile and put it on a directory:
 
 .. code-block::
 
@@ -150,7 +150,7 @@ Now we can build the database container:
 
 .. code-block::
 
-$ docker volume create --name database-volume
+  $ docker volume create --name database-volume
 
 
 **3) Launch the database container:**
@@ -198,10 +198,13 @@ If we want to drop and create again a clean database, we can use the -r option:
   $ ./db_create_drop.sh -r 172.18.0.2
 
 
+
 Running Dobie backend on Docker
 -----------------------------------
 
 In this step, we are going to set up the backend process.
+
+Before building the image, you must download the Dockerfile and put it on a directory:
 
 Use the Dockerfile (located on this repository) to build the Python container for the backend server.
 Put the Dockerfile on a directory and run the following command in the same directory:
