@@ -46,9 +46,7 @@ class Controller(object):
 
         self.dataBase = database.DataBase(DB_FILE)
 
-
-        self.lockIoIface = threading.Lock()
-        self.ioIface = ioiface.IoIface()
+        self.ioIface = ioiface.IoIface(self.dataBase)
         
         #Defining a OS queue to get messages from the ioiface
         self.ioIfaceQue = posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
@@ -60,29 +58,37 @@ class Controller(object):
                         }
 
         #Queue used to send events to eventThread
-        self.mainToEvent = queue.Queue()
+        self.eventQueue = queue.Queue()
         
         #Queue used to send responses from netMngr thread to event thread
         netToEvent = queue.Queue()
 
         #Queue used to send responses from netMngr thread to ReSender thread
-        netToReSnd = queue.Queue()
+        self.netToReSnd = queue.Queue()
 
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
+
+        self.lockPssgsControl = threading.Lock()
+        self.pssgsControl = passage.PssgsControl()
+        #self.pssgsControl.loadParams()
+
         #Creating the CRUD Manager Thread 
-        self.crudMngr = crud.CrudMngr(self.lockIoIface, self.ioIface, self.exitFlag)
+        self.crudMngr = crud.CrudMngr(self.lockPssgsControl, self.pssgsControl, self.exitFlag)
 
         #Creating the Net Manager Thread 
-        self.netMngr = network.NetMngr(netToEvent, netToReSnd, self.crudMngr, self.exitFlag)        
+        self.netMngr = network.NetMngr(netToEvent, self.netToReSnd, self.crudMngr, self.exitFlag)        
 
         #Setting internal crudMngr reference to netMngr thread to be able to answer
         #once the CRUD where commited in DB
         self.crudMngr.netMngr = self.netMngr
 
+        #Flag to know if Resender Thread is alive
+        self.resenderAlive = threading.Event()
+
         #Creating the Event Manager Thread giving to it the previous event queue
-        self.eventMngr = events.EventMngr(self.mainToEvent, self.netMngr, netToEvent, netToReSnd, self.exitFlag)
+        self.eventMngr = events.EventMngr(self.eventQueue, self.netMngr, netToEvent, self.netToReSnd, self.resenderAlive, self.exitFlag)
 
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
         signal.signal(signal.SIGTERM, self.sigtermHandler)
@@ -112,30 +118,28 @@ class Controller(object):
 
 
 
-    def openPssg(self, pssgId):
+    def openPssg(self, pssgNum):
         '''
         This method is called by "procCard" and "procButton" methods to release
         the passage and start the buzzer.
         It also creates a thread to close the passage and buzzer
         '''
 
-        with self.lockIoIface:
+        with self.lockPssgsControl:
 
-            pssgControl = self.ioIface.pssgsControl[pssgId]
+            pssgControl = self.pssgsControl.params[pssgNum]
 
             pssgControl['pssgObj'].release(True)
-            self.logger.debug("Releasing the passage {}.".format(pssgId))
+            self.logger.debug("Releasing the passage {}.".format(pssgNum))
             pssgControl['pssgObj'].startBzzr(True)
-            self.logger.debug("Starting the buzzer on passage {}.".format(pssgId))
+            self.logger.debug("Starting the buzzer on passage {}.".format(pssgNum))
             pssgControl['accessPermit'].set()
             pssgControl['timeAccessPermit'] = datetime.datetime.now()
     
 
             if not pssgControl['cleanerPssgMngrAlive'].is_set():
                 pssgControl['cleanerPssgMngrAlive'].set()
-                cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, 
-                                                      self.ioIface.pssgsReconfFlag, 
-                                                      self.exitFlag)
+                cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
                 cleanerPssgMngr.start()
 
 
@@ -144,58 +148,75 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def procCard(self, pssgId, side, cardNumber):
+    def procCard(self, pssgNum, side, cardNumber):
         '''
         This method is called each time somebody put a card in a card reader
         '''
 
-        allowed, personId, notReason = self.dataBase.canAccess(pssgId, side, cardNumber)
+        try:
+            with self.lockPssgsControl:
+                pssgId = self.pssgsControl.getPssgId(pssgNum)
 
-        if allowed:
-            self.openPssg(pssgId)
+            allowed, personId, notReasonId = self.dataBase.canAccess(pssgId, side, cardNumber)
 
-        dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+            if allowed:
+                self.openPssg(pssgNum)
+
+            dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         
-        event = {'pssgId' : pssgId, 
-                 'eventType' : 1,
-                 'dateTime' : dateTime,
-                 'latchType' : 1,
-                 'personId' : personId,
-                 'side' : side,
-                 'allowed' : allowed,
-                 'notReason' : notReason 
-                }
+            event = {'pssgId' : pssgId, 
+                     'eventTypeId' : 1,
+                     'dateTime' : dateTime,
+                     'latchId' : 1,
+                     'personId' : personId,
+                     'side' : side,
+                     'allowed' : allowed,
+                     'notReasonId' : notReasonId
+                    }
 
-        #Sending the event to the "Event Manager" thread
-        self.mainToEvent.put(event)
+            #Sending the event to the "Event Manager" thread
+            self.eventQueue.put(event)
+
+
+        except passage.PassageNotConfigured:
+            logMsg = 'Card was read on passage {} but it is not configured'.format(pssgNum)
+            self.logger.warning(logMsg)
 
 
 
     #---------------------------------------------------------------------------#
 
-    def procButton(self, pssgId, side, value):
+    def procButton(self, pssgNum, side, value):
         '''
         This method is called each time somebody press the button to release
         the passage
         '''
 
-        self.openPssg(pssgId)
+        try:
+            with self.lockPssgsControl:
+                pssgId = self.pssgsControl.getPssgId(pssgNum)
 
-        dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+            self.openPssg(pssgNum)
+
+            dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
 
-        event = {'pssgId' : pssgId,
-                 'eventType' : 2,
-                 'dateTime' : dateTime,
-                 'latchType' : 3,
-                 'personId' : 1,
-                 'side' : side,
-                 'allowed' : True,
-                 'notReason' : None
-                }
+            event = {'pssgId' : pssgId,
+                     'eventTypeId' : 2,
+                     'dateTime' : dateTime,
+                     'latchId' : 3,
+                     'personId' : None,
+                     'side' : side,
+                     'allowed' : True,
+                     'notReasonId' : None
+                    }
 
-        #Sending the event to the "Event Manager" thread
-        self.mainToEvent.put(event)
+            #Sending the event to the "Event Manager" thread
+            self.eventQueue.put(event)
+
+        except passage.PassageNotConfigured:
+            logMsg = 'Button pressed on passage {} but it is not configured'.format(pssgNum)
+            self.logger.warning(logMsg)
 
 
 
@@ -205,45 +226,70 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def procState(self, pssgId, side, openOrClose):
+    def procState(self, pssgNum, side, openOrClose):
         '''
         This method is called each time a passage change its state. (It is opened or closed)
         '''
 
-        with self.lockIoIface:
+        try:
+            with self.lockPssgsControl:
+                #pssgId is used just to create the event below we get it here to raise
+                #"PassageNotConfigured" exception if the passage is not confiugred
+                pssgId = self.pssgsControl.getPssgId(pssgNum)
+                pssgControl = self.pssgsControl.params[pssgNum]
 
-            pssgControl = self.ioIface.pssgsControl[pssgId]
+                #Converting "openOrClose" to int type to evaluete it on if statement
+                openOrClose = int(openOrClose)
+                #The state of the passage indicates that was opened
+                if openOrClose:
+                    pssgControl['openPssg'].set()
+                    #If the passage was open in a permitted way
+                    if pssgControl['accessPermit'].is_set():
+                        #Creates a StarterAlrmMngrAlive if not was previously created by other access
+                        if not pssgControl['starterAlrmMngrAlive'].is_set():
+                            starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, self.eventQueue, self.exitFlag)
+                            starterAlrmMngr.start()
 
-            #Converting "openOrClose" to int type to evaluete it on if statement
-            openOrClose = int(openOrClose)
-            #The state of the passage indicates that was opened
-            if openOrClose:
-                pssgControl['openPssg'].set()
-                #If the passage was open in a permitted way
-                if pssgControl['accessPermit'].is_set():
-                    #Creates a StarterAlrmMngrAlive if not was previously created by other access
-                    if not pssgControl['starterAlrmMngrAlive'].is_set():
-                        starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, 
-                                                                  self.ioIface.pssgsReconfFlag, 
-                                                                  self.exitFlag)
-                        starterAlrmMngr.start()
+                    #If the passage was not opened in a permitted way, start the alarm and 
+                    #send to server or store locally an event
+                    else:
+                        logMsg = ("Unpermitted access on passage: {}, "
+                                  "Starting the alarm.".format(pssgNum)
+                                 )
+                        self.logger.warning(logMsg)
+                        pssgControl['pssgObj'].startBzzr(True)
 
-                #If the passage was not opened in a permitted way, start the alarm
+                        dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
+                        event = {'pssgId' : pssgId,
+                                 'eventTypeId' : 4,
+                                 'dateTime' : dateTime,
+                                 'latchId' : None,
+                                 'personId' : None,
+                                 'side' : None,
+                                 'allowed' : False,
+                                 'notReasonId' : None
+                                }
+
+                        #Sending the event to the "Event Manager" thread
+                        self.eventQueue.put(event)
+
+
+
+
+                #The state of the passage indicates that was closed
                 else:
-                    logMsg = ("Unpermitted access on passage: {}, "
-                              "Starting the alarm.".format(pssgId)
+                    logMsg = ("The state of the passage: {}, indicates that was closed. "
+                              "Stopping the alarm.".format(pssgNum)
                              )
-                    self.logger.warning(logMsg)
-                    pssgControl['pssgObj'].startBzzr(True)
+                    self.logger.info(logMsg)
+                    pssgControl['openPssg'].clear()
+                    pssgControl['pssgObj'].startBzzr(False)
 
-            #The state of the passage indicates that was closed
-            else:
-                logMsg = ("The state of the passage: {}, indicates that was closed. "
-                          "Stopping the alarm.".format(pssgId)
-                         )
-                self.logger.info(logMsg)
-                pssgControl['openPssg'].clear()
-                pssgControl['pssgObj'].startBzzr(False)
+        except passage.PassageNotConfigured:
+            logMsg = 'State received on passage {} but it is not configured'.format(pssgNum)
+            self.logger.warning(logMsg)
+
 
 
 
@@ -257,6 +303,9 @@ class Controller(object):
         #Launching Pssg Iface binary
         self.ioIface.start()
 
+        with self.lockPssgsControl:
+            self.pssgsControl.loadParams()
+
         #Starting the "Event Manager" thread
         self.eventMngr.start()
 
@@ -265,17 +314,26 @@ class Controller(object):
 
         #Starting the "CRUD Manager" thread
         self.crudMngr.start()
+
+        #Starting the "Re Sender" thread because in the database there may be events to resend 
+        if not self.resenderAlive.is_set():
+            self.logger.info('Starting the Re Sender thread to resend events of local DB.')
+            self.resenderAlive.set()
+            reSender = events.ReSender(self.netMngr, self.netToReSnd, self.resenderAlive, self.exitFlag)
+            reSender.start()
+
         
         try:
             while True:
                 ioIfaceData = self.ioIfaceQue.receive()
                 ioIfaceData = ioIfaceData[0].decode('utf8')
                 print(ioIfaceData)
-                pssgId, side, varField = ioIfaceData.split(';')
-                pssgId = int(pssgId)
+                pssgNum, side, varField = ioIfaceData.split(';')
+                pssgNum = int(pssgNum)
                 side = int(side)
                 command, value  = varField.split('=')
-                self.handlers[command](pssgId, side, value)
+                self.handlers[command](pssgNum, side, value)
+
             
         except posix_ipc.SignalError:
             self.logger.debug('IO Interface Queue was interrupted by a OS signal.')

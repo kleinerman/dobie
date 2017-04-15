@@ -12,9 +12,6 @@ from config import *
 
 
 
-class UnspecifiedGpio(Exception):
-    pass
-
 
 class Passage(object):
     '''
@@ -95,7 +92,7 @@ class Passage(object):
 
 
 
-class CleanerPssgMngr(genmngr.PssgMngr):
+class CleanerPssgMngr(genmngr.GenericMngr):
     '''
     This thread stops the buzzer and close the passage. 
     It is created when the passage is opened. 
@@ -103,7 +100,7 @@ class CleanerPssgMngr(genmngr.PssgMngr):
     When the passage is opened more than once consecutively, the time is prolonged.    
     '''
 
-    def __init__(self, pssgControl, pssgsReconfFlag, exitFlag):
+    def __init__(self, pssgControl, exitFlag):
 
         #Dictionary with variables to control the passage
         self.pssgControl = pssgControl
@@ -114,7 +111,7 @@ class CleanerPssgMngr(genmngr.PssgMngr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('CleanerPssgMngr_{}'.format(self.pssgId), pssgsReconfFlag, exitFlag)
+        super().__init__('CleanerPssgMngr_{}'.format(self.pssgId), exitFlag)
 
         #The following attributes are to manage this variables in a cleaner way.
         self.pssgObj = pssgControl['pssgObj']
@@ -177,7 +174,7 @@ class CleanerPssgMngr(genmngr.PssgMngr):
 
         
 
-class StarterAlrmMngr(genmngr.PssgMngr):
+class StarterAlrmMngr(genmngr.GenericMngr):
     '''
     This thread starts the buzzer when the passage remains opened  
     for more than 
@@ -185,10 +182,13 @@ class StarterAlrmMngr(genmngr.PssgMngr):
     When the passage is opened more than once consecutively, the time is prolonged.    
     '''
 
-    def __init__(self, pssgControl, pssgsReconfFlag, exitFlag):
+    def __init__(self, pssgControl, eventQueue, exitFlag):
 
         #Dictionary with variables to control the passage
         self.pssgControl = pssgControl
+
+        #Queue to send events to Event Manager when the alarm start
+        self.eventQueue = eventQueue
 
         #Getting the pssgId for logging purpouses. It is got in this way 
         #to avoid passing it in constructor of the class.
@@ -196,7 +196,7 @@ class StarterAlrmMngr(genmngr.PssgMngr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('StarterAlrmMngr_{}'.format(self.pssgId), pssgsReconfFlag, exitFlag)
+        super().__init__('StarterAlrmMngr_{}'.format(self.pssgId), exitFlag)
 
         #The following attributes are to manage this variables in a cleaner way.
         self.pssgObj = pssgControl['pssgObj']
@@ -224,18 +224,108 @@ class StarterAlrmMngr(genmngr.PssgMngr):
             self.checkExit()
 
             with self.lockTimeAccessPermit:
-                elapsedTime = datetime.datetime.now() - self.pssgControl['timeAccessPermit']
+                nowDateTime = datetime.datetime.now()
+                elapsedTime = nowDateTime - self.pssgControl['timeAccessPermit']
 
             elapsedTime = int(elapsedTime.total_seconds())
 
             if elapsedTime >= self.alrmTime:
                 self.logger.debug("Starting the alarm on passage {}.".format(self.pssgId))
                 self.pssgObj.startBzzr(True)
+
+
+                dateTime = nowDateTime.strftime('%Y-%m-%d %H:%M')
+                event = {'pssgId' : self.pssgId,
+                         'eventTypeId' : 3,
+                         'dateTime' : dateTime,
+                         'latchId' : None,
+                         'personId' : 1,
+                         'side' : None,
+                         'allowed' : False,
+                         'notReasonId' : None
+                        }
+                #Sending the event to the "Event Manager" thread
+                self.eventQueue.put(event)
+
                 alive = False
 
         #Notifying that this thread has died
         self.starterAlrmMngrAlive.clear()
 
 
+
+class PassageNotConfigured(Exception):
+    pass
+
+
+
+class PssgsControl(object):
+
+    def __init__(self):
+
+        #Getting the logger
+        self.logger = logging.getLogger('Controller')
+
+        #Dictionary indexed by pssgNum containing dictionaries with objects to control the passages 
+        self.params = None
+
+
+    #---------------------------------------------------------------------------#
+
+
+
+    def loadParams(self):
+        '''
+        This method load passage params from DB in "params" dictionary.
+        This method is called when the main program starts or when a CRUD of
+        passage is received. 
+        '''
+
+
+        #Database connection should be done here and can not be done in the constructor
+        #since this method is run by the mainThread and also run by crud thread when
+        #a passage is added, updated or deleted.
+        dataBase = database.DataBase(DB_FILE)
+
+
+        #Dictionary indexed by pssgId. Each pssg has a dictionry with all the pssg parametters indexed
+        #by pssg parametters names
+        paramsPssgs = dataBase.getParamsPssgs()
+
+        #The following structure is a dict indexed by the pssgNums. Each value is another dict
+        #with object, event and variables to control each passage. Each time a passage is added,
+        #updated or deleted, this structure should be regenerated.
+        self.params = {}
+        for paramsPssg in paramsPssgs:
+            self.params[paramsPssg['pssgNum']] = {'pssgId': paramsPssg['id'],
+                                                  #Passage object to manage the passage
+                                                  'pssgObj': Passage(paramsPssg),
+                                                  #Event object to know when a passage was opened 
+                                                  #in a correct way by someone who has access
+                                                  'accessPermit': threading.Event(),
+                                                  #Lock and datetime object to know when the access
+                                                  #was opened
+                                                  'lockTimeAccessPermit': threading.Lock(),
+                                                  'timeAccessPermit': None,
+                                                  #Event object to know when the "cleanerPssgMngr" thread is alive
+                                                  #to avoid creating more than once
+                                                  'cleanerPssgMngrAlive': threading.Event(),
+                                                  #Event to know when the passage was opened
+                                                  'openPssg': threading.Event(),
+                                                  #Event object to know when the "starterAlrmMngrMngr" thread
+                                                  #is alive to avoid creating more than once
+                                                  'starterAlrmMngrAlive': threading.Event()
+                                                 }
+
+
+    def getPssgId(self, pssgNum):
+        '''
+        Return the pssgId receiving the pssgNum.
+        '''
+
+        try:
+            return self.params[pssgNum]['pssgId']
+        except KeyError:
+            raise PassageNotConfigured
 
 

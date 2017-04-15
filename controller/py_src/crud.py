@@ -27,7 +27,7 @@ class CrudMngr(genmngr.GenericMngr):
     are happening.
     '''
 
-    def __init__(self, lockIoIface, ioIface, exitFlag):
+    def __init__(self, lockPssgsControl, pssgsControl, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
@@ -35,8 +35,8 @@ class CrudMngr(genmngr.GenericMngr):
 
         #When receiving a passage CRUD is necessary to re launch the ioiface proccess.
         #For this reason it is necessary a reference to "ioIface" object.
-        self.lockIoIface = lockIoIface
-        self.ioIface = ioIface
+        self.lockPssgsControl = lockPssgsControl
+        self.pssgsControl = pssgsControl
 
         #Reference to network manager to answer the CRUD messages
         #sent by the server
@@ -95,10 +95,10 @@ class CrudMngr(genmngr.GenericMngr):
                     self.crudHndlrs[crudCmd](crudObject)
 
                     #If the CRUD command do a modification in a passage, it is necessary to 
-                    #relaunch the ioIface
+                    #load the passage params again in pssgsControl object
                     if crudCmd[0] == 'S':
-                        with self.lockIoIface:
-                            self.ioIface.restart()
+                        with self.lockPssgsControl:
+                            self.pssgsControl.loadParams()
                         
                     #If we are at this point of code means that the database method executed 
                     #did not throw an exception and therefore we can answer with OK to the server.
