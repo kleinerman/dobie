@@ -31,6 +31,9 @@ NET_POLL_MSEC = 1000
 
 RE_SEND_EVTS_QUANT = 4
 
+IOIFACE_WAIT_FINISH_TIME = 4
+
+
 #This parametter should be put in db for each pssg
 PSSG_RLSE_TIME = 10
 

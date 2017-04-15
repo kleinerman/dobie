@@ -21,17 +21,17 @@ class EventMngr(genmngr.GenericMngr):
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
 
-    def __init__(self, mainToEvent, netMngr, netToEvent, netToReSnd, exitFlag):
+    def __init__(self, eventQueue, netMngr, netToEvent, netToReSnd, resenderAlive, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('EventMngr', exitFlag)
 
         #Database connection should be created in run method
-        self.dataBase = None
+        #self.dataBase = None
 
         #Queue to receive message from the Main thread.
-        self.mainToEvent = mainToEvent
+        self.eventQueue = eventQueue
 
         #Queue to send messages to net.
         self.netMngr = netMngr
@@ -43,7 +43,7 @@ class EventMngr(genmngr.GenericMngr):
         self.netToReSnd = netToReSnd
         
         #Flag to know if Resender Thread is alive
-        self.resenderAlive = threading.Event()
+        self.resenderAlive = resenderAlive
 
 
 
@@ -59,13 +59,13 @@ class EventMngr(genmngr.GenericMngr):
         #The connection to database should be done here and not in constructor since
         #the constructor is executed by the main thread and to have simultaneous access to DB
         #from diffrent thread each thread shoud crate its own connection.
-        self.dataBase = database.DataBase(DB_FILE)
+        dataBase = database.DataBase(DB_FILE)
 
         while True:
             #self.logger.debug('Sender Thread waiting from MGT or Asynchronous Receiver messages ...')
             try:
                 #Blocking until Main thread sends an event or EXIT_CHECK_TIME expires 
-                event = self.mainToEvent.get(timeout=EXIT_CHECK_TIME)
+                event = self.eventQueue.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
                 self.netMngr.sendEvent(event)
                 try:
@@ -84,7 +84,7 @@ class EventMngr(genmngr.GenericMngr):
                     logMsg += 'saving event in local DB'
 
                     self.logger.warning(logMsg)
-                    self.dataBase.saveEvent(event)
+                    dataBase.saveEvent(event)
                     self.checkExit()
                     
                     if not self.resenderAlive.is_set():
@@ -120,7 +120,7 @@ class ReSender(genmngr.GenericMngr):
         self.netToReSnd = netToReSnd
 
         #Database connection should be created in run method
-        self.dataBase = None
+        #self.dataBase = None
 
         #Flag to know if Resender Thread is alive
         self.resenderAlive = resenderAlive
@@ -137,23 +137,20 @@ class ReSender(genmngr.GenericMngr):
     def run(self):
         '''
         '''
-        self.dataBase = database.DataBase(DB_FILE)
+        dataBase = database.DataBase(DB_FILE)
 
-        for eventIdList, eventList in self.dataBase.getNEvents(RE_SEND_EVTS_QUANT):
-            noConnection = True
-            while noConnection:
-                self.netMngr.reSendEvents(eventList)
+        for eventIds, toReSendEvents in dataBase.getNEvents(RE_SEND_EVTS_QUANT):
+            eventsSent = False
+            while not eventsSent:
+                self.netMngr.reSendEvents(toReSendEvents)
                 try:
                     eventsResponse = self.netToReSnd.get(timeout=WAIT_RESP_TIME)
                     if eventsResponse == 'OK':
                         self.logger.debug('The server confirms the reception of the events.')
-                        self.dataBase.delEvents(eventIdList)
-                        noConnection = False
+                        dataBase.delEvents(eventIds)
+                        eventsSent = True
                     else:
-                        logMsg = ('The server could not save the events correctly, '
-                                  'saving the event in local DB.'
-                                 )
-                        self.logger.warning(logMsg)
+                        self.logger.warning('The server could not save the events correctly.')
                         raise queue.Empty
                 except queue.Empty:
                     logMsg = ("Sleeping for {} secs to retry sending events."

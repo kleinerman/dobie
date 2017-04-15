@@ -33,8 +33,8 @@ cursor.execute('''CREATE UNIQUE INDEX cardNumberIndex
 
 
 cursor.execute('''
-    CREATE TABLE Passage (
-        id       INTEGER PRIMARY KEY, 
+    CREATE TABLE PssgGpios (
+        id       INTEGER PRIMARY KEY,
         i0In     INTEGER, 
         i1In     INTEGER,
         o0In     INTEGER,
@@ -42,13 +42,30 @@ cursor.execute('''
         bttnIn   INTEGER,
         stateIn  INTEGER,
         rlseOut  INTEGER,
-        bzzrOut  INTEGER,
-        rlseTime INTEGER,
-        bzzrTime INTEGER,
-        alrmTime INTEGER
+        bzzrOut  INTEGER
     )
     '''
 )
+
+
+
+cursor.execute('''
+    CREATE TABLE Passage (
+        id       INTEGER PRIMARY KEY,
+        pssgNum  INTEGER,
+        rlseTime INTEGER,
+        bzzrTime INTEGER,
+        alrmTime INTEGER,
+        FOREIGN KEY(pssgNum) REFERENCES PssgGpios(id) ON DELETE CASCADE
+    )
+    '''
+)
+
+cursor.execute('''CREATE UNIQUE INDEX pssgNumIndex
+                  ON Passage (pssgNum)
+               '''
+)
+
 
 
 #----------------Access Table-----------------#
@@ -69,6 +86,8 @@ cursor.execute('''
     )
     '''
 )
+
+#FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
 
 cursor.execute('''CREATE UNIQUE INDEX pssgPersonIndex
                   ON Access (pssgId, personId)
@@ -101,26 +120,28 @@ cursor.execute('''CREATE UNIQUE INDEX pssgPersonWeekDayIndex
 
 
 cursor.execute('''
-    CREATE TABLE Events (
+    CREATE TABLE Event (
         id          INTEGER PRIMARY KEY,
         pssgId      INTEGER,
-        eventType   INTEGER,
+        eventTypeId INTEGER,
         dateTime    DATETIME,
-        latchType   INTEGER,   
+        latchId     INTEGER,   
         personId    INTEGER,
         side        BOOLEAN,
         allowed     BOOLEAN,
-        notReason   INTEGER,
-        FOREIGN KEY(eventType) REFERENCES Event(id),
-        FOREIGN KEY(latchType) REFERENCES Latch(id),
-        FOREIGN KEY(notReason) REFERENCES NotReason(id)
+        notReasonId INTEGER,
+        FOREIGN KEY(pssgId) REFERENCES Passage(id),
+        FOREIGN KEY(eventTypeId) REFERENCES EventType(id),
+        FOREIGN KEY(latchId) REFERENCES Latch(id),
+        FOREIGN KEY(personId) REFERENCES Person(id),
+        FOREIGN KEY(notReasonId) REFERENCES NotReason(id)
    )
     '''
 )
 
 
 cursor.execute('''
-    CREATE TABLE Event (
+    CREATE TABLE EventType (
         id          INTEGER PRIMARY KEY,
         description TEXT
 
