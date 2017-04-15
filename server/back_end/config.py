@@ -2,12 +2,12 @@ import logging
 
 LOGGER_NAME = 'BackEndSrvr'
 
-LOGGING_FILE ='logevents.log'
+LOGGING_FILE ='/opt/dobie-server/logevents.log'
 
 DB_HOST = '172.18.0.2'
-DB_USER = 'conpass_usr'
+DB_USER = 'dobie_usr'
 DB_PASSWD = 'qwe123qwe'
-DB_DATABASE = 'conpass_db'
+DB_DATABASE = 'dobie_db'
 
 
 EXIT_CHECK_TIME = 2
