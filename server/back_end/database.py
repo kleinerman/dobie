@@ -143,11 +143,43 @@ class DataBase(object):
         self.passwd = passwd
         self.dataBase = dataBase
 
+
+        self.connect()
+
+
         # With this client_flag, cursor.rowcount will have found rows instead of affected rows
-        self.connection = pymysql.connect(host, user, passwd, dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
-        self.connection.autocommit(True)
+        #self.connection = pymysql.connect(host, user, passwd, dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
+        #self.connection.autocommit(True)
         # The following line makes all "fetch" calls return a dictionary instead a tuple 
+        #self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+
+
+
+    def connect(self):
+        '''
+        '''
+        # With this client_flag, cursor.rowcount will have found rows instead of affected rows
+        self.connection = pymysql.connect(self.host, self.user, self.passwd, self.dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
+        self.connection.autocommit(True)
+        # The following line makes all "fetch" calls return a dictionary instead a tuple
         self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+
+
+
+
+    def execute(self, sql):
+        '''
+        This method is a wrapper of cursor.execute(). It tries to execute the "sql"
+        string, if database is not connected, it reconnect and execute the statement.
+        '''
+
+        try:
+            self.cursor.execute(sql)
+
+        except pymysql.err.OperationalError:
+            self.logger.info("Database is not connected. Reconnecting...")
+            self.connect()
+            self.cursor.execute(sql)
 
 
 
@@ -161,7 +193,7 @@ class DataBase(object):
         #macAsHex = '{0:0{1}x}'.format(macAsInt, 12)
         sql = "SELECT COUNT(*) FROM Controller WHERE macAddress = '{}'".format(ctrllerMac)
 
-        self.cursor.execute(sql)
+        self.execute(sql)
         #If commit is not present, once adding the controller via REST 
         #it is neccesary to restart the server (not sure why)
         self.connection.commit()
@@ -195,7 +227,7 @@ class DataBase(object):
 
                   )
             try:
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
             except pymysql.err.IntegrityError as integrityError:
@@ -212,7 +244,7 @@ class DataBase(object):
         Return a dictionary with user fields if exists, if not it returns None
         '''
         sql = "SELECT * from User WHERE username = '{}'".format(username)
-        self.cursor.execute(sql)
+        self.execute(sql)
         user = self.cursor.fetchone()
         return user
 
@@ -226,7 +258,7 @@ class DataBase(object):
         Return a a dictionary with all rowStates
         '''
         sql = ('SELECT * FROM RowState')
-        self.cursor.execute(sql)
+        self.execute(sql)
         rowStates = self.cursor.fetchall()
 
         return rowStates
@@ -243,7 +275,7 @@ class DataBase(object):
         Return a a dictionary with all organizations
         '''
         sql = ('SELECT * FROM Organization')
-        self.cursor.execute(sql)
+        self.execute(sql)
         organizations = self.cursor.fetchall()
 
         return organizations
@@ -262,7 +294,7 @@ class DataBase(object):
               )
         
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
             return self.cursor.lastrowid
 
@@ -295,7 +327,7 @@ class DataBase(object):
                   )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise OrganizationNotFound('Organization not found')
             self.connection.commit()
@@ -323,7 +355,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise OrganizationNotFound('Organization not found')
             self.connection.commit()
@@ -351,7 +383,7 @@ class DataBase(object):
                    "JOIN Person ON (Organization.id = Person.orgId) WHERE Person.id = {}"
                    "".format(personId)
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
             row = self.cursor.fetchone()
             orgId, rowStateId = row['id'], row['rowStateId']
 
@@ -362,7 +394,7 @@ class DataBase(object):
                 sql = ("SELECT COUNT(*) FROM Person WHERE orgId = {} AND rowStateId != {}"
                        "".format(orgId, DELETED)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 personCount = self.cursor.fetchone()['COUNT(*)']
 
                 #If personCount is 0, the organization can be deleted.
@@ -370,7 +402,7 @@ class DataBase(object):
                     sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
                            "".format(DELETED, orgId)
                           )
-                    self.cursor.execute(sql)
+                    self.execute(sql)
 
 
         except TypeError:
@@ -396,7 +428,7 @@ class DataBase(object):
         Return a dictionary with all Zones
         '''
         sql = ('SELECT * FROM Zone')
-        self.cursor.execute(sql)
+        self.execute(sql)
         zones = self.cursor.fetchall()
 
         return zones
@@ -414,7 +446,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
             return self.cursor.lastrowid
 
@@ -437,7 +469,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise ZoneNotFound('Zone not found')
             self.connection.commit()
@@ -459,7 +491,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise ZoneNotFound('Zone not found')
             self.connection.commit()
@@ -483,7 +515,7 @@ class DataBase(object):
         Return a dictionary with all Zones
         '''
         sql = ('SELECT * FROM VisitorsPassages')
-        self.cursor.execute(sql)
+        self.execute(sql)
         visitorsPssgss = self.cursor.fetchall()
 
         return visitorsPssgss
@@ -502,7 +534,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
             return self.cursor.lastrowid
 
@@ -525,7 +557,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise VisitorsPssgsNotFound('Visitors Passages not found')
             self.connection.commit()
@@ -547,7 +579,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise VisitorsPssgsNotFound('Visitors Passages not found')
             self.connection.commit()
@@ -571,7 +603,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
             return self.cursor.lastrowid
 
@@ -595,7 +627,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise VisitorsPssgsNotFound('Passage not found in Visitors Passages.')
             self.connection.commit()
@@ -623,7 +655,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
             return self.cursor.lastrowid
 
@@ -649,7 +681,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise ControllerNotFound('Controller not found')
             self.connection.commit()
@@ -673,7 +705,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise ControllerNotFound('Controller not found')
             self.connection.commit()
@@ -705,7 +737,7 @@ class DataBase(object):
                    "id = {}".format(controllerId)
                   )
             try:
-                self.cursor.execute(sql)
+                self.execute(sql)
                 return self.cursor.fetchone()['macAddress']
 
             except TypeError:
@@ -720,7 +752,7 @@ class DataBase(object):
                   )
 
             try:
-                self.cursor.execute(sql)
+                self.execute(sql)
                 return self.cursor.fetchone()['macAddress']
 
             except TypeError:
@@ -744,7 +776,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             ctrllerMacsToDelPrsn = self.cursor.fetchall()
             ctrllerMacsToDelPrsn = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsToDelPrsn]
             if ctrllerMacsToDelPrsn == []:
@@ -782,7 +814,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             ctrllerMacsNotComm = self.cursor.fetchall()
             ctrllerMacsNotComm = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsNotComm]
             return ctrllerMacsNotComm
@@ -812,19 +844,19 @@ class DataBase(object):
             sql = ("UPDATE Passage SET rowStateId = {} WHERE controllerId = {}"
                    "".format(TO_ADD, controllerId)
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
 
             sql = ("UPDATE Access SET rowStateId = {} WHERE pssgId IN "
                    "(SELECT id FROM Passage WHERE controllerId = {}) AND allWeek = 1"
                    "".format(TO_ADD, controllerId)
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
 
             sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE pssgId IN "
                    "(SELECT id FROM Passage WHERE controllerId = {})"
                    "".format(TO_ADD, controllerId)
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
         
 
         except pymysql.err.IntegrityError as integrityError:
@@ -854,7 +886,7 @@ class DataBase(object):
 
             # check if the zoneId exists in the database
             sql = ("SELECT * FROM Zone WHERE id='{}'".format(zoneId))
-            self.cursor.execute(sql)
+            self.execute(sql)
             zone = self.cursor.fetchall()
 
             if not zone:
@@ -862,14 +894,14 @@ class DataBase(object):
        
             # Get all persons from the organization
             sql = ("SELECT * FROM Passage WHERE zoneId='{}'".format(zoneId))
-            self.cursor.execute(sql)
+            self.execute(sql)
             passages = self.cursor.fetchall()
         
             return passages
 
         elif visitorsPssgsId:
             sql = ("SELECT COUNT(*) FROM VisitorsPassages WHERE id='{}'".format(visitorsPssgsId))
-            self.cursor.execute(sql)
+            self.execute(sql)
             
             if self.cursor.fetchone()['COUNT(*)']:
         
@@ -878,7 +910,7 @@ class DataBase(object):
                        "WHERE VisitorsPassagesPassage.visitorsPssgsId = {}"
                        "".format(visitorsPssgsId)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 passages = self.cursor.fetchall()
                 return passages
 
@@ -939,7 +971,7 @@ class DataBase(object):
 
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
             return self.cursor.lastrowid
 
@@ -961,21 +993,21 @@ class DataBase(object):
         sql = "SELECT rowStateId FROM Passage WHERE id = {}".format(passageId)
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             rowState = self.cursor.fetchone()['rowStateId']
 
             if rowState in (TO_ADD, TO_UPDATE):
                 sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
                        "".format(COMMITTED, passageId)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
             elif rowState == TO_DELETE:
                 sql = ("DELETE FROM Passage WHERE id = {}"
                        "".format(passageId)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
             elif rowState == COMMITTED:
@@ -1007,7 +1039,7 @@ class DataBase(object):
                "".format(TO_DELETE, passageId)
               )
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PassageNotFound('Passage not found')
             self.connection.commit()
@@ -1032,7 +1064,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PassageNotFound('Passage not found')
             self.connection.commit()
@@ -1062,7 +1094,7 @@ class DataBase(object):
         
             #check if the organization id exist in the database
             sql = ("SELECT * FROM Organization WHERE id='{}'".format(orgId))
-            self.cursor.execute(sql)
+            self.execute(sql)
             organization = self.cursor.fetchone()
 
             if not organization:
@@ -1076,7 +1108,7 @@ class DataBase(object):
                 sql = ("SELECT * FROM Person WHERE orgId = {} AND rowStateId != {}"
                        "".format(orgId, DELETED)
                       )
-            self.cursor.execute(sql)
+            self.execute(sql)
             persons = self.cursor.fetchall()
         
             return persons
@@ -1145,7 +1177,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
             return self.cursor.lastrowid
 
@@ -1174,7 +1206,7 @@ class DataBase(object):
             sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
                    "".format(operation, personId)
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PersonNotFound('Person not found')
             self.connection.commit()
@@ -1188,12 +1220,12 @@ class DataBase(object):
                 sql = ("DELETE FROM LimitedAccess WHERE rowStateId = {} AND personId = {}"
                        "".format(TO_ADD, personId)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
 
                 sql = ("DELETE FROM Access WHERE rowStateId = {} AND personId = {}"
                        "".format(TO_ADD, personId)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
 
 
             #To avoid having duplicate MACs in the result list, it is used DISTINCT clause
@@ -1206,7 +1238,7 @@ class DataBase(object):
                    "".format(personId)
                   )
 
-            self.cursor.execute(sql)
+            self.execute(sql)
             ctrllerMacs = self.cursor.fetchall()
             ctrllerMacs = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacs]
 
@@ -1221,7 +1253,7 @@ class DataBase(object):
                     sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
                        "".format(DELETED, personId)
                           )
-                    self.cursor.execute(sql)
+                    self.execute(sql)
                     self.connection.commit()
 
                     self.delOrgIfNeed(personId)
@@ -1234,7 +1266,7 @@ class DataBase(object):
                     sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
                        "".format(COMMITTED, personId)
                           )
-                    self.cursor.execute(sql)
+                    self.execute(sql)
                     self.connection.commit()
             else:
                 #Adding in PersonPendingOperation table: personId, mac address and pending operation
@@ -1251,7 +1283,7 @@ class DataBase(object):
                 sql = ("INSERT IGNORE INTO PersonPendingOperation(personId, macAddress, pendingOp) VALUES {}"
                        "".format(values)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
             #If the list of MACs is void or not, we always return it.
@@ -1286,7 +1318,7 @@ class DataBase(object):
             #Determines the pendig operation of that person on that controller
             sql = "SELECT rowStateId FROM Person WHERE id = {}".format(personId)
 
-            self.cursor.execute(sql)
+            self.execute(sql)
             rowState = self.cursor.fetchone()['rowStateId']
 
             if rowState == TO_DELETE:
@@ -1298,7 +1330,7 @@ class DataBase(object):
                        "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
                        "".format(personId, ctrllerMac)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit() 
 
                 #Deleting all the accesses of this person on the passages managed by 
@@ -1308,7 +1340,7 @@ class DataBase(object):
                        "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
                        "".format(personId, ctrllerMac)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()                
 
                 #Deleting the entry in "PersonPendingOperation" table which has this person id,
@@ -1316,7 +1348,7 @@ class DataBase(object):
                 sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
                        "AND pendingOp = {}".format(personId, ctrllerMac, TO_DELETE)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
                 #If there is not more entries on "PersonPendingOperation" table with this person and 
@@ -1324,12 +1356,12 @@ class DataBase(object):
                 sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
                        "AND pendingOp = {}".format(personId, TO_DELETE)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
                 if not pendCtrllersToDel:
                     #sql = "DELETE FROM Person WHERE id = {}".format(personId)
                     sql = "UPDATE Person SET rowStateId = {} WHERE id = {}".format(DELETED, personId)
-                    self.cursor.execute(sql)
+                    self.execute(sql)
                     self.connection.commit()
 
                 self.delOrgIfNeed(personId)
@@ -1341,7 +1373,7 @@ class DataBase(object):
                 sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
                        "AND pendingOp = {}".format(personId, ctrllerMac, TO_UPDATE)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
                 #If there is not more entries on "PersonPendingOperation" table with this person and 
@@ -1350,11 +1382,11 @@ class DataBase(object):
                 sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
                        "AND pendingOp = {}".format(personId, TO_UPDATE)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 pendCtrllersToUpd = self.cursor.fetchone()['COUNT(*)']
                 if not pendCtrllersToUpd:
                     sql = "UPDATE Person SET rowStateId = {} WHERE id = {}".format(COMMITTED, personId)
-                    self.cursor.execute(sql)
+                    self.execute(sql)
                     self.connection.commit()
 
             elif rowState == COMMITTED:
@@ -1393,7 +1425,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PersonNotFound('Person not found')
             self.connection.commit()
@@ -1418,7 +1450,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PersonNotFound('Person not found')
             self.connection.commit()
@@ -1440,7 +1472,7 @@ class DataBase(object):
         '''
 
         sql = "SELECT id, name, cardNumber FROM Person WHERE id = {}".format(personId)
-        self.cursor.execute(sql)
+        self.execute(sql)
         person = self.cursor.fetchone()
 
         if not person:
@@ -1459,7 +1491,7 @@ class DataBase(object):
         '''
         # check if the person id exist in the database
         sql = ("SELECT * FROM Person WHERE id='{}'".format(personId))
-        self.cursor.execute(sql)
+        self.execute(sql)
         person = self.cursor.fetchall()
 
         if not person:
@@ -1467,7 +1499,7 @@ class DataBase(object):
 
         # Get all persons from the organization
         sql = ("SELECT * FROM Access WHERE personId='{}'".format(personId))
-        self.cursor.execute(sql)
+        self.execute(sql)
         accesses = self.cursor.fetchall()
 
         for access in accesses:
@@ -1491,7 +1523,7 @@ class DataBase(object):
         '''
         # check if the person id exist in the database
         sql = ("SELECT * FROM Person WHERE id = '{}'".format(personId))
-        self.cursor.execute(sql)
+        self.execute(sql)
         person = self.cursor.fetchall()
 
         if not person:
@@ -1501,7 +1533,7 @@ class DataBase(object):
         sql = ("SELECT * FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
                "".format(pssgId, personId)
               )
-        self.cursor.execute(sql)
+        self.execute(sql)
         liAccesses = self.cursor.fetchall()
 
         for liAccess in liAccesses:
@@ -1573,7 +1605,7 @@ class DataBase(object):
             sql = ("DELETE FROM LimitedAccess WHERE pssgId = {} and personId = {}"
                    "".format(access['pssgId'], access['personId'])
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
 
 
@@ -1589,7 +1621,7 @@ class DataBase(object):
                              access['iSide'], access['oSide'], access['startTime'], access['endTime'],
                              access['expireDate'], TO_ADD)
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
 
 
@@ -1599,7 +1631,7 @@ class DataBase(object):
             sql = ("SELECT id FROM Access WHERE pssgId = {} AND personId = {}"
                    "".format(access['pssgId'], access['personId'])
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
             return self.cursor.fetchone()['id']
 
 
@@ -1634,7 +1666,7 @@ class DataBase(object):
               )
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise AccessNotFound('Access not found')
             self.connection.commit()
@@ -1658,7 +1690,7 @@ class DataBase(object):
                "".format(TO_DELETE, accessId)
               )
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise AccessNotFound('Access not found')
             self.connection.commit()
@@ -1680,21 +1712,21 @@ class DataBase(object):
         sql = "SELECT rowStateId FROM Access WHERE id = {}".format(accessId)
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             rowState = self.cursor.fetchone()['rowStateId']
 
             if rowState in (TO_ADD, TO_UPDATE):
                 sql = ("UPDATE Access SET rowStateId = {} WHERE id = {}"
                        "".format(COMMITTED, accessId)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
             elif rowState == TO_DELETE:
                 sql = ("DELETE FROM Access WHERE id = {}"
                        "".format(accessId)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
             elif rowState == COMMITTED:
@@ -1742,7 +1774,7 @@ class DataBase(object):
 
 
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             pssgId = self.cursor.fetchone()['pssgId']
             return pssgId
 
@@ -1853,7 +1885,7 @@ class DataBase(object):
                    "".format(liAccess['pssgId'], liAccess['personId'], liAccess['expireDate'], 
                              COMMITTED, liAccess['expireDate'], COMMITTED)
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
 
 
@@ -1863,7 +1895,7 @@ class DataBase(object):
             sql = ("SELECT id FROM Access WHERE pssgId = {} AND personId = {}"
                    "".format(liAccess['pssgId'], liAccess['personId'])
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
             accessId = self.cursor.fetchone()['id']
             
 
@@ -1873,7 +1905,7 @@ class DataBase(object):
                              liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
                              liAccess['endTime'], TO_ADD)
                   )
-            self.cursor.execute(sql)
+            self.execute(sql)
             self.connection.commit()
             liAccessId = self.cursor.lastrowid
             return accessId, liAccessId
@@ -1910,7 +1942,7 @@ class DataBase(object):
                    "".format(liAccess['id'])
                   )
 
-            self.cursor.execute(sql)
+            self.execute(sql)
             row = self.cursor.fetchone()
             pssgId = row['pssgId']
             personId = row['personId']
@@ -1920,7 +1952,7 @@ class DataBase(object):
                    "".format(liAccess['expireDate'], pssgId, personId)
                   )
 
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise AccessNotFound('Access not found')
             self.connection.commit()
@@ -1934,7 +1966,7 @@ class DataBase(object):
                              liAccess['id'])
                   )
 
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise AccessNotFound('Access not found')
             self.connection.commit()
@@ -1963,7 +1995,7 @@ class DataBase(object):
                "".format(TO_DELETE, liAccessId)
               )
         try:
-            self.cursor.execute(sql)
+            self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise AccessNotFound('Access not found')
             self.connection.commit()
@@ -1986,7 +2018,7 @@ class DataBase(object):
 
         try:
             sql = "SELECT rowStateId FROM LimitedAccess WHERE id = {}".format(liAccessId)
-            self.cursor.execute(sql)
+            self.execute(sql)
             rowState = self.cursor.fetchone()['rowStateId']
 
             if rowState in (TO_ADD, TO_UPDATE):
@@ -1994,7 +2026,7 @@ class DataBase(object):
                        "".format(COMMITTED, liAccessId)
                       )
 
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
 
@@ -2004,7 +2036,7 @@ class DataBase(object):
                        "".format(liAccessId)
                       )
 
-                self.cursor.execute(sql)
+                self.execute(sql)
                 row = self.cursor.fetchone() #KeyError exception could be raised here
                 pssgId = row['pssgId']       #Me parece que es TypeError y no KeyError
                 personId = row['personId']
@@ -2012,7 +2044,7 @@ class DataBase(object):
                 sql = ("DELETE FROM LimitedAccess WHERE id = {}"
                        "".format(liAccessId)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 self.connection.commit()
 
 
@@ -2022,14 +2054,14 @@ class DataBase(object):
                 sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
                        "".format(pssgId, personId)
                       )
-                self.cursor.execute(sql)
+                self.execute(sql)
                 remaining = self.cursor.fetchone()['COUNT(*)']
 
                 if not remaining:
                    sql = ("DELETE FROM Access WHERE pssgId = {} AND personId = {}"
                           "".format(pssgId, personId)
                          )
-                   self.cursor.execute(sql)
+                   self.execute(sql)
                    self.connection.commit()
 
             elif rowState == COMMITTED:
