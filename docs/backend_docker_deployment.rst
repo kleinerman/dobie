@@ -204,4 +204,4 @@ You must map the cloned repository into the container's directory `/opt/dobie-se
 
 .. code-block::
   
-  docker run -d --name backend --hostname backend --net network_01 --ip 172.18.0.3 -p 5000:5000 -p 7979:7979 -v /home/USER/dobie/server/back_end:/opt/dobie-server backend:1 python /opt/dobie-server/main.py
+  docker run -d --name backend --hostname backend --net network_01 --ip 172.18.0.3 -p 5000:5000 -p 7979:7979 -v /home/USER/dobie/server/back_end:/opt/dobie-server backend:1 python -u /opt/dobie-server/main.py
