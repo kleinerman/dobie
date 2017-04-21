@@ -243,6 +243,12 @@ class CrudMngr(genmngr.GenericMngr):
                 if request.method == 'GET':
                     organizations = self.dataBase.getOrganizations()
 
+                    #Remove "Visitors" organization
+                    for i, organization in enumerate(organizations):
+                        if organization['id'] == 1:
+                            organizations.pop(i)
+                            break
+
                     for organization in organizations:
                         organization['uri'] = url_for('Organization', orgId=organization['id'], _external=True)
                         organization.pop('id')
