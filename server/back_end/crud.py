@@ -186,12 +186,91 @@ class CrudMngr(genmngr.GenericMngr):
 
 #------------------------------------User----------------------------------------------
         @app.route('/api/v1.0/login', methods=['GET'])
-        def user():
+        def login():
             '''
-            GET: Return a list with all persons in the organization
+            GET: Return user parametters of the logged user. The role parametter 
+            is used by the UI to know the options to show.
             '''
             g.user.pop('passwdHash')
             return jsonify(g.user)
+
+
+
+
+        userNeedKeys = ('description', 'username', 'passwd', 'roleId',)
+
+        @app.route('/api/v1.0/user', methods=['GET', 'POST'])
+        @auth.login_required
+        def Users():
+            '''
+            GET: Return a list with all user
+            POST: Add a new user into the database
+            '''
+
+            try:
+                ## For GET method
+                if request.method == 'GET':
+                    users = self.dataBase.getUsers()
+                    for user in users:
+                        user['uri'] = url_for('User', userId=user['id'], _external=True)
+                        user.pop('id')
+                        user.pop('passwdHash')
+                    return jsonify(users)
+
+                ## For POST method
+                elif request.method == 'POST':
+                    user = {}
+                    for param in userNeedKeys:
+                        user[param] = request.json[param]
+                    userId = self.dataBase.addUser(user)
+                    uri = url_for('User', userId=userId, _external=True)
+                    return jsonify({'status': 'OK', 'message': 'User added', 'code': CREATED, 'uri': uri}), CREATED
+
+            except database.UserError as userError:
+                raise ConflictError(str(userError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(userNeedKeys)))
+
+
+
+        @app.route('/api/v1.0/user/<int:userId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def User(userId):
+            '''
+            PUT: Update a user in database
+            DELETE: Delete a user in the database.
+            '''
+            try:
+                if request.method == 'PUT':
+                    user = {}
+                    user['id'] = userId
+                    for param in userNeedKeys:
+                        user[param] = request.json[param]
+                    self.dataBase.updUser(user)
+                    return jsonify({'status': 'OK', 'message': 'User updated'}), OK
+
+                elif request.method == 'DELETE':
+                    self.dataBase.delUser(userId)
+                    return jsonify({'status': 'OK', 'message': 'User deleted'}), OK
+
+            except database.UserNotFound as userNotFound:
+                raise NotFound(str(userNotFound))
+            except database.UserError as userError:
+                raise ConflictError(str(userError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(userNeedKeys)))
+
+
 
 
 

@@ -1,6 +1,7 @@
 import pymysql
 import queue
 import logging
+import crypt
 
 from config import *
 
@@ -9,6 +10,24 @@ TO_UPDATE = 2
 COMMITTED = 3
 TO_DELETE = 4
 DELETED = 5
+
+
+
+class UserError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class UserNotFound(UserError):
+    '''
+    '''
+    pass
+
 
 
 
@@ -247,6 +266,109 @@ class DataBase(object):
         self.execute(sql)
         user = self.cursor.fetchone()
         return user
+
+
+
+    def getUsers(self):
+        '''
+        Return a dictionary with all Users
+        '''
+        sql = ('SELECT * FROM User')
+        self.execute(sql)
+        users = self.cursor.fetchall()
+
+        return users
+
+
+
+
+    def addUser(self, user):
+        '''
+        Receive a dictionary with user parametters and save it in DB
+        It returns the id of the added user.
+        '''
+
+
+        passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
+
+        sql = ("INSERT INTO User(description, username, passwdHash, roleId) "
+               "VALUES('{}', '{}', '{}', {})"
+               "".format(user['description'], user['username'], passwdHash, user['roleId'])
+              )
+
+
+        try:
+            self.execute(sql)
+            return self.cursor.lastrowid
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise UserError('Can not add this user')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise UserError('Can not add this user')
+
+
+
+
+
+
+
+    def delUser(self, userId):
+        '''
+        Mark de User as TO_DELETE state if it has persons on it
+        or as DELETED if there is not more persons on it
+        '''
+
+        sql = "DELETE FROM User WHERE id = {}".format(userId)
+        
+        try:
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise UserNotFound('User not found')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise UserError('Can not delete this user')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise UserError('Can not delete this user: wrong argument')
+
+
+
+
+
+
+
+    def updUser(self, user):
+        '''
+        Receive a dictionary with user parametters and update it in DB
+        '''
+
+
+        passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
+
+        sql = ("UPDATE User SET description = '{}', username = '{}', "
+               "passwdHash = '{}', roleId = {} WHERE id = {}"
+               "".format(user['description'], user['username'], passwdHash, 
+                         user['roleId']), user['id']
+              )
+
+        try:
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise UserNotFound('User not found')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise UserError('Can not update this user')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise UserError('Can not update this user: wrong argument')
+
+
+
+
 
 
 
