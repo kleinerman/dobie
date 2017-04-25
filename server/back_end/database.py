@@ -351,7 +351,7 @@ class DataBase(object):
         sql = ("UPDATE User SET description = '{}', username = '{}', "
                "passwdHash = '{}', roleId = {} WHERE id = {}"
                "".format(user['description'], user['username'], passwdHash, 
-                         user['roleId']), user['id']
+                         user['roleId'], user['id'])
               )
 
         try:
