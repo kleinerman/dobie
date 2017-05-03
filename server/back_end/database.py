@@ -1294,8 +1294,10 @@ class DataBase(object):
         if not person['visitedOrgId']:
             person['visitedOrgId'] = 'NULL'
 
-        sql = ("INSERT INTO Person(name, cardNumber, orgId, visitedOrgId, rowStateId) VALUES('{}', {}, {}, {}, {})"
-               "".format(person['name'], person['cardNumber'], person['orgId'], person['visitedOrgId'], COMMITTED)
+        sql = ("INSERT INTO Person(name, identNumber, cardNumber, orgId, visitedOrgId, rowStateId) "
+               "VALUES('{}', '{}', {}, {}, {}, {})"
+               "".format(person['name'], person['identNumber'], person['cardNumber'], person['orgId'],
+                         person['visitedOrgId'], COMMITTED)
               )
 
         try:
@@ -1567,8 +1569,10 @@ class DataBase(object):
         if not person['visitedOrgId']:
             person['visitedOrgId'] = 'NULL'
 
-        sql = ("UPDATE Person SET name = '{}', cardNumber = {}, orgId = {}, visitedOrgId = {} WHERE id = {}"
-               "".format(person['name'], person['cardNumber'], person['orgId'], person['visitedOrgId'], person['id'])
+        sql = ("UPDATE Person SET name = '{}', identNumber = '{}', cardNumber = {}, orgId = {}, "
+               "visitedOrgId = {} WHERE id = {}"
+               "".format(person['name'], person['identNumber'], person['cardNumber'], 
+                         person['orgId'], person['visitedOrgId'], person['id'])
               )
 
         try:
