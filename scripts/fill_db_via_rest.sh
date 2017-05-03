@@ -38,14 +38,14 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Movistel"}' http://172.18.0.3:5000/api/v1.0/organization
 curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://172.18.0.3:5000/api/v1.0/organization/4
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Jorge Kleinerman", "cardNumber": 4300737, "orgId": 2, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ary Kleinerman", "cardNumber": 5300738, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Manuel Bobadilla", "cardNumber": 9038876, "orgId": 2, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Lucas Ferre", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Paola Ceballos", "cardNumber": 4994413, "orgId": 2, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Juan Alvarez", "cardNumber": 5300739, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Carlos Vazquez", "cardNumber": 4300757, "orgId": 2, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ruben Juearez", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Jorge Kleinerman", "identNumber": "28063146", "cardNumber": 4300737, "orgId": 2, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ary Kleinerman", "identNumber": "21063146", "cardNumber": 5300738, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Manuel Bobadilla", "identNumber": "22063146", "cardNumber": 9038876, "orgId": 2, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Lucas Ferre", "identNumber": "23063146", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Paola Ceballos", "identNumber": "2463146", "cardNumber": 4994413, "orgId": 2, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Juan Alvarez", "identNumber": "25063146", "cardNumber": 5300739, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Carlos Vazquez", "identNumber": "26063146", "cardNumber": 4300757, "orgId": 2, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ruben Juearez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person
 #curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ruben Juearez", "cardNumber": 5301768, "orgId": 2, "visitedOrgId": 3}' http://172.18.0.3:5000/api/v1.0/person
 #curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ruben Juearez", "cardNumber": 5302768, "orgId": 2, "visitedOrgId": 4}' http://172.18.0.3:5000/api/v1.0/person
 

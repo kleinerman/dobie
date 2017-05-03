@@ -627,7 +627,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 #-------------------------------------Person------------------------------------------
 
-        prsnNeedKeys = ('name', 'cardNumber', 'orgId', 'visitedOrgId')
+        prsnNeedKeys = ('name', 'identNumber', 'cardNumber', 'orgId', 'visitedOrgId')
 
         @app.route('/api/v1.0/person', methods=['POST'])
         @auth.login_required
@@ -687,6 +687,7 @@ class CrudMngr(genmngr.GenericMngr):
                         person[param] = request.json[param]
                     self.dataBase.updPerson(person)
                     person.pop('name')
+                    person.pop('identNumber')
                     person.pop('orgId')
                     person.pop('visitedOrgId')
                     ctrllerMacsToUpdPrsn = self.dataBase.markPerson(personId, database.TO_UPDATE)
