@@ -1339,17 +1339,38 @@ class DataBase(object):
 
             #If the operation is TO_DELETE, and we still have access pending to add (TO_ADD),
             #those accesses should be deleted in central DB and the controller should never
-            #be aware of this situationu
+            #be aware of this situation
             if operation == TO_DELETE:
+                sql = ("DELETE FROM Access WHERE rowStateId = {} AND personId = {}"
+                       "".format(TO_ADD, personId)
+                      )
+                self.execute(sql)
+
                 sql = ("DELETE FROM LimitedAccess WHERE rowStateId = {} AND personId = {}"
                        "".format(TO_ADD, personId)
                       )
                 self.execute(sql)
 
-                sql = ("DELETE FROM Access WHERE rowStateId = {} AND personId = {}"
-                       "".format(TO_ADD, personId)
+                sql = ("SELECT pssgId FROM Access WHERE personId = {} AND allWeek = 0"
+                       "".format(personId)
                       )
+
                 self.execute(sql)
+                pssgIds = self.cursor.fetchall()
+                pssgIds = [pssgId['pssgId'] for pssgId in pssgIds]
+                for pssgId in pssgIds:
+                    sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE pssgId = {} AND "
+                           "personId = {}".format(pssgId, personId)
+                          )
+                    self.execute(sql)
+                    count = self.cursor.fetchone()['COUNT(*)']
+                    if count == 0:
+                        sql = ("DELETE FROM Access WHERE pssgId = {} "
+                               "AND personId = {} AND allWeek = 0"
+                               "".format(pssgId, personId)
+                              )
+                        self.execute(sql)
+
 
 
             #To avoid having duplicate MACs in the result list, it is used DISTINCT clause
@@ -2213,4 +2234,23 @@ class DataBase(object):
             self.logger.warning('Error committing a limited access.')
 
 
+
+
+
+if __name__ == "__main__": 
+    print("Testing Database")
+    dataBase = DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+
+    sql = ("SELECT pssgId FROM Access WHERE personId = 2 AND allWeek = 0")
+    dataBase.execute(sql)
+    pssgIds = dataBase.cursor.fetchall()
+    pssgIds = [pssgId['pssgId'] for pssgId in pssgIds]
+    print(pssgIds)
+    for pssgId in pssgIds:
+        sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE pssgId = {} AND "
+               "personId = {}".format(pssgId, 4)
+              )
+        dataBase.execute(sql)
+        print(dataBase.cursor.fetchone())
+        
 
