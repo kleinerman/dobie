@@ -566,7 +566,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 elif request.method == 'DELETE':
                     self.dataBase.delVisitorsPssgs(visitorsPssgsId)
-                    return jsonify({'status': 'OK', 'message': 'Controller deleted'}), OK
+                    return jsonify({'status': 'OK', 'message': 'Visitors Passages deleted'}), OK
 
             except database.VisitorsPssgsNotFound as visitorsPssgsNotFound:
                 raise NotFound(str(visitorsPssgsNotFound))

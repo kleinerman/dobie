@@ -1,8 +1,7 @@
 #!/bin/bash
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eb750952"}' http://172.18.0.3:5000/api/v1.0/controller
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eb277791"}' http://172.18.0.3:5000/api/v1.0/controller
-
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eb750952"}' http://172.18.0.3:5000/api/v1.0/controller
 
 sleep 4
 
@@ -18,7 +17,6 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 
 
 
-
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Molinete 1", "pssgNum": 1, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Puerta 2", "pssgNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Barrera 5", "pssgNum": 3, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
@@ -27,6 +25,24 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"descrip
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Baño 3", "pssgNum": 1, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Molinte 5", "pssgNum": 2, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Ingreso 2", "pssgNum": 3, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
+
+
+
+
+
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/1/passage/1
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/1/passage/2
+
+
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/2/passage/1
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/2/passage/4
+
+
+curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/2/passage/4
+
+curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/2
+
+
 
 
 
@@ -79,7 +95,7 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId"
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 6, "personId": 8, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"name": "Pedro Juearez", "cardNumber": 5377768, "orgId": 2, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person/8
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"name": "Carlos Ranzula", "identNumber": "23063146", "cardNumber": 5301768, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person/8
 
 curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://172.18.0.3:5000/api/v1.0/person/7
 
