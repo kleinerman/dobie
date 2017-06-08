@@ -13,9 +13,9 @@ cursor.execute('PRAGMA foreign_keys = ON')
 
 #Filling Event Table
 sqlSentence = ("INSERT INTO PssgGpios(id, i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut) "
-               "VALUES (1, 21, 20, 16, 12, 26, 19,  9,  3), "
-                      "(2,  7,  8, 25, 24, 13,  6, 10, 17), "
-                      "(3, 23, 18, 15, 14,  5, 11, 22, 27)"
+               "VALUES (1, 26, 21, 19, 20, 25, 24, 27, 14), "
+                      "(2, 13, 16,  6, 12,  9, 23,  3, 15), "
+                      "(3,  7,  5, 11,  8, 10, 22, 18, 17)"
               )
 cursor.execute(sqlSentence)
 
