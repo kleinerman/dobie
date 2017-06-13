@@ -41,6 +41,10 @@ Install **vim** editor:
 
   # pacman -S vim
 
+
+Pacakges to run dobie
+---------------------
+
 Install **python-pip** and **gcc** package to download and compile posix_ipc package needed by the application:
 
 .. code-block::
@@ -80,6 +84,13 @@ Install **make** package to be able to compile ioiface:
 .. code-block::
 
   # pacman -S make
+  
+Install **git** to clone dobie repository
+
+.. code-block::
+
+  # pacman -S git
+
   
   
  
