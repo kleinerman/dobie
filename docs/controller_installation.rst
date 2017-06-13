@@ -75,6 +75,12 @@ The file should have the following content:
   DNS=10.10.10.54
   
   
+Install **make** package to be able to compile ioiface:
+  
+.. code-block::
+
+  # pacman -S make
+  
   
  
   
