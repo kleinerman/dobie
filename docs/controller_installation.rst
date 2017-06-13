@@ -42,10 +42,10 @@ Install **vim** editor:
   # pacman -S vim
   
   
- Wired network configuration
- ---------------------------
+Wired network configuration
+---------------------------
  
- .. code-block::
+.. code-block::
 
   # sudo vim /etc/systemd/network/eth0.network
   
