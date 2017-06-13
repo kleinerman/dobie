@@ -3,8 +3,17 @@ Dobie Controller Installation
 
 .. contents::
 
-Login Screen
-------------
+Operative system base installation
+----------------------------------
+
+Follow the installation guide to install the Arch Linux Arm according the board being used:
+
+**RPi3:** `https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3`
+
+**RPi2:** `https://archlinuxarm.org/platforms/armv7/broadcom/raspberry-pi-2`
+
+**RPi1:** `https://archlinuxarm.org/platforms/armv6/raspberry-pi`
+
 
 This screen is used to login the user into the system. According to the privilegies of the user,
 the system will show different tabs and options.
@@ -266,7 +275,7 @@ an organizations should be selected first.
 
 .. image:: images_front_end_specs/person.png
 
-To get from server the current list of organizations, see `Get Organizations`_ section.
+To get from server the current list of organizations, see `Get Organizations`_ section `Add Organization`_ 
 
 Get Persons
 ~~~~~~~~~~~
