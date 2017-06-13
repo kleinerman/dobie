@@ -55,4 +55,26 @@ Download and install **posix_ipc** python library needed by controller applicati
   # pip install posix_ipc
 
   
+ Configure the wired network
+ 
+ .. code-block::
+
+  # sudo vim /etc/systemd/network/eth0.network
+  
+The file should have the following content:
+  
+.. code-block::
+  
+  [Match]
+  Name=eth0
+
+  [Network]
+  Address=10.10.7.72/24
+  Gateway=10.10.7.1
+  DNS=10.10.10.53
+  DNS=10.10.10.54
+  
+  
+  
+ 
   
