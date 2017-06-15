@@ -85,9 +85,22 @@ To enable wireless at boot, enable the below service on your particular wireless
 
   # systemctl enable wpa_supplicant@wlan0
   
-wpa_supplicant@.service - accepts the interface name as an argument and starts the wpa_supplicant daemon for this interface. It reads a **/etc/wpa_supplicant/wpa_supplicant-interface.conf** configuration file. For this reason the file in **/etc/wpa_supplicant** was named **wpa_supplicant-wlan0.conf***
+wpa_supplicant@.service - accepts the interface name as an argument and starts the wpa_supplicant daemon for this interface. It reads a **/etc/wpa_supplicant/wpa_supplicant-interface.conf** configuration file. For this reason the file in **/etc/wpa_supplicant** was named **wpa_supplicant-wlan0.conf**
 
 
+
+Setting the IP address trough systemd-networkd
+----------------------------------------------
+
+Create the following file **/etc/systemd/network/wlan0.network** assuming your interface is **wlan0**:
+
+.. code-block::
+
+  [Match]
+  Name=wlan0
+  
+  [Network]
+  Address=10.10.7.71/24
   
  
 Interesting links
