@@ -79,6 +79,14 @@ Finally save this network in the configuration file:
   OK
   
 
+To check link status, use following command.
+
+.. code-block::
+
+  # iw dev interface link
+
+
+
 To enable wireless at boot, enable the below service on your particular wireless interface.
 
 .. code-block::
