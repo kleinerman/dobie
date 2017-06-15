@@ -4,6 +4,8 @@ Wifi Configuration on Raspberry Pi 3 under Arm Arch Linux
 .. contents::
 
 
+Configuring wpa_supplicant
+--------------------------
 
 Check the name of the wifi adapter you are going to use with the following command:
 
@@ -55,8 +57,10 @@ To associate with MYSSID, add the network, set the credentials and enable it:
 
   > set_network 0 ssid "MYSSID"
   OK
+
   > set_network 0 psk "passphrase"
   OK
+  
   > enable_network 0
   OK
   <3>CTRL-EVENT-SCAN-STARTED 
@@ -74,27 +78,20 @@ Finally save this network in the configuration file:
   > save_config
   OK
   
-<2>CTRL-EVENT-CONNECTED - Connection to 00:00:00:00:00:00 completed (reauth) [id=0 id_str=]
 
-Install **sudo** package and add your user to wheel group:
-
-.. code-block::
-
-  # pacman -S sudo
-  # usermod -aG wheel jkleinerman
-
-Install **vim** editor:
+To enable wireless at boot, enable the below service on your particular wireless interface.
 
 .. code-block::
 
-  # pacman -S vim
+  # systemctl enable wpa_supplicant@wlan0
   
+wpa_supplicant@.service - accepts the interface name as an argument and starts the wpa_supplicant daemon for this interface. It reads a **/etc/wpa_supplicant/wpa_supplicant-interface.conf** configuration file. For this reason the file in **/etc/wpa_supplicant** was named **wpa_supplicant-wlan0.conf***
+
+
   
-Wired network configuration
----------------------------
  
-Operative system base installation
-----------------------------------
+Interesting links
+-----------------
 
 Follow the installation guide to install the Arch Linux Arm according the board being used:
 
