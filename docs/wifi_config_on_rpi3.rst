@@ -102,6 +102,9 @@ Create the following file **/etc/systemd/network/wlan0.network** assuming your i
   [Network]
   Address=10.10.7.71/24
   
+
+Restart the board
+
  
 Interesting links
 -----------------
