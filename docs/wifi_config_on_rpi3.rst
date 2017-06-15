@@ -123,5 +123,5 @@ Follow the installation guide to install the Arch Linux Arm according the board 
 
 **Arch Linux Wireless network configuration:** `https://wiki.archlinux.org/index.php/Wireless_network_configuration`
 
-**Arch Linux Systemd-Networkd** `https://wiki.archlinux.org/index.php/systemd-networkd`
+**Arch Linux Systemd-Networkd:** `https://wiki.archlinux.org/index.php/systemd-networkd`
   
