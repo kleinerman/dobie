@@ -119,9 +119,9 @@ Interesting links
 
 Follow the installation guide to install the Arch Linux Arm according the board being used:
 
-**RPi3:** `https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3`
+**Arch Linux WPA_Supplicant configuration:** `https://wiki.archlinux.org/index.php/WPA_supplicant`
 
-**RPi2:** `https://archlinuxarm.org/platforms/armv7/broadcom/raspberry-pi-2`
+**Arch Linux Wireless network configuration:** `https://wiki.archlinux.org/index.php/Wireless_network_configuration`
 
-**RPi1:** `https://archlinuxarm.org/platforms/armv6/raspberry-pi`
+**Arch Linux Systemd-Networkd** `https://wiki.archlinux.org/index.php/systemd-networkd`
   
