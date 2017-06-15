@@ -20,6 +20,11 @@ After installing the operative system, update it:
 
   # pacman -Syu
 
+Bash completion is very usefull:
+
+.. code-block::
+
+  # pacman -S bash-completion
 
 Add your username:
 
