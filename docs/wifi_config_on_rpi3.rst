@@ -109,6 +109,24 @@ Create the following file **/etc/systemd/network/wlan0.network** assuming your i
   
   [Network]
   Address=10.10.7.71/24
+  Gateway=10.10.7.1
+  DNS=10.10.5.5
+  
+  
+**systemd-resolved** is required only if you are specifying DNS entries in .network files or if you want to obtain DNS addresses from networkd's DHCP client. Alternatively you may manually manage /etc/resolv.conf.
+
+If you are going to use it delete or rename the existing file `/etc/resolv.conf` and create the following symbolic link:
+
+.. code-block::
+
+  # ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+  
+Enable both services at boot:
+
+.. code-block::
+
+  # systemctl enable systemd-networkd
+  # systemctl enable systemd-resolvd
   
 
 Restart the board
