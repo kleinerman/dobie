@@ -21,19 +21,45 @@ To validate the username and password, it is necessary to get the following reso
 
   http://10.10.7.74:5000/api/v1.0/login
 
+The default username is: `admin` and the default password is: `admin`
+
+A valid login will answer with:
+
 **Response:**
 
 .. code-block::
 
-  This is temporary
-  -----------------
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 89
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Wed, 12 Jul 2017 14:31:05 GMT
+  
+  {
+    "description": "Administrator", 
+    "id": 1, 
+    "roleId": 1, 
+    "username": "admin"
+  }
 
-  Returns 200 OK if valid username and passwrod.
-  Returns 403 Forbidden if incorrect user and password.
+
+
+An invalid login will answer with:
+
+.. code-block::
+
+  HTTP/1.0 403 FORBIDDEN
+  Content-Type: application/json
+  WWW-Authenticate: Basic realm="Authentication Required"
+  Content-Length: 59
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Wed, 12 Jul 2017 14:37:28 GMT
   
-  Default username = admin
-  Default password = admin
-  
+  {
+    "error": "Unauthorized access", 
+    "status": "error"
+  }
+
   
 
 Organization
