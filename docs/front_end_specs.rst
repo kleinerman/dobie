@@ -102,17 +102,17 @@ To get from the server the current list of organizations, the following REST met
       "uri": "http://10.10.7.74:5000/api/v1.0/organization/1"
     }, 
     {
-      "name": "Building Networks", 
+      "name": "Campers Networks", 
       "rowStateId": 3, 
       "uri": "http://10.10.7.74:5000/api/v1.0/organization/2"
     }, 
     {
-      "name": "Datacenter", 
+      "name": "Linkers Inc.", 
       "rowStateId": 4, 
       "uri": "http://10.10.7.74:5000/api/v1.0/organization/3"
     }, 
     {
-      "name": "Movistel", 
+      "name": "Mobile Solutions", 
       "rowStateId": 5, 
       "uri": "http://10.10.7.74:5000/api/v1.0/organization/4"
     }
@@ -164,7 +164,7 @@ To get all posible states, the following method should be sent to the server:
     }
   ]
 
-The organizations in state: "Deleted" should not be shown and the other states should be shown in a different color.
+The organizations in state: ``"Deleted"`` should not be shown and the other states should be shown in a different color.
 
 
 Add Organization
@@ -188,7 +188,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Tarjeta Naranja"}
+  {"name": "Zipper Corp."}
 
 **Response:**
 
@@ -230,7 +230,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Tarjeta Provencred"}
+  {"name": "Sipper Corporation"}
   
 
 **Response:**
@@ -331,7 +331,7 @@ To get from server the current list of persons in each organization, the followi
     }, 
     {
       "cardNumber": 9038876, 
-      "name": "Manuel Bobadilla", 
+      "name": "Carlos Tabares", 
       "orgId": 2, 
       "rowStateId": 3, 
       "uri": "http://10.10.7.74:5000/api/v1.0/person/4", 
@@ -339,7 +339,7 @@ To get from server the current list of persons in each organization, the followi
     }, 
     {
       "cardNumber": 4994413, 
-      "name": "Paola Ceballos", 
+      "name": "Gisel Carmona", 
       "orgId": 2, 
       "rowStateId": 3, 
       "uri": "http://10.10.7.74:5000/api/v1.0/person/6", 
@@ -432,7 +432,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Carlos Juarez", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  {"name": "Carlos Roman", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
   
   
 **Response:**
