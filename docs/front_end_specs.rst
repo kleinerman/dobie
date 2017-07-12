@@ -21,7 +21,7 @@ To validate the username and password, it is necessary to get the following reso
 
   http://10.10.7.74:5000/api/v1.0/login
 
-The default username is: `admin` and the default password is: `admin`
+The default username is: ``admin`` and the default password is: ``admin``
 
 A valid login will answer with:
 
@@ -45,6 +45,8 @@ A valid login will answer with:
 
 
 An invalid login will answer with:
+
+**Response:**
 
 .. code-block::
 
