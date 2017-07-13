@@ -454,24 +454,25 @@ The following REST method should be sent to the server:
 
 
 
-If the “cardNumber” is in use, the following response will arrive:
+If "cardNumber" or "identNumber" is in use, the following response will arrive:
 
 **Response:**
 
 .. code-block::
-  
+
   HTTP/1.0 409 CONFLICT
   Content-Type: application/json
-  Content-Length: 198
-  Server: Werkzeug/0.11.9 Python/3.5.1
-  Date: Wed, 08 Mar 2017 14:39:13 GMT
+  Content-Length: 250
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 13 Jul 2017 18:46:52 GMT
   
   {
     "code": 409, 
     "error": "The request could not be completed due to a conflict with the current state of the target resource", 
-    "message": "Can not add this person", 
+    "message": "Can't add this person. Card number or Identification number already exists.", 
     "status": "conflict"
   }
+
 
 
 
@@ -496,7 +497,9 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Carlos Tobarez", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  {"name": "Lucas Ferre", "identNumber": "23063146", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  
+  
   
   
 **Response:**
@@ -506,16 +509,34 @@ The following REST method should be sent to the server:
   HTTP/1.0 200 OK
   Content-Type: application/json
   Content-Length: 53
-  Server: Werkzeug/0.11.9 Python/3.5.1
-  Date: Wed, 08 Mar 2017 15:05:44 GMT
-  
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 13 Jul 2017 18:57:29 GMT
+
   {
-    "message": "Person updated", 
+    "message": "Person updated.", 
     "status": "OK"
   }
+
+
+If "cardNumber" or "identNumber" is in use, the following response will arrive:
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 409 CONFLICT
+  Content-Type: application/json
+  Content-Length: 253
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 13 Jul 2017 18:54:53 GMT
   
-  
-A pop-up will inform to the user this situation.
+  {
+    "code": 409, 
+    "error": "The request could not be completed due to a conflict with the current state of the target resource", 
+    "message": "Can't update this person. Card number or Identification number already exists.", 
+    "status": "conflict"
+  }
 
 
 
