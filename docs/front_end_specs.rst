@@ -19,7 +19,7 @@ To validate the username and password, it is necessary to get the following reso
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/login
+  http://172.18.0.3:5000/api/v1.0/login
 
 The default username is: ``admin`` and the default password is: ``admin``
 
@@ -83,7 +83,7 @@ To get from the server the current list of organizations, the following REST met
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/organization
+  http://172.18.0.3:5000/api/v1.0/organization
 
 **Response:**
 
@@ -99,22 +99,22 @@ To get from the server the current list of organizations, the following REST met
     {
       "name": "Visitors", 
       "rowStateId": 3, 
-      "uri": "http://10.10.7.74:5000/api/v1.0/organization/1"
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/1"
     }, 
     {
       "name": "Campers Networks", 
       "rowStateId": 3, 
-      "uri": "http://10.10.7.74:5000/api/v1.0/organization/2"
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/2"
     }, 
     {
       "name": "Linkers Inc.", 
       "rowStateId": 4, 
-      "uri": "http://10.10.7.74:5000/api/v1.0/organization/3"
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/3"
     }, 
     {
       "name": "Mobile Solutions", 
       "rowStateId": 5, 
-      "uri": "http://10.10.7.74:5000/api/v1.0/organization/4"
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/4"
     }
   ]
 
@@ -129,7 +129,7 @@ To get all posible states, the following method should be sent to the server:
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/rowstate
+  http://172.18.0.3:5000/api/v1.0/rowstate
   
 **Response:**
 
@@ -182,7 +182,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/organization
+  http://172.18.0.3:5000/api/v1.0/organization
   
 **JSON**
 
@@ -204,7 +204,7 @@ The following REST method should be sent to the server:
     "code": 201, 
     "message": "Organization added", 
     "status": "OK", 
-    "uri": "http://10.10.7.74:5000/api/v1.0/organization/5"
+    "uri": "http://172.18.0.3:5000/api/v1.0/organization/5"
   }
   
   
@@ -223,7 +223,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/organization/5
+  http://172.18.0.3:5000/api/v1.0/organization/5
   
   
 **JSON**
@@ -247,7 +247,7 @@ The following REST method should be sent to the server:
     "code": 201, 
     "message": "Organization added", 
     "status": "OK", 
-    "uri": "http://10.10.7.74:5000/api/v1.0/organization/5"
+    "uri": "http://172.18.0.3:5000/api/v1.0/organization/5"
   }
   
   
@@ -266,7 +266,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/organization/5
+  http://172.18.0.3:5000/api/v1.0/organization/5
   
 **Response:**
 
@@ -307,7 +307,7 @@ To get from server the current list of persons in each organization, the followi
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/organization/2
+  http://172.18.0.3:5000/api/v1.0/organization/2
   
   
 **Response:**
@@ -326,7 +326,7 @@ To get from server the current list of persons in each organization, the followi
       "name": "Jorge Kleinerman", 
       "orgId": 2, 
       "rowStateId": 3, 
-      "uri": "http://10.10.7.74:5000/api/v1.0/person/2", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/2", 
       "visitedOrgId": null
     }, 
     {
@@ -334,7 +334,7 @@ To get from server the current list of persons in each organization, the followi
       "name": "Carlos Tabares", 
       "orgId": 2, 
       "rowStateId": 3, 
-      "uri": "http://10.10.7.74:5000/api/v1.0/person/4", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/4", 
       "visitedOrgId": null
     }, 
     {
@@ -342,7 +342,7 @@ To get from server the current list of persons in each organization, the followi
       "name": "Gisel Carmona", 
       "orgId": 2, 
       "rowStateId": 3, 
-      "uri": "http://10.10.7.74:5000/api/v1.0/person/6", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/6", 
       "visitedOrgId": null
     }, 
     {
@@ -350,7 +350,7 @@ To get from server the current list of persons in each organization, the followi
       "name": "Carlos Vazquez", 
       "orgId": 2, 
       "rowStateId": 4, 
-      "uri": "http://10.10.7.74:5000/api/v1.0/person/8", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/8", 
       "visitedOrgId": null
     }, 
     {
@@ -358,7 +358,7 @@ To get from server the current list of persons in each organization, the followi
       "name": "Pedro Juearez", 
       "orgId": 2, 
       "rowStateId": 2, 
-      "uri": "http://10.10.7.74:5000/api/v1.0/person/9", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/9", 
       "visitedOrgId": null
     }
   ]
@@ -373,7 +373,7 @@ To get all posible state the following method should be sent to the server:
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/rowstate
+  http://172.18.0.3:5000/api/v1.0/rowstate
   
 **Response:**
 
@@ -426,7 +426,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/person
+  http://172.18.0.3:5000/api/v1.0/person
 
 **JSON**
 
@@ -491,7 +491,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/person/7
+  http://172.18.0.3:5000/api/v1.0/person/7
 
 **JSON**
 
@@ -553,7 +553,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  http://10.10.7.74:5000/api/v1.0/person/7
+  http://172.18.0.3:5000/api/v1.0/person/7
 
 If the person was deleted successfully, the server will answer with the following response:
 
