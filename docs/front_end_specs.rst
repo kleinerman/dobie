@@ -432,7 +432,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Carlos Roman", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  {"name": "Ruben Juearez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}
   
   
 **Response:**
@@ -441,16 +441,17 @@ The following REST method should be sent to the server:
 
   HTTP/1.0 201 CREATED
   Content-Type: application/json
-  Content-Length: 133
-  Server: Werkzeug/0.11.9 Python/3.5.1
-  Date: Tue, 07 Mar 2017 19:52:06 GMT
-  
+  Content-Length: 121
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 13 Jul 2017 13:40:56 GMT
+
   {
     "code": 201, 
-    "message": "Organization added", 
+    "message": "Person added", 
     "status": "OK", 
-    "uri": "http://10.10.7.74:5000/api/v1.0/organization/5"
+    "uri": "http://172.18.0.3:5000/api/v1.0/person/9"
   }
+
 
 
 If the “cardNumber” is in use, the following response will arrive:
