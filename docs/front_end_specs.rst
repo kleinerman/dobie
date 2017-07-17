@@ -574,7 +574,10 @@ If the person was deleted successfully, the server will answer with the followin
   }
   
 If the person is not present in the system, the following message will be received:
-  
+
+**Response:**
+
+.. code-block::
   
   HTTP/1.0 404 NOT FOUND
   Content-Type: application/json
