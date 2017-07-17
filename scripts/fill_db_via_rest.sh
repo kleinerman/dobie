@@ -1,7 +1,9 @@
 #!/bin/bash
 
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eb277791"}' http://172.18.0.3:5000/api/v1.0/controller
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eb750952"}' http://172.18.0.3:5000/api/v1.0/controller
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eb618f06"}' http://172.18.0.3:5000/api/v1.0/controller
+
+
 
 sleep 4
 
