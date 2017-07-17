@@ -497,7 +497,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Lucas Ferre", "identNumber": "23063146", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  {"name": "Lucas Suarez", "identNumber": "23063146", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
   
   
   
@@ -572,5 +572,21 @@ If the person was deleted successfully, the server will answer with the followin
     "message": "Person deleted", 
     "status": "OK"
   }
+  
+If the person is not present in the system, the following message will be received:
+  
+  
+  HTTP/1.0 404 NOT FOUND
+  Content-Type: application/json
+  Content-Length: 107
+  Server: Werkzeug/0.12.2 Python/3.6.0
+  Date: Mon, 17 Jul 2017 00:09:43 GMT
+  
+  {
+   "code": 404, 
+    "error": "request not found", 
+    "message": "Person not found", 
+    "status": "error"
+  }
 
-A pop up should inform that situation.
+A pop up should inform the success or unsuccess of the operation 
