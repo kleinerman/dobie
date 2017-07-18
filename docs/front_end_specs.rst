@@ -592,4 +592,107 @@ If the person is not present in the system, the following message will be receiv
     "status": "error"
   }
 
-A pop up should inform the success or unsuccess of the operation 
+A pop up should inform the success or unsuccess of the operation
+
+
+
+
+Accesses
+--------
+
+
+This screen is used to add edit or delete accesses of persons throgh the differents passages of the building
+
+.. image:: images_front_end_specs/organization.png
+
+Get Organizations
+~~~~~~~~~~~~~~~~~
+
+To get from the server the current list of organizations, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/organization
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 481
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Mon, 20 Mar 2017 14:49:41 GMT
+  
+  [
+    {
+      "name": "Visitors", 
+      "rowStateId": 3, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/1"
+    }, 
+    {
+      "name": "Campers Networks", 
+      "rowStateId": 3, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/2"
+    }, 
+    {
+      "name": "Linkers Inc.", 
+      "rowStateId": 4, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/3"
+    }, 
+    {
+      "name": "Mobile Solutions", 
+      "rowStateId": 5, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/4"
+    }
+  ]
+
+
+**rowStateId** is a field that indicates the state of the organization into the system
+
+To get all posible states, the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/rowstate
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 272
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Mon, 27 Mar 2017 20:49:28 GMT
+  
+  [
+    {
+      "description": "To Add", 
+      "id": 1
+    }, 
+    {
+      "description": "To Update", 
+      "id": 2
+    }, 
+    {
+      "description": "Committed", 
+      "id": 3
+    }, 
+    {
+      "description": "To Delete", 
+      "id": 4
+    }, 
+    {
+
+
+
+
