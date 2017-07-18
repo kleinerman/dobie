@@ -641,7 +641,7 @@ class CrudMngr(genmngr.GenericMngr):
                     person[param] = request.json[param]
                 personId = self.dataBase.addPerson(person)
                 uri = url_for('modPerson', personId=personId, _external=True)
-                return jsonify({'status': 'OK', 'message': 'Person added', 'code': CREATED, 'uri': uri}), CREATED
+                return jsonify({'status': 'OK', 'message': 'Person added.', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.PersonError as personError:
                 raise ConflictError(str(personError))
@@ -692,12 +692,12 @@ class CrudMngr(genmngr.GenericMngr):
                     person.pop('visitedOrgId')
                     ctrllerMacsToUpdPrsn = self.dataBase.markPerson(personId, database.TO_UPDATE)
                     self.ctrllerMsger.updPerson(ctrllerMacsToUpdPrsn, person)
-                    return jsonify({'status': 'OK', 'message': 'Person updated'}), OK
+                    return jsonify({'status': 'OK', 'message': 'Person updated.'}), OK
 
                 elif request.method == 'DELETE':
                     ctrllerMacsToDelPrsn = self.dataBase.markPerson(personId, database.TO_DELETE)
                     self.ctrllerMsger.delPerson(ctrllerMacsToDelPrsn, personId)
-                    return jsonify({'status': 'OK', 'message': 'Person deleted'}), OK
+                    return jsonify({'status': 'OK', 'message': 'Person deleted.'}), OK
 
             except database.PersonNotFound as personNotFound:
                 raise NotFound(str(personNotFound))

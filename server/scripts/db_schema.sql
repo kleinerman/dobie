@@ -50,6 +50,8 @@ CREATE TABLE `Person` (
 
 CREATE UNIQUE INDEX cardNumberIndex ON Person (cardNumber)
 ;
+CREATE UNIQUE INDEX identNumberIndex ON Person (identNumber)
+;
 
 
 CREATE TABLE `CtrllerModel` (

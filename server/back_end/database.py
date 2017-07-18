@@ -1041,7 +1041,26 @@ class DataBase(object):
 
 
             
-            
+    def getPssgDescription(self, pssgId):
+        '''
+        Get passage description receiving passage ID.
+        This method is used by getAccesses method to return the description
+        '''  
+
+        sql = "SELECT description FROM Passage WHERE id = {}".format(pssgId)
+
+        try:
+            self.execute(sql)
+            description = self.cursor.fetchone()['description']
+            return description
+
+        except TypeError:
+            raise PassageNotFound('Passage not found')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PassageError('Error getting description of passage.')
+
 
 
 
@@ -1307,10 +1326,10 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PersonError('Can not add this person')
+            raise PersonError("Can't add this person. Card number or Identification number already exists.")
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise PersonError('Can not add this person: wrong argument')
+            raise PersonError("Can not add this person. Internal error.")
 
 
 
@@ -1604,10 +1623,10 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PersonError('Can not update this person')
+            raise PersonError("Can't update this person. Card number or Identification number already exists.")
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise PersonError('Can not update this person: wrong argument')
+            raise PersonError("Can't update this person. Internal error.")
 
 
 
@@ -1623,7 +1642,7 @@ class DataBase(object):
         person = self.cursor.fetchone()
 
         if not person:
-            raise PersonNotFound('Person not found')
+            raise PersonNotFound("Person not found.")
         return person
 
 
@@ -1654,6 +1673,7 @@ class DataBase(object):
             access['startTime'] = str(access['startTime'])
             access['endTime'] = str(access['endTime'])
             access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+            access['pssgDescription'] = self.getPssgDescription(access['pssgId'])
 
             if not access['allWeek']:
                 access['liAccesses'] = self.getLiAccesses(access['pssgId'], personId)
