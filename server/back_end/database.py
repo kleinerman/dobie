@@ -1677,6 +1677,8 @@ class DataBase(object):
 
             if not access['allWeek']:
                 access['liAccesses'] = self.getLiAccesses(access['pssgId'], personId)
+                access.pop('startTime')
+                access.pop('endTime')
 
         return accesses
 
@@ -1707,7 +1709,7 @@ class DataBase(object):
                            
             liAccess['startTime'] = str(liAccess['startTime'])
             liAccess['endTime'] = str(liAccess['endTime'])
-
+            liAccess.pop('pssgId')
 
         return liAccesses
 
