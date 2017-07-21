@@ -616,27 +616,7 @@ To get all accesses of an specific person to show them in the right side the fol
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/person
-
-**Response:**
-
-.. code-block::
-
-
-
-
-Get Organizations
-~~~~~~~~~~~~~~~~~
-
-To get from the server the current list of organizations, the following REST method should be sent:
-
-**Method:** GET
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.3:5000/api/v1.0/organization
+  http://172.18.0.3:5000/api/v1.0/person/6
 
 **Response:**
 
@@ -644,74 +624,105 @@ To get from the server the current list of organizations, the following REST met
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 481
-  Server: Werkzeug/0.11.9 Python/3.5.1
-  Date: Mon, 20 Mar 2017 14:49:41 GMT
+  Content-Length: 2154
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Fri, 21 Jul 2017 19:04:38 GMT
   
   [
     {
-      "name": "Visitors", 
+      "allWeek": 0, 
+      "expireDate": "2016-01-02 00:00", 
+      "iSide": 0, 
+      "liAccesses": [
+        {
+          "endTime": "21:37:00", 
+          "iSide": 1, 
+          "id": 10, 
+          "oSide": 1, 
+          "rowStateId": 1, 
+          "startTime": "20:37:00", 
+          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/10", 
+          "weekDay": 5
+        }, 
+        {
+          "endTime": "21:37:00", 
+          "iSide": 1, 
+          "id": 13, 
+          "oSide": 1, 
+          "rowStateId": 1, 
+          "startTime": "20:37:00", 
+          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/13", 
+          "weekDay": 1
+        }, 
+        {
+          "endTime": "21:37:00", 
+          "iSide": 1, 
+          "id": 14, 
+          "oSide": 1, 
+          "rowStateId": 1, 
+          "startTime": "20:37:00", 
+          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/14", 
+          "weekDay": 2
+        }, 
+        {
+          "endTime": "21:37:00", 
+          "iSide": 1, 
+          "id": 16, 
+          "oSide": 1, 
+          "rowStateId": 1, 
+          "startTime": "20:37:00", 
+          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/16", 
+          "weekDay": 3
+        }
+      ], 
+      "oSide": 0, 
+      "pssgDescription": "Ba\u00f1o 3", 
+      "pssgId": 4, 
       "rowStateId": 3, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/organization/1"
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/3"
     }, 
     {
-      "name": "Campers Networks", 
-      "rowStateId": 3, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/organization/2"
+      "allWeek": 1, 
+      "endTime": "23:59:00", 
+      "expireDate": "2018-12-12 00:00", 
+      "iSide": 1, 
+      "oSide": 1, 
+      "pssgDescription": "Molinte 5", 
+      "pssgId": 5, 
+      "rowStateId": 1, 
+      "startTime": "0:00:00", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/7"
     }, 
     {
-      "name": "Linkers Inc.", 
-      "rowStateId": 4, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/organization/3"
+      "allWeek": 1, 
+      "endTime": "23:59:00", 
+      "expireDate": "2018-12-12 00:00", 
+      "iSide": 1, 
+      "oSide": 1, 
+      "pssgDescription": "Barrera 5", 
+      "pssgId": 3, 
+      "rowStateId": 1, 
+      "startTime": "0:00:00", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/20"
     }, 
     {
-      "name": "Mobile Solutions", 
-      "rowStateId": 5, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/organization/4"
+      "allWeek": 1, 
+      "endTime": "23:59:00", 
+      "expireDate": "2018-12-12 00:00", 
+      "iSide": 1, 
+      "oSide": 1, 
+      "pssgDescription": "Puerta 2", 
+      "pssgId": 2, 
+      "rowStateId": 1, 
+      "startTime": "0:00:00", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/21"
     }
   ]
 
 
-**rowStateId** is a field that indicates the state of the organization into the system
 
-To get all posible states, the following method should be sent to the server:
 
-**Method:** GET
 
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.3:5000/api/v1.0/rowstate
-  
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 272
-  Server: Werkzeug/0.11.9 Python/3.5.1
-  Date: Mon, 27 Mar 2017 20:49:28 GMT
-  
-  [
-    {
-      "description": "To Add", 
-      "id": 1
-    }, 
-    {
-      "description": "To Update", 
-      "id": 2
-    }, 
-    {
-      "description": "Committed", 
-      "id": 3
-    }, 
-    {
-      "description": "To Delete", 
-      "id": 4
-    }, 
-    {
 
 
 
