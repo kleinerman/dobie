@@ -719,7 +719,9 @@ To get all accesses of an specific person to show them in the right side the fol
     }
   ]
 
-
+When a the access has "allWeek" field set to 1, the check icon in "all week" column should be set.
+When a the access has "allWeek" field set to 0, the check icon in "all week" column should not be set.
+In the last case the access will have a field called "liAccess" which will have a list with all the accesses for each day of the week.
 
 
 
