@@ -1670,6 +1670,7 @@ class DataBase(object):
 
         for access in accesses:
 
+            access.pop('personId')
             access['startTime'] = str(access['startTime'])
             access['endTime'] = str(access['endTime'])
             access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
@@ -1706,10 +1707,11 @@ class DataBase(object):
         liAccesses = self.cursor.fetchall()
 
         for liAccess in liAccesses:
-                           
+
+            liAccess.pop('personId')
+            liAccess.pop('pssgId')                           
             liAccess['startTime'] = str(liAccess['startTime'])
             liAccess['endTime'] = str(liAccess['endTime'])
-            liAccess.pop('pssgId')
 
         return liAccesses
 
