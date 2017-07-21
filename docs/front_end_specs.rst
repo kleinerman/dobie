@@ -724,6 +724,72 @@ When a the access has "allWeek" field set to 0, the check icon in "all week" col
 In the last case the access will have a field called "liAccess" which will have a list with all the accesses for each day of the week.
 
 
+Add Access
+~~~~~~~~~~
+
+Before pressing "new" button an specific person or an entire organization should be selected and the following window will appear:
+
+.. image:: images_front_end_specs/add_access.png
+
+The following REST method should be sent to the server:
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/person
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Ruben Juearez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 121
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 13 Jul 2017 13:40:56 GMT
+
+  {
+    "code": 201, 
+    "message": "Person added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.3:5000/api/v1.0/person/9"
+  }
+
+
+
+If "cardNumber" or "identNumber" is in use, the following response will arrive:
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 409 CONFLICT
+  Content-Type: application/json
+  Content-Length: 250
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 13 Jul 2017 18:46:52 GMT
+  
+  {
+    "code": 409, 
+    "error": "The request could not be completed due to a conflict with the current state of the target resource", 
+    "message": "Can't add this person. Card number or Identification number already exists.", 
+    "status": "conflict"
+  }
+
+
+
+
+
 
 
 
