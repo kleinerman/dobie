@@ -603,7 +603,27 @@ Accesses
 
 This screen is used to add edit or delete accesses of persons throgh the differents passages of the building
 
-.. image:: images_front_end_specs/organization.png
+.. image:: images_front_end_specs/access.png
+
+The user should select the organization and the person which its accesses will be added, edited or removed.
+In the right side of the screen, the access of the person will be shown with the description of the passage and a checkbox will shown if the access is for all days of weeks.
+
+To get all accesses of an specific person to show them in the right side the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/person
+
+**Response:**
+
+.. code-block::
+
+
+
 
 Get Organizations
 ~~~~~~~~~~~~~~~~~
