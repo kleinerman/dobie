@@ -731,60 +731,39 @@ Before pressing "new" button an specific person or an entire organization should
 
 .. image:: images_front_end_specs/add_access.png
 
-The following REST method should be sent to the server:
+In this window a "Zone" should be selected.
+To get all the zones the following REST method should be sent to the server:
 
-**Method:** POST
+**Method:** GET
 
 **URI:**
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/person
+  http://172.18.0.3:5000/api/v1.0/zone
 
-**JSON**
-
-.. code-block::
-
-  {"name": "Ruben Juearez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}
-  
-  
+ 
 **Response:**
 
 .. code-block::
 
-  HTTP/1.0 201 CREATED
+  HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 121
+  Content-Length: 184
   Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 13 Jul 2017 13:40:56 GMT
-
-  {
-    "code": 201, 
-    "message": "Person added", 
-    "status": "OK", 
-    "uri": "http://172.18.0.3:5000/api/v1.0/person/9"
-  }
-
-
-
-If "cardNumber" or "identNumber" is in use, the following response will arrive:
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 409 CONFLICT
-  Content-Type: application/json
-  Content-Length: 250
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 13 Jul 2017 18:46:52 GMT
+  Date: Fri, 21 Jul 2017 20:46:51 GMT
   
-  {
-    "code": 409, 
-    "error": "The request could not be completed due to a conflict with the current state of the target resource", 
-    "message": "Can't add this person. Card number or Identification number already exists.", 
-    "status": "conflict"
-  }
+  [
+    {
+      "name": "Ingreso Sur", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/zone/1"
+    }, 
+    {
+      "name": "Ingreso Norte", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/zone/2"
+    }
+  ]
+
 
 
 
