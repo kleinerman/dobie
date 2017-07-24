@@ -770,7 +770,7 @@ To get all the zones the following REST method should be sent to the server:
     }
   ]
 
-To get all persons from a zone, the following REST method should be sent to the server:
+To get all passages from a zone, the following REST method should be sent to the server:
 
 
 **URI:**
