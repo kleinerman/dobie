@@ -330,7 +330,6 @@ class CrudMngr(genmngr.GenericMngr):
 
                     for organization in organizations:
                         organization['uri'] = url_for('Organization', orgId=organization['id'], _external=True)
-                        organization.pop('id')
                     return jsonify(organizations)
 
                 ## Add a new organizations
@@ -374,7 +373,9 @@ class CrudMngr(genmngr.GenericMngr):
                     
                     for person in persons:
                         person['uri'] = url_for('modPerson', personId=person['id'], _external=True)
-                        person.pop('id')
+                        #Removing orgId as is the same for all the persons and is given by the user
+                        #in the REST request.
+                        person.pop('orgId')
                     return jsonify(persons)
 
                 # Update an organization
@@ -466,7 +467,10 @@ class CrudMngr(genmngr.GenericMngr):
                     
                     for passage in passages:
                         passage['uri'] = url_for('modPassage', pssgId=passage['id'], _external=True)
-                        passage.pop('id')
+                        #All the passage will have the same zoneId, this parametter is given by the
+                        #user in REST request.
+                        passage.pop('zoneId')
+                        #passage.pop('id')
                     return jsonify(passages)
 
 
@@ -669,13 +673,23 @@ class CrudMngr(genmngr.GenericMngr):
                     accesses = self.dataBase.getAccesses(personId)
                     for access in accesses:
                         access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
+                        #personId is not neccesary since the user send it as an argument to retrieve all 
+                        #the access of this person
+                        access.pop('personId')
                         try:
                             for liAccess in access['liAccesses']:
                                 liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
+                                #pssgId field is the same for all liAccesses and is present as access field
+                                liAccess.pop('pssgId')
+                                #personId is not neccesary since the user send it as an argument to retrieve all 
+                                #the access of this person
+                                liAccess.pop('personId')
                         except KeyError:
+                            #This exception will happen when the access is allWeek access. In this situation
+                            #nothing should be done.
                             pass
                         # Remove id
-                        access.pop('id')
+                        #access.pop('id')
 
                     return jsonify(accesses)
 
