@@ -621,18 +621,19 @@ To get all accesses of an specific person to show them in the right side the fol
 **Response:**
 
 .. code-block::
-
+ 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 2154
+  Content-Length: 2212
   Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Fri, 21 Jul 2017 19:04:38 GMT
+  Date: Mon, 24 Jul 2017 15:01:51 GMT
   
   [
     {
       "allWeek": 0, 
       "expireDate": "2016-01-02 00:00", 
       "iSide": 0, 
+      "id": 3, 
       "liAccesses": [
         {
           "endTime": "21:37:00", 
@@ -686,6 +687,7 @@ To get all accesses of an specific person to show them in the right side the fol
       "endTime": "23:59:00", 
       "expireDate": "2018-12-12 00:00", 
       "iSide": 1, 
+      "id": 7, 
       "oSide": 1, 
       "pssgDescription": "Molinte 5", 
       "pssgId": 5, 
@@ -698,6 +700,7 @@ To get all accesses of an specific person to show them in the right side the fol
       "endTime": "23:59:00", 
       "expireDate": "2018-12-12 00:00", 
       "iSide": 1, 
+      "id": 20, 
       "oSide": 1, 
       "pssgDescription": "Barrera 5", 
       "pssgId": 3, 
@@ -710,6 +713,7 @@ To get all accesses of an specific person to show them in the right side the fol
       "endTime": "23:59:00", 
       "expireDate": "2018-12-12 00:00", 
       "iSide": 1, 
+      "id": 21, 
       "oSide": 1, 
       "pssgDescription": "Puerta 2", 
       "pssgId": 2, 
@@ -719,7 +723,9 @@ To get all accesses of an specific person to show them in the right side the fol
     }
   ]
 
-When a the access has "allWeek" field set to 1, the check icon in "all week" column should be set.
+ 
+ 
+When the access has "allWeek" field set to 1, the check icon in "all week" column should be set.
 When a the access has "allWeek" field set to 0, the check icon in "all week" column should not be set.
 In the last case the access will have a field called "liAccess" which will have a list with all the accesses for each day of the week.
 
@@ -727,11 +733,11 @@ In the last case the access will have a field called "liAccess" which will have 
 Add Access
 ~~~~~~~~~~
 
-Before pressing "new" button an specific person or an entire organization should be selected and the following window will appear:
+Before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
 
 .. image:: images_front_end_specs/add_access.png
 
-In this window a "Zone" should be selected.
+In this window a **"Zone"** should be selected.
 To get all the zones the following REST method should be sent to the server:
 
 **Method:** GET
@@ -764,7 +770,95 @@ To get all the zones the following REST method should be sent to the server:
     }
   ]
 
+To get all persons from a zone, the following REST method should be sent to the server:
 
+
+**URI:**
+
+.. code-block::
+
+
+  http://172.18.0.3:5000/api/v1.0/zone/1
+
+ 
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 1432
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Mon, 24 Jul 2017 15:06:13 GMT
+  
+  [
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "description": "Molinete 1", 
+      "id": 1, 
+      "pssgNum": 1, 
+      "rlseTime": 7, 
+      "rowStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/passage/1"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "description": "Puerta 2", 
+      "id": 2, 
+      "pssgNum": 2, 
+      "rlseTime": 7, 
+      "rowStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/passage/2"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "description": "Barrera 5", 
+      "id": 3, 
+      "pssgNum": 3, 
+      "rlseTime": 7, 
+      "rowStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/passage/3"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 1, 
+      "description": "Ba\u00f1o 3", 
+      "id": 4, 
+      "pssgNum": 1, 
+      "rlseTime": 7, 
+      "rowStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/passage/4"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 1, 
+      "description": "Molinte 5", 
+      "id": 5, 
+      "pssgNum": 2, 
+      "rlseTime": 7, 
+      "rowStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/passage/5"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 1, 
+      "description": "Ingreso 2", 
+      "id": 6, 
+      "pssgNum": 3, 
+      "rlseTime": 7, 
+      "rowStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/passage/6"
+    }
+  ]
 
 
 
