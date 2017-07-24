@@ -314,55 +314,53 @@ To get from server the current list of persons in each organization, the followi
 
 .. code-block::
   
+  
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 950
-  Server: Werkzeug/0.11.9 Python/3.5.1
-  Date: Mon, 20 Mar 2017 20:38:49 GMT
+  Content-Length: 877
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Mon, 24 Jul 2017 19:24:08 GMT
   
   [
     {
       "cardNumber": 4300737, 
+      "id": 1, 
+      "identNumber": "28063146", 
       "name": "Jorge Kleinerman", 
-      "orgId": 2, 
       "rowStateId": 3, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/person/2", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/1", 
       "visitedOrgId": null
     }, 
     {
       "cardNumber": 9038876, 
-      "name": "Carlos Tabares", 
-      "orgId": 2, 
+      "id": 3, 
+      "identNumber": "22063146", 
+      "name": "Carlos Gonzalez", 
       "rowStateId": 3, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/person/4", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/3", 
       "visitedOrgId": null
     }, 
     {
       "cardNumber": 4994413, 
-      "name": "Gisel Carmona", 
-      "orgId": 2, 
+      "id": 5, 
+      "identNumber": "2463146", 
+      "name": "Ernesto Chlima", 
       "rowStateId": 3, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/person/6", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/5", 
       "visitedOrgId": null
     }, 
     {
       "cardNumber": 4300757, 
+      "id": 7, 
+      "identNumber": "26063146", 
       "name": "Carlos Vazquez", 
-      "orgId": 2, 
-      "rowStateId": 4, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/person/8", 
-      "visitedOrgId": null
-    }, 
-    {
-      "cardNumber": 5377768, 
-      "name": "Pedro Juearez", 
-      "orgId": 2, 
-      "rowStateId": 2, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/person/9", 
+      "rowStateId": 5, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/7", 
       "visitedOrgId": null
     }
   ]
 
+    
 **rowStateId** is a field that indicates the state of the person into the system
 
 To get all posible state the following method should be sent to the server:
