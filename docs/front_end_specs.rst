@@ -235,19 +235,19 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  HTTP/1.0 201 CREATED
+
+  HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 133
-  Server: Werkzeug/0.11.9 Python/3.5.1
-  Date: Tue, 07 Mar 2017 19:52:06 GMT
-  
+  Content-Length: 59
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Mon, 24 Jul 2017 19:51:48 GMT
+
   {
-    "code": 201, 
-    "message": "Organization added", 
-    "status": "OK", 
-    "uri": "http://172.18.0.3:5000/api/v1.0/organization/5"
+    "message": "Organization updated", 
+    "status": "OK"
   }
-  
+
+
   
 Delete Organization
 ~~~~~~~~~~~~~~~~~~~
@@ -766,8 +766,8 @@ To get all the zones the following REST method should be sent to the server:
     }
   ]
 
-To get all passages from a zone, the following REST method should be sent to the server:
 
+To get all passages from a zone, the following REST method should be sent to the server:
 
 **URI:**
 
@@ -857,10 +857,77 @@ To get all passages from a zone, the following REST method should be sent to the
   ]
 
 
+Knowing the passage id, it is possible to create the new **"All Week"** access or a **""Day""** access sending the following POST method to the server:
+
+All Week Access
+---------------
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/access
+
+ **JSON**
+
+.. code-block::
+
+  {"pssgId": 4, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "01:01", "endTime": "22:31", "expireDate": "2018-11-12"}
+ 
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 121
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Mon, 24 Jul 2017 20:09:18 GMT
+  
+  {
+    "code": 201, 
+    "message": "Access added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.3:5000/api/v1.0/access/3"
+  }
 
 
 
+Day Access (Limited Access)
+---------------------------
 
+**Method:** POST
 
+**URI:**
 
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/liaccess
+
+ **JSON**
+
+.. code-block::
+
+  {"pssgId": 6, "personId": 7, "weekDay": 4, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}
+ 
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 124
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Mon, 24 Jul 2017 20:17:48 GMT
+  
+  {
+    "code": 201, 
+    "message": "Access added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/17"
+  }
 
