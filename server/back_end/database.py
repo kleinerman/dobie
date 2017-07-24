@@ -1670,14 +1670,17 @@ class DataBase(object):
 
         for access in accesses:
 
-            access.pop('personId')
             access['startTime'] = str(access['startTime'])
             access['endTime'] = str(access['endTime'])
             access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+            #The description is usefull to show the access in the front end for an
+            #specific person.
             access['pssgDescription'] = self.getPssgDescription(access['pssgId'])
 
             if not access['allWeek']:
                 access['liAccesses'] = self.getLiAccesses(access['pssgId'], personId)
+                #When the the access is not allWeek access, startTime and endTime fields
+                #is present in each limitedAccess, so we can remove this field from access.
                 access.pop('startTime')
                 access.pop('endTime')
 
@@ -1708,8 +1711,6 @@ class DataBase(object):
 
         for liAccess in liAccesses:
 
-            liAccess.pop('personId')
-            liAccess.pop('pssgId')                           
             liAccess['startTime'] = str(liAccess['startTime'])
             liAccess['endTime'] = str(liAccess['endTime'])
 
