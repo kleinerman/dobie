@@ -857,7 +857,7 @@ To get all passages from a zone, the following REST method should be sent to the
   ]
 
 
-Knowing the passage id, it is possible to create the new **"All Week"** access or a **""Day""** access sending the following POST method to the server:
+Knowing the passage id, it is possible to create the new **"All Week"** access or a **"Day"** access sending the following POST method to the server:
 
 All Week Access
 ---------------
@@ -870,7 +870,8 @@ All Week Access
 
   http://172.18.0.3:5000/api/v1.0/access
 
- **JSON**
+
+**JSON**
 
 .. code-block::
 
@@ -907,7 +908,8 @@ Day Access (Limited Access)
 
   http://172.18.0.3:5000/api/v1.0/liaccess
 
- **JSON**
+
+**JSON**
 
 .. code-block::
 
