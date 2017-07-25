@@ -936,4 +936,6 @@ Day Access (Limited Access)
 
 If all the passages of a zone is selected, an "access" or the necessary "limited access" should be sent to the server for each passage of the zone.
 
-If an entire organization is selected, all the above should be repeated for each person of the organization.
+If an entire organization is selected, all the above should be repeated for each person of the organization. 
+
+An entire organization can be selected and an entire zone too.
