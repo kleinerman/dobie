@@ -933,3 +933,7 @@ Day Access (Limited Access)
     "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/17"
   }
 
+
+If all the passages of a zone is selected, an "access" or the necessary "limited access" should be sent to the server for each passage of the zone.
+
+If an entire organization is selected, all the above should be repeated for each person of the organization.
