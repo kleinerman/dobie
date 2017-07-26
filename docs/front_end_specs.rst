@@ -939,3 +939,15 @@ If all the passages of a zone is selected, an "access" or the necessary "limited
 If an entire organization is selected, all the above should be repeated for each person of the organization. 
 
 An entire organization can be selected and an entire zone too.
+
+
+Edit Access
+~~~~~~~~~~~
+
+.. image:: images_front_end_specs/access.png
+
+To edit an access, an organization and person should be selected in the above screen. In the right side of the screen all the accesses of the person will appear. The access to be edited, should be selected and the edit button should be pressed.
+The followin window will appear.
+
+.. image:: images_front_end_specs/edit_access.png
+
