@@ -949,5 +949,5 @@ Edit Access
 To edit an access, an organization and person should be selected in the above screen. In the right side of the screen all the accesses of the person will appear. The access to be edited, should be selected and the edit button should be pressed.
 The followin window will appear.
 
-.. image:: images_front_end_specs/edit_access.png
+.. image:: images_front_end_specs/upd_access.png
 
