@@ -472,10 +472,10 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
 
 
 
-Update Person
-~~~~~~~~~~~~~
+Edit a Person
+~~~~~~~~~~~~~~~
 
-When “Update” button is pressed the following pop-up will appear:
+When “Edit” button is pressed the following pop-up will appear:
 
 .. image:: images_front_end_specs/upd_person.png
 
@@ -941,8 +941,8 @@ If an entire organization is selected, all the above should be repeated for each
 An entire organization can be selected and an entire zone too.
 
 
-Edit Access
-~~~~~~~~~~~
+Edit an Access
+~~~~~~~~~~~~~~
 
 .. image:: images_front_end_specs/access.png
 
