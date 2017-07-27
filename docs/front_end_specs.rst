@@ -1031,3 +1031,6 @@ To **modify a Week Access (Full Access)** the following PUT method should be sen
   }
 
 
+If a person has a "Limited Access" on a passage and the user modify it giving a "Full Access", a POST method with the "Full Access" should be sent to the server. This will automatically erase all the "Limited Accesses" who this person had on this passage.
+In the same way, if the person had a "Full Access" and the user modify it giving a "Limited Access", a POST method with "Limited Access" should be sent to the server and this will automatically erase the previous "Full Access" 
+
