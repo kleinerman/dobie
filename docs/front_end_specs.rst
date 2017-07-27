@@ -285,7 +285,7 @@ The following REST method should be sent to the server:
 
 
 Persons
-=======
+-------
 
 This screen is used to “add”, “edit” or “delete” persons. For any of this actions,
 an organizations should be selected first.
@@ -473,7 +473,7 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
 
 
 Edit a Person
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 When “Edit” button is pressed the following pop-up will appear:
 
@@ -594,7 +594,7 @@ A pop up should inform the success or unsuccess of the operation
 
 
 Accesses
-========
+--------
 
 
 This screen is used to add edit or delete accesses of persons throgh the differents passages of the building
@@ -727,7 +727,7 @@ In the last case the access will have a field called "liAccess" which will have 
 
 
 Add Access
-----------
+~~~~~~~~~~
 
 Before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
 
@@ -943,7 +943,7 @@ An entire organization can be selected and an entire zone too.
 
 
 Edit an Access
-~~~~~~~~~~~~~~
+--------------
 
 .. image:: images_front_end_specs/access.png
 
