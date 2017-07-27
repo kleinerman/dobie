@@ -952,13 +952,14 @@ The followin window will appear.
 
 .. image:: images_front_end_specs/upd_access.png
 
-All the information of the access shown in the above window can should be retrieved in the same way done in `Accesses`_ window, sending an POST method to the person and using the information for the access that is going to be modified.
+All the information of the access shown in the above window should be retrieved in the same way done in `Accesses`_ window, sending an POST method to the person and using the information for the access that is going to be modified.
 
-For example if the Day Access of person with id = 6 and and Passage with id = 4 should be edited, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
+For example if the Day Accesses of person with id = 6 and and Passage with id = 4 should be edited, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
 
 .. image:: images_front_end_specs/get_access.png
 
-To modify a Day Access (Limited Access) the following PUT method should be send to the server:
+
+To **modify a Day Access (Limited Access)** the following PUT method should be send to the server:
 
 
 **Method:** PUT
@@ -989,6 +990,43 @@ To modify a Day Access (Limited Access) the following PUT method should be send 
   
   {
     "message": "Limited Access updated", 
+    "status": "OK"
+  }
+
+Modify a "Day Accesses" of a person could imply add new "Limited Access",  when adding a new day of access for the person, or delete "Limited Access", when removing a day of access for the person
+
+
+To **modify a Week Access (Full Access)** the following PUT method should be send to the server:
+
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/access/7 
+
+
+**JSON**
+
+.. code-block::
+
+  {"iSide": 0, "oSide": 1, "startTime": "21:01:00", "endTime": "23:35:00", "expireDate": "2019-09-09 00:00"}
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 53
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 27 Jul 2017 18:28:08 GMT
+  
+  {
+    "message": "Access updated", 
     "status": "OK"
   }
 
