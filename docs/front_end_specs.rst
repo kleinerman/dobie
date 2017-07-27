@@ -951,4 +951,4 @@ The followin window will appear.
 
 .. image:: images_front_end_specs/upd_access.png
 
-All the information of the access shown in the above window can should be retrieved in the same way done in `Access`_ window, sending an POST method to the person and using the information for the access that is going to be modified.
+All the information of the access shown in the above window can should be retrieved in the same way done in `Accesses`_ window, sending an POST method to the person and using the information for the access that is going to be modified.
