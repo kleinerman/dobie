@@ -285,7 +285,7 @@ The following REST method should be sent to the server:
 
 
 Persons
--------
+=======
 
 This screen is used to “add”, “edit” or “delete” persons. For any of this actions,
 an organizations should be selected first.
@@ -594,7 +594,7 @@ A pop up should inform the success or unsuccess of the operation
 
 
 Accesses
---------
+========
 
 
 This screen is used to add edit or delete accesses of persons throgh the differents passages of the building
@@ -727,7 +727,7 @@ In the last case the access will have a field called "liAccess" which will have 
 
 
 Add Access
-~~~~~~~~~~
+----------
 
 Before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
 
@@ -859,8 +859,9 @@ To get all passages from a zone, the following REST method should be sent to the
 
 Knowing the passage id, it is possible to create the new **"All Week"** access or a **"Day"** access sending the following POST method to the server:
 
-All Week Access
----------------
+Add All Week Access
+~~~~~~~~~~~~~~~~~~~
+
 
 **Method:** POST
 
@@ -897,8 +898,8 @@ All Week Access
 
 
 
-Day Access (Limited Access)
----------------------------
+Add Day Access (Limited Access)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Method:** POST
 
@@ -952,3 +953,7 @@ The followin window will appear.
 .. image:: images_front_end_specs/upd_access.png
 
 All the information of the access shown in the above window can should be retrieved in the same way done in `Accesses`_ window, sending an POST method to the person and using the information for the access that is going to be modified.
+
+For example if the Day Access of person with id = 6 and and Passage with id = 4 should be edited, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
+
+.. image:: images_front_end_specs/get_access.png
