@@ -1648,25 +1648,61 @@ class DataBase(object):
 
 
 
+    def getPersonName(self, personId):
+        '''
+        Receive person id and returns a dictionary with person parameters.
+        '''
+
+        sql = "SELECT name FROM Person WHERE id = {}".format(personId)
+        self.execute(sql)
+        person = self.cursor.fetchone()
+
+        if not person:
+            raise PersonNotFound("Person not found.")
+        return person['name']
+
+
+
+
 #-------------------------------Access-----------------------------------
 
-    def getAccesses(self, personId):
-
+    def getAccesses(self, personId=None, pssgId=None):
         '''
         Return a dictionary with all access with the personId
         '''
-        # check if the person id exist in the database
-        sql = ("SELECT * FROM Person WHERE id='{}'".format(personId))
-        self.execute(sql)
-        person = self.cursor.fetchall()
+        if (not personId and not pssgId) or (personId and pssgId):
+            raise AccessError("Error of arguments received in getAccess method.")
+        
+        elif personId:
+            # check if the person id exist in the database
+            sql = ("SELECT * FROM Person WHERE id='{}'".format(personId))
+            self.execute(sql)
+            person = self.cursor.fetchall()
 
-        if not person:
-            raise PersonNotFound('Person not found')
+            if not person:
+                raise PersonNotFound('Person not found')
 
-        # Get all persons from the organization
-        sql = ("SELECT * FROM Access WHERE personId='{}'".format(personId))
-        self.execute(sql)
-        accesses = self.cursor.fetchall()
+            # Get all persons from the organization
+            sql = ("SELECT * FROM Access WHERE personId = '{}'".format(personId))
+            self.execute(sql)
+            accesses = self.cursor.fetchall()
+
+        else:
+            
+
+            # check if the person id exist in the database
+            sql = ("SELECT * FROM Passage WHERE id='{}'".format(pssgId))
+            self.execute(sql)
+            passage = self.cursor.fetchall()
+
+            if not passage:
+                raise PassageNotFound('Passage not found')
+
+            # Get all persons from the organization
+            sql = ("SELECT * FROM Access WHERE pssgId = '{}'".format(pssgId))
+            self.execute(sql)
+            accesses = self.cursor.fetchall()
+
 
         for access in accesses:
 
@@ -1675,7 +1711,11 @@ class DataBase(object):
             access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
             #The description is usefull to show the access in the front end for an
             #specific person.
-            access['pssgDescription'] = self.getPssgDescription(access['pssgId'])
+
+            if personId:
+                access['pssgDescription'] = self.getPssgDescription(access['pssgId'])
+            else:
+                access['personName'] = self.getPersonName(access['personId'])
 
             if not access['allWeek']:
                 access['liAccesses'] = self.getLiAccesses(access['pssgId'], personId)
