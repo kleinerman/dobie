@@ -670,7 +670,7 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 ## For GET method
                 if request.method == 'GET':
-                    accesses = self.dataBase.getAccesses(personId)
+                    accesses = self.dataBase.getAccesses(personId=personId)
                     for access in accesses:
                         access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
                         #personId is not neccesary since the user send it as an argument to retrieve all 
