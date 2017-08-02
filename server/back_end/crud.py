@@ -673,23 +673,13 @@ class CrudMngr(genmngr.GenericMngr):
                     accesses = self.dataBase.getAccesses(personId=personId)
                     for access in accesses:
                         access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
-                        #personId is not neccesary since the user send it as an argument to retrieve all 
-                        #the access of this person
-                        access.pop('personId')
                         try:
                             for liAccess in access['liAccesses']:
                                 liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
-                                #pssgId field is the same for all liAccesses and is present as access field
-                                liAccess.pop('pssgId')
-                                #personId is not neccesary since the user send it as an argument to retrieve all 
-                                #the access of this person
-                                liAccess.pop('personId')
                         except KeyError:
                             #This exception will happen when the access is allWeek access. In this situation
                             #nothing should be done.
                             pass
-                        # Remove id
-                        #access.pop('id')
 
                     return jsonify(accesses)
 
@@ -866,7 +856,7 @@ class CrudMngr(genmngr.GenericMngr):
                 raise BadRequest('Invalid request. Required: {}'.format(', '.join(pssgNeedKeys)))
 
 
-        @app.route('/api/v1.0/passage/<int:pssgId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/passage/<int:pssgId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
         def modPassage(pssgId):
             '''
@@ -874,7 +864,22 @@ class CrudMngr(genmngr.GenericMngr):
             the appropriate controller.
             '''
             try:
-                if request.method == 'PUT':
+                ## For GET method
+                if request.method == 'GET':
+                    accesses = self.dataBase.getAccesses(pssgId=pssgId)
+                    for access in accesses:
+                        access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
+                        try:
+                            for liAccess in access['liAccesses']:
+                                liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
+                        except KeyError:
+                            #This exception will happen when the access is allWeek access. In this situation
+                            #nothing should be done.
+                            pass
+
+                    return jsonify(accesses)
+
+                elif request.method == 'PUT':
                     # Create a clean passage dictionary with only required passage params,
                     # removing unnecessary parameters if the client send them.
                     # Also a KeyError wil be raised if the client misses any parameter.
