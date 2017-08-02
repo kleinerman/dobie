@@ -1682,14 +1682,15 @@ class DataBase(object):
             if not person:
                 raise PersonNotFound('Person not found')
 
-            # Get all persons from the organization
-            sql = ("SELECT * FROM Access WHERE personId = '{}'".format(personId))
+            # Get all accesses from an specific person
+            sql = ("SELECT id, pssgId, allWeek, iSide, oSide, startTime, endTime, "
+                   "expireDate, rowStateId FROM Access WHERE personId = '{}'"
+                   "".format(personId)
+                  )
             self.execute(sql)
             accesses = self.cursor.fetchall()
 
         else:
-            
-
             # check if the person id exist in the database
             sql = ("SELECT * FROM Passage WHERE id='{}'".format(pssgId))
             self.execute(sql)
@@ -1699,7 +1700,12 @@ class DataBase(object):
                 raise PassageNotFound('Passage not found')
 
             # Get all persons from the organization
-            sql = ("SELECT * FROM Access WHERE pssgId = '{}'".format(pssgId))
+
+            sql = ("SELECT id, personId, allWeek, iSide, oSide, startTime, endTime, "
+                   "expireDate, rowStateId FROM Access WHERE pssgId = '{}'"
+                   "".format(pssgId)
+                  )
+            
             self.execute(sql)
             accesses = self.cursor.fetchall()
 
@@ -1718,11 +1724,17 @@ class DataBase(object):
                 access['personName'] = self.getPersonName(access['personId'])
 
             if not access['allWeek']:
-                access['liAccesses'] = self.getLiAccesses(access['pssgId'], personId)
-                #When the the access is not allWeek access, startTime and endTime fields
-                #is present in each limitedAccess, so we can remove this field from access.
+                if personId:
+                    access['liAccesses'] = self.getLiAccesses(access['pssgId'], personId)
+                else:
+                    access['liAccesses'] = self.getLiAccesses(pssgId, access['personId'])
+                #When the the access is not allWeek access, startTime, endTime, iSide and 
+                #oSide fields are present in each limitedAccess, so we can remove this
+                #field from access.
                 access.pop('startTime')
                 access.pop('endTime')
+                access.pop('iSide')
+                access.pop('oSide')
 
         return accesses
 
@@ -1743,7 +1755,8 @@ class DataBase(object):
             raise PersonNotFound('Person not found')
 
         # Get all persons from the organization
-        sql = ("SELECT * FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
+        sql = ("SELECT id, weekDay, iSide, oSide, startTime, endTime, rowStateId "
+               "FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
                "".format(pssgId, personId)
               )
         self.execute(sql)
