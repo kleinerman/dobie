@@ -608,7 +608,8 @@ with the person name and its corresponding organization allowed to pass trough t
 The user should select the organization and the person which its accesses will be added, edited or removed.
 In the right side of the screen, the access of the person will be shown with the description of the passage and a checkbox will shown if the access is for all days of weeks.
 
-To get all accesses of an specific person to show them in the right side the following method should be sent to the server:
+
+For the first screen, to get all accesses of an specific person to show them in the right side the following method should be sent to the server:
 
 **Method:** GET
 
@@ -621,79 +622,27 @@ To get all accesses of an specific person to show them in the right side the fol
 **Response:**
 
 .. code-block::
- 
+
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 2212
+  Content-Length: 2390
   Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Mon, 24 Jul 2017 15:01:51 GMT
+  Date: Fri, 04 Aug 2017 19:30:25 GMT
   
   [
-    {
-      "allWeek": 0, 
-      "expireDate": "2016-01-02 00:00", 
-      "iSide": 0, 
-      "id": 3, 
-      "liAccesses": [
-        {
-          "endTime": "21:37:00", 
-          "iSide": 1, 
-          "id": 10, 
-          "oSide": 1, 
-          "rowStateId": 1, 
-          "startTime": "20:37:00", 
-          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/10", 
-          "weekDay": 5
-        }, 
-        {
-          "endTime": "21:37:00", 
-          "iSide": 1, 
-          "id": 13, 
-          "oSide": 1, 
-          "rowStateId": 1, 
-          "startTime": "20:37:00", 
-          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/13", 
-          "weekDay": 1
-        }, 
-        {
-          "endTime": "21:37:00", 
-          "iSide": 1, 
-          "id": 14, 
-          "oSide": 1, 
-          "rowStateId": 1, 
-          "startTime": "20:37:00", 
-          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/14", 
-          "weekDay": 2
-        }, 
-        {
-          "endTime": "21:37:00", 
-          "iSide": 1, 
-          "id": 16, 
-          "oSide": 1, 
-          "rowStateId": 1, 
-          "startTime": "20:37:00", 
-          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/16", 
-          "weekDay": 3
-        }
-      ], 
-      "oSide": 0, 
-      "pssgDescription": "Ba\u00f1o 3", 
-      "pssgId": 4, 
-      "rowStateId": 3, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/access/3"
-    }, 
     {
       "allWeek": 1, 
       "endTime": "23:59:00", 
       "expireDate": "2018-12-12 00:00", 
       "iSide": 1, 
-      "id": 7, 
+      "id": 21, 
       "oSide": 1, 
-      "pssgDescription": "Molinte 5", 
-      "pssgId": 5, 
+      "pssgDescription": "Puerta 2", 
+      "pssgId": 2, 
       "rowStateId": 1, 
       "startTime": "0:00:00", 
-      "uri": "http://172.18.0.3:5000/api/v1.0/access/7"
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/21", 
+      "zoneName": "Ingreso Sur"
     }, 
     {
       "allWeek": 1, 
@@ -706,25 +655,82 @@ To get all accesses of an specific person to show them in the right side the fol
       "pssgId": 3, 
       "rowStateId": 1, 
       "startTime": "0:00:00", 
-      "uri": "http://172.18.0.3:5000/api/v1.0/access/20"
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/20", 
+      "zoneName": "Ingreso Sur"
     }, 
     {
       "allWeek": 1, 
-      "endTime": "23:59:00", 
-      "expireDate": "2018-12-12 00:00", 
+      "endTime": "22:31:00", 
+      "expireDate": "2018-11-12 00:00", 
       "iSide": 1, 
-      "id": 21, 
+      "id": 3, 
       "oSide": 1, 
-      "pssgDescription": "Puerta 2", 
-      "pssgId": 2, 
+      "pssgDescription": "Ba\u00f1o 3", 
+      "pssgId": 4, 
       "rowStateId": 1, 
-      "startTime": "0:00:00", 
-      "uri": "http://172.18.0.3:5000/api/v1.0/access/21"
+      "startTime": "1:01:00", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/3", 
+      "zoneName": "Ingreso Sur"
+    }, 
+    {
+      "allWeek": 1, 
+      "endTime": "23:35:00", 
+      "expireDate": "2019-09-09 00:00", 
+      "iSide": 0, 
+      "id": 7, 
+      "oSide": 1, 
+      "pssgDescription": "Molinte 5", 
+      "pssgId": 5, 
+      "rowStateId": 2, 
+      "startTime": "21:01:00", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/7", 
+      "zoneName": "Ingreso Sur"
+    }, 
+    {
+      "allWeek": 0, 
+      "expireDate": "2019-09-09 00:00", 
+      "id": 27, 
+      "liAccesses": [
+        {
+          "endTime": "21:37:00", 
+          "iSide": 1, 
+          "id": 19, 
+          "oSide": 1, 
+          "rowStateId": 1, 
+          "startTime": "20:37:00", 
+          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/19", 
+          "weekDay": 4
+        }, 
+        {
+          "endTime": "23:35:00", 
+          "iSide": 0, 
+          "id": 20, 
+          "oSide": 1, 
+          "rowStateId": 2, 
+          "startTime": "21:01:00", 
+          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/20", 
+          "weekDay": 2
+        }, 
+        {
+          "endTime": "21:37:00", 
+          "iSide": 1, 
+          "id": 21, 
+          "oSide": 1, 
+          "rowStateId": 1, 
+          "startTime": "20:37:00", 
+          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/21", 
+          "weekDay": 3
+        }
+      ], 
+      "pssgDescription": "Ingreso 2", 
+      "pssgId": 6, 
+      "rowStateId": 3, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/27", 
+      "zoneName": "Ingreso Sur"
     }
   ]
-
- 
- 
+  
+  
 When the access has "allWeek" field set to 1, the check icon in "all week" column should be set.
 When a the access has "allWeek" field set to 0, the check icon in "all week" column should not be set.
 In the last case the access will have a field called "liAccess" which will have a list with all the accesses for each day of the week.
@@ -733,6 +739,7 @@ In the last case the access will have a field called "liAccess" which will have 
 Add Access
 ~~~~~~~~~~
 
+For the first screen (person -> pasage)
 Before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
 
 .. image:: images_front_end_specs/add_access.png
