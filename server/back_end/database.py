@@ -1040,28 +1040,6 @@ class DataBase(object):
                 raise VisitorsPssgsNotFound('Visitors Passages not found')
 
 
-            
-    def getPssgDescription(self, pssgId):
-        '''
-        Get passage description receiving passage ID.
-        This method is used by getAccesses method to return the description
-        '''  
-
-        sql = "SELECT description FROM Passage WHERE id = {}".format(pssgId)
-
-        try:
-            self.execute(sql)
-            description = self.cursor.fetchone()['description']
-            return description
-
-        except TypeError:
-            raise PassageNotFound('Passage not found')
-
-        except pymysql.err.InternalError as internalError:
-            self.logger.debug(internalError)
-            raise PassageError('Error getting description of passage.')
-
-
 
 
     def getUncmtPassages(self, ctrllerMac, rowStateId):
@@ -1648,22 +1626,6 @@ class DataBase(object):
 
 
 
-    def getPersonName(self, personId):
-        '''
-        Receive person id and returns a dictionary with person parameters.
-        '''
-
-        sql = "SELECT name FROM Person WHERE id = {}".format(personId)
-        self.execute(sql)
-        person = self.cursor.fetchone()
-
-        if not person:
-            raise PersonNotFound("Person not found.")
-        return person['name']
-
-
-
-
 #-------------------------------Access-----------------------------------
 
     def getAccesses(self, personId=None, pssgId=None):
@@ -1683,8 +1645,11 @@ class DataBase(object):
                 raise PersonNotFound('Person not found')
 
             # Get all accesses from an specific person
-            sql = ("SELECT id, pssgId, allWeek, iSide, oSide, startTime, endTime, "
-                   "expireDate, rowStateId FROM Access WHERE personId = '{}'"
+            sql = ("SELECT Access.id, Access.pssgId, Passage.description AS pssgDescription, "
+                   "Zone.name AS zoneName, Access.allWeek, Access.iSide, Access.oSide, "
+                   "Access.startTime, Access.endTime, Access.expireDate, Access.rowStateId "
+                   "FROM Access JOIN Passage ON (Access.pssgId = Passage.id) JOIN Zone ON "
+                   "(Passage.zoneId = Zone.id) WHERE personId = {}"
                    "".format(personId)
                   )
             self.execute(sql)
@@ -1701,11 +1666,14 @@ class DataBase(object):
 
             # Get all persons from the organization
 
-            sql = ("SELECT id, personId, allWeek, iSide, oSide, startTime, endTime, "
-                   "expireDate, rowStateId FROM Access WHERE pssgId = '{}'"
+
+            sql = ("SELECT Access.id, Access.personId, Person.name AS personName, "
+                   "Organization.name AS organizationName, Access.allWeek, Access.iSide, Access.oSide, "
+                   "Access.startTime, Access.endTime, Access.expireDate, Access.rowStateId "
+                   "FROM Access JOIN Person ON (Access.personId = Person.id) JOIN Organization ON "
+                   "(Person.orgId = Organization.id) WHERE pssgId = {}"
                    "".format(pssgId)
                   )
-            
             self.execute(sql)
             accesses = self.cursor.fetchall()
 
@@ -1717,11 +1685,6 @@ class DataBase(object):
             access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
             #The description is usefull to show the access in the front end for an
             #specific person.
-
-            if personId:
-                access['pssgDescription'] = self.getPssgDescription(access['pssgId'])
-            else:
-                access['personName'] = self.getPersonName(access['personId'])
 
             if not access['allWeek']:
                 if personId:
