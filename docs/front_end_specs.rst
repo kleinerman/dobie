@@ -605,11 +605,10 @@ with the person name and its corresponding organization allowed to pass trough t
 
 .. image:: images_front_end_specs/access_pas_per.png
 
-The user should select the organization and the person which its accesses will be added, edited or removed.
-In the right side of the screen, the access of the person will be shown with the description of the passage and a checkbox will shown if the access is for all days of weeks.
 
-
-For the first screen, to get all accesses of an specific person to show them in the right side the following method should be sent to the server:
+For the first screen **(Person -> Passage)**, the user should select the organization and the person which its accesses will be added, edited or removed.
+In the right side of the screen, the accesses of the person will be shown with the description of the passage, its corresponding zone and a checkbox wich will show if the access is for all days of weeks.
+For this screen, to get all accesses of an specific person to show them in the right side the following method should be sent to the server:
 
 **Method:** GET
 
@@ -730,17 +729,100 @@ For the first screen, to get all accesses of an specific person to show them in 
     }
   ]
   
+When the access has "allWeek" field set to 1, the check icon in "all week" column should be set.
+When a the access has "allWeek" field set to 0, the check icon in "all week" column should not be set.
+In the last case, the access will have a field called "liAccess" which will have a list with all the accesses for each day of the week.
+
+
+
+For the second screen **(Passage -> Person)**, the user should select the zone and the passage which its accesses will be added, edited or removed.
+In the right side of the screen, the accesses of the passage will be shown with the name of the person, its corresponding organization and a checkbox wich will shows if the access is for all days of weeks.
+For this screen, to get all accesses of an specific passage to show them in the right side the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/passage/4
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 1248
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Fri, 04 Aug 2017 20:20:34 GMT
+  
+  [
+    {
+      "allWeek": 1, 
+      "endTime": "23:59:00", 
+      "expireDate": "2018-12-12 00:00", 
+      "iSide": 1, 
+      "id": 1, 
+      "oSide": 1, 
+      "organizationName": "Building Networks", 
+      "personId": 1, 
+      "personName": "Jorge Kleinerman", 
+      "rowStateId": 1, 
+      "startTime": "0:00:00", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/1"
+    }, 
+    {
+      "allWeek": 0, 
+      "expireDate": "2016-01-02 00:00", 
+      "id": 2, 
+      "liAccesses": [
+        {
+          "endTime": "21:37:00", 
+          "iSide": 1, 
+          "id": 1, 
+          "oSide": 1, 
+          "rowStateId": 1, 
+          "startTime": "20:37:00", 
+          "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/1", 
+          "weekDay": 2
+        }
+      ], 
+      "organizationName": "Sipper Corporation", 
+      "personId": 2, 
+      "personName": "Ary Kleinerman", 
+      "rowStateId": 3, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/2"
+    }, 
+    {
+      "allWeek": 1, 
+      "endTime": "22:31:00", 
+      "expireDate": "2018-11-12 00:00", 
+      "iSide": 1, 
+      "id": 3, 
+      "oSide": 1, 
+      "organizationName": "Sipper Corporation", 
+      "personId": 6, 
+      "personName": "Juan Alvarez", 
+      "rowStateId": 1, 
+      "startTime": "1:01:00", 
+      "uri": "http://172.18.0.3:5000/api/v1.0/access/3"
+    }
+  ]
+
   
 When the access has "allWeek" field set to 1, the check icon in "all week" column should be set.
 When a the access has "allWeek" field set to 0, the check icon in "all week" column should not be set.
-In the last case the access will have a field called "liAccess" which will have a list with all the accesses for each day of the week.
+In the last case, the access will have a field called "liAccess" which will have a list with all the accesses for each day of the week.
+
+
+
 
 
 Add Access
 ~~~~~~~~~~
 
-For the first screen (person -> pasage)
-Before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
+For the first screen **(Person -> Pasage)**, before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
 
 .. image:: images_front_end_specs/add_access_per_pas.png
 
@@ -869,8 +951,7 @@ To get all passages from a zone, the following REST method should be sent to the
 
 
 
-For the second screen (pasage -> person)
-Before pressing **"add"** button an specific passage or an entire zone should be selected and the following window will appear:
+For the second screen **(Pasage -> Person)**, before pressing **"add"** button an specific passage or an entire zone should be selected and the following window will appear:
 
 .. image:: images_front_end_specs/add_access_pas_per.png
 
@@ -952,7 +1033,7 @@ To get all persons from an organization, the following REST method should be sen
       "cardNumber": 9038876, 
       "id": 3, 
       "identNumber": "22063146", 
-      "name": "Manuel Bobadilla", 
+      "name": "Maria Bedolla", 
       "rowStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/3", 
       "visitedOrgId": null
@@ -961,7 +1042,7 @@ To get all persons from an organization, the following REST method should be sen
       "cardNumber": 4994413, 
       "id": 5, 
       "identNumber": "2463146", 
-      "name": "Paola Ceballos", 
+      "name": "Paola Trujillo", 
       "rowStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/5", 
       "visitedOrgId": null
@@ -979,11 +1060,10 @@ To get all persons from an organization, the following REST method should be sen
 
 
 
-Knowing the passage id, it is possible to create the new **"All Week"** access or a **"Day"** access sending the following POST method to the server:
+Knowing the passage id and person id, it is possible to create the new **"All Week"** access or a **"Day"** access sending the following POST method to the server:
 
 Add All Week Access
 ~~~~~~~~~~~~~~~~~~~
-
 
 **Method:** POST
 
@@ -1057,9 +1137,12 @@ Add Day Access (Limited Access)
   }
 
 
-If all the passages of a zone is selected, an "access" or the necessary "limited access" should be sent to the server for each passage of the zone.
-
+For the first screen **(Person -> Passage)**, if all the passages of a zone is selected, an "access" or the necessary "limited access" should be sent to the server for each passage of the zone.
 If an entire organization is selected, all the above should be repeated for each person of the organization. 
+
+For the second screen **(Passage -> Person)**, if all the persons of an organization is selected, an "access" or the necessary "limited access" should be sent to the server for each person of the organizatino.
+If an entire zone is selected, all the above should be repeated for each passage of the zone. 
+
 
 An entire organization can be selected and an entire zone too.
 
