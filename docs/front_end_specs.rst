@@ -596,10 +596,12 @@ A pop up should inform the success or unsuccess of the operation
 Accesses
 --------
 
+In access section there are two screens. One of them lets view, add, modify and delete accesses selecting the person and seeing the accesses of this person with the name of the passage and its corresponding zone.
 
+The access option
 This screen is used to add edit or delete accesses of persons throgh the differents passages of the building
 
-.. image:: images_front_end_specs/access.png
+.. image:: images_front_end_specs/access_per_pas.png
 
 The user should select the organization and the person which its accesses will be added, edited or removed.
 In the right side of the screen, the access of the person will be shown with the description of the passage and a checkbox will shown if the access is for all days of weeks.
