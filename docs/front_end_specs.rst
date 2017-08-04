@@ -742,7 +742,7 @@ Add Access
 For the first screen (person -> pasage)
 Before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
 
-.. image:: images_front_end_specs/add_access.png
+.. image:: images_front_end_specs/add_access_per_pas.png
 
 In this window a **"Zone"** should be selected.
 To get all the zones the following REST method should be sent to the server:
@@ -866,6 +866,117 @@ To get all passages from a zone, the following REST method should be sent to the
       "uri": "http://172.18.0.3:5000/api/v1.0/passage/6"
     }
   ]
+
+
+
+For the second screen (pasage -> person)
+Before pressing **"add"** button an specific passage or an entire zone should be selected and the following window will appear:
+
+.. image:: images_front_end_specs/add_access_pas_per.png
+
+In this window an **"Organization"** should be selected.
+To get all the organizations the following REST method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/organization
+
+ 
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 414
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Fri, 04 Aug 2017 20:03:28 GMT
+  
+  [
+    {
+      "id": 2, 
+      "name": "Building Networks", 
+      "rowStateId": 3, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/2"
+    }, 
+    {
+      "id": 3, 
+      "name": "Sipper Corporation", 
+      "rowStateId": 3, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/3"
+    }, 
+    {
+      "id": 4, 
+      "name": "Movistel", 
+      "rowStateId": 5, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/organization/4"
+    }
+  ]
+
+
+To get all persons from an organization, the following REST method should be sent to the server:
+
+**URI:**
+
+.. code-block::
+
+
+  http://172.18.0.3:5000/api/v1.0/organization/2
+
+ 
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 877
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Fri, 04 Aug 2017 20:05:41 GMT
+  
+  [
+    {
+      "cardNumber": 4300737, 
+      "id": 1, 
+      "identNumber": "28063146", 
+      "name": "Jorge Kleinerman", 
+      "rowStateId": 3, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/1", 
+      "visitedOrgId": null
+    }, 
+    {
+      "cardNumber": 9038876, 
+      "id": 3, 
+      "identNumber": "22063146", 
+      "name": "Manuel Bobadilla", 
+      "rowStateId": 3, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/3", 
+      "visitedOrgId": null
+    }, 
+    {
+      "cardNumber": 4994413, 
+      "id": 5, 
+      "identNumber": "2463146", 
+      "name": "Paola Ceballos", 
+      "rowStateId": 3, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/5", 
+      "visitedOrgId": null
+    }, 
+    {
+      "cardNumber": 4300757, 
+      "id": 7, 
+      "identNumber": "26063146", 
+      "name": "Carlos Vazquez", 
+      "rowStateId": 5, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/person/7", 
+      "visitedOrgId": null
+    }
+  ]
+
 
 
 Knowing the passage id, it is possible to create the new **"All Week"** access or a **"Day"** access sending the following POST method to the server:
