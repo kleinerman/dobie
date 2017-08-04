@@ -598,10 +598,12 @@ Accesses
 
 In access section there are two screens. One of them lets view, add, modify and delete accesses selecting the person and seeing the accesses of this person with the name of the passage and its corresponding zone.
 
-The access option
-This screen is used to add edit or delete accesses of persons throgh the differents passages of the building
-
 .. image:: images_front_end_specs/access_per_pas.png
+
+The second screen, lets view, add, modify and delete accesses selecting the passage and seeing the accesses on this passage
+with the person name and its corresponding organization allowed to pass trough this passage.
+
+.. image:: images_front_end_specs/access_pas_per.png
 
 The user should select the organization and the person which its accesses will be added, edited or removed.
 In the right side of the screen, the access of the person will be shown with the description of the passage and a checkbox will shown if the access is for all days of weeks.
