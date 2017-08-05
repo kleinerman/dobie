@@ -731,7 +731,7 @@ For this screen, to get all accesses of an specific person to show them in the r
   
 When the access has "allWeek" field set to 1, the check icon in "all week" column should be set.
 When a the access has "allWeek" field set to 0, the check icon in "all week" column should not be set.
-In the last case, the access will have a field called "liAccess" which will have a list with all the accesses for each day of the week.
+In the last case, the access will have a field called "liAccesses" which will have a list with all the accesses for each day of the week.
 
 
 
@@ -765,7 +765,7 @@ For this screen, to get all accesses of an specific passage to show them in the 
       "iSide": 1, 
       "id": 1, 
       "oSide": 1, 
-      "organizationName": "Building Networks", 
+      "organizationName": "Kleinernet Corp.", 
       "personId": 1, 
       "personName": "Jorge Kleinerman", 
       "rowStateId": 1, 
@@ -813,7 +813,7 @@ For this screen, to get all accesses of an specific passage to show them in the 
   
 When the access has "allWeek" field set to 1, the check icon in "all week" column should be set.
 When a the access has "allWeek" field set to 0, the check icon in "all week" column should not be set.
-In the last case, the access will have a field called "liAccess" which will have a list with all the accesses for each day of the week.
+In the last case, the access will have a field called "liAccesses" which will have a list with all the accesses for each day of the week.
 
 
 
@@ -1142,7 +1142,6 @@ If an entire organization is selected, all the above should be repeated for each
 
 For the second screen **(Passage -> Person)**, if all the persons of an organization is selected, an "access" or the necessary "limited access" should be sent to the server for each person of the organizatino.
 If an entire zone is selected, all the above should be repeated for each passage of the zone. 
-
 
 An entire organization can be selected and an entire zone too.
 
