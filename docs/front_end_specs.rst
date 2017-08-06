@@ -1149,10 +1149,8 @@ An entire organization can be selected and an entire zone too.
 Edit an Access
 --------------
 
-.. image:: images_front_end_specs/access.png
+To edit and modify an access, an access should be selected. This can be done using the first access screen (Person -> Passage) or the second screen (Passage -> Person)
 
-To edit an access, an organization and person should be selected in the above screen. In the right side of the screen all the accesses of the person will appear. The access to be edited, should be selected and the edit button should be pressed.
-The followin window will appear.
 
 .. image:: images_front_end_specs/upd_access.png
 
