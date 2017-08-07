@@ -1170,8 +1170,20 @@ For example, if the Day Accesses (Limited Access) of person with id = 7 and and 
 .. image:: images_front_end_specs/get_accesses_per_pas.png
 
 
-For example, if a Week Access in passage  
+For example, if a Week Access in passage with id = 5 and person with id = 8 should be edited from the Passage -> Person screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
 
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/passage/5
+
+**Response:**
+
+.. image:: images_front_end_specs/get_accesses_pas_per.png
 
 
 
