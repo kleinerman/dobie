@@ -1159,7 +1159,7 @@ For example if the Day Accesses (Limited Access) of person with id = 6 and and p
 
 
 
-.. image:: images_front_end_specs/get_access_per_pas.png
+.. image:: images_front_end_specs/get_accesses_per_pas.png
 
 
 To **modify a Day Access (Limited Access)** the following PUT method should be send to the server:
