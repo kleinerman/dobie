@@ -1155,11 +1155,24 @@ To edit and modify an access, an access should be selected. This can be done usi
 
 All the information of the access shown in the above window should be retrieved in the same way to retrieve all the accesses for a person (Person -> Passage screen) or to retrieve all the accesses of a passage (Passage -> Person screen) but just using the information needed for this access.
 
-For example if the Day Accesses (Limited Access) of person with id = 6 and and passage with id = 4 should be edited, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
+For example, if the Day Accesses (Limited Access) of person with id = 7 and and passage with id = 6 should be edited from the Person -> Passage screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
 
+**Method:** GET
 
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/person/7
+
+**Response:**
 
 .. image:: images_front_end_specs/get_accesses_per_pas.png
+
+
+For example, if a Week Access in passage  
+
+
 
 
 To **modify a Day Access (Limited Access)** the following PUT method should be send to the server:
