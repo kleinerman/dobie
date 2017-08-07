@@ -1149,16 +1149,17 @@ An entire organization can be selected and an entire zone too.
 Edit an Access
 --------------
 
-To edit and modify an access, an access should be selected. This can be done using the first access screen (Person -> Passage) or the second screen (Passage -> Person)
-
+To edit and modify an access, an access should be selected. This can be done using the first access screen (Person -> Passage) or the second screen (Passage -> Person). When an access is selected and "edit" button is pressed the following  window should appear.
 
 .. image:: images_front_end_specs/upd_access.png
 
-All the information of the access shown in the above window should be retrieved in the same way done in `Accesses`_ window, sending an POST method to the person and using the information for the access that is going to be modified.
+All the information of the access shown in the above window should be retrieved in the same way to retrieve all the accesses for a person (Person -> Passage screen) or to retrieve all the accesses of a passage (Passage -> Person screen) but just using the information needed for this access.
 
-For example if the Day Accesses of person with id = 6 and and Passage with id = 4 should be edited, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
+For example if the Day Accesses (Limited Access) of person with id = 6 and and passage with id = 4 should be edited, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
 
-.. image:: images_front_end_specs/get_access.png
+
+
+.. image:: images_front_end_specs/get_access_per_pas.png
 
 
 To **modify a Day Access (Limited Access)** the following PUT method should be send to the server:
