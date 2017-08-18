@@ -256,6 +256,48 @@ class DataBase(object):
 
 
 
+    def getEvents(self, orgId, personId, zoneId, pssgId, startDateTime, 
+                  endDateTime, side, fromEvt, evtsQtty):
+        '''
+        Return a dictionary with an interval of "evtsQtty" events starting from "fromEvt".
+        If "personId" is None, the method will return only the events of the "Unknown" person
+        (for example events of passages opened by pressing REX button)
+        '''
+
+        if not orgId: orgId = '%'
+        if not zoneId: zoneId = '%'
+        if not pssgId: pssgId = '%'
+        if not side: side = '%'
+
+        if not personId:
+
+            sql = ("SELECT Event.* FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
+                   "WHERE Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND personId IS NULL "
+                   "AND dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{} "
+                   "".format(zoneId, pssgId, startDateTime, endDateTime, side, fromEvt, evtsQtty)
+                  )
+
+        else:
+            sql = ("SELECT Event.* FROM Event JOIN Person ON (Event.personId = Person.id) JOIN "
+                   "Passage ON (Event.pssgId = Passage.id) WHERE Person.orgId LIKE '{}' AND "
+                   "personId LIKE '{}' AND Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND "
+                   "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{}"
+                   "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, 
+                             side, fromEvt, evtsQtty)
+                  )
+
+        print(sql)
+
+
+        self.execute(sql)
+        events = self.cursor.fetchall()
+
+        return events
+
+        
+
+
+
 #-------------------------------------User--------------------------------------------
 
     def getUser(self, username):
