@@ -1158,6 +1158,59 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+        updLiAccessNeedKeys = ('weekDay', 'iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
+
+        @app.route('/api/v1.0/events', methods=['GET'])
+        @auth.login_required
+        def events():
+            '''
+            Update or delete a Access in the database and send the modification to
+            the appropriate controller.
+            '''
+            try:
+                if request.method == 'GET':
+
+                    orgId = request.args.get('orgId')
+                    personId = request.args.get('personId')
+                    zoneId = request.args.get('zoneId')
+                    pssgId = request.args.get('pssgId')
+                    startDateTime = request.args.get('startDateTime')
+                    endDateTime = request.args.get('endDateTime')
+                    side = request.args.get('side')
+                    fromEvt = request.args.get('fromEvt')
+                    evtsQtty = request.args.get('evtsQtty')
+
+
+                    events = self.dataBase.getEvents(orgId, personId, zoneId, pssgId, startDateTime,
+                                                     endDateTime, side, fromEvt, evtsQtty)
+
+                    print(request.args)
+                    return jsonify(events)
+
+                elif request.method == 'DELETE':
+                    self.dataBase.markLiAccessToDel(liAccessId)
+                    pssgId = self.dataBase.getPssgId(liAccessId=liAccessId)
+                    ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
+                    self.ctrllerMsger.delLiAccess(ctrllerMac, liAccessId)
+                    return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
+
+            except database.PassageNotFound as passageNotFound:
+                raise NotFound(str(passageNotFound))
+            except database.AccessNotFound as accessNotFound:
+                raise NotFound(str(accessNotFound))
+            except database.AccessError as accessError:
+                raise ConflictError(str(accessError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(updLiAccessNeedKeys)))
+
+
+
+
 
 #----------------------------------------Main--------------------------------------------
 
