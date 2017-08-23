@@ -150,6 +150,26 @@ class AccessNotFound(AccessError):
 
 
 
+class EventError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class EventNotFound(EventError):
+    '''
+    '''
+    pass
+
+
+
+
+
+
 class DataBase(object):
 
     def __init__(self, host, user, passwd, dataBase):
@@ -257,25 +277,44 @@ class DataBase(object):
 
 
     def getEvents(self, orgId, personId, zoneId, pssgId, startDateTime, 
-                  endDateTime, side, fromEvt, evtsQtty):
+                  endDateTime, side, startEvt, evtsQtty):
         '''
-        Return a dictionary with an interval of "evtsQtty" events starting from "fromEvt".
+        Return a dictionary with an interval of "evtsQtty" events starting from "startEvt".
         If "personId" is None, the method will return only the events of the "Unknown" person
         (for example events of passages opened by pressing REX button)
         '''
-
+        #If "orgId" is "None", "%" is assigned to tell SQL to return all the organizations.
+        #The same is done with "personId", "zoneId", "pssgId" and "side".
         if not orgId: orgId = '%'
+        if not personId: personId = '%'
         if not zoneId: zoneId = '%'
         if not pssgId: pssgId = '%'
         if not side: side = '%'
 
-        if not personId:
+        #The startEvt value is substracted one since SQL starts indexing on 0.
+        #To do this, "startEvt" should be converted to int.
+        #To be neat, "evtsQtty" is also converted to int. 
+        startEvt = int(startEvt) - 1
+        evtsQtty = int(evtsQtty)
+
+        #If "personId" is "null", the events of "unknown" person should be returned.
+        #"lower()" method of string is used to be able to receive the "null" word 
+        #with uppercase in the URL
+        if personId.lower() == 'null':
 
             sql = ("SELECT Event.* FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
                    "WHERE Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND personId IS NULL "
                    "AND dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{} "
-                   "".format(zoneId, pssgId, startDateTime, endDateTime, side, fromEvt, evtsQtty)
+                   "".format(zoneId, pssgId, startDateTime, endDateTime, side, startEvt, evtsQtty)
                   )
+
+
+            sqlCount = ("SELECT COUNT(*) FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
+                        "WHERE Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND personId IS NULL "
+                        "AND dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}'"
+                        "".format(zoneId, pssgId, startDateTime, endDateTime, side)
+                       )
+
 
         else:
             sql = ("SELECT Event.* FROM Event JOIN Person ON (Event.personId = Person.id) JOIN "
@@ -283,16 +322,37 @@ class DataBase(object):
                    "personId LIKE '{}' AND Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND "
                    "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{}"
                    "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, 
-                             side, fromEvt, evtsQtty)
+                             side, startEvt, evtsQtty)
                   )
 
-        print(sql)
+            sqlCount = ("SELECT COUNT(*) FROM Event JOIN Person ON (Event.personId = Person.id) JOIN "
+                        "Passage ON (Event.pssgId = Passage.id) WHERE Person.orgId LIKE '{}' AND "
+                        "personId LIKE '{}' AND Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND "
+                        "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}'"
+                        "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, side)
+                       )
 
 
-        self.execute(sql)
-        events = self.cursor.fetchall()
+        try:
+            #Calculating the total count of that could be returned. This is necessary for paging
+            self.execute(sqlCount)
+            totalEvtsCount = self.cursor.fetchone()['COUNT(*)']
 
-        return events
+            #If the user asks even
+            if totalEvtsCount <= int(startEvt):
+                self.logger.debug('The first event is higher than the count of all events.')
+                raise EventNotFound('Events not found')
+
+
+            self.execute(sql)
+            events = self.cursor.fetchall()
+
+        except pymysql.err.ProgrammingError as programmingError:
+            #This exception can happen when startEvt or evtQtty is < 0
+            #This exception is converted to BadRequest in crud.py module
+            raise EventError
+
+        return events, totalEvtsCount
 
         
 
