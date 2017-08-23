@@ -1168,39 +1168,44 @@ class CrudMngr(genmngr.GenericMngr):
             the appropriate controller.
             '''
             try:
-                if request.method == 'GET':
 
-                    orgId = request.args.get('orgId')
-                    personId = request.args.get('personId')
-                    zoneId = request.args.get('zoneId')
-                    pssgId = request.args.get('pssgId')
-                    startDateTime = request.args.get('startDateTime')
-                    endDateTime = request.args.get('endDateTime')
-                    side = request.args.get('side')
-                    fromEvt = request.args.get('fromEvt')
-                    evtsQtty = request.args.get('evtsQtty')
+                orgId = request.args.get('orgId')
+                personId = request.args.get('personId')
+                zoneId = request.args.get('zoneId')
+                pssgId = request.args.get('pssgId')
+                startDateTime = request.args.get('startDateTime')
+                endDateTime = request.args.get('endDateTime')
+                side = request.args.get('side')
+                startEvt = int(request.args.get('startEvt'))
+                evtsQtty = int(request.args.get('evtsQtty'))
+
+                print(11111111, request.url, 1111111)
 
 
-                    events = self.dataBase.getEvents(orgId, personId, zoneId, pssgId, startDateTime,
-                                                     endDateTime, side, fromEvt, evtsQtty)
+                events, totalEvtsCount = self.dataBase.getEvents(orgId, personId, zoneId, pssgId, startDateTime,
+                                                                 endDateTime, side, startEvt, evtsQtty)
 
-                    print(request.args)
-                    return jsonify(events)
 
-                elif request.method == 'DELETE':
-                    self.dataBase.markLiAccessToDel(liAccessId)
-                    pssgId = self.dataBase.getPssgId(liAccessId=liAccessId)
-                    ctrllerMac = self.dataBase.getControllerMac(passageId=pssgId)
-                    self.ctrllerMsger.delLiAccess(ctrllerMac, liAccessId)
-                    return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
+                jsonObj = {}
+                jsonObj['startEvt'] = startEvt
+                jsonObj['evtsQtty'] = evtsQtty
+                jsonObj['totalEvtsCount'] = totalEvtsCount
 
-            except database.PassageNotFound as passageNotFound:
-                raise NotFound(str(passageNotFound))
-            except database.AccessNotFound as accessNotFound:
-                raise NotFound(str(accessNotFound))
-            except database.AccessError as accessError:
-                raise ConflictError(str(accessError))
-            except TypeError:
+                if startEvt == 1:
+                    jsonObj['prevURL'] = ''
+                else:
+                    prevStartEvt = max(1, startEvt - evtsQtty)
+                    prevEvtsQtty = startEvt - 1
+                    jsonObj['prevURL'] = '/api/v1.0/events' + '?start=%d&limit=%d' % (prevStartEvt, prevEvtsQtty)
+
+                jsonObj['events'] = events
+
+                return jsonify(jsonObj)
+
+            except database.EventNotFound as eventNotFound:
+                raise NotFound(str(eventNotFound))
+
+            except (database.EventError, TypeError):
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
