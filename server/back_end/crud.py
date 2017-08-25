@@ -1179,8 +1179,6 @@ class CrudMngr(genmngr.GenericMngr):
                 startEvt = int(request.args.get('startEvt'))
                 evtsQtty = int(request.args.get('evtsQtty'))
 
-                print(11111111, request.url, 1111111)
-
 
                 events, totalEvtsCount = self.dataBase.getEvents(orgId, personId, zoneId, pssgId, startDateTime,
                                                                  endDateTime, side, startEvt, evtsQtty)
@@ -1192,11 +1190,20 @@ class CrudMngr(genmngr.GenericMngr):
                 jsonObj['totalEvtsCount'] = totalEvtsCount
 
                 if startEvt == 1:
-                    jsonObj['prevURL'] = ''
+                    jsonObj['prevURL'] = None
                 else:
                     prevStartEvt = max(1, startEvt - evtsQtty)
                     prevEvtsQtty = startEvt - 1
-                    jsonObj['prevURL'] = '/api/v1.0/events' + '?start=%d&limit=%d' % (prevStartEvt, prevEvtsQtty)
+                    jsonObj['prevURL'] = request.url.replace('startEvt={}'.format(startEvt), 'startEvt={}'.format(prevStartEvt))
+                    jsonObj['prevURL'] = jsonObj['prevURL'].replace('evtsQtty={}'.format(evtsQtty), 'evtsQtty={}'.format(evtsQtty))
+
+
+                if startEvt + evtsQtty > totalEvtsCount:
+                    jsonObj['nextURL'] = None
+                else:
+                    nextStartEvt = startEvt + evtsQtty
+                    jsonObj['nextURL'] = request.url.replace('startEvt={}'.format(startEvt), 'startEvt={}'.format(nextStartEvt))
+
 
                 jsonObj['events'] = events
 
