@@ -292,10 +292,7 @@ class DataBase(object):
         if not side: side = '%'
 
         #The startEvt value is substracted one since SQL starts indexing on 0.
-        #To do this, "startEvt" should be converted to int.
-        #To be neat, "evtsQtty" is also converted to int. 
-        startEvt = int(startEvt) - 1
-        evtsQtty = int(evtsQtty)
+        startEvtSql = startEvt - 1
 
         #If "personId" is "null", the events of "unknown" person should be returned.
         #"lower()" method of string is used to be able to receive the "null" word 
@@ -305,7 +302,7 @@ class DataBase(object):
             sql = ("SELECT Event.* FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
                    "WHERE Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND personId IS NULL "
                    "AND dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{} "
-                   "".format(zoneId, pssgId, startDateTime, endDateTime, side, startEvt, evtsQtty)
+                   "".format(zoneId, pssgId, startDateTime, endDateTime, side, startEvtSql, evtsQtty)
                   )
 
 
@@ -322,7 +319,7 @@ class DataBase(object):
                    "personId LIKE '{}' AND Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND "
                    "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{}"
                    "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, 
-                             side, startEvt, evtsQtty)
+                             side, startEvtSql, evtsQtty)
                   )
 
             sqlCount = ("SELECT COUNT(*) FROM Event JOIN Person ON (Event.personId = Person.id) JOIN "
@@ -332,14 +329,13 @@ class DataBase(object):
                         "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, side)
                        )
 
-
         try:
             #Calculating the total count of that could be returned. This is necessary for paging
             self.execute(sqlCount)
             totalEvtsCount = self.cursor.fetchone()['COUNT(*)']
 
             #If the user asks even
-            if totalEvtsCount <= int(startEvt):
+            if totalEvtsCount < startEvt:
                 self.logger.debug('The first event is higher than the count of all events.')
                 raise EventNotFound('Events not found')
 
