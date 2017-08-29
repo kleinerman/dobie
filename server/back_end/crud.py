@@ -1156,16 +1156,16 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+#------------------------------------Events-------------------------------------------------
 
-
-        updLiAccessNeedKeys = ('weekDay', 'iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
 
         @app.route('/api/v1.0/events', methods=['GET'])
         @auth.login_required
         def events():
             '''
-            Update or delete a Access in the database and send the modification to
-            the appropriate controller.
+            Returns events. This resource receives arguments in the URL that 
+            parameterize the list of events returned.
+            The events are returned in paginated way.
             '''
             try:
 
@@ -1195,7 +1195,6 @@ class CrudMngr(genmngr.GenericMngr):
                     prevStartEvt = max(1, startEvt - evtsQtty)
                     prevEvtsQtty = startEvt - 1
                     jsonObj['prevURL'] = request.url.replace('startEvt={}'.format(startEvt), 'startEvt={}'.format(prevStartEvt))
-                    jsonObj['prevURL'] = jsonObj['prevURL'].replace('evtsQtty={}'.format(evtsQtty), 'evtsQtty={}'.format(evtsQtty))
 
 
                 if startEvt + evtsQtty > totalEvtsCount:
@@ -1217,8 +1216,6 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-            except KeyError:
-                raise BadRequest('Invalid request. Required: {}'.format(', '.join(updLiAccessNeedKeys)))
 
 
 
