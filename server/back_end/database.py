@@ -291,6 +291,13 @@ class DataBase(object):
         if not pssgId: pssgId = '%'
         if not side: side = '%'
 
+        #"startEvt" should not be < 1 since it is substracted by 1 to generate
+        #the SQL sentence and less than 0 should raise a programming error sql
+        #exception. To avoid it an "EventError" is raised
+        #For SQL point of view, "evtsQtty" could be 0, but it will return a
+        #void list. To avoid it, if evtsQtty < 1, also "EventError" is raised
+        if startEvt < 1 or evtsQtty < 1: raise EventError
+
         #The startEvt value is substracted one since SQL starts indexing on 0.
         startEvtSql = startEvt - 1
 
@@ -334,18 +341,20 @@ class DataBase(object):
             self.execute(sqlCount)
             totalEvtsCount = self.cursor.fetchone()['COUNT(*)']
 
-            #If the user asks even
-            if totalEvtsCount < startEvt:
+            #If the firs event selected is higher than the total count of events
+            #an exception is raised.
+            if startEvt > totalEvtsCount:
                 self.logger.debug('The first event is higher than the count of all events.')
                 raise EventNotFound('Events not found')
-
 
             self.execute(sql)
             events = self.cursor.fetchall()
 
         except pymysql.err.ProgrammingError as programmingError:
-            #This exception can happen when startEvt or evtQtty is < 0
+            #This exception can happen when startEvtSql < 0 or evtQtty is < 0
             #This exception is converted to BadRequest in crud.py module
+            #However this would never happen since both parametters are checked 
+            #in the first part of the method
             raise EventError
 
         return events, totalEvtsCount
