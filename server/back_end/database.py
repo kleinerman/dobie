@@ -1,6 +1,7 @@
 import pymysql
 import queue
 import logging
+import datetime
 import crypt
 
 from config import *
@@ -1870,10 +1871,18 @@ class DataBase(object):
             while access:
                 #Removing rowStateId as it should not be sent to the controller
                 access.pop('rowStateId')
-                #As the database retrieves the dates and times as datetime types
-                #they are converted to string to be sent to the controller
-                access['startTime'] = str(access['startTime'])
-                access['endTime'] = str(access['endTime'])
+                #Time columns in MariaDB are retrieved as timedelta type.
+                #If it is converted to string using str() function, something
+                #like 0:27:00 is got. When it is sent to controller in this way, 
+                #it causes problems when it is compared with times like 09:23.
+                #(For example: '0:00:00' > '09:31' returns True).
+                #For this reason, it should be formatted and sent in the XX:XX format.
+                #To format it in this way, it should be converted to datetime object
+                #and formatted using strftime() function.
+                #To do it, the timedelta object should be added to the minimum datetime
+                #object, then retrieve the time from it and call the strftime() method.
+                access['startTime'] = (datetime.datetime.min + access['startTime']).time().strftime('%H:%M')
+                access['endTime'] = (datetime.datetime.min + access['endTime']).time().strftime('%H:%M')
                 access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
                 
                 yield access
@@ -2132,9 +2141,20 @@ class DataBase(object):
 
                 #Removing rowStateId field as it should not be sent to the controller.
                 liAccess.pop('rowStateId')
-                #Converting datetime types to string types.
-                liAccess['startTime'] = str(liAccess['startTime'])
-                liAccess['endTime'] = str(liAccess['endTime'])
+
+                #Time columns in MariaDB are retrieved as timedelta type.
+                #If it is converted to string using str() function, something
+                #like 0:27:00 is got. When it is sent to controller in this way, 
+                #it causes problems when it is compared with times like 09:23.
+                #(For example: '0:00:00' > '09:31' returns True).
+                #For this reason, it should be formatted and sent in the XX:XX format.
+                #To format it in this way, it should be converted to datetime object
+                #and formatted using strftime() function.
+                #To do it, the timedelta object should be added to the minimum datetime
+                #object, then retrieve the time from it and call the strftime() method.
+                liAccess['startTime'] = (datetime.datetime.min + liAccess['startTime']).time().strftime('%H:%M')
+                liAccess['endTime'] = (datetime.datetime.min + liAccess['endTime']).time().strftime('%H:%M')
+
                 #Adding fields from access to liAccess dictionary.
                 liAccess['accessId'] = accessId
                 liAccess['expireDate'] = expireDate
