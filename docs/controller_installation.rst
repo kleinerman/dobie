@@ -40,7 +40,7 @@ Install **sudo** package and add your user to wheel group:
   # pacman -S sudo
   # usermod -aG wheel jkleinerman
   
-Allow members of group wheel to execute any command without a password:
+Allow members of group wheel to execute any command without a password:  
 Uncomment the following line in ``/etc/sudoers``
 
 .. code-block::
