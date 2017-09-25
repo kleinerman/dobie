@@ -49,6 +49,25 @@ Uncomment the following line in ``/etc/sudoers``
   %wheel ALL=(ALL) NOPASSWD: ALL
 
 
+Configure the correct **time zone**:
+
+.. code-block::
+
+  # timedatectl set-timezone America/Argentina/Cordoba
+  
+Be sure the ntp is synced
+
+.. code-block::
+  
+  #  timedatectl set-ntp true
+  
+Check everything with
+
+.. code-block::
+
+  #  timedatectl status
+  
+
 Install **vim** editor:
 
 .. code-block::
