@@ -41,7 +41,7 @@ Install **sudo** package and add your user to wheel group:
   # usermod -aG wheel jkleinerman
   
 Allow members of group wheel to execute any command without a password:
-Uncomment the following line in `/etc/sudoers`
+Uncomment the following line in ``/etc/sudoers``
 
 .. code-block::
 
