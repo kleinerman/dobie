@@ -1267,7 +1267,32 @@ In the same way, if the person had a "Full Access" and the user modify it giving
 Events
 ------
 
-In event section, there are two screens. One of them lets view the events in real time. The second one, lets search historical of saved events.
+In event section, there are two screens. One of them lets view the events in real time. The second one, lets search historical events saved.
 
+In the second screen screen organization, person, zone, passage, direction, start date and time and end date and time can be selected to retrieve events.
 
 .. image:: images_front_end_specs/events_searcher.png
+
+If an organization is selected, the person section should show all the persons of this organization and one of them shold be pick by the user.
+
+The following REST method should be sent to the server.
+
+**Method:** PUT
+
+http://10.10.10.14:5000/api/v1.0/events?personId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10"
+
+The following mehtod should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?personId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=1&evtsQtty=10"
+
+
+  
+  
+
+
