@@ -1277,12 +1277,6 @@ If an organization is selected, the person section should show all the persons o
 
 The following REST method should be sent to the server.
 
-**Method:** PUT
-
-http://10.10.10.14:5000/api/v1.0/events?personId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10"
-
-The following mehtod should be sent to the server:
-
 **Method:** GET
 
 **URI:**
