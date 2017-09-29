@@ -1273,7 +1273,7 @@ In the second screen screen organization, person, zone, passage, direction, star
 
 .. image:: images_front_end_specs/events_searcher.png
 
-If an organization is selected, the person section should show all the persons of this organization and one of them shold be pick by the user.
+If an organization is selected, the person section should show all the persons of this organization and one of them should be picked up by the user.
 
 The following REST method should be sent to the server.
 
