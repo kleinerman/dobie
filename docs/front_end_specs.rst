@@ -860,6 +860,9 @@ To get all the zones the following REST method should be sent to the server:
   ]
 
 
+Getting passages from a zone
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 To get all passages from a zone, the following REST method should be sent to the server:
 
 **URI:**
@@ -1302,3 +1305,31 @@ If all the events from an entire organization is need, an organization should be
   http://172.18.0.3:5000/api/v1.0/events?orgId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
 
+
+
+If a zone is selected, the passage window should show all the passages of this zone and one of them should be picked up by the user.
+To get from server the current list of passages of a zone, see `Getting passages from a zone`_ section.
+
+The following REST method should be sent to the server.
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?personId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=1&evtsQtty=10"
+
+
+
+
+
+If all the events from an entire organization is need, an organization should be selected in the organization window and the word "ALL" in the person window. The following REST method shoud be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?orgId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
