@@ -1291,5 +1291,14 @@ The following REST method should be sent to the server.
 ``evtsQtty`` variable should be the quantity of events returned from server starting from ``startEvt``
 
   
+If all the events from an entire organization is need, an organization should be selected in the organization window and the word "ALL" in the person window. The following REST method shoud be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?orgId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
 
