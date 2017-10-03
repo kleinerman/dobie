@@ -1294,7 +1294,7 @@ The following REST method should be sent to the server.
 ``evtsQtty`` variable should be the quantity of events returned from server starting from ``startEvt``
 
   
-If all the events from an entire organization is need, an organization should be selected in the organization window and the word "ALL" in the person window. The following REST method shoud be sent to the server:
+If all the events from an entire organization is need, an organization should be selected in the organization window and the word "ALL" in the person window too. The following REST method shoud be sent to the server:
 
 **Method:** GET
 
@@ -1322,9 +1322,7 @@ The following REST method should be sent to the server.
 
 
 
-
-
-If all the events from an entire organization is need, an organization should be selected in the organization window and the word "ALL" in the person window. The following REST method shoud be sent to the server:
+If all the events from an entire zone is need, a zone should be selected in the zone window and the word "ALL" in the passage window too. The following REST method shoud be sent to the server:
 
 **Method:** GET
 
