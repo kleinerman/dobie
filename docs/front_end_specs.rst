@@ -861,7 +861,7 @@ To get all the zones the following REST method should be sent to the server:
 
 
 Getting passages from a zone
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++
 
 To get all passages from a zone, the following REST method should be sent to the server:
 
