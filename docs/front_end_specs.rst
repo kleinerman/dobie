@@ -1376,3 +1376,9 @@ To query those events, ``personId=null`` in the URI:
   http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
 
+Of course, all combinations would be possible:
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?orgId=2&pssgId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
+
