@@ -1334,7 +1334,23 @@ If all the events from an entire zone is need, a zone should be selected in the 
 
 If events corresponding to incomings are need, ``side`` variable should be ``1``.
 
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
+
 If events corresponding to outgoings are need, ``side`` variable should be ``0``.
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=0&startEvt=1&evtsQtty=10
 
 If events corresponding to incomings and outgoings at the same time are need, the "side" variable should be removed from the URI.
 
