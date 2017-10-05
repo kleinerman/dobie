@@ -1332,6 +1332,9 @@ If all the events from an entire zone is need, a zone should be selected in the 
 
   http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
+If events corresponding to incomings are need, ``side`` variable should be ``1``.
+
+If events corresponding to outgoings are need, ``side`` variable should be ``0``.
 
 If events corresponding to incomings and outgoings at the same time are need, the "side" variable should be removed from the URI.
 
@@ -1343,10 +1346,10 @@ If events corresponding to incomings and outgoings at the same time are need, th
 
   http://172.18.0.3:5000/api/v1.0/events?startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=1&evtsQtty=10
   
-As can be noticed, if a variable is removed from the URI, the server will return all the events which this variable could filter. The only variables which couldn't be omitted are "startDateTime", "endDateTime", "startEvt" and "evtsQtty"
+As can be noticed, if a variable is removed from the URI, the server will return all the events which this variable could filter. The only variables which couldn't be omitted are ``startDateTime``, ``endDateTime``, ``startEvt`` and ``evtsQtty``
 
-When a passage is opened using a button or a passage is forced, the "personId" of the event would be "null" meaning an "unknown" person passed trough this passage.
-To query those events, personId=null in the URI:
+When a passage is opened using a button or a passage is forced, the ``personId`` of the event would be ``null`` meaning an "unknown" person passed trough this passage.
+To query those events, ``personId=null`` in the URI:
 
 **Method:** GET
 
