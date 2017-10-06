@@ -1452,6 +1452,29 @@ To query those events, ``personId=null`` in the URI:
   }
 
 
+A JSON object is returned with the following keys:
+
+- events: Is a list with al the events.
+- evtsQtty: Is the amount of events returned in this call starting
+- startEvt: The index of the first event returned.
+- totalEvtsCount: Total events in server.
+- nextURL: Is the URI of the next page.
+- prevURL: Is the URI of the previous page.
+
+When the person is UNKNOWN, each event has the following fields:
+
+- id: The ID of the event.
+- eventTypeId: ID of type of event.
+- dateTime: Date and time of the event.
+- latchId: ID of latch used.
+- side: 1 for incoming and 0 for outgoing.
+- zoneName: Name of the zone.
+- pssgName: Name fo the passage.
+- notReasonId: When the access is not allowed, this is the ID of notReason.
+
+
+
+
 Of course, all combinations would be possible:
 
 .. code-block::
