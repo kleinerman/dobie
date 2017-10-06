@@ -166,9 +166,7 @@ CREATE UNIQUE INDEX pssgPersonWeekDayIndex ON LimitedAccess (pssgId, personId, w
 
 CREATE TABLE `EventType` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `description` varchar(40) NOT NULL,
-    `rowStateId` integer NOT NULL,
-    CONSTRAINT `fk_EventType_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
+    `description` varchar(40) NOT NULL
 )
 ;
 

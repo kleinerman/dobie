@@ -287,10 +287,10 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify(rowStates)
 
 
-            except database.OrganizationNotFound as organizationNotFound:
-                raise NotFound(str(organizationNotFound))
-            except database.OrganizationError as organizationError:
-                raise ConflictError(str(organizationError))
+#            except database.OrganizationNotFound as organizationNotFound:
+#                raise NotFound(str(organizationNotFound))
+#            except database.OrganizationError as organizationError:
+#                raise ConflictError(str(organizationError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -300,6 +300,33 @@ class CrudMngr(genmngr.GenericMngr):
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
 
 
+
+
+
+#------------------------------------EventType----------------------------------------------
+        @app.route('/api/v1.0/eventtype', methods=['GET'])
+        def eventType():
+            '''
+            GET: Return a list with all persons in the organization
+            '''
+            try:
+                ## For GET method
+                eventTypes = self.dataBase.getEventTypes()
+
+                return jsonify(eventTypes)
+
+
+#            except database.OrganizationNotFound as organizationNotFound:
+#                raise NotFound(str(organizationNotFound))
+#            except database.OrganizationError as organizationError:
+#                raise ConflictError(str(organizationError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
 
 
 

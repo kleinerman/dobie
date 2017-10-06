@@ -297,7 +297,10 @@ class DataBase(object):
         #exception. To avoid it an "EventError" is raised
         #For SQL point of view, "evtsQtty" could be 0, but it will return a
         #void list. To avoid it, if evtsQtty < 1, also "EventError" is raised
-        if startEvt < 1 or evtsQtty < 1: raise EventError
+        #Also, if startDateTime or endDateTime is None and EventError will be
+        #raised.
+        if startEvt < 1 or evtsQtty < 1 or not startDateTime or not endDateTime: 
+            raise EventError
 
         #The startEvt value is substracted one since SQL starts indexing on 0.
         startEvtSql = startEvt - 1
@@ -307,7 +310,11 @@ class DataBase(object):
         #with uppercase in the URL
         if personId.lower() == 'null':
 
-            sql = ("SELECT Event.* FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
+            sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
+                   "Passage.description AS pssgName, Event.latchId, "
+                   "Event.dateTime, Event.side, Event.allowed, Event.notReasonId "
+                   "FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
+                   "JOIN Zone ON (Passage.zoneId = Zone.id) "
                    "WHERE Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND personId IS NULL "
                    "AND dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{} "
                    "".format(zoneId, pssgId, startDateTime, endDateTime, side, startEvtSql, evtsQtty)
@@ -322,9 +329,16 @@ class DataBase(object):
 
 
         else:
-            sql = ("SELECT Event.* FROM Event JOIN Person ON (Event.personId = Person.id) JOIN "
-                   "Passage ON (Event.pssgId = Passage.id) WHERE Person.orgId LIKE '{}' AND "
-                   "personId LIKE '{}' AND Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND "
+            sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
+                   "Passage.description AS pssgName, Organization.name AS orgName, "
+                   "Person.name AS personName, Event.latchId, Event.dateTime, "
+                   "Event.side, Event.allowed, Event.notReasonId "
+                   "FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
+                   "JOIN Zone ON (Passage.zoneId = Zone.id) "
+                   "JOIN Person ON (Event.personId = Person.id) "
+                   "JOIN Organization ON (Person.orgId = Organization.id) "
+                   "WHERE Person.orgId LIKE '{}' AND personId LIKE '{}' "
+                   "AND Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND "
                    "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{}"
                    "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, 
                              side, startEvtSql, evtsQtty)
@@ -336,6 +350,7 @@ class DataBase(object):
                         "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}'"
                         "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, side)
                        )
+
 
         try:
             #Calculating the total count of that could be returned. This is necessary for paging
@@ -492,6 +507,21 @@ class DataBase(object):
         rowStates = self.cursor.fetchall()
 
         return rowStates
+
+
+
+
+#----------------------------------Event Types------------------------------------------
+
+    def getEventTypes(self):
+        '''
+        Return a a dictionary with all Event Types
+        '''
+        sql = ('SELECT * FROM EventType')
+        self.execute(sql)
+        eventTypes = self.cursor.fetchall()
+
+        return eventTypes
 
 
 
