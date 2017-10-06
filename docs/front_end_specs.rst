@@ -1376,9 +1376,101 @@ To query those events, ``personId=null`` in the URI:
   http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
 
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 1708
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Fri, 06 Oct 2017 18:21:30 GMT
+  
+  {
+    "events": [
+      {
+        "allowed": 1, 
+        "dateTime": "Wed, 13 Sep 2017 20:26:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 12, 
+        "latchId": 3, 
+        "notReasonId": null, 
+        "pssgName": "Ingreso F65", 
+        "side": 0, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Wed, 13 Sep 2017 17:50:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 16, 
+        "latchId": 3, 
+        "notReasonId": null, 
+        "pssgName": "Ingreso F65", 
+        "side": 0, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 0, 
+        "dateTime": "Thu, 14 Sep 2017 08:08:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 32, 
+        "latchId": 1, 
+        "notReasonId": 1, 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 0, 
+        "dateTime": "Thu, 14 Sep 2017 08:08:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 33, 
+        "latchId": 1, 
+        "notReasonId": 1, 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 0, 
+        "dateTime": "Thu, 14 Sep 2017 09:59:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 43, 
+        "latchId": 1, 
+        "notReasonId": 1, 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }
+    ], 
+    "evtsQtty": 5, 
+    "nextURL": "http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=15&evtsQtty=5", 
+    "prevURL": "http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=5&evtsQtty=5", 
+    "startEvt": 10, 
+    "totalEvtsCount": 28
+  }
+
+
 Of course, all combinations would be possible:
 
 .. code-block::
 
   http://172.18.0.3:5000/api/v1.0/events?orgId=2&pssgId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 53
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 27 Jul 2017 18:28:08 GMT
+  
+  {
+    "message": "Access updated", 
+    "status": "OK"
+  }
