@@ -126,6 +126,28 @@ Install **git** to clone dobie repository
 
   # pacman -S git
 
+
+Installing Dobie controller
+---------------------------
+
+Inside ``/opt`` directory, clone the respository:
+
+.. code-block::
+
+  # git clone https://jkleinerman@github.com/kleinerman/dobie.git
+  
+If the the master branch doesn't have the latest changes on the controller, fetch the controller branch and switch to it:
+
+.. code-block::
+
+  # git fetch github jek_controller:jek_controller
+  # git checkout jek_controller
+  
+  
+
+
+
+
   
   
  
