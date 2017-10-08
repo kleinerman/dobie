@@ -146,6 +146,8 @@ If the the master branch doesn't have the latest changes on the controller, fetc
 Inside ``/opt/dobie/controller/c_src/`` directory, run ``make`` to compile the ioiface.
 
 Inside ``/opt/dobie/controller/scripts/`` directory, run ``./create-db.py`` and ``./init-db.py`` to create and init the sqlite database.
+
+Inside ``/opt/dobie/controller/py_src/`` directory, edit ``config.py`` and point the parameter ``SERVER_IP`` to the servers's IP used.
   
   
 
