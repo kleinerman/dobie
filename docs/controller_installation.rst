@@ -143,6 +143,10 @@ If the the master branch doesn't have the latest changes on the controller, fetc
   # git fetch github jek_controller:jek_controller
   # git checkout jek_controller
   
+Inside ``/opt/dobie/controller/c_src/`` directory, run ``make`` to compile the ioiface.
+
+Inside ``/opt/dobie/controller/scripts/`` directory, run ``./create-db.py`` and ``./init-db.py`` to create and init the sqlite database.
+  
   
 
 
