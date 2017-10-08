@@ -105,6 +105,7 @@ Install **python-pip** and **gcc** package to download and compile posix_ipc pac
 
   # pacman -S gcc
   # pacman -S python-pip
+  # pip install --upgrade pip
   
 Download and install **posix_ipc** python library needed by controller application:
 
