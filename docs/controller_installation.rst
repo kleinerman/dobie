@@ -147,14 +147,54 @@ Inside ``/opt/dobie/controller/c_src/`` directory, run ``make`` to compile the i
 
 Inside ``/opt/dobie/controller/scripts/`` directory, run ``./create-db.py`` and ``./init-db.py`` to create and init the sqlite database.
 
-Inside ``/opt/dobie/controller/py_src/`` directory, edit ``config.py`` and point the parameter ``SERVER_IP`` to the servers's IP used.
+Inside ``/opt/dobie/controller/py_src/`` directory, edit ``config.py`` and point the parameter ``SERVER_IP`` to the servers's IP used. Also be sure of having the following parameters with the absolute path if it is planned to run dobie with systemd.
+
+.. code-block::
+
+  IOIFACE_BIN = '/opt/dobie/controller/c_src/ioiface'
   
+  DB_FILE = '/opt/dobie/controller/py_src/access.db'
+  
+  LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'  
+   
   
 
+Inside ``/etc/systemd/system/`` directory create a file named: ``dobie-c.service`` with the following content:
 
+.. code-block::
 
+  [Unit]
+  Description=Dobie controller service
+  Requires=network.target
+  After=network.target
 
+  [Service]
+  Type=simple
+  ExecStart=/usr/bin/env python3 -u /opt/dobie/controller/py_src/main.py
+  Restart=always
+  RestartSec=10
   
+  [Install]
+  WantedBy=multi-user.target
+
+Reload systemd
   
- 
+.. code-block::
+
+  # systemctl daemon-reload
   
+
+Enable the service at startup
+  
+.. code-block::
+
+  # systemctl enable dobie-c.service
+  
+
+Start the service now
+  
+.. code-block::
+
+  # systemctl start dobie-c.service
+  
+
