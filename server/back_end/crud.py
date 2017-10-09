@@ -331,6 +331,62 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+#------------------------------------Latch----------------------------------------------
+        @app.route('/api/v1.0/latch', methods=['GET'])
+        def latch():
+            '''
+            GET: Return a list with all latches
+            '''
+            try:
+                ## For GET method
+                latches = self.dataBase.getLatches()
+
+                return jsonify(latches)
+
+
+#            except database.OrganizationNotFound as organizationNotFound:
+#                raise NotFound(str(organizationNotFound))
+#            except database.OrganizationError as organizationError:
+#                raise ConflictError(str(organizationError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+
+
+
+
+
+#------------------------------------Not Reason----------------------------------------------
+        @app.route('/api/v1.0/notreason', methods=['GET'])
+        def notReason():
+            '''
+            GET: Return a list with all latches
+            '''
+            try:
+                ## For GET method
+                notReasons = self.dataBase.getNotReasons()
+
+                return jsonify(notReasons)
+
+
+#            except database.OrganizationNotFound as organizationNotFound:
+#                raise NotFound(str(organizationNotFound))
+#            except database.OrganizationError as organizationError:
+#                raise ConflictError(str(organizationError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+
+
+
 
 #-------------------------------------Organization------------------------------------------
 

@@ -526,6 +526,35 @@ class DataBase(object):
 
 
 
+#----------------------------------Latches------------------------------------------
+
+    def getLatches(self):
+        '''
+        Return a a dictionary with all Latches
+        '''
+        sql = ('SELECT * FROM Latch')
+        self.execute(sql)
+        latches = self.cursor.fetchall()
+
+        return latches
+
+
+
+
+#----------------------------------Not Reasons------------------------------------------
+
+    def getNotReasons(self):
+        '''
+        Return a a dictionary with all Not Reasons
+        '''
+        sql = ('SELECT * FROM NotReason')
+        self.execute(sql)
+        notReasons = self.cursor.fetchall()
+
+        return notReasons
+
+
+
 
 #----------------------------------Organization----------------------------------------
 
