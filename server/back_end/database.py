@@ -169,6 +169,76 @@ class EventNotFound(EventError):
 
 
 
+class RowStateError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class RowStateNotFound(RowStateError):
+    '''
+    '''
+    pass
+
+
+
+
+class EventTypeError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class EventTypeNotFound(EventTypeError):
+    '''
+    '''
+    pass
+
+
+
+class LatchError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class LatchNotFound(LatchError):
+    '''
+    '''
+    pass
+
+
+
+
+class NotReasonError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class NotReasonNotFound(NotReasonError):
+    '''
+    '''
+    pass
+
+
+
 
 
 class DataBase(object):
@@ -385,10 +455,19 @@ class DataBase(object):
         '''
         Return a dictionary with user fields if exists, if not it returns None
         '''
-        sql = "SELECT * from User WHERE username = '{}'".format(username)
-        self.execute(sql)
-        user = self.cursor.fetchone()
-        return user
+        try:
+            sql = "SELECT * from User WHERE username = '{}'".format(username)
+            self.execute(sql)
+            user = self.cursor.fetchone()
+            return user
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise UserError('Can not get User')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise UserError('Can not get User')
 
 
 
@@ -396,12 +475,19 @@ class DataBase(object):
         '''
         Return a dictionary with all Users
         '''
-        sql = ('SELECT * FROM User')
-        self.execute(sql)
-        users = self.cursor.fetchall()
+        try:
+            sql = ('SELECT * FROM User')
+            self.execute(sql)
+            users = self.cursor.fetchall()
+            return users
 
-        return users
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise UserError('Can not get Users')
 
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise UserError('Can not get Users')
 
 
 
@@ -502,11 +588,19 @@ class DataBase(object):
         '''
         Return a a dictionary with all rowStates
         '''
-        sql = ('SELECT * FROM RowState')
-        self.execute(sql)
-        rowStates = self.cursor.fetchall()
+        try:
+            sql = ('SELECT * FROM RowState')
+            self.execute(sql)
+            rowStates = self.cursor.fetchall()
+            return rowStates
 
-        return rowStates
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise RowStateError('Can not get Row States')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise RowStateError('Can not get Row States')
 
 
 
@@ -517,13 +611,20 @@ class DataBase(object):
         '''
         Return a a dictionary with all Event Types
         '''
-        sql = ('SELECT * FROM EventType')
-        self.execute(sql)
-        eventTypes = self.cursor.fetchall()
 
-        return eventTypes
+        try:
+            sql = ('SELECT * FROM EventType')
+            self.execute(sql)
+            eventTypes = self.cursor.fetchall()
+            return eventTypes
 
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise EventTypeError('Can not get Event Types')
 
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise EventTypeError('Can not get Event Types')
 
 
 #----------------------------------Latches------------------------------------------
@@ -532,11 +633,20 @@ class DataBase(object):
         '''
         Return a a dictionary with all Latches
         '''
-        sql = ('SELECT * FROM Latch')
-        self.execute(sql)
-        latches = self.cursor.fetchall()
 
-        return latches
+        try:
+            sql = ('SELECT * FROM Latch')
+            self.execute(sql)
+            latches = self.cursor.fetchall()
+            return latches
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise LatchError('Can not get Latches')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise LatchError('Can not get Latches')
 
 
 
@@ -547,11 +657,20 @@ class DataBase(object):
         '''
         Return a a dictionary with all Not Reasons
         '''
-        sql = ('SELECT * FROM NotReason')
-        self.execute(sql)
-        notReasons = self.cursor.fetchall()
 
-        return notReasons
+        try:
+            sql = ('SELECT * FROM NotReason')
+            self.execute(sql)
+            notReasons = self.cursor.fetchall()
+            return notReasons
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise NotReasonError('Can not get Not Reasons')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise NotReasonError('Can not get Not Reasons')
 
 
 
@@ -563,11 +682,19 @@ class DataBase(object):
         '''
         Return a a dictionary with all organizations
         '''
-        sql = ('SELECT * FROM Organization')
-        self.execute(sql)
-        organizations = self.cursor.fetchall()
+        try:
+            sql = ('SELECT * FROM Organization')
+            self.execute(sql)
+            organizations = self.cursor.fetchall()
+            return organizations
 
-        return organizations
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise OrganizationError('Can not get Organizations')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not get Organizations')
 
 
                                              

@@ -226,6 +226,8 @@ class CrudMngr(genmngr.GenericMngr):
                     uri = url_for('User', userId=userId, _external=True)
                     return jsonify({'status': 'OK', 'message': 'User added', 'code': CREATED, 'uri': uri}), CREATED
 
+            except database.UserNotFound as userNotFound:
+                raise NotFound(str(userNotFound))
             except database.UserError as userError:
                 raise ConflictError(str(userError))
             except TypeError:
@@ -283,21 +285,17 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 ## For GET method
                 rowStates = self.dataBase.getRowStates()
-
                 return jsonify(rowStates)
 
-
-#            except database.OrganizationNotFound as organizationNotFound:
-#                raise NotFound(str(organizationNotFound))
-#            except database.OrganizationError as organizationError:
-#                raise ConflictError(str(organizationError))
+            except database.RowStateNotFound as rowStateNotFound:
+                raise NotFound(str(rowStateNotFound))
+            except database.RowStateError as rowStateError:
+                raise ConflictError(str(rowStateError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-            except KeyError:
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
 
 
 
@@ -316,17 +314,15 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify(eventTypes)
 
 
-#            except database.OrganizationNotFound as organizationNotFound:
-#                raise NotFound(str(organizationNotFound))
-#            except database.OrganizationError as organizationError:
-#                raise ConflictError(str(organizationError))
+            except database.EventTypeNotFound as eventTypeNotFound:
+                raise NotFound(str(eventTypeNotFound))
+            except database.EventTypeError as eventTypeError:
+                raise ConflictError(str(eventTypeError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-            except KeyError:
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
 
 
 
@@ -340,21 +336,17 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 ## For GET method
                 latches = self.dataBase.getLatches()
-
                 return jsonify(latches)
 
-
-#            except database.OrganizationNotFound as organizationNotFound:
-#                raise NotFound(str(organizationNotFound))
-#            except database.OrganizationError as organizationError:
-#                raise ConflictError(str(organizationError))
+            except database.LatchNotFound as latchNotFound:
+                raise NotFound(str(latchNotFound))
+            except database.LatchError as latchError:
+                raise ConflictError(str(latchError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-            except KeyError:
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
 
 
 
@@ -369,21 +361,18 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 ## For GET method
                 notReasons = self.dataBase.getNotReasons()
-
                 return jsonify(notReasons)
 
 
-#            except database.OrganizationNotFound as organizationNotFound:
-#                raise NotFound(str(organizationNotFound))
-#            except database.OrganizationError as organizationError:
-#                raise ConflictError(str(organizationError))
+            except database.NotReasonNotFound as notReasonNotFound:
+                raise NotFound(str(notReasonNotFound))
+            except database.NotReasonError as notReasonError:
+                raise ConflictError(str(notReasonError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-            except KeyError:
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
 
 
 
@@ -426,6 +415,9 @@ class CrudMngr(genmngr.GenericMngr):
                     uri = url_for('Organization', orgId=orgId, _external=True)
                     return jsonify({'status': 'OK', 'message': 'Organization added', 'code': CREATED, 'uri': uri}), CREATED
 
+
+            except database.OrganizationNotFound as organizationNotFound:
+                raise NotFound(str(organizationNotFound))
             except database.OrganizationError as organizationError:
                 raise ConflictError(str(organizationError))
             except TypeError:
