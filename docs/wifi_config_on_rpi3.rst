@@ -126,7 +126,7 @@ Enable both services at boot:
 .. code-block::
 
   # systemctl enable systemd-networkd
-  # systemctl enable systemd-resolvd
+  # systemctl enable systemd-resolved
   
 
 Restart the board
