@@ -1473,6 +1473,50 @@ When the person is UNKNOWN, each event has the following fields:
 - notReasonId: When the access is not allowed, this is the ID of notReason.
 
 
+To show the **Event Type** description with the eventTypeId received in the event received, the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/eventtype
+
+
+**Response:**
+
+.. code-block::
+
+HTTP/1.0 200 OK
+Content-Type: application/json
+Content-Length: 268
+Server: Werkzeug/0.12.1 Python/3.6.0
+Date: Thu, 12 Oct 2017 15:14:45 GMT
+
+[
+  {
+    "description": "Access with card", 
+    "id": 1
+  }, 
+  {
+    "description": "Access with button", 
+    "id": 2
+  }, 
+  {
+    "description": "The passage remains opened", 
+    "id": 3
+  }, 
+  {
+    "description": "The passage was forced", 
+    "id": 4
+  }
+]
+
+
+
+
+
 
 
 Of course, all combinations would be possible:
