@@ -1488,30 +1488,30 @@ To show the **Event Type** description with the eventTypeId received in the even
 
 .. code-block::
 
-HTTP/1.0 200 OK
-Content-Type: application/json
-Content-Length: 268
-Server: Werkzeug/0.12.1 Python/3.6.0
-Date: Thu, 12 Oct 2017 15:14:45 GMT
-
-[
-  {
-    "description": "Access with card", 
-    "id": 1
-  }, 
-  {
-    "description": "Access with button", 
-    "id": 2
-  }, 
-  {
-    "description": "The passage remains opened", 
-    "id": 3
-  }, 
-  {
-    "description": "The passage was forced", 
-    "id": 4
-  }
-]
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 268
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 12 Oct 2017 15:14:45 GMT
+  
+  [
+    {
+      "description": "Access with card", 
+      "id": 1
+    }, 
+    {
+      "description": "Access with button", 
+      "id": 2
+    }, 
+    {
+      "description": "The passage remains opened", 
+      "id": 3
+    }, 
+    {
+      "description": "The passage was forced", 
+      "id": 4
+    }
+  ]
 
 
 
