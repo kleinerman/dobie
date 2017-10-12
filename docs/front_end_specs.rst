@@ -1372,8 +1372,8 @@ To query those events, ``personId=null`` should be placed in the URI:
 **URI:**
 
 .. code-block::
-
-  http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
+  
+  http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=11&evtsQtty=10
 
 
 **Response:**
@@ -1382,23 +1382,12 @@ To query those events, ``personId=null`` should be placed in the URI:
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 1708
+  Content-Length: 3033
   Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Fri, 06 Oct 2017 18:21:30 GMT
+  Date: Thu, 12 Oct 2017 18:20:29 GMT
   
   {
     "events": [
-      {
-        "allowed": 1, 
-        "dateTime": "Wed, 13 Sep 2017 20:26:00 GMT", 
-        "eventTypeId": 2, 
-        "id": 12, 
-        "latchId": 3, 
-        "notReasonId": null, 
-        "pssgName": "Ingreso F65", 
-        "side": 0, 
-        "zoneName": "Ingreso Oficina"
-      }, 
       {
         "allowed": 1, 
         "dateTime": "Wed, 13 Sep 2017 17:50:00 GMT", 
@@ -1442,15 +1431,80 @@ To query those events, ``personId=null`` should be placed in the URI:
         "pssgName": "Ingreso F65", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 0, 
+        "dateTime": "Thu, 14 Sep 2017 09:59:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 44, 
+        "latchId": 1, 
+        "notReasonId": 1, 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 0, 
+        "dateTime": "Thu, 14 Sep 2017 10:08:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 45, 
+        "latchId": 1, 
+        "notReasonId": 1, 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 0, 
+        "dateTime": "Thu, 14 Sep 2017 10:08:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 46, 
+        "latchId": 1, 
+        "notReasonId": 1, 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Thu, 14 Sep 2017 11:59:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 49, 
+        "latchId": 3, 
+        "notReasonId": null, 
+        "pssgName": "Ingreso F65", 
+        "side": 0, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Thu, 14 Sep 2017 12:45:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 52, 
+        "latchId": 3, 
+        "notReasonId": null, 
+        "pssgName": "Ingreso F65", 
+        "side": 0, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Thu, 14 Sep 2017 12:55:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 53, 
+        "latchId": 3, 
+        "notReasonId": null, 
+        "pssgName": "Ingreso F65", 
+        "side": 0, 
+        "zoneName": "Ingreso Oficina"
       }
     ], 
-    "evtsQtty": 5, 
-    "nextURL": "http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=15&evtsQtty=5", 
-    "prevURL": "http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=5&evtsQtty=5", 
-    "startEvt": 10, 
-    "totalEvtsCount": 28
+    "evtsQtty": 10, 
+    "nextURL": "http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=21&evtsQtty=10", 
+    "prevURL": "http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=1&evtsQtty=10", 
+    "startEvt": 11, 
+    "totalEvtsCount": 775
   }
-
 
 A JSON object is returned with the following keys:
 
