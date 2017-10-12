@@ -1369,7 +1369,7 @@ Of course, all combinations would be possible:
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/events?orgId=2&pssgId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
+  http://172.18.0.3:5000/api/v1.0/events?orgId=3&pssgId=2&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=80&evtsQtty=10
 
 
 An the tipical response would be:
@@ -1378,153 +1378,175 @@ An the tipical response would be:
 
 .. code-block::
 
-
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 3703
+  Content-Length: 3930
   Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 12 Oct 2017 18:32:29 GMT
-
+  Date: Thu, 12 Oct 2017 19:58:25 GMT
+  
   {
     "events": [
       {
         "allowed": 1, 
-        "dateTime": "Wed, 13 Sep 2017 20:26:00 GMT", 
+        "dateTime": "Thu, 05 Oct 2017 09:25:00 GMT", 
         "eventTypeId": 1, 
-        "id": 14, 
+        "id": 1137, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Jorge Kleinerman", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Wed, 13 Sep 2017 18:05:00 GMT", 
+        "dateTime": "Thu, 05 Oct 2017 09:30:00 GMT", 
         "eventTypeId": 1, 
-        "id": 27, 
+        "id": 1139, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Ary Kleinerman", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Wed, 13 Sep 2017 18:05:00 GMT", 
+        "dateTime": "Thu, 05 Oct 2017 09:39:00 GMT", 
         "eventTypeId": 1, 
-        "id": 28, 
+        "id": 1143, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Jorge Kleinerman", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Fri, 15 Sep 2017 09:29:00 GMT", 
+        "dateTime": "Thu, 05 Oct 2017 09:59:00 GMT", 
         "eventTypeId": 1, 
-        "id": 92, 
+        "id": 1146, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Jorge Kleinerman", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Fri, 15 Sep 2017 12:19:00 GMT", 
+        "dateTime": "Thu, 05 Oct 2017 10:53:00 GMT", 
         "eventTypeId": 1, 
-        "id": 102, 
+        "id": 1151, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Ary Kleinerman", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Fri, 15 Sep 2017 12:54:00 GMT", 
+        "dateTime": "Thu, 05 Oct 2017 11:07:00 GMT", 
         "eventTypeId": 1, 
-        "id": 106, 
+        "id": 1153, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Ary Kleinerman", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Fri, 15 Sep 2017 14:15:00 GMT", 
+        "dateTime": "Thu, 05 Oct 2017 11:38:00 GMT", 
         "eventTypeId": 1, 
-        "id": 113, 
+        "id": 1157, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Jorge Kleinerman", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Fri, 15 Sep 2017 15:24:00 GMT", 
+        "dateTime": "Thu, 05 Oct 2017 17:54:00 GMT", 
         "eventTypeId": 1, 
-        "id": 117, 
+        "id": 1178, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Ary Kleinerman", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Mon, 18 Sep 2017 12:29:00 GMT", 
+        "dateTime": "Fri, 06 Oct 2017 08:09:00 GMT", 
         "eventTypeId": 1, 
-        "id": 175, 
+        "id": 1188, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Javier Coronel", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Tue, 19 Sep 2017 12:20:00 GMT", 
+        "dateTime": "Fri, 06 Oct 2017 09:25:00 GMT", 
         "eventTypeId": 1, 
-        "id": 204, 
+        "id": 1192, 
         "latchId": 1, 
         "notReasonId": null, 
-        "orgName": "Building Networks", 
-        "personName": "Fernando Acha", 
-        "pssgName": "Ingreso F65", 
+        "orgName": "Datacenter Capitalinas", 
+        "personName": "Ary Kleinerman", 
+        "pssgName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }
     ], 
     "evtsQtty": 10, 
-    "nextURL": "http://172.18.0.3:5000/api/v1.0/events?orgId=2&pssgId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=11&evtsQtty=10", 
-    "prevURL": null, 
-    "startEvt": 1, 
-    "totalEvtsCount": 139
+    "nextURL": "http://172.18.0.3:5000/api/v1.0/events?orgId=3&pssgId=2&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=90&evtsQtty=10", 
+    "prevURL": "http://172.18.0.3:5000/api/v1.0/events?orgId=3&pssgId=2&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=70&evtsQtty=10", 
+    "startEvt": 80, 
+    "totalEvtsCount": 136
   }
 
+
+A JSON object is returned with the following keys:
+
+- ``events``: Is a list with al the events.
+- ``evtsQtty``: Is the amount of events returned in this call starting
+- ``startEvt``: The index of the first event returned.
+- ``totalEvtsCount``: Total events in server.
+- ``nextURL``: Is the URI of the next page.
+- ``prevURL``: Is the URI of the previous page.
+
+When person is KNOWN, each event has the following fields:
+
+- ``id``: The ID of the event.
+- ``eventTypeId``: ID of type of event.
+- ``dateTime``: Date and time of the event.
+- ``latchId``: ID of latch used.
+- ``side``: 1 for incoming and 0 for outgoing.
+- ``zoneName``: Name of the zone.
+- ``pssgName```: Name of the passage.
+- ``orgName``: Name of the organization that person belong to.
+- ``personName``: Name of the person. 
+- ``notReasonId``: When the access is not allowed, this is the ID of notReason.
+- ``allowed``: If the access was allowed it will be ``1``, if not, it will ``0``.
 
 
 When a passage is opened using a button or a passage is forced, the ``personId`` of the event would be ``null`` meaning an "unknown" person passed trough this passage.
@@ -1547,30 +1569,19 @@ To query those events, ``personId=null`` should be placed in the URI:
   Content-Type: application/json
   Content-Length: 3033
   Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 12 Oct 2017 18:20:29 GMT
+  Date: Thu, 12 Oct 2017 20:05:23 GMT
   
   {
     "events": [
       {
         "allowed": 1, 
-        "dateTime": "Wed, 13 Sep 2017 17:50:00 GMT", 
+        "dateTime": "Wed, 13 Sep 2017 20:26:00 GMT", 
         "eventTypeId": 2, 
-        "id": 16, 
+        "id": 12, 
         "latchId": 3, 
         "notReasonId": null, 
         "pssgName": "Ingreso F65", 
         "side": 0, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 0, 
-        "dateTime": "Thu, 14 Sep 2017 08:08:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 32, 
-        "latchId": 1, 
-        "notReasonId": 1, 
-        "pssgName": "Ingreso F65", 
-        "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
@@ -1586,9 +1597,9 @@ To query those events, ``personId=null`` should be placed in the URI:
       }, 
       {
         "allowed": 0, 
-        "dateTime": "Thu, 14 Sep 2017 09:59:00 GMT", 
+        "dateTime": "Thu, 14 Sep 2017 08:08:00 GMT", 
         "eventTypeId": 1, 
-        "id": 43, 
+        "id": 32, 
         "latchId": 1, 
         "notReasonId": 1, 
         "pssgName": "Ingreso F65", 
@@ -1608,9 +1619,9 @@ To query those events, ``personId=null`` should be placed in the URI:
       }, 
       {
         "allowed": 0, 
-        "dateTime": "Thu, 14 Sep 2017 10:08:00 GMT", 
+        "dateTime": "Thu, 14 Sep 2017 09:59:00 GMT", 
         "eventTypeId": 1, 
-        "id": 45, 
+        "id": 43, 
         "latchId": 1, 
         "notReasonId": 1, 
         "pssgName": "Ingreso F65", 
@@ -1622,6 +1633,17 @@ To query those events, ``personId=null`` should be placed in the URI:
         "dateTime": "Thu, 14 Sep 2017 10:08:00 GMT", 
         "eventTypeId": 1, 
         "id": 46, 
+        "latchId": 1, 
+        "notReasonId": 1, 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 0, 
+        "dateTime": "Thu, 14 Sep 2017 10:08:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 45, 
         "latchId": 1, 
         "notReasonId": 1, 
         "pssgName": "Ingreso F65", 
@@ -1669,25 +1691,19 @@ To query those events, ``personId=null`` should be placed in the URI:
     "totalEvtsCount": 775
   }
 
-A JSON object is returned with the following keys:
 
-- events: Is a list with al the events.
-- evtsQtty: Is the amount of events returned in this call starting
-- startEvt: The index of the first event returned.
-- totalEvtsCount: Total events in server.
-- nextURL: Is the URI of the next page.
-- prevURL: Is the URI of the previous page.
+When person is UNKNOWN, each event has the following fields:
 
-When the person is UNKNOWN, each event has the following fields:
+- ``id``: The ID of the event.
+- ``eventTypeId``: ID of type of event.
+- ``dateTime``: Date and time of the event.
+- ``latchId``: ID of latch used.
+- ``side``: 1 for incoming and 0 for outgoing.
+- ``zoneName``: Name of the zone.
+- ``pssgName```: Name of the passage.
+- ``notReasonId``: When the access is not allowed, this is the ID of notReason.
+- ``allowed``: If the access was allowed it will be ``1``, if not, it will ``0``.
 
-- id: The ID of the event.
-- eventTypeId: ID of type of event.
-- dateTime: Date and time of the event.
-- latchId: ID of latch used.
-- side: 1 for incoming and 0 for outgoing.
-- zoneName: Name of the zone.
-- pssgName: Name fo the passage.
-- notReasonId: When the access is not allowed, this is the ID of notReason.
 
 
 To show **Event Types** descriptions with the ``eventTypeId`` received in the event, the following method should be sent to the server:
