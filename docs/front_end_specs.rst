@@ -1514,6 +1514,42 @@ To show the **Event Type** description with the eventTypeId received in the even
   ]
 
 
+To show the **Latch** description with the latchId received in the event received, the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/latch
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 175
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 12 Oct 2017 15:33:48 GMT
+  
+  [
+    {
+      "description": "Card Reader", 
+      "id": 1
+    }, 
+    {
+      "description": "Fingerprint Reader", 
+      "id": 2
+    }, 
+    {
+      "description": "Button", 
+      "id": 3
+    }
+  ]
+
 
 
 
