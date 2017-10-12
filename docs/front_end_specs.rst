@@ -1365,7 +1365,7 @@ If events corresponding to incomings and outgoings at the same time are need, th
 As can be noticed, if a variable is removed from the URI, the server will return all the events which this variable could filter. The only variables which couldn't be omitted are ``startDateTime``, ``endDateTime``, ``startEvt`` and ``evtsQtty``
 
 When a passage is opened using a button or a passage is forced, the ``personId`` of the event would be ``null`` meaning an "unknown" person passed trough this passage.
-To query those events, ``personId=null`` in the URI:
+To query those events, ``personId=null`` should be placed in the URI:
 
 **Method:** GET
 
@@ -1473,7 +1473,7 @@ When the person is UNKNOWN, each event has the following fields:
 - notReasonId: When the access is not allowed, this is the ID of notReason.
 
 
-To show the **Event Type** description with the eventTypeId received in the event received, the following method should be sent to the server:
+To show **Event Types** descriptions with the ``eventTypeId`` received in the event, the following method should be sent to the server:
 
 **Method:** GET
 
@@ -1514,7 +1514,7 @@ To show the **Event Type** description with the eventTypeId received in the even
   ]
 
 
-To show the **Latch** description with the latchId received in the event received, the following method should be sent to the server:
+To show **Latches** descriptions with the ``latchId`` received in the event, the following method should be sent to the server:
 
 **Method:** GET
 
@@ -1552,6 +1552,41 @@ To show the **Latch** description with the latchId received in the event receive
 
 
 
+To show **Not Reasons** descriptions with the ``notReasonId`` received in the event, the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/notreason
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 172
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 12 Oct 2017 17:46:47 GMT
+  
+  [
+    {
+      "description": "No access", 
+      "id": 1
+    }, 
+    {
+      "description": "Expired card", 
+      "id": 2
+    }, 
+    {
+      "description": "Out of time", 
+      "id": 3
+    }
+  ]
 
 
 
