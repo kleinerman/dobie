@@ -1364,6 +1364,169 @@ If events corresponding to incomings and outgoings at the same time are need, th
   
 As can be noticed, if a variable is removed from the URI, the server will return all the events which this variable could filter. The only variables which couldn't be omitted are ``startDateTime``, ``endDateTime``, ``startEvt`` and ``evtsQtty``
 
+
+Of course, all combinations would be possible:
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?orgId=2&pssgId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
+
+
+An the tipical response would be:
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 3703
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 12 Oct 2017 18:32:29 GMT
+
+  {
+    "events": [
+      {
+        "allowed": 1, 
+        "dateTime": "Wed, 13 Sep 2017 20:26:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 14, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Wed, 13 Sep 2017 18:05:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 27, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Wed, 13 Sep 2017 18:05:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 28, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Fri, 15 Sep 2017 09:29:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 92, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Fri, 15 Sep 2017 12:19:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 102, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Fri, 15 Sep 2017 12:54:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 106, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Fri, 15 Sep 2017 14:15:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 113, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Fri, 15 Sep 2017 15:24:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 117, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Mon, 18 Sep 2017 12:29:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 175, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Tue, 19 Sep 2017 12:20:00 GMT", 
+        "eventTypeId": 1, 
+        "id": 204, 
+        "latchId": 1, 
+        "notReasonId": null, 
+        "orgName": "Building Networks", 
+        "personName": "Fernando Acha", 
+        "pssgName": "Ingreso F65", 
+        "side": 1, 
+        "zoneName": "Ingreso Oficina"
+      }
+    ], 
+    "evtsQtty": 10, 
+    "nextURL": "http://172.18.0.3:5000/api/v1.0/events?orgId=2&pssgId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=11&evtsQtty=10", 
+    "prevURL": null, 
+    "startEvt": 1, 
+    "totalEvtsCount": 139
+  }
+
+
+
 When a passage is opened using a button or a passage is forced, the ``personId`` of the event would be ``null`` meaning an "unknown" person passed trough this passage.
 To query those events, ``personId=null`` should be placed in the URI:
 
@@ -1644,25 +1807,3 @@ To show **Not Reasons** descriptions with the ``notReasonId`` received in the ev
 
 
 
-Of course, all combinations would be possible:
-
-.. code-block::
-
-  http://172.18.0.3:5000/api/v1.0/events?orgId=2&pssgId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
-
-
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 53
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 27 Jul 2017 18:28:08 GMT
-  
-  {
-    "message": "Access updated", 
-    "status": "OK"
-  }
