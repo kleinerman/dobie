@@ -386,7 +386,8 @@ class DataBase(object):
                    "FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
                    "JOIN Zone ON (Passage.zoneId = Zone.id) "
                    "WHERE Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND personId IS NULL "
-                   "AND dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{} "
+                   "AND dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' "
+                   "ORDER BY Event.dateTime ASC LIMIT {},{}"
                    "".format(zoneId, pssgId, startDateTime, endDateTime, side, startEvtSql, evtsQtty)
                   )
 
@@ -409,7 +410,8 @@ class DataBase(object):
                    "JOIN Organization ON (Person.orgId = Organization.id) "
                    "WHERE Person.orgId LIKE '{}' AND personId LIKE '{}' "
                    "AND Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND "
-                   "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' LIMIT {},{}"
+                   "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' "
+                   "ORDER BY Event.dateTime ASC LIMIT {},{}"
                    "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, 
                              side, startEvtSql, evtsQtty)
                   )
@@ -420,7 +422,6 @@ class DataBase(object):
                         "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}'"
                         "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, side)
                        )
-
 
         try:
             #Calculating the total count of that could be returned. This is necessary for paging
