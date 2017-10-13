@@ -351,16 +351,25 @@ class DataBase(object):
                   endDateTime, side, startEvt, evtsQtty):
         '''
         Return a dictionary with an interval of "evtsQtty" events starting from "startEvt".
-        If "personId" is None, the method will return only the events of the "Unknown" person
-        (for example events of passages opened by pressing REX button)
         '''
-        #If "orgId" is "None", "%" is assigned to tell SQL to return all the organizations.
-        #The same is done with "personId", "zoneId", "pssgId" and "side".
-        if not orgId: orgId = '%'
-        if not personId: personId = '%'
-        if not zoneId: zoneId = '%'
-        if not pssgId: pssgId = '%'
-        if not side: side = '%'
+
+        #When the following parameters are not NULL, they are used to
+        #complete the below SQL sentence.
+        if personId: personFilter = ' AND Event.personId = {}'.format(personId)
+        else: personFilter = ''
+
+        if orgId: orgFilter = ' AND Person.orgId = {}'.format(orgId)
+        else: orgFilter = ''
+
+        if pssgId: pssgFilter = ' AND Event.pssgId = {}'.format(pssgId)
+        else: pssgFilter = ''
+
+        if zoneId: zoneFilter = ' AND Passage.zoneId = {}'.format(zoneId)
+        else: zoneFilter = ''
+
+        if side: sideFilter = ' AND Event.side = {}'.format(side)
+        else: sideFilter = ''
+
 
         #"startEvt" should not be < 1 since it is substracted by 1 to generate
         #the SQL sentence and less than 0 should raise a programming error sql
@@ -374,61 +383,36 @@ class DataBase(object):
 
         #The startEvt value is substracted one since SQL starts indexing on 0.
         startEvtSql = startEvt - 1
+        
+        sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
+               "Passage.description AS pssgName, Organization.name AS orgName, "
+               "Person.name AS personName, Event.latchId, Event.dateTime, "
+               "Event.side, Event.allowed, Event.notReasonId "
+               "FROM Event LEFT JOIN Passage ON (Event.pssgId = Passage.id) "
+               "LEFT JOIN Zone ON (Passage.zoneId = Zone.id) "
+               "LEFT JOIN Person ON (Event.personId = Person.id) "
+               "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
+               "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{} "
+               "LIMIT {},{}"
+               "".format(startDateTime, endDateTime, personFilter, orgFilter, 
+                         pssgFilter, zoneFilter, sideFilter, startEvtSql, evtsQtty)
+              )
 
-        #If "personId" is "null", the events of "unknown" person should be returned.
-        #"lower()" method of string is used to be able to receive the "null" word 
-        #with uppercase in the URL
-        if personId.lower() == 'null':
-
-            sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
-                   "Passage.description AS pssgName, Event.latchId, "
-                   "Event.dateTime, Event.side, Event.allowed, Event.notReasonId "
-                   "FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
-                   "JOIN Zone ON (Passage.zoneId = Zone.id) "
-                   "WHERE Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND personId IS NULL "
-                   "AND dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' "
-                   "ORDER BY Event.dateTime ASC LIMIT {},{}"
-                   "".format(zoneId, pssgId, startDateTime, endDateTime, side, startEvtSql, evtsQtty)
-                  )
-
-
-            sqlCount = ("SELECT COUNT(*) FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
-                        "WHERE Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND personId IS NULL "
-                        "AND dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}'"
-                        "".format(zoneId, pssgId, startDateTime, endDateTime, side)
-                       )
-
-
-        else:
-            sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
-                   "Passage.description AS pssgName, Organization.name AS orgName, "
-                   "Person.name AS personName, Event.latchId, Event.dateTime, "
-                   "Event.side, Event.allowed, Event.notReasonId "
-                   "FROM Event JOIN Passage ON (Event.pssgId = Passage.id) "
-                   "JOIN Zone ON (Passage.zoneId = Zone.id) "
-                   "JOIN Person ON (Event.personId = Person.id) "
-                   "JOIN Organization ON (Person.orgId = Organization.id) "
-                   "WHERE Person.orgId LIKE '{}' AND personId LIKE '{}' "
-                   "AND Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND "
-                   "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}' "
-                   "ORDER BY Event.dateTime ASC LIMIT {},{}"
-                   "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, 
-                             side, startEvtSql, evtsQtty)
-                  )
-
-            sqlCount = ("SELECT COUNT(*) FROM Event JOIN Person ON (Event.personId = Person.id) JOIN "
-                        "Passage ON (Event.pssgId = Passage.id) WHERE Person.orgId LIKE '{}' AND "
-                        "personId LIKE '{}' AND Passage.zoneId LIKE '{}' AND pssgId LIKE '{}' AND "
-                        "dateTime >= '{}' AND dateTime <= '{}' AND side LIKE '{}'"
-                        "".format(orgId, personId, zoneId, pssgId, startDateTime, endDateTime, side)
-                       )
+        sqlCount = ("SELECT COUNT(*) FROM Event LEFT JOIN Passage ON (Event.pssgId = Passage.id) "
+                    "LEFT JOIN Zone ON (Passage.zoneId = Zone.id) "
+                    "LEFT JOIN Person ON (Event.personId = Person.id) "
+                    "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
+                    "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}"
+                    "".format(startDateTime, endDateTime, personFilter, orgFilter,     
+                         pssgFilter, zoneFilter, sideFilter)
+                   )
 
         try:
             #Calculating the total count of that could be returned. This is necessary for paging
             self.execute(sqlCount)
             totalEvtsCount = self.cursor.fetchone()['COUNT(*)']
 
-            #If the firs event selected is higher than the total count of events
+            #If the first event selected is higher than the total count of events
             #an exception is raised.
             if startEvt > totalEvtsCount:
                 self.logger.debug('The first event is higher than the count of all events.')
