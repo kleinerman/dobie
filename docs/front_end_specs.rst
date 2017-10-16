@@ -1444,8 +1444,8 @@ An the tipical response would be:
         "id": 1545, 
         "latchId": null, 
         "notReasonId": null, 
-        "orgName": "Datacenter Capitalinas", 
-        "personName": "Jorge Kleinerman", 
+        "orgName": "null", 
+        "personName": "null", 
         "pssgName": "Ingreso F66", 
         "side": null, 
         "zoneName": "Ingreso Oficina"
