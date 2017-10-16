@@ -1305,6 +1305,9 @@ If all the events from an entire organization is need, an organization should be
   http://172.18.0.3:5000/api/v1.0/events?orgId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
 
+If the word "ALL" in organization window is selected, events from all organizations will be retrieved. Also events corresponding to "UNKNOWN" persons will be retrieved in this way. They are events corresponding to persons opening the passages with buttons, passages forced or passages left opened.
+
+
 
 
 If a zone is selected, the passage window should show all the passages of this zone and one of them should be picked up by the user.
