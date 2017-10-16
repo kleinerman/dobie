@@ -1276,7 +1276,7 @@ In the second screen screen organization, person, zone, passage, direction, star
 
 .. image:: images_front_end_specs/events_searcher.png
 
-If an organization is selected, the person section should show all the persons of this organization and one of them should be picked up by the user.
+If an organization is selected, the person combobox should show all the persons of this organization and one of them should be selected by the user.
 To get from server the current list of persons of an organization, see `Get Persons`_ section.
 
 The following REST method should be sent to the server.
@@ -1294,7 +1294,7 @@ The following REST method should be sent to the server.
 ``evtsQtty`` variable should be the quantity of events returned from server starting from ``startEvt``
 
   
-If all the events from an entire organization is need, an organization should be selected in the organization window and the word "ALL" in the person window too. The following REST method shoud be sent to the server:
+If all the events from an entire organization is need, an organization should be selected in the organization combobox and the word "ALL" in the person combobox too. The following REST method shoud be sent to the server:
 
 **Method:** GET
 
@@ -1305,12 +1305,20 @@ If all the events from an entire organization is need, an organization should be
   http://172.18.0.3:5000/api/v1.0/events?orgId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
 
-If the word "ALL" in organization window is selected, events from all organizations will be retrieved. Also events corresponding to "UNKNOWN" persons will be retrieved in this way. They are events corresponding to persons opening the passages with buttons, passages forced or passages left opened.
+If the word "ALL" in organization combobox is selected, events from all organizations will be retrieved. Also events corresponding to "UNKNOWN" persons will be retrieved in this way. They are events corresponding to persons opening the passages with buttons, passages forced or passages left opened.
 
 
+**Method:** GET
 
+**URI:**
 
-If a zone is selected, the passage window should show all the passages of this zone and one of them should be picked up by the user.
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
+  
+  
+
+If a zone is selected, the passage combobox should show all the passages of this zone and one of them should be slected by the user.
 To get from server the current list of passages of a zone, see `Getting passages from a zone`_ section.
 
 The following REST method should be sent to the server.
@@ -1325,7 +1333,7 @@ The following REST method should be sent to the server.
 
 
 
-If all the events from an entire zone is need, a zone should be selected in the zone window and the word "ALL" in the passage window too. The following REST method shoud be sent to the server:
+If all the events from an entire zone is need, a zone should be selected in the zone combobox and the word "ALL" in the passage combobox too. The following REST method shoud be sent to the server:
 
 **Method:** GET
 
@@ -1380,20 +1388,34 @@ An the tipical response would be:
 **Response:**
 
 .. code-block::
-
+  
+  
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 3930
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 12 Oct 2017 19:58:25 GMT
+  Content-Length: 3709
+  Server: Werkzeug/0.12.2 Python/3.6.2
+  Date: Mon, 16 Oct 2017 20:46:26 GMT
   
   {
     "events": [
       {
+        "allowed": 0, 
+        "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT", 
+        "eventTypeId": 4, 
+        "id": 1542, 
+        "latchId": null, 
+        "notReasonId": null, 
+        "orgName": null, 
+        "personName": null, 
+        "pssgName": "Ingreso F66", 
+        "side": null, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
         "allowed": 1, 
-        "dateTime": "Thu, 05 Oct 2017 09:25:00 GMT", 
+        "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT", 
         "eventTypeId": 1, 
-        "id": 1137, 
+        "id": 1543, 
         "latchId": 1, 
         "notReasonId": null, 
         "orgName": "Datacenter Capitalinas", 
@@ -1404,22 +1426,74 @@ An the tipical response would be:
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Thu, 05 Oct 2017 09:30:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 1139, 
-        "latchId": 1, 
+        "dateTime": "Thu, 12 Oct 2017 17:20:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 1544, 
+        "latchId": 3, 
+        "notReasonId": null, 
+        "orgName": null, 
+        "personName": null, 
+        "pssgName": "Ingreso F66", 
+        "side": 0, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 0, 
+        "dateTime": "Thu, 12 Oct 2017 17:21:00 GMT", 
+        "eventTypeId": 3, 
+        "id": 1545, 
+        "latchId": null, 
         "notReasonId": null, 
         "orgName": "Datacenter Capitalinas", 
-        "personName": "Ary Kleinerman", 
+        "personName": "Jorge Kleinerman", 
         "pssgName": "Ingreso F66", 
-        "side": 1, 
+        "side": null, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Thu, 05 Oct 2017 09:39:00 GMT", 
+        "dateTime": "Thu, 12 Oct 2017 17:22:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 1546, 
+        "latchId": 3, 
+        "notReasonId": null, 
+        "orgName": null, 
+        "personName": null, 
+        "pssgName": "Ingreso F66", 
+        "side": 0, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Thu, 12 Oct 2017 17:56:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 1547, 
+        "latchId": 3, 
+        "notReasonId": null, 
+        "orgName": null, 
+        "personName": null, 
+        "pssgName": "Ingreso F66", 
+        "side": 0, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Thu, 12 Oct 2017 18:01:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 1548, 
+        "latchId": 3, 
+        "notReasonId": null, 
+        "orgName": null, 
+        "personName": null, 
+        "pssgName": "Ingreso F66", 
+        "side": 0, 
+        "zoneName": "Ingreso Oficina"
+      }, 
+      {
+        "allowed": 1, 
+        "dateTime": "Thu, 12 Oct 2017 18:01:00 GMT", 
         "eventTypeId": 1, 
-        "id": 1143, 
+        "id": 1549, 
         "latchId": 1, 
         "notReasonId": null, 
         "orgName": "Datacenter Capitalinas", 
@@ -1430,102 +1504,38 @@ An the tipical response would be:
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Thu, 05 Oct 2017 09:59:00 GMT", 
+        "dateTime": "Thu, 12 Oct 2017 18:02:00 GMT", 
         "eventTypeId": 1, 
-        "id": 1146, 
+        "id": 1550, 
         "latchId": 1, 
         "notReasonId": null, 
         "orgName": "Datacenter Capitalinas", 
         "personName": "Jorge Kleinerman", 
-        "pssgName": "Ingreso F66", 
+        "pssgName": "Ingreso F65", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
       {
         "allowed": 1, 
-        "dateTime": "Thu, 05 Oct 2017 10:53:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 1151, 
-        "latchId": 1, 
+        "dateTime": "Thu, 12 Oct 2017 18:02:00 GMT", 
+        "eventTypeId": 2, 
+        "id": 1551, 
+        "latchId": 3, 
         "notReasonId": null, 
-        "orgName": "Datacenter Capitalinas", 
-        "personName": "Ary Kleinerman", 
+        "orgName": null, 
+        "personName": null, 
         "pssgName": "Ingreso F66", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 1, 
-        "dateTime": "Thu, 05 Oct 2017 11:07:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 1153, 
-        "latchId": 1, 
-        "notReasonId": null, 
-        "orgName": "Datacenter Capitalinas", 
-        "personName": "Ary Kleinerman", 
-        "pssgName": "Ingreso F66", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 1, 
-        "dateTime": "Thu, 05 Oct 2017 11:38:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 1157, 
-        "latchId": 1, 
-        "notReasonId": null, 
-        "orgName": "Datacenter Capitalinas", 
-        "personName": "Jorge Kleinerman", 
-        "pssgName": "Ingreso F66", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 1, 
-        "dateTime": "Thu, 05 Oct 2017 17:54:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 1178, 
-        "latchId": 1, 
-        "notReasonId": null, 
-        "orgName": "Datacenter Capitalinas", 
-        "personName": "Ary Kleinerman", 
-        "pssgName": "Ingreso F66", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 1, 
-        "dateTime": "Fri, 06 Oct 2017 08:09:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 1188, 
-        "latchId": 1, 
-        "notReasonId": null, 
-        "orgName": "Datacenter Capitalinas", 
-        "personName": "Javier Coronel", 
-        "pssgName": "Ingreso F66", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 1, 
-        "dateTime": "Fri, 06 Oct 2017 09:25:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 1192, 
-        "latchId": 1, 
-        "notReasonId": null, 
-        "orgName": "Datacenter Capitalinas", 
-        "personName": "Ary Kleinerman", 
-        "pssgName": "Ingreso F66", 
-        "side": 1, 
+        "side": 0, 
         "zoneName": "Ingreso Oficina"
       }
     ], 
     "evtsQtty": 10, 
-    "nextURL": "http://172.18.0.3:5000/api/v1.0/events?orgId=3&pssgId=2&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=90&evtsQtty=10", 
-    "prevURL": "http://172.18.0.3:5000/api/v1.0/events?orgId=3&pssgId=2&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=70&evtsQtty=10", 
-    "startEvt": 80, 
-    "totalEvtsCount": 136
+    "nextURL": "http://172.18.0.3:5000/api/v1.0/events?startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=1552&evtsQtty=10", 
+    "prevURL": "http://172.18.0.3:5000/api/v1.0/events?startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=1532&evtsQtty=10", 
+    "startEvt": 1542, 
+    "totalEvtsCount": 1612
   }
+
 
 
 A JSON object is returned with the following keys:
@@ -1537,175 +1547,20 @@ A JSON object is returned with the following keys:
 - ``nextURL``: Is the URI of the next page.
 - ``prevURL``: Is the URI of the previous page.
 
-When person is KNOWN, each event has the following fields:
+Each event has the following fields:
 
 - ``id``: The ID of the event.
 - ``eventTypeId``: ID of type of event.
 - ``dateTime``: Date and time of the event.
-- ``latchId``: ID of latch used.
-- ``side``: 1 for incoming and 0 for outgoing.
+- ``latchId``: ID of latch used. (Could be NULL when the access was not allowed)
+- ``side``: 1 for incoming and 0 for outgoing. (Could be NULL when the access was not allowed)
 - ``zoneName``: Name of the zone.
 - ``pssgName```: Name of the passage.
-- ``orgName``: Name of the organization that person belong to.
-- ``personName``: Name of the person. 
-- ``notReasonId``: When the access is not allowed, this is the ID of notReason.
+- ``orgName``: Name of the organization that person belong to. (Could be NULL when person is UNKNOWN)
+- ``personName``: Name of the person. (Could be NULL when person is UNKNOWN)
+- ``notReasonId``: When the access is not allowed, this is the ID of notReason. (Could be NULL when the access was allowed)
 - ``allowed``: If the access was allowed it will be ``1``, if not, it will ``0``.
 
-
-When a passage is opened using a button or a passage is forced, the ``personId`` of the event would be ``null`` meaning an "unknown" person passed trough this passage.
-To query those events, ``personId=null`` should be placed in the URI:
-
-**Method:** GET
-
-**URI:**
-
-.. code-block::
-  
-  http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=11&evtsQtty=10
-
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 3033
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 12 Oct 2017 20:05:23 GMT
-  
-  {
-    "events": [
-      {
-        "allowed": 1, 
-        "dateTime": "Wed, 13 Sep 2017 20:26:00 GMT", 
-        "eventTypeId": 2, 
-        "id": 12, 
-        "latchId": 3, 
-        "notReasonId": null, 
-        "pssgName": "Ingreso F65", 
-        "side": 0, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 0, 
-        "dateTime": "Thu, 14 Sep 2017 08:08:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 33, 
-        "latchId": 1, 
-        "notReasonId": 1, 
-        "pssgName": "Ingreso F65", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 0, 
-        "dateTime": "Thu, 14 Sep 2017 08:08:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 32, 
-        "latchId": 1, 
-        "notReasonId": 1, 
-        "pssgName": "Ingreso F65", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 0, 
-        "dateTime": "Thu, 14 Sep 2017 09:59:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 44, 
-        "latchId": 1, 
-        "notReasonId": 1, 
-        "pssgName": "Ingreso F65", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 0, 
-        "dateTime": "Thu, 14 Sep 2017 09:59:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 43, 
-        "latchId": 1, 
-        "notReasonId": 1, 
-        "pssgName": "Ingreso F65", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 0, 
-        "dateTime": "Thu, 14 Sep 2017 10:08:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 46, 
-        "latchId": 1, 
-        "notReasonId": 1, 
-        "pssgName": "Ingreso F65", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 0, 
-        "dateTime": "Thu, 14 Sep 2017 10:08:00 GMT", 
-        "eventTypeId": 1, 
-        "id": 45, 
-        "latchId": 1, 
-        "notReasonId": 1, 
-        "pssgName": "Ingreso F65", 
-        "side": 1, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 1, 
-        "dateTime": "Thu, 14 Sep 2017 11:59:00 GMT", 
-        "eventTypeId": 2, 
-        "id": 49, 
-        "latchId": 3, 
-        "notReasonId": null, 
-        "pssgName": "Ingreso F65", 
-        "side": 0, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 1, 
-        "dateTime": "Thu, 14 Sep 2017 12:45:00 GMT", 
-        "eventTypeId": 2, 
-        "id": 52, 
-        "latchId": 3, 
-        "notReasonId": null, 
-        "pssgName": "Ingreso F65", 
-        "side": 0, 
-        "zoneName": "Ingreso Oficina"
-      }, 
-      {
-        "allowed": 1, 
-        "dateTime": "Thu, 14 Sep 2017 12:55:00 GMT", 
-        "eventTypeId": 2, 
-        "id": 53, 
-        "latchId": 3, 
-        "notReasonId": null, 
-        "pssgName": "Ingreso F65", 
-        "side": 0, 
-        "zoneName": "Ingreso Oficina"
-      }
-    ], 
-    "evtsQtty": 10, 
-    "nextURL": "http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=21&evtsQtty=10", 
-    "prevURL": "http://172.18.0.3:5000/api/v1.0/events?personId=null&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=1&evtsQtty=10", 
-    "startEvt": 11, 
-    "totalEvtsCount": 775
-  }
-
-
-When person is UNKNOWN, each event has the following fields:
-
-- ``id``: The ID of the event.
-- ``eventTypeId``: ID of type of event.
-- ``dateTime``: Date and time of the event.
-- ``latchId``: ID of latch used.
-- ``side``: 1 for incoming and 0 for outgoing.
-- ``zoneName``: Name of the zone.
-- ``pssgName```: Name of the passage.
-- ``notReasonId``: When the access is not allowed, this is the ID of notReason.
-- ``allowed``: If the access was allowed it will be ``1``, if not, it will ``0``.
 
 
 
