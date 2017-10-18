@@ -1683,6 +1683,6 @@ To show **Not Reasons** descriptions with the ``notReasonId`` received in the ev
 Event Reports
 ~~~~~~~~~~~~~
 
-When all the filters are applied a pop up window will appear with the report:
+When all the filters are applied and search button is pressed a pop up window will appear with the report:
 
 .. image:: images_front_end_specs/events_report.png
