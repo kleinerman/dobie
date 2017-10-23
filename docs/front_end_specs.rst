@@ -1643,7 +1643,7 @@ To show **DoorLocks** descriptions with the ``doorLockId`` received in the event
 
 
 
-To show **Not Reasons** descriptions with the ``denialCauseId`` received in the event, the following method should be sent to the server:
+To show **Denial Causes** descriptions with the ``denialCauseId`` received in the event, the following method should be sent to the server:
 
 **Method:** GET
 
