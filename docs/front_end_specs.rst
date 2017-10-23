@@ -1651,7 +1651,7 @@ To show **Not Reasons** descriptions with the ``denialCauseId`` received in the 
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/notreason
+  http://172.18.0.3:5000/api/v1.0/denialcause
 
 
 **Response:**
