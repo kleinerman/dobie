@@ -822,7 +822,7 @@ In the last case, the access will have a field called "liAccesses" which will ha
 Add Access
 ~~~~~~~~~~
 
-For the first screen **(Person -> Pasage)**, before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
+For the first screen **(Person -> Door)**, before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
 
 .. image:: images_front_end_specs/add_access_per_pas.png
 
@@ -1613,7 +1613,7 @@ To show **DoorLocks** descriptions with the ``doorLockId`` received in the event
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/doorLock
+  http://172.18.0.3:5000/api/v1.0/doorlock
 
 
 **Response:**
