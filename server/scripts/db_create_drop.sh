@@ -25,12 +25,12 @@ function create {
 
         INSERT INTO Role(id, description) VALUES (1, 'Administrator'), (2, 'Viewer');
         INSERT INTO User(description, username, passwdHash, roleId) VALUES ('Administrator', 'admin', '\$1\$CJvRt.x.\$ZmuMH4up3zMGnip.Kn7vI0', 1);
-        INSERT INTO RowState(id, description) VALUES (1, 'To Add'), (2, 'To Update'), (3, 'Committed'), (4, 'To Delete'), (5, 'Deleted');
-        INSERT INTO Organization(id, name, rowStateId) VALUES(1, 'Visitors', 3);
-        INSERT INTO EventType(id, description) VALUES(1, 'Access with card'), (2, 'Access with button'), (3, 'The passage remains opened'), (4, 'The passage was forced');
-        INSERT INTO Latch(id, description) VALUES(1, 'Card Reader'), (2, 'Fingerprint Reader'), (3, 'Button');
-        INSERT INTO NotReason(id, description) VALUES(1, 'No access'), (2, 'Expired card'), (3, 'Out of time');
-        INSERT INTO CtrllerModel(id, name, boardModel, pssgsQuant) VALUES(1, 'Dobie-RP1-333', 'Raspberry PI', 3);
+        INSERT INTO ResState(id, description) VALUES (1, 'To Add'), (2, 'To Update'), (3, 'Committed'), (4, 'To Delete'), (5, 'Deleted');
+        INSERT INTO Organization(id, name, resStateId) VALUES(1, 'Visitors', 3);
+        INSERT INTO EventType(id, description) VALUES(1, 'Access with card'), (2, 'Access with button'), (3, 'The door remains opened'), (4, 'The door was forced');
+        INSERT INTO DoorLock(id, description) VALUES(1, 'Card Reader'), (2, 'Fingerprint Reader'), (3, 'Button');
+        INSERT INTO DenialCause(id, description) VALUES(1, 'No access'), (2, 'Expired card'), (3, 'Out of time');
+        INSERT INTO CtrllerModel(id, name, boardModel, doorsQuant) VALUES(1, 'Dobie-RP1-333', 'Raspberry PI', 3);
 
                                                    "
 

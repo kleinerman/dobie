@@ -83,7 +83,7 @@ class ZoneNotFound(ZoneError):
 
 
 
-class VisitorsPssgsError(Exception):
+class VisitorsDoorsError(Exception):
     '''
     '''
     def __init__(self, errorMessage):
@@ -93,7 +93,7 @@ class VisitorsPssgsError(Exception):
         return self.errorMessage
 
 
-class VisitorsPssgsNotFound(ZoneError):
+class VisitorsDoorsNotFound(ZoneError):
     '''
     '''
     pass
@@ -117,7 +117,7 @@ class ControllerNotFound(ControllerError):
     pass
 
 
-class PassageError(Exception):
+class DoorError(Exception):
     '''
     '''
     def __init__(self, errorMessage):
@@ -127,7 +127,7 @@ class PassageError(Exception):
         return self.errorMessage
 
 
-class PassageNotFound(PassageError):
+class DoorNotFound(DoorError):
     '''
     '''
     pass
@@ -169,7 +169,7 @@ class EventNotFound(EventError):
 
 
 
-class RowStateError(Exception):
+class ResStateError(Exception):
     '''
     '''
     def __init__(self, errorMessage):
@@ -179,7 +179,7 @@ class RowStateError(Exception):
         return self.errorMessage
 
 
-class RowStateNotFound(RowStateError):
+class ResStateNotFound(ResStateError):
     '''
     '''
     pass
@@ -204,7 +204,7 @@ class EventTypeNotFound(EventTypeError):
 
 
 
-class LatchError(Exception):
+class DoorLockError(Exception):
     '''
     '''
     def __init__(self, errorMessage):
@@ -214,7 +214,7 @@ class LatchError(Exception):
         return self.errorMessage
 
 
-class LatchNotFound(LatchError):
+class DoorLockNotFound(DoorLockError):
     '''
     '''
     pass
@@ -222,7 +222,7 @@ class LatchNotFound(LatchError):
 
 
 
-class NotReasonError(Exception):
+class DenialCauseError(Exception):
     '''
     '''
     def __init__(self, errorMessage):
@@ -232,7 +232,7 @@ class NotReasonError(Exception):
         return self.errorMessage
 
 
-class NotReasonNotFound(NotReasonError):
+class DenialCauseNotFound(DenialCauseError):
     '''
     '''
     pass
@@ -320,7 +320,7 @@ class DataBase(object):
         for event in events:
 
             #Converting all None fields to 'NULL' to write the SQL sentence
-            #At this moment this is only need in 'personId' and 'notReason'
+            #At this moment this is only need in 'personId' and 'denialCause'
             #fields
             for eventField in event:
                 if event[eventField] == None:
@@ -328,11 +328,11 @@ class DataBase(object):
 
 
             sql = ("INSERT INTO "
-                   "Event(eventTypeId, pssgId, dateTime, latchId, personId, side, allowed, notReasonId) "
+                   "Event(eventTypeId, doorId, dateTime, doorLockId, personId, side, allowed, denialCauseId) "
                    "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
-                   "".format(event['eventTypeId'], event['pssgId'], event['dateTime'],
-                             event['latchId'], event['personId'], event['side'],
-                             event['allowed'], event['notReasonId']
+                   "".format(event['eventTypeId'], event['doorId'], event['dateTime'],
+                             event['doorLockId'], event['personId'], event['side'],
+                             event['allowed'], event['denialCauseId']
                             ) 
 
                   )
@@ -347,7 +347,7 @@ class DataBase(object):
 
 
 
-    def getEvents(self, orgId, personId, zoneId, pssgId, startDateTime, 
+    def getEvents(self, orgId, personId, zoneId, doorId, startDateTime, 
                   endDateTime, side, startEvt, evtsQtty):
         '''
         Return a dictionary with an interval of "evtsQtty" events starting from "startEvt".
@@ -361,10 +361,10 @@ class DataBase(object):
         if orgId: orgFilter = ' AND Person.orgId = {}'.format(orgId)
         else: orgFilter = ''
 
-        if pssgId: pssgFilter = ' AND Event.pssgId = {}'.format(pssgId)
-        else: pssgFilter = ''
+        if doorId: doorFilter = ' AND Event.doorId = {}'.format(doorId)
+        else: doorFilter = ''
 
-        if zoneId: zoneFilter = ' AND Passage.zoneId = {}'.format(zoneId)
+        if zoneId: zoneFilter = ' AND Door.zoneId = {}'.format(zoneId)
         else: zoneFilter = ''
 
         if side: sideFilter = ' AND Event.side = {}'.format(side)
@@ -385,26 +385,26 @@ class DataBase(object):
         startEvtSql = startEvt - 1
         
         sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
-               "Passage.description AS pssgName, Organization.name AS orgName, "
-               "Person.name AS personName, Event.latchId, Event.dateTime, "
-               "Event.side, Event.allowed, Event.notReasonId "
-               "FROM Event LEFT JOIN Passage ON (Event.pssgId = Passage.id) "
-               "LEFT JOIN Zone ON (Passage.zoneId = Zone.id) "
+               "Door.description AS doorName, Organization.name AS orgName, "
+               "Person.name AS personName, Event.doorLockId, Event.dateTime, "
+               "Event.side, Event.allowed, Event.denialCauseId "
+               "FROM Event LEFT JOIN Door ON (Event.doorId = Door.id) "
+               "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
                "LEFT JOIN Person ON (Event.personId = Person.id) "
                "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
                "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{} "
                "LIMIT {},{}"
                "".format(startDateTime, endDateTime, personFilter, orgFilter, 
-                         pssgFilter, zoneFilter, sideFilter, startEvtSql, evtsQtty)
+                         doorFilter, zoneFilter, sideFilter, startEvtSql, evtsQtty)
               )
 
-        sqlCount = ("SELECT COUNT(*) FROM Event LEFT JOIN Passage ON (Event.pssgId = Passage.id) "
-                    "LEFT JOIN Zone ON (Passage.zoneId = Zone.id) "
+        sqlCount = ("SELECT COUNT(*) FROM Event LEFT JOIN Door ON (Event.doorId = Door.id) "
+                    "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
                     "LEFT JOIN Person ON (Event.personId = Person.id) "
                     "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
                     "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}"
                     "".format(startDateTime, endDateTime, personFilter, orgFilter,     
-                         pssgFilter, zoneFilter, sideFilter)
+                         doorFilter, zoneFilter, sideFilter)
                    )
 
         try:
@@ -569,23 +569,23 @@ class DataBase(object):
 
 #----------------------------------Row State------------------------------------------
 
-    def getRowStates(self):
+    def getResStates(self):
         '''
-        Return a a dictionary with all rowStates
+        Return a a dictionary with all resStates
         '''
         try:
-            sql = ('SELECT * FROM RowState')
+            sql = ('SELECT * FROM ResState')
             self.execute(sql)
-            rowStates = self.cursor.fetchall()
-            return rowStates
+            resStates = self.cursor.fetchall()
+            return resStates
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise RowStateError('Can not get Row States')
+            raise ResStateError('Can not get Row States')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise RowStateError('Can not get Row States')
+            raise ResStateError('Can not get Row States')
 
 
 
@@ -612,50 +612,50 @@ class DataBase(object):
             raise EventTypeError('Can not get Event Types')
 
 
-#----------------------------------Latches------------------------------------------
+#----------------------------------DoorLocks------------------------------------------
 
-    def getLatches(self):
+    def getDoorLocks(self):
         '''
-        Return a a dictionary with all Latches
+        Return a a dictionary with all DoorLocks
         '''
 
         try:
-            sql = ('SELECT * FROM Latch')
+            sql = ('SELECT * FROM DoorLock')
             self.execute(sql)
-            latches = self.cursor.fetchall()
-            return latches
+            doorLocks = self.cursor.fetchall()
+            return doorLocks
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise LatchError('Can not get Latches')
+            raise DoorLockError('Can not get DoorLocks')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise LatchError('Can not get Latches')
+            raise DoorLockError('Can not get DoorLocks')
 
 
 
 
 #----------------------------------Not Reasons------------------------------------------
 
-    def getNotReasons(self):
+    def getDenialCauses(self):
         '''
         Return a a dictionary with all Not Reasons
         '''
 
         try:
-            sql = ('SELECT * FROM NotReason')
+            sql = ('SELECT * FROM DenialCause')
             self.execute(sql)
-            notReasons = self.cursor.fetchall()
-            return notReasons
+            denialCauses = self.cursor.fetchall()
+            return denialCauses
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise NotReasonError('Can not get Not Reasons')
+            raise DenialCauseError('Can not get Not Reasons')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise NotReasonError('Can not get Not Reasons')
+            raise DenialCauseError('Can not get Not Reasons')
 
 
 
@@ -690,7 +690,7 @@ class DataBase(object):
         It returns the id of the added organization.
         '''
 
-        sql = ("INSERT INTO Organization(name, rowStateId) VALUES('{}', {})"
+        sql = ("INSERT INTO Organization(name, resStateId) VALUES('{}', {})"
                "".format(organization['name'], COMMITTED)
               )
         
@@ -719,11 +719,11 @@ class DataBase(object):
         '''
 
         if self.getPersons(orgId, includeDeleted=False):
-            sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+            sql = ("UPDATE Organization SET resStateId = {} WHERE id = {}"
                    "".format(TO_DELETE, orgId)
                   )
         else:
-            sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+            sql = ("UPDATE Organization SET resStateId = {} WHERE id = {}"
                    "".format(DELETED, orgId)
                   )
 
@@ -780,19 +780,19 @@ class DataBase(object):
         try:
 
             #Getting the orgId this person belong to
-            sql = ("SELECT Organization.id, Organization.rowStateId FROM Organization "
+            sql = ("SELECT Organization.id, Organization.resStateId FROM Organization "
                    "JOIN Person ON (Organization.id = Person.orgId) WHERE Person.id = {}"
                    "".format(personId)
                   )
             self.execute(sql)
             row = self.cursor.fetchone()
-            orgId, rowStateId = row['id'], row['rowStateId']
+            orgId, resStateId = row['id'], row['resStateId']
 
-            if rowStateId == TO_DELETE:
+            if resStateId == TO_DELETE:
 
                 #Gets the number of people who belong to this organization and who have
                 #not yet been eliminated
-                sql = ("SELECT COUNT(*) FROM Person WHERE orgId = {} AND rowStateId != {}"
+                sql = ("SELECT COUNT(*) FROM Person WHERE orgId = {} AND resStateId != {}"
                        "".format(orgId, DELETED)
                       )
                 self.execute(sql)
@@ -800,7 +800,7 @@ class DataBase(object):
 
                 #If personCount is 0, the organization can be deleted.
                 if personCount == 0:
-                    sql = ("UPDATE Organization SET rowStateId = {} WHERE id = {}"
+                    sql = ("UPDATE Organization SET resStateId = {} WHERE id = {}"
                            "".format(DELETED, orgId)
                           )
                     self.execute(sql)
@@ -906,32 +906,32 @@ class DataBase(object):
 
 
 
-#----------------------------------Visitors Passage-----------------------------------
+#----------------------------------Visitors Door-----------------------------------
 
 
 
 
-    def getVisitorsPssgss(self):
+    def getVisitorsDoorss(self):
         '''
         Return a dictionary with all Zones
         '''
-        sql = ('SELECT * FROM VisitorsPassages')
+        sql = ('SELECT * FROM VisitorsDoors')
         self.execute(sql)
-        visitorsPssgss = self.cursor.fetchall()
+        visitorsDoorss = self.cursor.fetchall()
 
-        return visitorsPssgss
-
-
+        return visitorsDoorss
 
 
-    def addVisitorsPssgs(self, visitorsPssgs):
+
+
+    def addVisitorsDoors(self, visitorsDoors):
         '''
-        Receive a dictionary with Visitors Passagess parametters 
-        and save it in DB. It returns the id of the added Visitor Passages.
+        Receive a dictionary with Visitors Doorss parametters 
+        and save it in DB. It returns the id of the added Visitor Doors.
         '''
 
-        sql = ("INSERT INTO VisitorsPassages(name) VALUES('{}')"
-               "".format(visitorsPssgs['name'])
+        sql = ("INSERT INTO VisitorsDoors(name) VALUES('{}')"
+               "".format(visitorsDoors['name'])
               )
 
         try:
@@ -941,66 +941,66 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsPssgsError('Can not add this Visitors Passages')
+            raise VisitorsDoorsError('Can not add this Visitors Doors')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsPssgsError('Can not add this Visitors Passages: wrong argument')
+            raise VisitorsDoorsError('Can not add this Visitors Doors: wrong argument')
 
 
 
-    def delVisitorsPssgs(self, visitorsPssgsId):
+    def delVisitorsDoors(self, visitorsDoorsId):
         '''
-        Receive a dictionary with Visitors Passage id and delete the Visitor Passage
+        Receive a dictionary with Visitors Door id and delete the Visitor Door
         '''
 
-        sql = ("DELETE FROM VisitorsPassages WHERE id = {}"
-               "".format(visitorsPssgsId)
+        sql = ("DELETE FROM VisitorsDoors WHERE id = {}"
+               "".format(visitorsDoorsId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsPssgsNotFound('Visitors Passages not found')
+                raise VisitorsDoorsNotFound('Visitors Doors not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsPssgsError('Can not delete this Visitors Passages')
+            raise VisitorsDoorsError('Can not delete this Visitors Doors')
 
 
 
 
-    def updVisitorsPssgs(self, visitorsPssgs):
+    def updVisitorsDoors(self, visitorsDoors):
         '''
-        Receive a dictionary with Visitors Passages parametters and update it in DB
+        Receive a dictionary with Visitors Doors parametters and update it in DB
         '''
 
-        sql = ("UPDATE VisitorsPassages SET name = '{}' WHERE id = {}"
-               "".format(visitorsPssgs['name'], visitorsPssgs['id'])
+        sql = ("UPDATE VisitorsDoors SET name = '{}' WHERE id = {}"
+               "".format(visitorsDoors['name'], visitorsDoors['id'])
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsPssgsNotFound('Visitors Passages not found')
+                raise VisitorsDoorsNotFound('Visitors Doors not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsPssgsError('Can not update this Visitors Passages')
+            raise VisitorsDoorsError('Can not update this Visitors Doors')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsPssgsError('Can not update this Visitors Passages: wrong argument')
+            raise VisitorsDoorsError('Can not update this Visitors Doors: wrong argument')
 
 
 
 
-    def addPssgToVisitorsPssgs(self, visitorsPssgsId, pssgId):
+    def addDoorToVisitorsDoors(self, visitorsDoorsId, doorId):
         '''
         '''
 
-        sql = ("INSERT INTO VisitorsPassagesPassage(visitorsPssgsId, pssgId) "
-               "VALUES ({}, {})".format(visitorsPssgsId, pssgId)
+        sql = ("INSERT INTO VisitorsDoorsDoor(visitorsDoorsId, doorId) "
+               "VALUES ({}, {})".format(visitorsDoorsId, doorId)
               )
 
         try:
@@ -1010,32 +1010,32 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsPssgsError('Can not add this passage to Visitors Passage')
+            raise VisitorsDoorsError('Can not add this door to Visitors Door')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsPssgsError('Can not add this passage to Visitors Passage: wrong argument')
+            raise VisitorsDoorsError('Can not add this door to Visitors Door: wrong argument')
 
 
 
 
-    def delPssgFromVisitorsPssgs(self, visitorsPssgsId, pssgId):
+    def delDoorFromVisitorsDoors(self, visitorsDoorsId, doorId):
         '''
         '''
 
-        sql = ("DELETE FROM VisitorsPassagesPassage WHERE "
-               "visitorsPssgsId = {} AND pssgId = {}"
-               "".format(visitorsPssgsId, pssgId)
+        sql = ("DELETE FROM VisitorsDoorsDoor WHERE "
+               "visitorsDoorsId = {} AND doorId = {}"
+               "".format(visitorsDoorsId, doorId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsPssgsNotFound('Passage not found in Visitors Passages.')
+                raise VisitorsDoorsNotFound('Door not found in Visitors Doors.')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsPssgsError('Can not delete this Passage from Visitors Passages')
+            raise VisitorsDoorsError('Can not delete this Door from Visitors Doors')
 
 
 
@@ -1123,12 +1123,12 @@ class DataBase(object):
 
 
 
-    def getControllerMac(self, controllerId=None, passageId=None):
+    def getControllerMac(self, controllerId=None, doorId=None):
         '''
-        Return the controller MAC address receiving the controller ID or passage ID
+        Return the controller MAC address receiving the controller ID or door ID
         '''
 
-        if (controllerId and passageId) or (not controllerId and not passageId):
+        if (controllerId and doorId) or (not controllerId and not doorId):
             self.logger.debug("Incorrect arguments calling getControllerMac method.")
             raise ControllerError('Error getting the controller.')
             
@@ -1148,8 +1148,8 @@ class DataBase(object):
 
         else:
             sql = ("SELECT controller.macAddress FROM Controller controller JOIN "
-                   "Passage passage ON (controller.id = passage.controllerId) WHERE "
-                   "passage.id = {}".format(passageId)
+                   "Door door ON (controller.id = door.controllerId) WHERE "
+                   "door.id = {}".format(doorId)
                   )
 
             try:
@@ -1157,8 +1157,8 @@ class DataBase(object):
                 return self.cursor.fetchone()['macAddress']
 
             except TypeError:
-                self.logger.debug('This passage id is not present in any controller.')
-                raise PassageNotFound('Passage not found')
+                self.logger.debug('This door id is not present in any controller.')
+                raise DoorNotFound('Door not found')
 
 
 
@@ -1169,10 +1169,10 @@ class DataBase(object):
         to delete.
         '''
         
-        sql = ("SELECT macAddress FROM Controller controller JOIN Passage passage "
-               "ON (controller.id = passage.controllerId) JOIN Access access "
-               "ON (passage.id = access.pssgId) JOIN Person person "
-               "ON (access.personId = person.id) WHERE person.rowStateId = {} AND "
+        sql = ("SELECT macAddress FROM Controller controller JOIN Door door "
+               "ON (controller.id = door.controllerId) JOIN Access access "
+               "ON (door.id = access.doorId) JOIN Person person "
+               "ON (access.personId = person.id) WHERE person.resStateId = {} AND "
                "person.id = {}".format(TO_DELETE, personId)
               )
 
@@ -1199,16 +1199,16 @@ class DataBase(object):
         to crud messages.
         '''
 
-        sql = ("SELECT controller.macAddress FROM Controller controller JOIN Passage passage "
-               "ON (controller.id = passage.controllerId) WHERE passage.rowStateId IN ({0}, {1}, {2}) "
+        sql = ("SELECT controller.macAddress FROM Controller controller JOIN Door door "
+               "ON (controller.id = door.controllerId) WHERE door.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
-               "(controller.id = passage.controllerId) JOIN LimitedAccess limitedAccess ON "
-               "(passage.id = limitedAccess.pssgId) WHERE limitedAccess.rowStateId IN ({0}, {1}, {2}) "
+               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
+               "(controller.id = door.controllerId) JOIN LimitedAccess limitedAccess ON "
+               "(door.id = limitedAccess.doorId) WHERE limitedAccess.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Passage passage ON "
-               "(controller.id = passage.controllerId) JOIN Access access ON "
-               "(passage.id = access.pssgId) WHERE access.rowStateId IN ({0}, {1}, {2}) "
+               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
+               "(controller.id = door.controllerId) JOIN Access access ON "
+               "(door.id = access.doorId) WHERE access.resStateId IN ({0}, {1}, {2}) "
                "UNION "
                "SELECT macAddress FROM PersonPendingOperation"
                "".format(TO_ADD, TO_UPDATE, TO_DELETE)
@@ -1236,25 +1236,25 @@ class DataBase(object):
         '''
         This method is called by CRUD module when it is necessary to 
         reprovision an entire controller.
-        It sets all passages, access and limited access in state TO_ADD.
+        It sets all doors, access and limited access in state TO_ADD.
         Receive a dictionary with controller parametters and update it in central DB
         because MAC address and board model can change.
         '''
         try:
 
-            sql = ("UPDATE Passage SET rowStateId = {} WHERE controllerId = {}"
+            sql = ("UPDATE Door SET resStateId = {} WHERE controllerId = {}"
                    "".format(TO_ADD, controllerId)
                   )
             self.execute(sql)
 
-            sql = ("UPDATE Access SET rowStateId = {} WHERE pssgId IN "
-                   "(SELECT id FROM Passage WHERE controllerId = {}) AND allWeek = 1"
+            sql = ("UPDATE Access SET resStateId = {} WHERE doorId IN "
+                   "(SELECT id FROM Door WHERE controllerId = {}) AND allWeek = 1"
                    "".format(TO_ADD, controllerId)
                   )
             self.execute(sql)
 
-            sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE pssgId IN "
-                   "(SELECT id FROM Passage WHERE controllerId = {})"
+            sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE doorId IN "
+                   "(SELECT id FROM Door WHERE controllerId = {})"
                    "".format(TO_ADD, controllerId)
                   )
             self.execute(sql)
@@ -1271,17 +1271,17 @@ class DataBase(object):
 
 
 
-#----------------------------------Passage----------------------------------------
+#----------------------------------Door----------------------------------------
 
 
-    def getPassages(self, zoneId=None, visitorsPssgsId=None):
+    def getDoors(self, zoneId=None, visitorsDoorsId=None):
         '''
-        Return a dictionary with all passages in a Zone or in a visitorsPassages
+        Return a dictionary with all doors in a Zone or in a visitorsDoors
         according to the argument received
         '''
 
-        if not zoneId and not visitorsPssgsId:
-            raise PassageNotFound
+        if not zoneId and not visitorsDoorsId:
+            raise DoorNotFound
 
         elif zoneId:
 
@@ -1294,37 +1294,37 @@ class DataBase(object):
                 raise ZoneNotFound('Zone not found')
        
             # Get all persons from the organization
-            sql = ("SELECT * FROM Passage WHERE zoneId='{}'".format(zoneId))
+            sql = ("SELECT * FROM Door WHERE zoneId='{}'".format(zoneId))
             self.execute(sql)
-            passages = self.cursor.fetchall()
+            doors = self.cursor.fetchall()
         
-            return passages
+            return doors
 
-        elif visitorsPssgsId:
-            sql = ("SELECT COUNT(*) FROM VisitorsPassages WHERE id='{}'".format(visitorsPssgsId))
+        elif visitorsDoorsId:
+            sql = ("SELECT COUNT(*) FROM VisitorsDoors WHERE id='{}'".format(visitorsDoorsId))
             self.execute(sql)
             
             if self.cursor.fetchone()['COUNT(*)']:
         
-                sql = ("SELECT Passage.* from Passage JOIN VisitorsPassagesPassage "
-                       "ON (Passage.id = VisitorsPassagesPassage.pssgId) "
-                       "WHERE VisitorsPassagesPassage.visitorsPssgsId = {}"
-                       "".format(visitorsPssgsId)
+                sql = ("SELECT Door.* from Door JOIN VisitorsDoorsDoor "
+                       "ON (Door.id = VisitorsDoorsDoor.doorId) "
+                       "WHERE VisitorsDoorsDoor.visitorsDoorsId = {}"
+                       "".format(visitorsDoorsId)
                       )
                 self.execute(sql)
-                passages = self.cursor.fetchall()
-                return passages
+                doors = self.cursor.fetchall()
+                return doors
 
             else:
-                raise VisitorsPssgsNotFound('Visitors Passages not found')
+                raise VisitorsDoorsNotFound('Visitors Doors not found')
 
 
 
 
-    def getUncmtPassages(self, ctrllerMac, rowStateId):
+    def getUncmtDoors(self, ctrllerMac, resStateId):
         '''
-        This method is an iterator, in each iteration it returns a passage
-        not committed with the state "rowStateId" from the controller
+        This method is an iterator, in each iteration it returns a door
+        not committed with the state "resStateId" from the controller
         with the MAC address "ctrllerMac"
         IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
         in each iteration and between each iteration another method can be executed using
@@ -1332,39 +1332,39 @@ class DataBase(object):
         '''
 
         cursor = self.connection.cursor(pymysql.cursors.DictCursor)        
-        sql = ("SELECT passage.* FROM Passage passage JOIN Controller controller ON "
-               "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}' AND "
-               "rowStateId = {}".format(ctrllerMac, rowStateId))
+        sql = ("SELECT door.* FROM Door door JOIN Controller controller ON "
+               "(door.controllerId = controller.id) WHERE controller.macAddress = '{}' AND "
+               "resStateId = {}".format(ctrllerMac, resStateId))
 
         try:
 
             cursor.execute(sql)
-            passage = cursor.fetchone()
+            door = cursor.fetchone()
 
-            while passage:
-                #Removing the rowStateId as this field should not be sent to the controller
-                passage.pop('rowStateId')
-                yield passage
-                passage = cursor.fetchone()
+            while door:
+                #Removing the resStateId as this field should not be sent to the controller
+                door.pop('resStateId')
+                yield door
+                door = cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise PassageError('Error getting passages of not committed controllers')
+            raise DoorError('Error getting doors of not committed controllers')
 
 
 
 
-    def addPassage(self, passage):
+    def addDoor(self, door):
         '''
-        Receive a dictionary with passage parametters and save it in DB
-        It returns the id of the added passage
+        Receive a dictionary with door parametters and save it in DB
+        It returns the id of the added door
         '''
 
-        sql = ("INSERT INTO Passage(pssgNum, description, controllerId, rlseTime, bzzrTime, "
-               "alrmTime, zoneId, rowStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {})"
-               "".format(passage['pssgNum'], passage['description'], passage['controllerId'], 
-                         passage['rlseTime'], passage['bzzrTime'], passage['alrmTime'], 
-                         passage['zoneId'], TO_ADD)
+        sql = ("INSERT INTO Door(doorNum, description, controllerId, rlseTime, bzzrTime, "
+               "alrmTime, zoneId, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {})"
+               "".format(door['doorNum'], door['description'], door['controllerId'], 
+                         door['rlseTime'], door['bzzrTime'], door['alrmTime'], 
+                         door['zoneId'], TO_ADD)
               )
 
 
@@ -1375,104 +1375,104 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PassageError('Can not add this passage')
+            raise DoorError('Can not add this door')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise PassageError('Can not add this passage: wrong argument')
+            raise DoorError('Can not add this door: wrong argument')
 
 
 
-    def commitPassage(self, passageId):
+    def commitDoor(self, doorId):
         '''
-        Mark the passage in database as COMMITTED if it was previously in TO_ADD or
+        Mark the door in database as COMMITTED if it was previously in TO_ADD or
         TO_UPDATE state or delete it if it was previously in TO_DELETE state
         '''
  
-        sql = "SELECT rowStateId FROM Passage WHERE id = {}".format(passageId)
+        sql = "SELECT resStateId FROM Door WHERE id = {}".format(doorId)
 
         try:
             self.execute(sql)
-            rowState = self.cursor.fetchone()['rowStateId']
+            resState = self.cursor.fetchone()['resStateId']
 
-            if rowState in (TO_ADD, TO_UPDATE):
-                sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
-                       "".format(COMMITTED, passageId)
+            if resState in (TO_ADD, TO_UPDATE):
+                sql = ("UPDATE Door SET resStateId = {} WHERE id = {}"
+                       "".format(COMMITTED, doorId)
                       )
                 self.execute(sql)
                 self.connection.commit()
 
-            elif rowState == TO_DELETE:
-                sql = ("DELETE FROM Passage WHERE id = {}"
-                       "".format(passageId)
+            elif resState == TO_DELETE:
+                sql = ("DELETE FROM Door WHERE id = {}"
+                       "".format(doorId)
                       )
                 self.execute(sql)
                 self.connection.commit()
 
-            elif rowState == COMMITTED:
-                self.logger.info("Passage already committed.")
+            elif resState == COMMITTED:
+                self.logger.info("Door already committed.")
 
             else:
-                self.logger.error("Invalid state detected in passage table.")
-                raise PassageError('Error committing a passage.')
+                self.logger.error("Invalid state detected in door table.")
+                raise DoorError('Error committing a door.')
 
 
         except TypeError:
-            self.logger.debug('Error fetching a passage.')
-            self.logger.warning('The passage to commit is not in data base.')
+            self.logger.debug('Error fetching a door.')
+            self.logger.warning('The door to commit is not in data base.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            self.logger.warning('Error committing a passage.')
+            self.logger.warning('Error committing a door.')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            self.logger.warning('Error committing a passage.')
+            self.logger.warning('Error committing a door.')
 
 
 
-    def markPassageToDel(self, passageId):
+    def markDoorToDel(self, doorId):
         '''
-        Set passage row state in state: TO_DELETE (pending to delete).
+        Set door row state in state: TO_DELETE (pending to delete).
         '''
 
-        sql = ("UPDATE Passage SET rowStateId = {} WHERE id = {}"
-               "".format(TO_DELETE, passageId)
+        sql = ("UPDATE Door SET resStateId = {} WHERE id = {}"
+               "".format(TO_DELETE, doorId)
               )
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise PassageNotFound('Passage not found')
+                raise DoorNotFound('Door not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PassageError('Error marking the Passage to be deleted.')
+            raise DoorError('Error marking the Door to be deleted.')
         
 
 
 
-    def updPassage(self, passage):
+    def updDoor(self, door):
         '''
-        Receive a dictionary with passage parametters and update it in DB
+        Receive a dictionary with door parametters and update it in DB
         '''
 
-        sql = ("UPDATE Passage SET pssgNum = {}, description = '{}', controllerId = {}, rlseTime = {}, "
-               "bzzrTime = {}, alrmTime = {}, zoneId = {}, rowStateId = {} WHERE id = {}"
-               "".format(passage['pssgNum'], passage['description'], passage['controllerId'],
-                         passage['rlseTime'], passage['bzzrTime'], passage['alrmTime'],
-                         passage['zoneId'], TO_UPDATE, passage['id'])
+        sql = ("UPDATE Door SET doorNum = {}, description = '{}', controllerId = {}, rlseTime = {}, "
+               "bzzrTime = {}, alrmTime = {}, zoneId = {}, resStateId = {} WHERE id = {}"
+               "".format(door['doorNum'], door['description'], door['controllerId'],
+                         door['rlseTime'], door['bzzrTime'], door['alrmTime'],
+                         door['zoneId'], TO_UPDATE, door['id'])
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise PassageNotFound('Passage not found')
+                raise DoorNotFound('Door not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PassageError('Can not update this passage')
+            raise DoorError('Can not update this door')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise PassageError('Can not update this passage: wrong argument')
+            raise DoorError('Can not update this door: wrong argument')
 
 
 
@@ -1503,7 +1503,7 @@ class DataBase(object):
                 sql = "SELECT * FROM Person WHERE orgId = {}".format(orgId)
 
             else:
-                sql = ("SELECT * FROM Person WHERE orgId = {} AND rowStateId != {}"
+                sql = ("SELECT * FROM Person WHERE orgId = {} AND resStateId != {}"
                        "".format(orgId, DELETED)
                       )
             self.execute(sql)
@@ -1521,10 +1521,10 @@ class DataBase(object):
 
 
 
-    def getUncmtPersons(self, ctrllerMac, rowStateId):
+    def getUncmtPersons(self, ctrllerMac, resStateId):
         '''
         This method is an iterator, in each iteration it returns a person
-        not committed with the state "rowStateId" from the controller
+        not committed with the state "resStateId" from the controller
         with the MAC address "ctrllerMac"
         IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
         in each iteration and between each iteration another method can be executed using
@@ -1536,7 +1536,7 @@ class DataBase(object):
                "Person person JOIN PersonPendingOperation personPendingOperation ON "
                "(person.id = personPendingOperation.personId) WHERE "
                "personPendingOperation.macAddress = '{}' AND personPendingOperation.pendingOp = {}"
-               "".format(ctrllerMac, rowStateId)
+               "".format(ctrllerMac, resStateId)
               )
 
         try:
@@ -1545,8 +1545,8 @@ class DataBase(object):
             person = cursor.fetchone()
 
             while person:
-                #Removing the rowStateId as this field should not be sent to the controller
-                person.pop('rowStateId')
+                #Removing the resStateId as this field should not be sent to the controller
+                person.pop('resStateId')
                 yield person
                 person = cursor.fetchone()
 
@@ -1570,7 +1570,7 @@ class DataBase(object):
         if not person['visitedOrgId']:
             person['visitedOrgId'] = 'NULL'
 
-        sql = ("INSERT INTO Person(name, identNumber, cardNumber, orgId, visitedOrgId, rowStateId) "
+        sql = ("INSERT INTO Person(name, identNumber, cardNumber, orgId, visitedOrgId, resStateId) "
                "VALUES('{}', '{}', {}, {}, {}, {})"
                "".format(person['name'], person['identNumber'], person['cardNumber'], person['orgId'],
                          person['visitedOrgId'], COMMITTED)
@@ -1603,7 +1603,7 @@ class DataBase(object):
 
         try:
 
-            sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+            sql = ("UPDATE Person SET resStateId = {} WHERE id = {}"
                    "".format(operation, personId)
                   )
             self.execute(sql)
@@ -1617,44 +1617,44 @@ class DataBase(object):
             #those accesses should be deleted in central DB and the controller should never
             #be aware of this situation
             if operation == TO_DELETE:
-                sql = ("DELETE FROM Access WHERE rowStateId = {} AND personId = {}"
+                sql = ("DELETE FROM Access WHERE resStateId = {} AND personId = {}"
                        "".format(TO_ADD, personId)
                       )
                 self.execute(sql)
 
-                sql = ("DELETE FROM LimitedAccess WHERE rowStateId = {} AND personId = {}"
+                sql = ("DELETE FROM LimitedAccess WHERE resStateId = {} AND personId = {}"
                        "".format(TO_ADD, personId)
                       )
                 self.execute(sql)
 
-                sql = ("SELECT pssgId FROM Access WHERE personId = {} AND allWeek = 0"
+                sql = ("SELECT doorId FROM Access WHERE personId = {} AND allWeek = 0"
                        "".format(personId)
                       )
 
                 self.execute(sql)
-                pssgIds = self.cursor.fetchall()
-                pssgIds = [pssgId['pssgId'] for pssgId in pssgIds]
-                for pssgId in pssgIds:
-                    sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE pssgId = {} AND "
-                           "personId = {}".format(pssgId, personId)
+                doorIds = self.cursor.fetchall()
+                doorIds = [doorId['doorId'] for doorId in doorIds]
+                for doorId in doorIds:
+                    sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE doorId = {} AND "
+                           "personId = {}".format(doorId, personId)
                           )
                     self.execute(sql)
                     count = self.cursor.fetchone()['COUNT(*)']
                     if count == 0:
-                        sql = ("DELETE FROM Access WHERE pssgId = {} "
+                        sql = ("DELETE FROM Access WHERE doorId = {} "
                                "AND personId = {} AND allWeek = 0"
-                               "".format(pssgId, personId)
+                               "".format(doorId, personId)
                               )
                         self.execute(sql)
 
 
 
             #To avoid having duplicate MACs in the result list, it is used DISTINCT clause
-            #since we can have a Person having access in more than one passage
-            #and those passage could be on the same controller (with the same MAC)
-            sql = ("SELECT DISTINCT macAddress FROM Controller controller JOIN Passage passage "
-                   "ON (controller.id = passage.controllerId) JOIN Access access "
-                   "ON (passage.id = access.pssgId) JOIN Person person "
+            #since we can have a Person having access in more than one door
+            #and those door could be on the same controller (with the same MAC)
+            sql = ("SELECT DISTINCT macAddress FROM Controller controller JOIN Door door "
+                   "ON (controller.id = door.controllerId) JOIN Access access "
+                   "ON (door.id = access.doorId) JOIN Person person "
                    "ON (access.personId = person.id) WHERE person.id = {}"
                    "".format(personId)
                   )
@@ -1671,7 +1671,7 @@ class DataBase(object):
                               "Marking it as deleted in central DB." 
                              )
                     self.logger.debug(logMsg)
-                    sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+                    sql = ("UPDATE Person SET resStateId = {} WHERE id = {}"
                        "".format(DELETED, personId)
                           )
                     self.execute(sql)
@@ -1684,7 +1684,7 @@ class DataBase(object):
                               "Just modifying it in central DB."
                              )
                     self.logger.debug(logMsg)
-                    sql = ("UPDATE Person SET rowStateId = {} WHERE id = {}"
+                    sql = ("UPDATE Person SET resStateId = {} WHERE id = {}"
                        "".format(COMMITTED, personId)
                           )
                     self.execute(sql)
@@ -1728,7 +1728,7 @@ class DataBase(object):
         First of all it determines the pendig operation of that person on that controller.
 
         If the operation is TO_DELETE: it deletes all the accesses and limited accesses of
-        this person on the passages managed by this controller. 
+        this person on the doors managed by this controller. 
         Then it deletes the entry in "PersonPendingOperation" table which has this person id,
         this MAC and the corresponding pending operation. 
         If there is not more entries on "PersonPendingOperation" table with this person and 
@@ -1737,28 +1737,28 @@ class DataBase(object):
 
         try:
             #Determines the pendig operation of that person on that controller
-            sql = "SELECT rowStateId FROM Person WHERE id = {}".format(personId)
+            sql = "SELECT resStateId FROM Person WHERE id = {}".format(personId)
 
             self.execute(sql)
-            rowState = self.cursor.fetchone()['rowStateId']
+            resState = self.cursor.fetchone()['resStateId']
 
-            if rowState == TO_DELETE:
+            if resState == TO_DELETE:
 
-                #Deleting all the limited accesses of this person on the passages managed by 
+                #Deleting all the limited accesses of this person on the doors managed by 
                 #this controller
-                sql = ("DELETE FROM LimitedAccess WHERE personId = {} AND pssgId IN "
-                       "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
-                       "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
+                sql = ("DELETE FROM LimitedAccess WHERE personId = {} AND doorId IN "
+                       "(SELECT door.id FROM Door door JOIN Controller controller ON "
+                       "(door.controllerId = controller.id) WHERE controller.macAddress = '{}')"
                        "".format(personId, ctrllerMac)
                       )
                 self.execute(sql)
                 self.connection.commit() 
 
-                #Deleting all the accesses of this person on the passages managed by 
+                #Deleting all the accesses of this person on the doors managed by 
                 #this controller
-                sql = ("DELETE FROM Access WHERE personId = {} AND pssgId IN "
-                       "(SELECT passage.id FROM Passage passage JOIN Controller controller ON "
-                       "(passage.controllerId = controller.id) WHERE controller.macAddress = '{}')"
+                sql = ("DELETE FROM Access WHERE personId = {} AND doorId IN "
+                       "(SELECT door.id FROM Door door JOIN Controller controller ON "
+                       "(door.controllerId = controller.id) WHERE controller.macAddress = '{}')"
                        "".format(personId, ctrllerMac)
                       )
                 self.execute(sql)
@@ -1781,14 +1781,14 @@ class DataBase(object):
                 pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
                 if not pendCtrllersToDel:
                     #sql = "DELETE FROM Person WHERE id = {}".format(personId)
-                    sql = "UPDATE Person SET rowStateId = {} WHERE id = {}".format(DELETED, personId)
+                    sql = "UPDATE Person SET resStateId = {} WHERE id = {}".format(DELETED, personId)
                     self.execute(sql)
                     self.connection.commit()
 
                 self.delOrgIfNeed(personId)
 
 
-            elif rowState == TO_UPDATE:
+            elif resState == TO_UPDATE:
                 #Deleting the entry in "PersonPendingOperation" table which has this person id,
                 #this MAC and the corresponding pending operation.
                 sql = ("DELETE FROM PersonPendingOperation WHERE personId = {} AND macAddress = '{}' "
@@ -1806,14 +1806,14 @@ class DataBase(object):
                 self.execute(sql)
                 pendCtrllersToUpd = self.cursor.fetchone()['COUNT(*)']
                 if not pendCtrllersToUpd:
-                    sql = "UPDATE Person SET rowStateId = {} WHERE id = {}".format(COMMITTED, personId)
+                    sql = "UPDATE Person SET resStateId = {} WHERE id = {}".format(COMMITTED, personId)
                     self.execute(sql)
                     self.connection.commit()
 
-            elif rowState == COMMITTED:
+            elif resState == COMMITTED:
                 self.logger.info('Person already committed.')
 
-            elif rowState == DELETED:
+            elif resState == DELETED:
                 self.logger.info('Person already deleted.')
 
             else:
@@ -1907,11 +1907,11 @@ class DataBase(object):
 
 #-------------------------------Access-----------------------------------
 
-    def getAccesses(self, personId=None, pssgId=None):
+    def getAccesses(self, personId=None, doorId=None):
         '''
         Return a dictionary with all access with the personId
         '''
-        if (not personId and not pssgId) or (personId and pssgId):
+        if (not personId and not doorId) or (personId and doorId):
             raise AccessError("Error of arguments received in getAccess method.")
         
         elif personId:
@@ -1924,11 +1924,11 @@ class DataBase(object):
                 raise PersonNotFound('Person not found')
 
             # Get all accesses from an specific person
-            sql = ("SELECT Access.id, Access.pssgId, Passage.description AS pssgDescription, "
+            sql = ("SELECT Access.id, Access.doorId, Door.description AS doorDescription, "
                    "Zone.name AS zoneName, Access.allWeek, Access.iSide, Access.oSide, "
-                   "Access.startTime, Access.endTime, Access.expireDate, Access.rowStateId "
-                   "FROM Access JOIN Passage ON (Access.pssgId = Passage.id) JOIN Zone ON "
-                   "(Passage.zoneId = Zone.id) WHERE personId = {}"
+                   "Access.startTime, Access.endTime, Access.expireDate, Access.resStateId "
+                   "FROM Access JOIN Door ON (Access.doorId = Door.id) JOIN Zone ON "
+                   "(Door.zoneId = Zone.id) WHERE personId = {}"
                    "".format(personId)
                   )
             self.execute(sql)
@@ -1936,22 +1936,22 @@ class DataBase(object):
 
         else:
             # check if the person id exist in the database
-            sql = ("SELECT * FROM Passage WHERE id='{}'".format(pssgId))
+            sql = ("SELECT * FROM Door WHERE id='{}'".format(doorId))
             self.execute(sql)
-            passage = self.cursor.fetchall()
+            door = self.cursor.fetchall()
 
-            if not passage:
-                raise PassageNotFound('Passage not found')
+            if not door:
+                raise DoorNotFound('Door not found')
 
             # Get all persons from the organization
 
 
             sql = ("SELECT Access.id, Access.personId, Person.name AS personName, "
                    "Organization.name AS organizationName, Access.allWeek, Access.iSide, Access.oSide, "
-                   "Access.startTime, Access.endTime, Access.expireDate, Access.rowStateId "
+                   "Access.startTime, Access.endTime, Access.expireDate, Access.resStateId "
                    "FROM Access JOIN Person ON (Access.personId = Person.id) JOIN Organization ON "
-                   "(Person.orgId = Organization.id) WHERE pssgId = {}"
-                   "".format(pssgId)
+                   "(Person.orgId = Organization.id) WHERE doorId = {}"
+                   "".format(doorId)
                   )
             self.execute(sql)
             accesses = self.cursor.fetchall()
@@ -1967,9 +1967,9 @@ class DataBase(object):
 
             if not access['allWeek']:
                 if personId:
-                    access['liAccesses'] = self.getLiAccesses(access['pssgId'], personId)
+                    access['liAccesses'] = self.getLiAccesses(access['doorId'], personId)
                 else:
-                    access['liAccesses'] = self.getLiAccesses(pssgId, access['personId'])
+                    access['liAccesses'] = self.getLiAccesses(doorId, access['personId'])
                 #When the the access is not allWeek access, startTime, endTime, iSide and 
                 #oSide fields are present in each limitedAccess, so we can remove this
                 #field from access.
@@ -1983,7 +1983,7 @@ class DataBase(object):
 
 
 
-    def getLiAccesses(self, pssgId, personId):
+    def getLiAccesses(self, doorId, personId):
 
         '''
         Return a dictionary with all access with the personId
@@ -1997,9 +1997,9 @@ class DataBase(object):
             raise PersonNotFound('Person not found')
 
         # Get all persons from the organization
-        sql = ("SELECT id, weekDay, iSide, oSide, startTime, endTime, rowStateId "
-               "FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
-               "".format(pssgId, personId)
+        sql = ("SELECT id, weekDay, iSide, oSide, startTime, endTime, resStateId "
+               "FROM LimitedAccess WHERE doorId = {} AND personId = {}"
+               "".format(doorId, personId)
               )
         self.execute(sql)
         liAccesses = self.cursor.fetchall()
@@ -2015,10 +2015,10 @@ class DataBase(object):
 
 
 
-    def getUncmtAccesses(self, ctrllerMac, rowStateId):
+    def getUncmtAccesses(self, ctrllerMac, resStateId):
         '''
         This method is an iterator, in each iteration it returns a access
-        not committed with the state "rowStateId" from the controller
+        not committed with the state "resStateId" from the controller
         with the MAC address "ctrllerMac"
         IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
         in each iteration and between each iteration another method can be executed using
@@ -2028,11 +2028,11 @@ class DataBase(object):
 
 
         cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-        sql = ("SELECT access.* FROM Access access JOIN Passage passage ON "
-               "(access.pssgId = passage.id) JOIN Controller controller ON "
-               "(passage.controllerId = controller.id) WHERE "
-               "controller.macAddress = '{}' AND access.rowStateId = {}"
-               "".format(ctrllerMac, rowStateId)
+        sql = ("SELECT access.* FROM Access access JOIN Door door ON "
+               "(access.doorId = door.id) JOIN Controller controller ON "
+               "(door.controllerId = controller.id) WHERE "
+               "controller.macAddress = '{}' AND access.resStateId = {}"
+               "".format(ctrllerMac, resStateId)
               )
 
         try:
@@ -2040,8 +2040,8 @@ class DataBase(object):
             access = cursor.fetchone()
 
             while access:
-                #Removing rowStateId as it should not be sent to the controller
-                access.pop('rowStateId')
+                #Removing resStateId as it should not be sent to the controller
+                access.pop('resStateId')
                 #Time columns in MariaDB are retrieved as timedelta type.
                 #If it is converted to string using str() function, something
                 #like 0:27:00 is got. When it is sent to controller in this way, 
@@ -2071,14 +2071,14 @@ class DataBase(object):
         '''
         Receive a dictionary with access parametters and save it in DB.
         First of all, it tries to delete all limited access with the same
-        pssgId and personId. This could happen when it is given a full
+        doorId and personId. This could happen when it is given a full
         access to a person who has limited access.
         '''
 
         try:
 
-            sql = ("DELETE FROM LimitedAccess WHERE pssgId = {} and personId = {}"
-                   "".format(access['pssgId'], access['personId'])
+            sql = ("DELETE FROM LimitedAccess WHERE doorId = {} and personId = {}"
+                   "".format(access['doorId'], access['personId'])
                   )
             self.execute(sql)
             self.connection.commit()
@@ -2087,11 +2087,11 @@ class DataBase(object):
             #If there was a row in access table, it should be overwritten, avoiding the engine
             #complaining by the constraints. For this reason the ID is kept. For this reason it
             #is used "ON DUPLICATE KEY UPDATE" statement.
-            sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
-                   "endTime, expireDate, rowStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {}) "
+            sql = ("INSERT INTO Access(doorId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate, resStateId) VALUES({}, {}, True, {}, {}, '{}', '{}', '{}', {}) "
                    "ON DUPLICATE KEY UPDATE allWeek = True, iSide = {}, oSide = {}, startTime = '{}', "
-                   "endTime = '{}', expireDate = '{}', rowStateId = {}"
-                   "".format(access['pssgId'], access['personId'], access['iSide'], access['oSide'],
+                   "endTime = '{}', expireDate = '{}', resStateId = {}"
+                   "".format(access['doorId'], access['personId'], access['iSide'], access['oSide'],
                              access['startTime'], access['endTime'], access['expireDate'], TO_ADD,
                              access['iSide'], access['oSide'], access['startTime'], access['endTime'],
                              access['expireDate'], TO_ADD)
@@ -2103,8 +2103,8 @@ class DataBase(object):
             #As it is necessary to return the access ID, we could use "cursor.lastrowid" attribute,
             #but when all the parametters are the same and nothing is updated, lastrowid returns 0.
             #For this reason, a SELECT statement should be executed
-            sql = ("SELECT id FROM Access WHERE pssgId = {} AND personId = {}"
-                   "".format(access['pssgId'], access['personId'])
+            sql = ("SELECT id FROM Access WHERE doorId = {} AND personId = {}"
+                   "".format(access['doorId'], access['personId'])
                   )
             self.execute(sql)
             return self.cursor.fetchone()['id']
@@ -2128,13 +2128,13 @@ class DataBase(object):
     def updAccess(self, access):
         '''
         Receive a dictionary with access parameter to update it.
-        pssgId, personId and allWeek parameter are not modified.
+        doorId, personId and allWeek parameter are not modified.
         If a change on them is necessary, the access should be deleted
         and it should be added again.
         '''
 
         sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
-               "endTime = '{}', expireDate = '{}', rowStateId = {} WHERE id = {}"
+               "endTime = '{}', expireDate = '{}', resStateId = {} WHERE id = {}"
                "".format(access['iSide'], access['oSide'],
                          access['startTime'], access['endTime'],
                          access['expireDate'], TO_UPDATE, access['id'])
@@ -2161,7 +2161,7 @@ class DataBase(object):
         Set access row state in the server DB for a pending delete.
         '''
 
-        sql = ("UPDATE Access SET rowStateId = {} WHERE id = {}"
+        sql = ("UPDATE Access SET resStateId = {} WHERE id = {}"
                "".format(TO_DELETE, accessId)
               )
         try:
@@ -2184,27 +2184,27 @@ class DataBase(object):
         TO_UPDATE state or mark it as DELETED if it was previously in TO_DELETE state
         '''
 
-        sql = "SELECT rowStateId FROM Access WHERE id = {}".format(accessId)
+        sql = "SELECT resStateId FROM Access WHERE id = {}".format(accessId)
 
         try:
             self.execute(sql)
-            rowState = self.cursor.fetchone()['rowStateId']
+            resState = self.cursor.fetchone()['resStateId']
 
-            if rowState in (TO_ADD, TO_UPDATE):
-                sql = ("UPDATE Access SET rowStateId = {} WHERE id = {}"
+            if resState in (TO_ADD, TO_UPDATE):
+                sql = ("UPDATE Access SET resStateId = {} WHERE id = {}"
                        "".format(COMMITTED, accessId)
                       )
                 self.execute(sql)
                 self.connection.commit()
 
-            elif rowState == TO_DELETE:
+            elif resState == TO_DELETE:
                 sql = ("DELETE FROM Access WHERE id = {}"
                        "".format(accessId)
                       )
                 self.execute(sql)
                 self.connection.commit()
 
-            elif rowState == COMMITTED:
+            elif resState == COMMITTED:
                 self.logger.info("Access already committed.")
 
             else:
@@ -2229,37 +2229,37 @@ class DataBase(object):
 
 
 
-    def getPssgId(self, accessId=None, liAccessId=None):
+    def getDoorId(self, accessId=None, liAccessId=None):
         '''
         This method is called by CRUD module when it wants to delete an access.
-        On that situation, it needs to know the "pssgId" to send the DELETE 
+        On that situation, it needs to know the "doorId" to send the DELETE 
         message to the corresponding controller.
         It can receive "accessId" or "liAccessId" but not both.
         '''
 
         if accessId and not liAccessId:
-            sql = "SELECT pssgId FROM Access WHERE id = {}".format(accessId)
+            sql = "SELECT doorId FROM Access WHERE id = {}".format(accessId)
 
         elif liAccessId and not accessId:
-            sql = "SELECT pssgId FROM LimitedAccess WHERE id = {}".format(liAccessId)
+            sql = "SELECT doorId FROM LimitedAccess WHERE id = {}".format(liAccessId)
 
         else:
-            self.logger.debug('Error with arguments calling getPssgId method')
-            raise AccessError('Can not get passage id for this access.')
+            self.logger.debug('Error with arguments calling getDoorId method')
+            raise AccessError('Can not get door id for this access.')
 
 
         try:
             self.execute(sql)
-            pssgId = self.cursor.fetchone()['pssgId']
-            return pssgId
+            doorId = self.cursor.fetchone()['doorId']
+            return doorId
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise AccessError('Can not get passage id for this access.')
+            raise AccessError('Can not get door id for this access.')
 
         except TypeError:
-            self.logger.debug('Error fetching pssgId.')
-            raise AccessError('Can not get passage id for this access.')
+            self.logger.debug('Error fetching doorId.')
+            raise AccessError('Can not get door id for this access.')
 
 
 
@@ -2271,10 +2271,10 @@ class DataBase(object):
 
 
 
-    def getUncmtLiAccesses(self, ctrllerMac, rowStateId):
+    def getUncmtLiAccesses(self, ctrllerMac, resStateId):
         '''
         This method is an iterator, in each iteration it returns a liAccess
-        not committed with the state "rowStateId" from the controller
+        not committed with the state "resStateId" from the controller
         with the MAC address "ctrllerMac"
         IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
         in each iteration and between each iteration another method can be executed using
@@ -2286,11 +2286,11 @@ class DataBase(object):
         secCursor = self.connection.cursor(pymysql.cursors.DictCursor)
 
 
-        sql = ("SELECT liAccess.* FROM LimitedAccess liAccess JOIN Passage passage ON "
-               "(liAccess.pssgId = passage.id) JOIN Controller controller ON "
-               "(passage.controllerId = controller.id) WHERE "
-               "controller.macAddress = '{}' AND liAccess.rowStateId = {}"
-               "".format(ctrllerMac, rowStateId)
+        sql = ("SELECT liAccess.* FROM LimitedAccess liAccess JOIN Door door ON "
+               "(liAccess.doorId = door.id) JOIN Controller controller ON "
+               "(door.controllerId = controller.id) WHERE "
+               "controller.macAddress = '{}' AND liAccess.resStateId = {}"
+               "".format(ctrllerMac, resStateId)
               )
 
         try:
@@ -2301,8 +2301,8 @@ class DataBase(object):
             while liAccess:
                 #There are some fields from access table that should be sent to the controller
                 #when adding or updating a limited access and should be added the "liAccess" dictionary
-                secSql = ("SELECT id, expireDate FROM Access WHERE pssgId = {} AND personId = {}"
-                          "".format(liAccess['pssgId'], liAccess['personId'])
+                secSql = ("SELECT id, expireDate FROM Access WHERE doorId = {} AND personId = {}"
+                          "".format(liAccess['doorId'], liAccess['personId'])
                          )
                 secCursor.execute(secSql)
                 row = secCursor.fetchone()
@@ -2310,8 +2310,8 @@ class DataBase(object):
                 expireDate = row['expireDate']
                 expireDate = str(expireDate)
 
-                #Removing rowStateId field as it should not be sent to the controller.
-                liAccess.pop('rowStateId')
+                #Removing resStateId field as it should not be sent to the controller.
+                liAccess.pop('resStateId')
 
                 #Time columns in MariaDB are retrieved as timedelta type.
                 #If it is converted to string using str() function, something
@@ -2358,17 +2358,17 @@ class DataBase(object):
 
         try:
             #Each time an entry in "LimitedAccess" table is created with the same
-            #combination (pssgId, personId), this method will try to add an entry
+            #combination (doorId, personId), this method will try to add an entry
             #in "Access" table. For this reason it is used "ON DUPLICATE KEY UPDATE"
             #statement. Also it is necessary to use since when a "allWeek" access is
             #changing to a limited access type.
             #The REPLACE statement was not used because each time it is invoked, the ID
             #will increment since it is a DELETE followed by an INSERT.
-            sql = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, "
-                   "endTime, expireDate, rowStateId) VALUES({}, {}, FALSE, FALSE, FALSE, NULL, NULL, '{}', {}) "
+            sql = ("INSERT INTO Access(doorId, personId, allWeek, iSide, oSide, startTime, "
+                   "endTime, expireDate, resStateId) VALUES({}, {}, FALSE, FALSE, FALSE, NULL, NULL, '{}', {}) "
                    "ON DUPLICATE KEY UPDATE allWeek = FALSE, iSide = FALSE, oSide = FALSE, startTime = NULL, "
-                   "endTime = NULL, expireDate = '{}', rowStateId = {}"
-                   "".format(liAccess['pssgId'], liAccess['personId'], liAccess['expireDate'], 
+                   "endTime = NULL, expireDate = '{}', resStateId = {}"
+                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['expireDate'], 
                              COMMITTED, liAccess['expireDate'], COMMITTED)
                   )
             self.execute(sql)
@@ -2378,16 +2378,16 @@ class DataBase(object):
             #As it is necessary to return the access ID, we could use "cursor.lastrowid" attribute,
             #but when all the parametters are the same and nothing is updated, lastrowid returns 0.
             #For this reason, a SELECT statement should be executed.
-            sql = ("SELECT id FROM Access WHERE pssgId = {} AND personId = {}"
-                   "".format(liAccess['pssgId'], liAccess['personId'])
+            sql = ("SELECT id FROM Access WHERE doorId = {} AND personId = {}"
+                   "".format(liAccess['doorId'], liAccess['personId'])
                   )
             self.execute(sql)
             accessId = self.cursor.fetchone()['id']
             
 
-            sql = ("INSERT INTO LimitedAccess(pssgId, personId, weekDay, iSide, oSide, startTime, "
-                   "endTime, rowStateId) VALUES({}, {}, {}, {}, {}, '{}', '{}', {})"
-                   "".format(liAccess['pssgId'], liAccess['personId'], liAccess['weekDay'],
+            sql = ("INSERT INTO LimitedAccess(doorId, personId, weekDay, iSide, oSide, startTime, "
+                   "endTime, resStateId) VALUES({}, {}, {}, {}, {}, '{}', '{}', {})"
+                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['weekDay'],
                              liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
                              liAccess['endTime'], TO_ADD)
                   )
@@ -2416,26 +2416,26 @@ class DataBase(object):
     def updLiAccess(self, liAccess):
         '''
         Receive a dictionary with access parameter to update it.
-        pssgId, personId and allWeek parameter are not modified.
+        doorId, personId and allWeek parameter are not modified.
         If a change on them is necessary, the access should be deleted
         and it should be added again.
         '''
 
         try:
             #The only thing we should modify in "Access" table is the "expireDate" field.
-            #To modify the access table, we need "pssgId" and "personId"
-            sql = ("SELECT pssgId, personId FROM LimitedAccess WHERE id = {}"
+            #To modify the access table, we need "doorId" and "personId"
+            sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
                    "".format(liAccess['id'])
                   )
 
             self.execute(sql)
             row = self.cursor.fetchone()
-            pssgId = row['pssgId']
+            doorId = row['doorId']
             personId = row['personId']
 
 
-            sql = ("UPDATE Access SET expireDate = '{}' WHERE pssgId = {} AND personId = {}"
-                   "".format(liAccess['expireDate'], pssgId, personId)
+            sql = ("UPDATE Access SET expireDate = '{}' WHERE doorId = {} AND personId = {}"
+                   "".format(liAccess['expireDate'], doorId, personId)
                   )
 
             self.execute(sql)
@@ -2446,7 +2446,7 @@ class DataBase(object):
 
 
             sql = ("UPDATE LimitedAccess SET weekDay = {}, iSide = {}, oSide = {}, "
-                   "startTime = '{}', endTime = '{}', rowStateId = {} WHERE id = {}"
+                   "startTime = '{}', endTime = '{}', resStateId = {} WHERE id = {}"
                    "".format(liAccess['weekDay'], liAccess['iSide'], liAccess['oSide'],
                              liAccess['startTime'], liAccess['endTime'], TO_UPDATE,
                              liAccess['id'])
@@ -2459,7 +2459,7 @@ class DataBase(object):
 
 
         except TypeError:
-            self.logger.debug('Can not fetching pssgId and perssonId.')
+            self.logger.debug('Can not fetching doorId and perssonId.')
             raise AccessError('Can not update this limited access.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -2477,7 +2477,7 @@ class DataBase(object):
         Set limited access row state in state pending to delete.
         '''
 
-        sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE id = {}"
+        sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
                "".format(TO_DELETE, liAccessId)
               )
         try:
@@ -2503,12 +2503,12 @@ class DataBase(object):
         '''
 
         try:
-            sql = "SELECT rowStateId FROM LimitedAccess WHERE id = {}".format(liAccessId)
+            sql = "SELECT resStateId FROM LimitedAccess WHERE id = {}".format(liAccessId)
             self.execute(sql)
-            rowState = self.cursor.fetchone()['rowStateId']
+            resState = self.cursor.fetchone()['resStateId']
 
-            if rowState in (TO_ADD, TO_UPDATE):
-                sql = ("UPDATE LimitedAccess SET rowStateId = {} WHERE id = {}"
+            if resState in (TO_ADD, TO_UPDATE):
+                sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
                        "".format(COMMITTED, liAccessId)
                       )
 
@@ -2516,15 +2516,15 @@ class DataBase(object):
                 self.connection.commit()
 
 
-            elif rowState == TO_DELETE:
+            elif resState == TO_DELETE:
 
-                sql = ("SELECT pssgId, personId FROM LimitedAccess WHERE id = {}"
+                sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
                        "".format(liAccessId)
                       )
 
                 self.execute(sql)
                 row = self.cursor.fetchone() #KeyError exception could be raised here
-                pssgId = row['pssgId']       #Me parece que es TypeError y no KeyError
+                doorId = row['doorId']       #Me parece que es TypeError y no KeyError
                 personId = row['personId']
         
                 sql = ("DELETE FROM LimitedAccess WHERE id = {}"
@@ -2535,22 +2535,22 @@ class DataBase(object):
 
 
                 #Once we delete a limited access, we should verify if there is another
-                #limited access with the same "pssgId" and the same "personId", if there
+                #limited access with the same "doorId" and the same "personId", if there
                 #is not, we should delete the entry in "access" table.
-                sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
-                       "".format(pssgId, personId)
+                sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE doorId = {} AND personId = {}"
+                       "".format(doorId, personId)
                       )
                 self.execute(sql)
                 remaining = self.cursor.fetchone()['COUNT(*)']
 
                 if not remaining:
-                   sql = ("DELETE FROM Access WHERE pssgId = {} AND personId = {}"
-                          "".format(pssgId, personId)
+                   sql = ("DELETE FROM Access WHERE doorId = {} AND personId = {}"
+                          "".format(doorId, personId)
                          )
                    self.execute(sql)
                    self.connection.commit()
 
-            elif rowState == COMMITTED:
+            elif resState == COMMITTED:
                 self.logger.info("Limited access already committed.")
 
             else:
@@ -2580,14 +2580,14 @@ if __name__ == "__main__":
     print("Testing Database")
     dataBase = DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
 
-    sql = ("SELECT pssgId FROM Access WHERE personId = 2 AND allWeek = 0")
+    sql = ("SELECT doorId FROM Access WHERE personId = 2 AND allWeek = 0")
     dataBase.execute(sql)
-    pssgIds = dataBase.cursor.fetchall()
-    pssgIds = [pssgId['pssgId'] for pssgId in pssgIds]
-    print(pssgIds)
-    for pssgId in pssgIds:
-        sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE pssgId = {} AND "
-               "personId = {}".format(pssgId, 4)
+    doorIds = dataBase.cursor.fetchall()
+    doorIds = [doorId['doorId'] for doorId in doorIds]
+    print(doorIds)
+    for doorId in doorIds:
+        sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE doorId = {} AND "
+               "personId = {}".format(doorId, 4)
               )
         dataBase.execute(sql)
         print(dataBase.cursor.fetchone())
