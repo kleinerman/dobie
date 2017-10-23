@@ -369,7 +369,7 @@ To get all posible state the following method should be sent to the server:
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/rowstate
+  http://172.18.0.3:5000/api/v1.0/resstate
   
 **Response:**
 
