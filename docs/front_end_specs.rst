@@ -127,7 +127,7 @@ To get all posible states, the following method should be sent to the server:
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/rowstate
+  http://172.18.0.3:5000/api/v1.0/resstate
   
 **Response:**
 
@@ -954,7 +954,7 @@ To get all doors from a zone, the following REST method should be sent to the se
 
 
 
-For the second screen **(Pasage -> Person)**, before pressing **"add"** button an specific door or an entire zone should be selected and the following window will appear:
+For the second screen **(Door -> Person)**, before pressing **"add"** button an specific door or an entire zone should be selected and the following window will appear:
 
 .. image:: images_front_end_specs/add_access_pas_per.png
 
