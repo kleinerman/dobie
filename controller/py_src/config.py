@@ -3,15 +3,15 @@ import logging
 SIM_PERSON_QUANT = 5000
 SIM_LIM_ACCESS_QUANT = 500
 
-IOIFACE_BIN = '../c_src/ioiface'
+IOIFACE_BIN = '/opt/dobie/controller/c_src/ioiface'
 IOIFACE_ARGS = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut']
 
 
-DB_FILE = 'access.db'
+DB_FILE = '/opt/dobie/controller/py_src/access.db'
 QUEUE_FILE = '/ioiface_queue'
 
 
-LOGGING_FILE ='logevents.log'
+LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'
 
 #SERVER_IP = '192.168.1.79'
 SERVER_IP = '10.10.7.79'
