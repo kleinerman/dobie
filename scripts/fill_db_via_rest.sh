@@ -13,36 +13,36 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Molinetes Torre A"}' http://172.18.0.3:5000/api/v1.0/visitorspassages
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puertas Front Torre A"}' http://172.18.0.3:5000/api/v1.0/visitorspassages
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Molinetes Torre A"}' http://172.18.0.3:5000/api/v1.0/visitorsdoors
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puertas Front Torre A"}' http://172.18.0.3:5000/api/v1.0/visitorsdoors
 
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Molinete 1", "pssgNum": 1, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Puerta 2", "pssgNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Barrera 5", "pssgNum": 3, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Molinete 1", "doorNum": 1, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Puerta 2", "doorNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Barrera 5", "doorNum": 3, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/door
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Baño 3", "pssgNum": 1, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Molinte 5", "pssgNum": 2, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Ingreso 2", "pssgNum": 3, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/passage
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Baño 3", "doorNum": 1, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Molinte 5", "doorNum": 2, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Ingreso 2", "doorNum": 3, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1}' http://172.18.0.3:5000/api/v1.0/door
 
 
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/1/passage/1
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/1/passage/2
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorsdoors/1/door/1
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorsdoors/1/door/2
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/2/passage/1
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/2/passage/4
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorsdoors/2/door/1
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://172.18.0.3:5000/api/v1.0/visitorsdoors/2/door/4
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/2/passage/4
+curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://172.18.0.3:5000/api/v1.0/visitorsdoors/2/door/4
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://172.18.0.3:5000/api/v1.0/visitorspassages/2
+curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://172.18.0.3:5000/api/v1.0/visitorsdoors/2
 
 
 
@@ -70,31 +70,31 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 4, "personId": 1, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 1, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 4, "personId": 2, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 2, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 4, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 4, "personId": 6, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 6, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 5, "personId": 4, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 5, "personId": 4, "weekDay": 3, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "personId": 4, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "personId": 4, "weekDay": 3, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 5, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 5, "personId": 6, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "personId": 6, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 6, "personId": 3, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 3, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 6, "personId": 5, "weekDay": 7, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 5, "weekDay": 7, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 6, "personId": 8, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 6, "personId": 8, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 8, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 8, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 6, "personId": 7, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 6, "personId": 7, "weekDay": 4, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 7, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 7, "weekDay": 4, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 6, "personId": 8, "weekDay": 7, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 6, "personId": 8, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 8, "weekDay": 7, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 8, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
 
 
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"name": "Carlos Ranzula", "identNumber": "23063146", "cardNumber": 5301768, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person/8
@@ -106,8 +106,8 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' htt
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 4, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "01:01", "endTime": "22:31", "expireDate": "2018-11-12"}' http://172.18.0.3:5000/api/v1.0/access
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"pssgId": 4, "personId": 6, "weekDay": 5, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2020-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "01:01", "endTime": "22:31", "expireDate": "2018-11-12"}' http://172.18.0.3:5000/api/v1.0/access
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 6, "weekDay": 5, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2020-01-02"}' http://172.18.0.3:5000/api/v1.0/liaccess
 
 
 

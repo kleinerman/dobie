@@ -57,7 +57,7 @@ class CrudReSndr(genmngr.GenericMngr):
         for queue messages coming from the "Network" thread.
         The queue message is the MAC address of the controller which need CRUDs to be
         resended.
-        When a MAC address is received, this method send all the passages, access,
+        When a MAC address is received, this method send all the doors, access,
         limited access and persons CRUDs for this controller in this order to avoid
         inconsistency in the controller database.
         Also, after "self.ITERATIONS" times, it send a RRRE message to all the 
@@ -70,18 +70,18 @@ class CrudReSndr(genmngr.GenericMngr):
                 #Blocking until Network thread sends an msg or EXIT_CHECK_TIME expires 
                 ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
-                for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_ADD):
-                    passage.pop('description')
-                    passage.pop('controllerId')
-                    passage.pop('zoneId')
-                    self.ctrllerMsger.addPassage(ctrllerMac, passage)
-                for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_UPDATE):
-                    passage.pop('description')
-                    passage.pop('controllerId')
-                    passage.pop('zoneId')
-                    self.ctrllerMsger.updPassage(ctrllerMac, passage)
-                for passage in self.dataBase.getUncmtPassages(ctrllerMac, database.TO_DELETE):
-                    self.ctrllerMsger.delPassage(ctrllerMac, passage['id'])
+                for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_ADD):
+                    door.pop('description')
+                    door.pop('controllerId')
+                    door.pop('zoneId')
+                    self.ctrllerMsger.addDoor(ctrllerMac, door)
+                for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_UPDATE):
+                    door.pop('description')
+                    door.pop('controllerId')
+                    door.pop('zoneId')
+                    self.ctrllerMsger.updDoor(ctrllerMac, door)
+                for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_DELETE):
+                    self.ctrllerMsger.delDoor(ctrllerMac, door['id'])
                 self.checkExit()
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
@@ -95,7 +95,7 @@ class CrudReSndr(genmngr.GenericMngr):
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
                     #The following parameters should not be sent when updating an access.
-                    access.pop('pssgId')
+                    access.pop('doorId')
                     access.pop('personId')
                     access.pop('allWeek')
                     self.ctrllerMsger.updAccess(ctrllerMac, access)
@@ -118,7 +118,7 @@ class CrudReSndr(genmngr.GenericMngr):
                     #The following parameters should not be sent when updating an access.
                     liAccess.pop('accessId')
                     liAccess.pop('personId')
-                    liAccess.pop('pssgId')
+                    liAccess.pop('doorId')
                     self.ctrllerMsger.updLiAccess(ctrllerMac, liAccess)
 
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_DELETE):
