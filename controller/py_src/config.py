@@ -33,7 +33,7 @@ RE_SEND_EVTS_QUANT = 4
 IOIFACE_WAIT_FINISH_TIME = 4
 
 
-#This parametter should be put in db for each pssg
+#This parametter should be put in db for each door
 PSSG_RLSE_TIME = 10
 
 

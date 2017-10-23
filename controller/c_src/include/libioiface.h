@@ -17,21 +17,21 @@
 #define BOUNCE_TIME 200000
 #define QUEUE_NAME "/ioiface_queue"
 
-// pssg gpio map
+// door gpio map
 typedef struct {
-    int id;                     // pssg identification
+    int id;                     // door identification
     int i0In;                   // GPIO for data D0 (reader input side)
     int i1In;                   // GPIO for data D1 (reader input side)
     int o0In;                   // GPIO for data D0 (reader output side)
     int o1In;                   // GPIO for data D1 (reader output side)
-    int button;                 // GPIO for open pssg button
-    int state;                  // GPIO for state of the pssg (output)
-    int buzzer;			// GPIO for buzzer of the pssg (output)
-    int release;		// GPIO for release of the pssg (output)
-} pssg_t;
+    int button;                 // GPIO for open door button
+    int state;                  // GPIO for state of the door (output)
+    int buzzer;			// GPIO for buzzer of the door (output)
+    int release;		// GPIO for release of the door (output)
+} door_t;
 
 struct read_card_args {
-    int pssg_id;
+    int door_id;
     int d0;                     // GPIO for D0
     int d1;                     // GPIO for D1
     char side;                  // Door side: in / out
@@ -39,16 +39,16 @@ struct read_card_args {
 };
 
 struct buttons_args {
-    int number_of_pssgs;
+    int number_of_doors;
     int number_of_buttons;
-    pssg_t *pssg;
+    door_t *door;
     mqd_t mq;
 };
 
 struct state_args {
-    int number_of_pssgs;
+    int number_of_doors;
     int number_of_states;
-    pssg_t *pssg;
+    door_t *door;
     mqd_t mq;
 };
 
@@ -59,12 +59,12 @@ int export_gpio(unsigned int gpio);
 int unexport_gpio(unsigned int gpio);
 int gpio_set_direction(unsigned int gpio, unsigned int direction);
 int gpio_set_edge(unsigned int gpio, unsigned int edge);
-int set_gpio_pins (pssg_t *pssg, int number_of_pssgs);
-int unset_gpio_pins (pssg_t *pssg, int number_of_pssgs);
-int parser(int argc, char **argv, pssg_t *pssg);
+int set_gpio_pins (door_t *door, int number_of_doors);
+int unset_gpio_pins (door_t *door, int number_of_doors);
+int parser(int argc, char **argv, door_t *door);
 int get_number_of(int argc, char** argv, const char *str);
 void *read_card (void *args);
-int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *r_thread , mqd_t mq);
+int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthread_t *r_thread , mqd_t mq);
 void *buttons (void *b_args);
 void *state (void *s_args);
 

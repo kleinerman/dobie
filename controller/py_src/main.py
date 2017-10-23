@@ -20,7 +20,7 @@ import database
 import ioiface
 import events
 import network
-import passage
+import door
 import crud
 from config import *
 
@@ -70,12 +70,12 @@ class Controller(object):
         self.exitFlag = threading.Event()
 
 
-        self.lockPssgsControl = threading.Lock()
-        self.pssgsControl = passage.PssgsControl()
-        #self.pssgsControl.loadParams()
+        self.lockDoorsControl = threading.Lock()
+        self.doorsControl = door.DoorsControl()
+        #self.doorsControl.loadParams()
 
         #Creating the CRUD Manager Thread 
-        self.crudMngr = crud.CrudMngr(self.lockPssgsControl, self.pssgsControl, self.exitFlag)
+        self.crudMngr = crud.CrudMngr(self.lockDoorsControl, self.doorsControl, self.exitFlag)
 
         #Creating the Net Manager Thread 
         self.netMngr = network.NetMngr(netToEvent, self.netToReSnd, self.crudMngr, self.exitFlag)        
@@ -118,29 +118,29 @@ class Controller(object):
 
 
 
-    def openPssg(self, pssgNum):
+    def openDoor(self, doorNum):
         '''
         This method is called by "procCard" and "procButton" methods to release
-        the passage and start the buzzer.
-        It also creates a thread to close the passage and buzzer
+        the door and start the buzzer.
+        It also creates a thread to close the door and buzzer
         '''
 
-        with self.lockPssgsControl:
+        with self.lockDoorsControl:
 
-            pssgControl = self.pssgsControl.params[pssgNum]
+            doorControl = self.doorsControl.params[doorNum]
 
-            pssgControl['pssgObj'].release(True)
-            self.logger.debug("Releasing the passage {}.".format(pssgNum))
-            pssgControl['pssgObj'].startBzzr(True)
-            self.logger.debug("Starting the buzzer on passage {}.".format(pssgNum))
-            pssgControl['accessPermit'].set()
-            pssgControl['timeAccessPermit'] = datetime.datetime.now()
+            doorControl['doorObj'].release(True)
+            self.logger.debug("Releasing the door {}.".format(doorNum))
+            doorControl['doorObj'].startBzzr(True)
+            self.logger.debug("Starting the buzzer on door {}.".format(doorNum))
+            doorControl['accessPermit'].set()
+            doorControl['timeAccessPermit'] = datetime.datetime.now()
     
 
-            if not pssgControl['cleanerPssgMngrAlive'].is_set():
-                pssgControl['cleanerPssgMngrAlive'].set()
-                cleanerPssgMngr = passage.CleanerPssgMngr(pssgControl, self.exitFlag)
-                cleanerPssgMngr.start()
+            if not doorControl['cleanerDoorMngrAlive'].is_set():
+                doorControl['cleanerDoorMngrAlive'].set()
+                cleanerDoorMngr = door.CleanerDoorMngr(doorControl, self.exitFlag)
+                cleanerDoorMngr.start()
 
 
 
@@ -148,74 +148,74 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def procCard(self, pssgNum, side, cardNumber):
+    def procCard(self, doorNum, side, cardNumber):
         '''
         This method is called each time somebody put a card in a card reader
         '''
 
         try:
-            with self.lockPssgsControl:
-                pssgId = self.pssgsControl.getPssgId(pssgNum)
+            with self.lockDoorsControl:
+                doorId = self.doorsControl.getDoorId(doorNum)
 
-            allowed, personId, notReasonId = self.dataBase.canAccess(pssgId, side, cardNumber)
+            allowed, personId, denialCauseId = self.dataBase.canAccess(doorId, side, cardNumber)
 
             if allowed:
-                self.openPssg(pssgNum)
+                self.openDoor(doorNum)
 
             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         
-            event = {'pssgId' : pssgId, 
+            event = {'doorId' : doorId, 
                      'eventTypeId' : 1,
                      'dateTime' : dateTime,
-                     'latchId' : 1,
+                     'doorLockId' : 1,
                      'personId' : personId,
                      'side' : side,
                      'allowed' : allowed,
-                     'notReasonId' : notReasonId
+                     'denialCauseId' : denialCauseId
                     }
 
             #Sending the event to the "Event Manager" thread
             self.eventQueue.put(event)
 
 
-        except passage.PassageNotConfigured:
-            logMsg = 'Card was read on passage {} but it is not configured'.format(pssgNum)
+        except door.DoorNotConfigured:
+            logMsg = 'Card was read on door {} but it is not configured'.format(doorNum)
             self.logger.warning(logMsg)
 
 
 
     #---------------------------------------------------------------------------#
 
-    def procButton(self, pssgNum, side, value):
+    def procButton(self, doorNum, side, value):
         '''
         This method is called each time somebody press the button to release
-        the passage
+        the door
         '''
 
         try:
-            with self.lockPssgsControl:
-                pssgId = self.pssgsControl.getPssgId(pssgNum)
+            with self.lockDoorsControl:
+                doorId = self.doorsControl.getDoorId(doorNum)
 
-            self.openPssg(pssgNum)
+            self.openDoor(doorNum)
 
             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
 
-            event = {'pssgId' : pssgId,
+            event = {'doorId' : doorId,
                      'eventTypeId' : 2,
                      'dateTime' : dateTime,
-                     'latchId' : 3,
+                     'doorLockId' : 3,
                      'personId' : None,
                      'side' : side,
                      'allowed' : True,
-                     'notReasonId' : None
+                     'denialCauseId' : None
                     }
 
             #Sending the event to the "Event Manager" thread
             self.eventQueue.put(event)
 
-        except passage.PassageNotConfigured:
-            logMsg = 'Button pressed on passage {} but it is not configured'.format(pssgNum)
+        except door.DoorNotConfigured:
+            logMsg = 'Button pressed on door {} but it is not configured'.format(doorNum)
             self.logger.warning(logMsg)
 
 
@@ -226,49 +226,49 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def procState(self, pssgNum, side, openOrClose):
+    def procState(self, doorNum, side, openOrClose):
         '''
-        This method is called each time a passage change its state. (It is opened or closed)
+        This method is called each time a door change its state. (It is opened or closed)
         '''
 
         try:
-            with self.lockPssgsControl:
-                #pssgId is used just to create the event below we get it here to raise
-                #"PassageNotConfigured" exception if the passage is not confiugred
-                pssgId = self.pssgsControl.getPssgId(pssgNum)
-                pssgControl = self.pssgsControl.params[pssgNum]
+            with self.lockDoorsControl:
+                #doorId is used just to create the event below we get it here to raise
+                #"DoorNotConfigured" exception if the door is not confiugred
+                doorId = self.doorsControl.getDoorId(doorNum)
+                doorControl = self.doorsControl.params[doorNum]
 
                 #Converting "openOrClose" to int type to evaluete it on if statement
                 openOrClose = int(openOrClose)
-                #The state of the passage indicates that was opened
+                #The state of the door indicates that was opened
                 if openOrClose:
-                    pssgControl['openPssg'].set()
-                    #If the passage was open in a permitted way
-                    if pssgControl['accessPermit'].is_set():
+                    doorControl['openDoor'].set()
+                    #If the door was open in a permitted way
+                    if doorControl['accessPermit'].is_set():
                         #Creates a StarterAlrmMngrAlive if not was previously created by other access
-                        if not pssgControl['starterAlrmMngrAlive'].is_set():
-                            starterAlrmMngr = passage.StarterAlrmMngr(pssgControl, self.eventQueue, self.exitFlag)
+                        if not doorControl['starterAlrmMngrAlive'].is_set():
+                            starterAlrmMngr = door.StarterAlrmMngr(doorControl, self.eventQueue, self.exitFlag)
                             starterAlrmMngr.start()
 
-                    #If the passage was not opened in a permitted way, start the alarm and 
+                    #If the door was not opened in a permitted way, start the alarm and 
                     #send to server or store locally an event
                     else:
-                        logMsg = ("Unpermitted access on passage: {}, "
-                                  "Starting the alarm.".format(pssgNum)
+                        logMsg = ("Unpermitted access on door: {}, "
+                                  "Starting the alarm.".format(doorNum)
                                  )
                         self.logger.warning(logMsg)
-                        pssgControl['pssgObj'].startBzzr(True)
+                        doorControl['doorObj'].startBzzr(True)
 
                         dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
-                        event = {'pssgId' : pssgId,
+                        event = {'doorId' : doorId,
                                  'eventTypeId' : 4,
                                  'dateTime' : dateTime,
-                                 'latchId' : None,
+                                 'doorLockId' : None,
                                  'personId' : None,
                                  'side' : None,
                                  'allowed' : False,
-                                 'notReasonId' : None
+                                 'denialCauseId' : None
                                 }
 
                         #Sending the event to the "Event Manager" thread
@@ -277,17 +277,17 @@ class Controller(object):
 
 
 
-                #The state of the passage indicates that was closed
+                #The state of the door indicates that was closed
                 else:
-                    logMsg = ("The state of the passage: {}, indicates that was closed. "
-                              "Stopping the alarm.".format(pssgNum)
+                    logMsg = ("The state of the door: {}, indicates that was closed. "
+                              "Stopping the alarm.".format(doorNum)
                              )
                     self.logger.info(logMsg)
-                    pssgControl['openPssg'].clear()
-                    pssgControl['pssgObj'].startBzzr(False)
+                    doorControl['openDoor'].clear()
+                    doorControl['doorObj'].startBzzr(False)
 
-        except passage.PassageNotConfigured:
-            logMsg = 'State received on passage {} but it is not configured'.format(pssgNum)
+        except door.DoorNotConfigured:
+            logMsg = 'State received on door {} but it is not configured'.format(doorNum)
             self.logger.warning(logMsg)
 
 
@@ -300,11 +300,11 @@ class Controller(object):
 
         self.logger.debug('Starting Controller')
         
-        #Launching Pssg Iface binary
+        #Launching Door Iface binary
         self.ioIface.start()
 
-        with self.lockPssgsControl:
-            self.pssgsControl.loadParams()
+        with self.lockDoorsControl:
+            self.doorsControl.loadParams()
 
         #Starting the "Event Manager" thread
         self.eventMngr.start()
@@ -328,11 +328,11 @@ class Controller(object):
                 ioIfaceData = self.ioIfaceQue.receive()
                 ioIfaceData = ioIfaceData[0].decode('utf8')
                 print(ioIfaceData)
-                pssgNum, side, varField = ioIfaceData.split(';')
-                pssgNum = int(pssgNum)
+                doorNum, side, varField = ioIfaceData.split(';')
+                doorNum = int(doorNum)
                 side = int(side)
                 command, value  = varField.split('=')
-                self.handlers[command](pssgNum, side, value)
+                self.handlers[command](doorNum, side, value)
 
             
         except posix_ipc.SignalError:

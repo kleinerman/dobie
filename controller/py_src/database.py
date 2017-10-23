@@ -58,11 +58,11 @@ class DataBase(object):
 
     #---------------------------------------------------------------------------#
 
-    def canAccess(self, pssgId, side, cardNumber):
+    def canAccess(self, doorId, side, cardNumber):
         '''
         This method is called by the main thread. It checks if the user identified
-        by "cardNumber" is authorized to pass the passage identified by "pssgId" on
-        this "side" of the passage.
+        by "cardNumber" is authorized to pass the door identified by "doorId" on
+        this "side" of the door.
         It returns three values. The first one is a boolean which tells if the person
         is authorized to pass. The second is the "personId" corresponding to this
         "cardNumber", used to create the event. The last one is the reason of not
@@ -75,9 +75,9 @@ class DataBase(object):
         sql = ("SELECT person.id, access.allWeek, access.startTime, "
                "access.endTime, access.expireDate "
                "FROM Access access JOIN Person person ON (access.personId = person.id) "
-               "WHERE access.pssgId = '{}' AND access.{} = 1 " 
+               "WHERE access.doorId = '{}' AND access.{} = 1 " 
                "AND person.cardNumber = '{}'"
-               "".format(pssgId, sideColumn, cardNumber)
+               "".format(doorId, sideColumn, cardNumber)
                )
 
         self.cursor.execute(sql)
@@ -103,9 +103,9 @@ class DataBase(object):
                     nowWeekDay = datetime.datetime.now().isoweekday()
 
                     sql = ("SELECT startTime, endTime FROM LimitedAccess "
-                           "WHERE pssgId = {} AND personId = {} AND "
+                           "WHERE doorId = {} AND personId = {} AND "
                            "weekDay = {} AND {} = 1"
-                           "".format(pssgId, personId, nowWeekDay, sideColumn)
+                           "".format(doorId, personId, nowWeekDay, sideColumn)
                           )
 
                     self.cursor.execute(sql)
@@ -122,7 +122,7 @@ class DataBase(object):
                             return (False, personId, 3)
 
                     else:
-                        print("This person has not access on this pssg/side")
+                        print("This person has not access on this door/side")
                         return (False, None, 1)
 
             else:
@@ -130,7 +130,7 @@ class DataBase(object):
                 return (False, None, 2)
 
         else:
-            print("This person has not access on this pssg/side")
+            print("This person has not access on this door/side")
             return (False, None, 1)
 
 
@@ -155,25 +155,25 @@ class DataBase(object):
 
         allowed = int(event['allowed'])
 
-        if event['notReasonId']:
-            notReasonId = event['notReasonId']
+        if event['denialCauseId']:
+            denialCauseId = event['denialCauseId']
         else:
-            notReasonId = 'NULL'
+            denialCauseId = 'NULL'
 
-        if event['latchId']:
-            latchId = event['latchId']
+        if event['doorLockId']:
+            doorLockId = event['doorLockId']
         else:
-            latchId = 'NULL'
+            doorLockId = 'NULL'
 
             
 
         sql = ("INSERT INTO Event"
-               "(pssgId, eventTypeId, dateTime, latchId, "
-               "personId, side, allowed, notReasonId) "
+               "(doorId, eventTypeId, dateTime, doorLockId, "
+               "personId, side, allowed, denialCauseId) "
                "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
-               "".format(event['pssgId'], event['eventTypeId'], 
-                         event['dateTime'], latchId, personId,
-                         side, allowed, notReasonId)
+               "".format(event['doorId'], event['eventTypeId'], 
+                         event['dateTime'], doorLockId, personId,
+                         side, allowed, denialCauseId)
               )
 
         self.cursor.execute(sql)
@@ -190,8 +190,8 @@ class DataBase(object):
         "evtsQtty" events.
         '''
 
-        sql = ("SELECT id, pssgId, eventTypeId, dateTime, latchId, "
-               "personId, side, allowed, notReasonId FROM Event "
+        sql = ("SELECT id, doorId, eventTypeId, dateTime, doorLockId, "
+               "personId, side, allowed, denialCauseId FROM Event "
                "LIMIT {}".format(evtsQtty)
               )
 
@@ -211,14 +211,14 @@ class DataBase(object):
             #dictionary the convertion could not work), and also it is
             #necessary remove the id and convert the "allowed" column to bool.
             for savedEvent in savedEvents:
-                toReSendEvent = {'pssgId' : savedEvent['pssgId'],
+                toReSendEvent = {'doorId' : savedEvent['doorId'],
                                  'eventTypeId' : savedEvent['eventTypeId'],
                                  'dateTime' : savedEvent['dateTime'],
-                                 'latchId' : savedEvent['latchId'],
+                                 'doorLockId' : savedEvent['doorLockId'],
                                  'personId' : savedEvent['personId'],
                                  'side' : savedEvent['side'],
                                  'allowed' : bool(savedEvent['allowed']),
-                                 'notReasonId' : savedEvent['notReasonId']
+                                 'denialCauseId' : savedEvent['denialCauseId']
                                 }
                 toReSendEvents.append(toReSendEvent)
                 eventIds.append(savedEvent['id'])
@@ -257,10 +257,10 @@ class DataBase(object):
 
     def getGpioNames(self):
         '''
-        Getting Passage GPIO Names from SQL database
+        Getting Door GPIO Names from SQL database
         '''
 
-        sql = "SELECT * FROM PssgGpios"
+        sql = "SELECT * FROM DoorGpios"
         self.cursor.execute(sql)
 
         #To leave the DB unlocked for other threads, it is necesary to
@@ -275,47 +275,47 @@ class DataBase(object):
     #---------------------------------------------------------------------------#
 
 
-    def getGpiosPssgs(self):
+    def getGpiosDoors(self):
         '''
-        Return a list with "dictionaries" with GPIOs of each passage indexed
+        Return a list with "dictionaries" with GPIOs of each door indexed
         by GPIO name
         '''
 
-        sql = "SELECT * FROM PssgGpios"
+        sql = "SELECT * FROM DoorGpios"
         self.cursor.execute(sql)
-        gpiosPssgs = self.cursor.fetchall()
+        gpiosDoors = self.cursor.fetchall()
 
 
-        return gpiosPssgs
+        return gpiosDoors
 
 
 
     #---------------------------------------------------------------------------#
 
-    def getParamsPssgs(self):
+    def getParamsDoors(self):
         '''
-        Get the arguments of passages to call ioiface external program.
-        pps = Passage Parametters
+        Get the arguments of doors to call ioiface external program.
+        pps = Door Parametters
 
         '''
  
-        sql = ("SELECT Passage.id, Passage.pssgNum, PssgGpios.rlseOut, PssgGpios.bzzrOut, "
-               "Passage.rlseTime, Passage.bzzrTime, Passage.alrmTime FROM "
-               "PssgGpios JOIN Passage ON (PssgGpios.id = Passage.pssgNum)"
+        sql = ("SELECT Door.id, Door.doorNum, DoorGpios.rlseOut, DoorGpios.bzzrOut, "
+               "Door.rlseTime, Door.bzzrTime, Door.alrmTime FROM "
+               "DoorGpios JOIN Door ON (DoorGpios.id = Door.doorNum)"
               )
                      
         self.cursor.execute(sql)
-        paramsPssgs = self.cursor.fetchall()
+        paramsDoors = self.cursor.fetchall()
 
-        return paramsPssgs
+        return paramsDoors
 
 
 
     #---------------------------------------------------------------------------#
 
-    def addPassage(self, passage):
+    def addDoor(self, door):
         '''
-        Receive a passage dictionary and add it into DB
+        Receive a door dictionary and add it into DB
         '''
 
 
@@ -323,10 +323,10 @@ class DataBase(object):
             #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender Module of
             #the server send a limited access CRUD before the client respond and avoid integrity error.
             #Using REPLACE is not good since it has to DELETE and INSERT always.
-            sql = ("INSERT OR IGNORE INTO Passage(id, pssgNum, rlseTime, bzzrTime, alrmTime) "
+            sql = ("INSERT OR IGNORE INTO Door(id, doorNum, rlseTime, bzzrTime, alrmTime) "
                    "VALUES({}, {}, {}, {}, {})"
-                   "".format(passage['id'], passage['pssgNum'], passage['rlseTime'],
-                             passage['bzzrTime'], passage['alrmTime'])
+                   "".format(door['id'], door['doorNum'], door['rlseTime'],
+                             door['bzzrTime'], door['alrmTime'])
                   )
             self.cursor.execute(sql)
             #self.connection.commit()
@@ -334,28 +334,28 @@ class DataBase(object):
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
-            raise OperationalError('Operational error adding a Passage.')
+            raise OperationalError('Operational error adding a Door.')
 
         except sqlite3.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise IntegrityError('Integrity error adding a Passage.')
+            raise IntegrityError('Integrity error adding a Door.')
 
 
 
 
     #---------------------------------------------------------------------------#
 
-    def updPassage(self, passage):
+    def updDoor(self, door):
         '''
-        Receive a passage dictionary and add it into DB
+        Receive a door dictionary and add it into DB
         '''
 
         try:
-            sql = ("UPDATE Passage SET pssgNum = {}, rlseTime = {}, "
+            sql = ("UPDATE Door SET doorNum = {}, rlseTime = {}, "
                    "bzzrTime = {}, alrmTime = {} WHERE id = {}"
-                   "".format(passage['pssgNum'], passage['rlseTime'], 
-                             passage['bzzrTime'], passage['alrmTime'], 
-                             passage['id'])
+                   "".format(door['doorNum'], door['rlseTime'], 
+                             door['bzzrTime'], door['alrmTime'], 
+                             door['id'])
               )
             self.cursor.execute(sql)
             #self.connection.commit()
@@ -363,27 +363,27 @@ class DataBase(object):
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
-            raise OperationalError('Operational error updating a passage.')
+            raise OperationalError('Operational error updating a door.')
 
         except sqlite3.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise IntegrityError('Integrity error updating a passage.')
+            raise IntegrityError('Integrity error updating a door.')
 
 
 
 
     #---------------------------------------------------------------------------#
 
-    def delPassage(self, passage):
+    def delDoor(self, door):
         '''
-        Receive a passage dictionary and delete it.
-        All access and limited access on these passage will be automatically deleted 
+        Receive a door dictionary and delete it.
+        All access and limited access on these door will be automatically deleted 
         by the db engine as "ON DELETE CASCADE" clause is present.
-        Then all the persons who has no access to any passage are also deleted manually.
+        Then all the persons who has no access to any door are also deleted manually.
         '''
 
         try:
-            sql = "DELETE FROM Passage WHERE id = {}".format(passage['id'])
+            sql = "DELETE FROM Door WHERE id = {}".format(door['id'])
             self.cursor.execute(sql)
             #self.connection.commit()
 
@@ -396,11 +396,11 @@ class DataBase(object):
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
-            raise OperationalError('Operational error deleting a passage.')
+            raise OperationalError('Operational error deleting a door.')
 
         except sqlite3.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise IntegrityError('Integrity error deleting a passage.')
+            raise IntegrityError('Integrity error deleting a door.')
 
 
 
@@ -436,17 +436,17 @@ class DataBase(object):
             #answer, receiving it twice. In this situation it is important to answer to the server
             #with OK to avoid server continue sending the CRUD. If INSERT will be used, a constraint
             #error will happen and the client will never answer with OK.
-            sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
+            sql = ("REPLACE INTO Access(id, doorId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate) VALUES({}, {}, {}, 1, {}, {}, '{}', '{}', '{}')"
-                   "".format(access['id'], access['pssgId'], access['personId'],
+                   "".format(access['id'], access['doorId'], access['personId'],
                              access['iSide'], access['oSide'], access['startTime'],
                              access['endTime'], access['expireDate'])
                   )
             self.cursor.execute(sql)
             
             #Everytime an all week access is added, all limited accesses should be deleted if exist.
-            sql = ("DELETE FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
-                   "".format(access['pssgId'], access['personId'])
+            sql = ("DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}"
+                   "".format(access['doorId'], access['personId'])
                   )
             self.cursor.execute(sql)
 
@@ -493,7 +493,7 @@ class DataBase(object):
     def delAccess(self, access):
         '''
         Receive an access dictionary and delete it.
-        Then all the persons who has no access to any passage are also deleted manually.
+        Then all the persons who has no access to any door are also deleted manually.
         '''
         try:
             sql = "DELETE FROM Access WHERE id = {}".format(access['id'])
@@ -546,18 +546,18 @@ class DataBase(object):
             #error will happen and the client will never answer with OK.
             #Important Note: iSide and oSide should be filled with "1", because the way "canAccess"
             #method work. The real iSide an oSide is in the LimitedAccess table.
-            sql = ("REPLACE INTO Access(id, pssgId, personId, allWeek, iSide, oSide, startTime, "
+            sql = ("REPLACE INTO Access(id, doorId, personId, allWeek, iSide, oSide, startTime, "
                    "endTime, expireDate) VALUES({}, {}, {}, 0, 1, 1, NULL, NULL, '{}')"
-                   "".format(liAccess['accessId'], liAccess['pssgId'],
+                   "".format(liAccess['accessId'], liAccess['doorId'],
                              liAccess['personId'], liAccess['expireDate'])
                   )
             self.cursor.execute(sql)
 
             #Using REPLACE instead of INSERT to answer with OK when the Crud Resender Module of
             #the server send a limited access CRUD before the client respond and avoid integrity error.
-            sql = ("REPLACE INTO LimitedAccess(id, pssgId, personId, weekDay, iSide, oSide, startTime, "
+            sql = ("REPLACE INTO LimitedAccess(id, doorId, personId, weekDay, iSide, oSide, startTime, "
                    "endTime) VALUES({}, {}, {}, {}, {}, {}, '{}', '{}')"
-                   "".format(liAccess['id'], liAccess['pssgId'], liAccess['personId'], liAccess['weekDay'],
+                   "".format(liAccess['id'], liAccess['doorId'], liAccess['personId'], liAccess['weekDay'],
                              liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
                              liAccess['endTime'])
 
@@ -586,17 +586,17 @@ class DataBase(object):
 
         try:
 
-            sql = ("SELECT pssgId, personId FROM LimitedAccess WHERE id = {}"
+            sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
                    "".format(liAccess['id'])
                   )
             self.cursor.execute(sql)
             row = self.cursor.fetchone()
-            pssgId = row[0]
+            doorId = row[0]
             personId = row[1]
             
 
-            sql = ("UPDATE Access SET expireDate = '{}' WHERE pssgId = {} AND personId = {}"
-                   "".format(liAccess['expireDate'], pssgId, personId)
+            sql = ("UPDATE Access SET expireDate = '{}' WHERE doorId = {} AND personId = {}"
+                   "".format(liAccess['expireDate'], doorId, personId)
                   )
             self.cursor.execute(sql)
             #self.connection.commit()
@@ -633,31 +633,31 @@ class DataBase(object):
     def delLiAccess(self, liAccess):
         '''
         Receive an access dictionary and delete it.
-        Then all the persons who has no access to any passage are also deleted manually.
+        Then all the persons who has no access to any door are also deleted manually.
         '''
         try:
-            sql = "SELECT pssgId, personId FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
+            sql = "SELECT doorId, personId FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
             self.cursor.execute(sql)
             row = self.cursor.fetchone()
-            pssgId = row[0]
+            doorId = row[0]
             personId = row[1]
             
             sql = "DELETE FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
             self.cursor.execute(sql)
             #self.connection.commit()
 
-            sql = ("SELECT * FROM LimitedAccess WHERE pssgId = {} AND personId = {}"
-                   "".format(pssgId, personId)
+            sql = ("SELECT * FROM LimitedAccess WHERE doorId = {} AND personId = {}"
+                   "".format(doorId, personId)
                   )
             self.cursor.execute(sql)
             
-            #If there is not more limited access from this person in this passage,
+            #If there is not more limited access from this person in this door,
             #the entry in access table should be deleted and also the person from 
-            #Person table in case this person has not access on any other passage
+            #Person table in case this person has not access on any other door
             if not self.cursor.fetchone():
                 
-                sql = ("DELETE FROM Access WHERE pssgId = {} AND personId = {}"
-                       "".format(pssgId, personId)
+                sql = ("DELETE FROM Access WHERE doorId = {} AND personId = {}"
+                       "".format(doorId, personId)
                       )
                 self.cursor.execute(sql)
                 #self.connection.commit()
@@ -712,7 +712,7 @@ class DataBase(object):
     def delPerson(self, person):
         '''
         Receive a person dictionary and delete it.
-        All access and limited access on these passage will be automatically deleted 
+        All access and limited access on these door will be automatically deleted 
         by the db engine as "ON DELETE CASCADE" clause is present.
         '''
         try:
@@ -733,7 +733,7 @@ class DataBase(object):
 
     def clearDatabase(self):
         '''
-        Remove all LimitedAccess, Access, Persons, Passages and Events
+        Remove all LimitedAccess, Access, Persons, Doors and Events
         This method is called when the controller receive from server
         RRP message
         '''
@@ -751,7 +751,7 @@ class DataBase(object):
             self.cursor.execute(sql)
             #self.connection.commit()
 
-            sql = "DELETE FROM Passage"
+            sql = "DELETE FROM Door"
             self.cursor.execute(sql)
             #self.connection.commit()
             
