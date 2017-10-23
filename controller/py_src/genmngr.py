@@ -49,36 +49,36 @@ class GenericMngr(threading.Thread):
 
 
 
-class PssgMngr(GenericMngr):
+class DoorMngr(GenericMngr):
 
     '''
-    Generic Thread Manager to create starterAlarmMngr and cleanerPssgMngr
+    Generic Thread Manager to create starterAlarmMngr and cleanerDoorMngr
     threads. This thread inherits from "GenericMngr". It differs from his
-    parent receiving "pssgsReconfFlag" in the constructor, and overwriting
+    parent receiving "doorsReconfFlag" in the constructor, and overwriting
     "checkExit" method, checking this flag and "exitFlag" as well.
     '''
 
-    def __init__(self, threadName, pssgsReconfFlag, exitFlag):
+    def __init__(self, threadName, doorsReconfFlag, exitFlag):
 
         #Invoking the parent class constructor.
         super().__init__(threadName, exitFlag)
     
-        #Flag to know when the starterAlarmMngr or cleanerPssgMngr should exit
-        #This will happen when a new passage is added, updated or deleted and 
+        #Flag to know when the starterAlarmMngr or cleanerDoorMngr should exit
+        #This will happen when a new door is added, updated or deleted and 
         #and we should kill all the existing "starterAlarmMngr" or/and 
-        #"cleanerPssgMngr" running.
-        self.pssgsReconfFlag = pssgsReconfFlag
+        #"cleanerDoorMngr" running.
+        self.doorsReconfFlag = doorsReconfFlag
 
 
 
     def checkExit(self):
         '''
         Check if the main thread ask this thread to exit using exitFlag
-        or crud thread ask this thread to exit using pssgsReconfFlag. 
+        or crud thread ask this thread to exit using doorsReconfFlag. 
         If true, call sys.exit and finish this thread
         '''
 
-        if self.exitFlag.is_set() or self.pssgsReconfFlag.is_set():
+        if self.exitFlag.is_set() or self.doorsReconfFlag.is_set():
             logMsg = 'Exiting with code: {}'.format(self.exitCode)
             self.logger.info(logMsg)
             sys.exit(self.exitCode)
