@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eb618f06"}' http://172.18.0.3:5000/api/v1.0/controller
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827ebf65300"}' http://172.18.0.3:5000/api/v1.0/controller
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eb277791"}' http://172.18.0.3:5000/api/v1.0/controller
 
 
@@ -97,7 +97,7 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId"
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 8, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2018-12-12"}' http://172.18.0.3:5000/api/v1.0/access
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"name": "Carlos Ranzula", "identNumber": "23063146", "cardNumber": 5301768, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person/8
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"name": "Carlos Ranzula", "identNumber": "23063147", "cardNumber": 5301768, "orgId": 3, "visitedOrgId": null}' http://172.18.0.3:5000/api/v1.0/person/8
 
 curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://172.18.0.3:5000/api/v1.0/person/7
 
