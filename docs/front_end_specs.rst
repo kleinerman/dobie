@@ -99,25 +99,25 @@ To get from the server the current list of organizations, the following REST met
     {
       "id": 2, 
       "name": "Cloud Networks", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/organization/2"
     }, 
     {
       "id": 3, 
       "name": "Global Corporate", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/organization/3"
     }, 
     {
       "id": 4, 
       "name": "Machado y Asociados", 
-      "rowStateId": 5, 
+      "resStateId": 5, 
       "uri": "http://172.18.0.3:5000/api/v1.0/organization/4"
     }
   ]
 
   
-**rowStateId** is a field that indicates the state of the organization into the system
+**resStateId** is a field that indicates the state of the organization into the system
 
 To get all posible states, the following method should be sent to the server:
 
@@ -325,7 +325,7 @@ To get from server the current list of persons in each organization, the followi
       "id": 1, 
       "identNumber": "28063146", 
       "name": "Jorge Kleinerman", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/1", 
       "visitedOrgId": null
     }, 
@@ -334,7 +334,7 @@ To get from server the current list of persons in each organization, the followi
       "id": 3, 
       "identNumber": "22063146", 
       "name": "Carlos Gonzalez", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/3", 
       "visitedOrgId": null
     }, 
@@ -343,7 +343,7 @@ To get from server the current list of persons in each organization, the followi
       "id": 5, 
       "identNumber": "2463146", 
       "name": "Ernesto Chlima", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/5", 
       "visitedOrgId": null
     }, 
@@ -352,14 +352,14 @@ To get from server the current list of persons in each organization, the followi
       "id": 7, 
       "identNumber": "26063146", 
       "name": "Carlos Vazquez", 
-      "rowStateId": 5, 
+      "resStateId": 5, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/7", 
       "visitedOrgId": null
     }
   ]
 
     
-**rowStateId** is a field that indicates the state of the person into the system
+**resStateId** is a field that indicates the state of the person into the system
 
 To get all posible state the following method should be sent to the server:
 
@@ -596,18 +596,18 @@ A pop up should inform the success or unsuccess of the operation
 Accesses
 --------
 
-In access section there are two screens. One of them lets view, add, modify and delete accesses selecting the person and seeing the accesses of this person with the name of the passage and its corresponding zone.
+In access section there are two screens. One of them lets view, add, modify and delete accesses selecting the person and seeing the accesses of this person with the name of the door and its corresponding zone.
 
 .. image:: images_front_end_specs/access_per_pas.png
 
-The second screen, lets view, add, modify and delete accesses selecting the passage and seeing the accesses on this passage
-with the person name and its corresponding organization allowed to pass trough this passage.
+The second screen, lets view, add, modify and delete accesses selecting the door and seeing the accesses on this door
+with the person name and its corresponding organization allowed to pass trough this door.
 
 .. image:: images_front_end_specs/access_pas_per.png
 
 
-For the first screen **(Person -> Passage)**, the user should select the organization and the person which its accesses will be added, edited or removed.
-In the right side of the screen, the accesses of the person will be shown with the description of the passage, its corresponding zone and a checkbox wich will show if the access is for all days of weeks.
+For the first screen **(Person -> Door)**, the user should select the organization and the person which its accesses will be added, edited or removed.
+In the right side of the screen, the accesses of the person will be shown with the description of the door, its corresponding zone and a checkbox wich will show if the access is for all days of weeks.
 For this screen, to get all accesses of an specific person to show them in the right side the following method should be sent to the server:
 
 **Method:** GET
@@ -636,9 +636,9 @@ For this screen, to get all accesses of an specific person to show them in the r
       "iSide": 1, 
       "id": 21, 
       "oSide": 1, 
-      "pssgDescription": "Puerta 2", 
-      "pssgId": 2, 
-      "rowStateId": 1, 
+      "doorDescription": "Puerta 2", 
+      "doorId": 2, 
+      "resStateId": 1, 
       "startTime": "0:00:00", 
       "uri": "http://172.18.0.3:5000/api/v1.0/access/21", 
       "zoneName": "Ingreso Sur"
@@ -650,9 +650,9 @@ For this screen, to get all accesses of an specific person to show them in the r
       "iSide": 1, 
       "id": 20, 
       "oSide": 1, 
-      "pssgDescription": "Barrera 5", 
-      "pssgId": 3, 
-      "rowStateId": 1, 
+      "doorDescription": "Barrera 5", 
+      "doorId": 3, 
+      "resStateId": 1, 
       "startTime": "0:00:00", 
       "uri": "http://172.18.0.3:5000/api/v1.0/access/20", 
       "zoneName": "Ingreso Sur"
@@ -664,9 +664,9 @@ For this screen, to get all accesses of an specific person to show them in the r
       "iSide": 1, 
       "id": 3, 
       "oSide": 1, 
-      "pssgDescription": "Ba\u00f1o 3", 
-      "pssgId": 4, 
-      "rowStateId": 1, 
+      "doorDescription": "Ba\u00f1o 3", 
+      "doorId": 4, 
+      "resStateId": 1, 
       "startTime": "1:01:00", 
       "uri": "http://172.18.0.3:5000/api/v1.0/access/3", 
       "zoneName": "Ingreso Sur"
@@ -678,9 +678,9 @@ For this screen, to get all accesses of an specific person to show them in the r
       "iSide": 0, 
       "id": 7, 
       "oSide": 1, 
-      "pssgDescription": "Molinte 5", 
-      "pssgId": 5, 
-      "rowStateId": 2, 
+      "doorDescription": "Molinte 5", 
+      "doorId": 5, 
+      "resStateId": 2, 
       "startTime": "21:01:00", 
       "uri": "http://172.18.0.3:5000/api/v1.0/access/7", 
       "zoneName": "Ingreso Sur"
@@ -695,7 +695,7 @@ For this screen, to get all accesses of an specific person to show them in the r
           "iSide": 1, 
           "id": 19, 
           "oSide": 1, 
-          "rowStateId": 1, 
+          "resStateId": 1, 
           "startTime": "20:37:00", 
           "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/19", 
           "weekDay": 4
@@ -705,7 +705,7 @@ For this screen, to get all accesses of an specific person to show them in the r
           "iSide": 0, 
           "id": 20, 
           "oSide": 1, 
-          "rowStateId": 2, 
+          "resStateId": 2, 
           "startTime": "21:01:00", 
           "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/20", 
           "weekDay": 2
@@ -715,15 +715,15 @@ For this screen, to get all accesses of an specific person to show them in the r
           "iSide": 1, 
           "id": 21, 
           "oSide": 1, 
-          "rowStateId": 1, 
+          "resStateId": 1, 
           "startTime": "20:37:00", 
           "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/21", 
           "weekDay": 3
         }
       ], 
-      "pssgDescription": "Ingreso 2", 
-      "pssgId": 6, 
-      "rowStateId": 3, 
+      "doorDescription": "Ingreso 2", 
+      "doorId": 6, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/access/27", 
       "zoneName": "Ingreso Sur"
     }
@@ -735,9 +735,9 @@ In the last case, the access will have a field called "liAccesses" which will ha
 
 
 
-For the second screen **(Passage -> Person)**, the user should select the zone and the passage which its accesses will be added, edited or removed.
-In the right side of the screen, the accesses of the passage will be shown with the name of the person, its corresponding organization and a checkbox wich will shows if the access is for all days of weeks.
-For this screen, to get all accesses of an specific passage to show them in the right side the following method should be sent to the server:
+For the second screen **(Door -> Person)**, the user should select the zone and the door which its accesses will be added, edited or removed.
+In the right side of the screen, the accesses of the door will be shown with the name of the person, its corresponding organization and a checkbox wich will shows if the access is for all days of weeks.
+For this screen, to get all accesses of an specific door to show them in the right side the following method should be sent to the server:
 
 **Method:** GET
 
@@ -745,7 +745,7 @@ For this screen, to get all accesses of an specific passage to show them in the 
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/passage/4
+  http://172.18.0.3:5000/api/v1.0/door/4
 
 **Response:**
 
@@ -768,7 +768,7 @@ For this screen, to get all accesses of an specific passage to show them in the 
       "organizationName": "Kleinernet Corp.", 
       "personId": 1, 
       "personName": "Jorge Kleinerman", 
-      "rowStateId": 1, 
+      "resStateId": 1, 
       "startTime": "0:00:00", 
       "uri": "http://172.18.0.3:5000/api/v1.0/access/1"
     }, 
@@ -782,7 +782,7 @@ For this screen, to get all accesses of an specific passage to show them in the 
           "iSide": 1, 
           "id": 1, 
           "oSide": 1, 
-          "rowStateId": 1, 
+          "resStateId": 1, 
           "startTime": "20:37:00", 
           "uri": "http://172.18.0.3:5000/api/v1.0/liaccess/1", 
           "weekDay": 2
@@ -791,7 +791,7 @@ For this screen, to get all accesses of an specific passage to show them in the 
       "organizationName": "Sipper Corporation", 
       "personId": 2, 
       "personName": "Ary Kleinerman", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/access/2"
     }, 
     {
@@ -804,7 +804,7 @@ For this screen, to get all accesses of an specific passage to show them in the 
       "organizationName": "Sipper Corporation", 
       "personId": 6, 
       "personName": "Juan Alvarez", 
-      "rowStateId": 1, 
+      "resStateId": 1, 
       "startTime": "1:01:00", 
       "uri": "http://172.18.0.3:5000/api/v1.0/access/3"
     }
@@ -860,10 +860,10 @@ To get all the zones the following REST method should be sent to the server:
   ]
 
 
-Getting passages from a zone
+Getting doors from a zone
 ++++++++++++++++++++++++++++
 
-To get all passages from a zone, the following REST method should be sent to the server:
+To get all doors from a zone, the following REST method should be sent to the server:
 
 **URI:**
 
@@ -890,10 +890,10 @@ To get all passages from a zone, the following REST method should be sent to the
       "controllerId": 2, 
       "description": "Molinete 1", 
       "id": 1, 
-      "pssgNum": 1, 
+      "doorNum": 1, 
       "rlseTime": 7, 
-      "rowStateId": 1, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/passage/1"
+      "resStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/door/1"
     }, 
     {
       "alrmTime": 10, 
@@ -901,10 +901,10 @@ To get all passages from a zone, the following REST method should be sent to the
       "controllerId": 2, 
       "description": "Puerta 2", 
       "id": 2, 
-      "pssgNum": 2, 
+      "doorNum": 2, 
       "rlseTime": 7, 
-      "rowStateId": 1, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/passage/2"
+      "resStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/door/2"
     }, 
     {
       "alrmTime": 10, 
@@ -912,10 +912,10 @@ To get all passages from a zone, the following REST method should be sent to the
       "controllerId": 2, 
       "description": "Barrera 5", 
       "id": 3, 
-      "pssgNum": 3, 
+      "doorNum": 3, 
       "rlseTime": 7, 
-      "rowStateId": 1, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/passage/3"
+      "resStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/door/3"
     }, 
     {
       "alrmTime": 10, 
@@ -923,10 +923,10 @@ To get all passages from a zone, the following REST method should be sent to the
       "controllerId": 1, 
       "description": "Ba\u00f1o 3", 
       "id": 4, 
-      "pssgNum": 1, 
+      "doorNum": 1, 
       "rlseTime": 7, 
-      "rowStateId": 1, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/passage/4"
+      "resStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/door/4"
     }, 
     {
       "alrmTime": 10, 
@@ -934,10 +934,10 @@ To get all passages from a zone, the following REST method should be sent to the
       "controllerId": 1, 
       "description": "Molinte 5", 
       "id": 5, 
-      "pssgNum": 2, 
+      "doorNum": 2, 
       "rlseTime": 7, 
-      "rowStateId": 1, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/passage/5"
+      "resStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/door/5"
     }, 
     {
       "alrmTime": 10, 
@@ -945,16 +945,16 @@ To get all passages from a zone, the following REST method should be sent to the
       "controllerId": 1, 
       "description": "Ingreso 2", 
       "id": 6, 
-      "pssgNum": 3, 
+      "doorNum": 3, 
       "rlseTime": 7, 
-      "rowStateId": 1, 
-      "uri": "http://172.18.0.3:5000/api/v1.0/passage/6"
+      "resStateId": 1, 
+      "uri": "http://172.18.0.3:5000/api/v1.0/door/6"
     }
   ]
 
 
 
-For the second screen **(Pasage -> Person)**, before pressing **"add"** button an specific passage or an entire zone should be selected and the following window will appear:
+For the second screen **(Pasage -> Person)**, before pressing **"add"** button an specific door or an entire zone should be selected and the following window will appear:
 
 .. image:: images_front_end_specs/add_access_pas_per.png
 
@@ -984,19 +984,19 @@ To get all the organizations the following REST method should be sent to the ser
     {
       "id": 2, 
       "name": "Building Networks", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/organization/2"
     }, 
     {
       "id": 3, 
       "name": "Sipper Corporation", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/organization/3"
     }, 
     {
       "id": 4, 
       "name": "Movistel", 
-      "rowStateId": 5, 
+      "resStateId": 5, 
       "uri": "http://172.18.0.3:5000/api/v1.0/organization/4"
     }
   ]
@@ -1028,7 +1028,7 @@ To get all persons from an organization, the following REST method should be sen
       "id": 1, 
       "identNumber": "28063146", 
       "name": "Jorge Kleinerman", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/1", 
       "visitedOrgId": null
     }, 
@@ -1037,7 +1037,7 @@ To get all persons from an organization, the following REST method should be sen
       "id": 3, 
       "identNumber": "22063146", 
       "name": "Maria Bedolla", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/3", 
       "visitedOrgId": null
     }, 
@@ -1046,7 +1046,7 @@ To get all persons from an organization, the following REST method should be sen
       "id": 5, 
       "identNumber": "2463146", 
       "name": "Paola Trujillo", 
-      "rowStateId": 3, 
+      "resStateId": 3, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/5", 
       "visitedOrgId": null
     }, 
@@ -1055,7 +1055,7 @@ To get all persons from an organization, the following REST method should be sen
       "id": 7, 
       "identNumber": "26063146", 
       "name": "Carlos Vazquez", 
-      "rowStateId": 5, 
+      "resStateId": 5, 
       "uri": "http://172.18.0.3:5000/api/v1.0/person/7", 
       "visitedOrgId": null
     }
@@ -1063,7 +1063,7 @@ To get all persons from an organization, the following REST method should be sen
 
 
 
-Knowing the passage id and person id, it is possible to create the new **"All Week"** access or a **"Day"** access sending the following POST method to the server:
+Knowing the door id and person id, it is possible to create the new **"All Week"** access or a **"Day"** access sending the following POST method to the server:
 
 Add All Week Access
 ~~~~~~~~~~~~~~~~~~~
@@ -1081,7 +1081,7 @@ Add All Week Access
 
 .. code-block::
 
-  {"pssgId": 4, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "01:01", "endTime": "22:31", "expireDate": "2018-11-12"}
+  {"doorId": 4, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "01:01", "endTime": "22:31", "expireDate": "2018-11-12"}
  
   
 **Response:**
@@ -1119,7 +1119,7 @@ Add Day Access (Limited Access)
 
 .. code-block::
 
-  {"pssgId": 6, "personId": 7, "weekDay": 4, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}
+  {"doorId": 6, "personId": 7, "weekDay": 4, "iSide": 1, "oSide": 1, "startTime": "20:37", "endTime": "21:37", "expireDate": "2016-01-02"}
  
   
 **Response:**
@@ -1140,11 +1140,11 @@ Add Day Access (Limited Access)
   }
 
 
-For the first screen **(Person -> Passage)**, if all the passages of a zone is selected, an "access" or the necessary "limited access" should be sent to the server for each passage of the zone.
+For the first screen **(Person -> Door)**, if all the doors of a zone is selected, an "access" or the necessary "limited access" should be sent to the server for each door of the zone.
 If an entire organization is selected, all the above should be repeated for each person of the organization. 
 
-For the second screen **(Passage -> Person)**, if all the persons of an organization is selected, an "access" or the necessary "limited access" should be sent to the server for each person of the organizatino.
-If an entire zone is selected, all the above should be repeated for each passage of the zone. 
+For the second screen **(Door -> Person)**, if all the persons of an organization is selected, an "access" or the necessary "limited access" should be sent to the server for each person of the organizatino.
+If an entire zone is selected, all the above should be repeated for each door of the zone. 
 
 An entire organization can be selected and an entire zone too.
 
@@ -1152,13 +1152,13 @@ An entire organization can be selected and an entire zone too.
 Edit an Access
 --------------
 
-To edit and modify an access, an access should be selected. This can be done using the first access screen (Person -> Passage) or the second screen (Passage -> Person). When an access is selected and "edit" button is pressed the following  window should appear.
+To edit and modify an access, an access should be selected. This can be done using the first access screen (Person -> Door) or the second screen (Door -> Person). When an access is selected and "edit" button is pressed the following  window should appear.
 
 .. image:: images_front_end_specs/upd_access.png
 
-All the information of the access shown in the above window should be retrieved in the same way to retrieve all the accesses for a person (Person -> Passage screen) or to retrieve all the accesses of a passage (Passage -> Person screen) but just using the information needed for this access.
+All the information of the access shown in the above window should be retrieved in the same way to retrieve all the accesses for a person (Person -> Door screen) or to retrieve all the accesses of a door (Door -> Person screen) but just using the information needed for this access.
 
-For example, if the Day Accesses (Limited Access) of person with id = 7 and and passage with id = 6 should be edited from the Person -> Passage screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
+For example, if the Day Accesses (Limited Access) of person with id = 7 and and door with id = 6 should be edited from the Person -> Door screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
 
 **Method:** GET
 
@@ -1173,7 +1173,7 @@ For example, if the Day Accesses (Limited Access) of person with id = 7 and and 
 .. image:: images_front_end_specs/get_accesses_per_pas.png
 
 
-For example, if a Week Access in passage with id = 5 and person with id = 8 should be edited from the Passage -> Person screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
+For example, if a Week Access in door with id = 5 and person with id = 8 should be edited from the Door -> Person screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
 
 
 **Method:** GET
@@ -1182,7 +1182,7 @@ For example, if a Week Access in passage with id = 5 and person with id = 8 shou
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/passage/5
+  http://172.18.0.3:5000/api/v1.0/door/5
 
 **Response:**
 
@@ -1262,7 +1262,7 @@ To **modify a Week Access (Full Access)** the following PUT method should be sen
   }
 
 
-If a person has a "Limited Access" on a passage and the user modify it giving a "Full Access", a POST method with the "Full Access" should be sent to the server. This will automatically erase all the "Limited Accesses" who this person had on this passage.
+If a person has a "Limited Access" on a door and the user modify it giving a "Full Access", a POST method with the "Full Access" should be sent to the server. This will automatically erase all the "Limited Accesses" who this person had on this door.
 In the same way, if the person had a "Full Access" and the user modify it giving a "Limited Access", a POST method with "Limited Access" should be sent to the server and this will automatically erase the previous "Full Access" 
 
 
@@ -1272,7 +1272,7 @@ Events
 
 In event section, there are two screens. One of them lets view the events in real time. The second one, lets search historical events saved.
 
-In the second screen screen organization, person, zone, passage, direction, start date and time and end date and time can be selected to retrieve events.
+In the second screen screen organization, person, zone, door, direction, start date and time and end date and time can be selected to retrieve events.
 
 .. image:: images_front_end_specs/events_searcher.png
 
@@ -1305,7 +1305,7 @@ If all the events from an entire organization is need, an organization should be
   http://172.18.0.3:5000/api/v1.0/events?orgId=3&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
 
-If the word "ALL" in organization combobox is selected, events from all organizations will be retrieved. Also events corresponding to "UNKNOWN" persons will be retrieved in this way. They are events corresponding to persons opening the passages with buttons, passages forced or passages left opened.
+If the word "ALL" in organization combobox is selected, events from all organizations will be retrieved. Also events corresponding to "UNKNOWN" persons will be retrieved in this way. They are events corresponding to persons opening the doors with buttons, doors forced or doors left opened.
 
 
 **Method:** GET
@@ -1318,8 +1318,8 @@ If the word "ALL" in organization combobox is selected, events from all organiza
   
   
 
-If a zone is selected, the passage combobox should show all the passages of this zone and one of them should be slected by the user.
-To get from server the current list of passages of a zone, see `Getting passages from a zone`_ section.
+If a zone is selected, the door combobox should show all the doors of this zone and one of them should be slected by the user.
+To get from server the current list of doors of a zone, see `Getting doors from a zone`_ section.
 
 The following REST method should be sent to the server.
 
@@ -1329,11 +1329,11 @@ The following REST method should be sent to the server.
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/events?pssgId=2&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
+  http://172.18.0.3:5000/api/v1.0/events?doorId=2&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
 
 
-If all the events from an entire zone is need, a zone should be selected in the zone combobox and the word "ALL" in the passage combobox too. The following REST method shoud be sent to the server:
+If all the events from an entire zone is need, a zone should be selected in the zone combobox and the word "ALL" in the door combobox too. The following REST method shoud be sent to the server:
 
 **Method:** GET
 
@@ -1380,7 +1380,7 @@ Of course, all combinations would be possible:
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/events?orgId=3&pssgId=2&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=80&evtsQtty=10
+  http://172.18.0.3:5000/api/v1.0/events?orgId=3&doorId=2&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=80&evtsQtty=10
 
 
 An the tipical response would be:
@@ -1403,11 +1403,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT", 
         "eventTypeId": 4, 
         "id": 1542, 
-        "latchId": null, 
-        "notReasonId": null, 
+        "doorLockId": null, 
+        "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
-        "pssgName": "Ingreso F66", 
+        "doorName": "Ingreso F66", 
         "side": null, 
         "zoneName": "Ingreso Oficina"
       }, 
@@ -1416,11 +1416,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT", 
         "eventTypeId": 1, 
         "id": 1543, 
-        "latchId": 1, 
-        "notReasonId": null, 
+        "doorLockId": 1, 
+        "denialCauseId": null, 
         "orgName": "Datacenter Capitalinas", 
         "personName": "Jorge Kleinerman", 
-        "pssgName": "Ingreso F66", 
+        "doorName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
@@ -1429,11 +1429,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 17:20:00 GMT", 
         "eventTypeId": 2, 
         "id": 1544, 
-        "latchId": 3, 
-        "notReasonId": null, 
+        "doorLockId": 3, 
+        "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
-        "pssgName": "Ingreso F66", 
+        "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
       }, 
@@ -1442,11 +1442,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 17:21:00 GMT", 
         "eventTypeId": 3, 
         "id": 1545, 
-        "latchId": null, 
-        "notReasonId": null, 
+        "doorLockId": null, 
+        "denialCauseId": null, 
         "orgName": "null", 
         "personName": "null", 
-        "pssgName": "Ingreso F66", 
+        "doorName": "Ingreso F66", 
         "side": null, 
         "zoneName": "Ingreso Oficina"
       }, 
@@ -1455,11 +1455,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 17:22:00 GMT", 
         "eventTypeId": 2, 
         "id": 1546, 
-        "latchId": 3, 
-        "notReasonId": null, 
+        "doorLockId": 3, 
+        "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
-        "pssgName": "Ingreso F66", 
+        "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
       }, 
@@ -1468,11 +1468,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 17:56:00 GMT", 
         "eventTypeId": 2, 
         "id": 1547, 
-        "latchId": 3, 
-        "notReasonId": null, 
+        "doorLockId": 3, 
+        "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
-        "pssgName": "Ingreso F66", 
+        "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
       }, 
@@ -1481,11 +1481,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 18:01:00 GMT", 
         "eventTypeId": 2, 
         "id": 1548, 
-        "latchId": 3, 
-        "notReasonId": null, 
+        "doorLockId": 3, 
+        "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
-        "pssgName": "Ingreso F66", 
+        "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
       }, 
@@ -1494,11 +1494,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 18:01:00 GMT", 
         "eventTypeId": 1, 
         "id": 1549, 
-        "latchId": 1, 
-        "notReasonId": null, 
+        "doorLockId": 1, 
+        "denialCauseId": null, 
         "orgName": "Datacenter Capitalinas", 
         "personName": "Jorge Kleinerman", 
-        "pssgName": "Ingreso F66", 
+        "doorName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
@@ -1507,11 +1507,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 18:02:00 GMT", 
         "eventTypeId": 1, 
         "id": 1550, 
-        "latchId": 1, 
-        "notReasonId": null, 
+        "doorLockId": 1, 
+        "denialCauseId": null, 
         "orgName": "Datacenter Capitalinas", 
         "personName": "Jorge Kleinerman", 
-        "pssgName": "Ingreso F65", 
+        "doorName": "Ingreso F65", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
       }, 
@@ -1520,11 +1520,11 @@ An the tipical response would be:
         "dateTime": "Thu, 12 Oct 2017 18:02:00 GMT", 
         "eventTypeId": 2, 
         "id": 1551, 
-        "latchId": 3, 
-        "notReasonId": null, 
+        "doorLockId": 3, 
+        "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
-        "pssgName": "Ingreso F66", 
+        "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
       }
@@ -1552,13 +1552,13 @@ Each event has the following fields:
 - ``id``: The ID of the event.
 - ``eventTypeId``: ID of type of event.
 - ``dateTime``: Date and time of the event.
-- ``latchId``: ID of latch used. (Could be NULL when the access was not allowed)
+- ``doorLockId``: ID of doorLock used. (Could be NULL when the access was not allowed)
 - ``side``: 1 for incoming and 0 for outgoing. (Could be NULL when the access was not allowed)
 - ``zoneName``: Name of the zone.
-- ``pssgName```: Name of the passage.
+- ``doorName```: Name of the door.
 - ``orgName``: Name of the organization that person belong to. (Could be NULL when person is UNKNOWN)
 - ``personName``: Name of the person. (Could be NULL when person is UNKNOWN)
-- ``notReasonId``: When the access is not allowed, this is the ID of notReason. (Could be NULL when the access was allowed)
+- ``denialCauseId``: When the access is not allowed, this is the ID of denialCause. (Could be NULL when the access was allowed)
 - ``allowed``: If the access was allowed it will be ``1``, if not, it will ``0``.
 
 
@@ -1595,17 +1595,17 @@ To show **Event Types** descriptions with the ``eventTypeId`` received in the ev
       "id": 2
     }, 
     {
-      "description": "The passage remains opened", 
+      "description": "The door remains opened", 
       "id": 3
     }, 
     {
-      "description": "The passage was forced", 
+      "description": "The door was forced", 
       "id": 4
     }
   ]
 
 
-To show **Latches** descriptions with the ``latchId`` received in the event, the following method should be sent to the server:
+To show **DoorLocks** descriptions with the ``doorLockId`` received in the event, the following method should be sent to the server:
 
 **Method:** GET
 
@@ -1613,7 +1613,7 @@ To show **Latches** descriptions with the ``latchId`` received in the event, the
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/latch
+  http://172.18.0.3:5000/api/v1.0/doorLock
 
 
 **Response:**
@@ -1643,7 +1643,7 @@ To show **Latches** descriptions with the ``latchId`` received in the event, the
 
 
 
-To show **Not Reasons** descriptions with the ``notReasonId`` received in the event, the following method should be sent to the server:
+To show **Not Reasons** descriptions with the ``denialCauseId`` received in the event, the following method should be sent to the server:
 
 **Method:** GET
 
