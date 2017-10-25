@@ -444,15 +444,10 @@ class CrudMngr(genmngr.GenericMngr):
 
                 ## For GET method
                 if request.method == 'GET':
-                    persons = self.dataBase.getPersons(orgId)
+                    organization = self.dataBase.getOrganization(orgId)
+                    organization['uri'] = url_for('Organization', orgId=orgId, _external=True)
+                    return jsonify(organization)
                     
-                    for person in persons:
-                        person['uri'] = url_for('modPerson', personId=person['id'], _external=True)
-                        #Removing orgId as is the same for all the persons and is given by the user
-                        #in the REST request.
-                        person.pop('orgId')
-                    return jsonify(persons)
-
                 # Update an organization
                 elif request.method == 'PUT':
                     organization = {}
@@ -482,6 +477,50 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
             except KeyError:
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+
+
+
+
+        @app.route('/api/v1.0/organization/<int:orgId>/person', methods=['GET',])
+        def orgPersons(orgId):
+            '''
+            GET: Return a list with all persons in the organization
+            '''
+            try:
+                #If somebody is trying to modify/delete the "Visitors"
+                #organization via REST, we should respond with 404 (Not Found)
+                if orgId == 1:
+                    raise database.OrganizationNotFound('Organization not found')
+
+                ## For GET method
+                persons = self.dataBase.getPersons(orgId)
+
+                for person in persons:
+                    person['uri'] = url_for('modPerson', personId=person['id'], _external=True)
+                    #Removing orgId as is the same for all the persons and is given by the user
+                    #in the REST request.
+                    person.pop('orgId')
+                return jsonify(persons)
+
+
+            except database.OrganizationNotFound as organizationNotFound:
+                raise NotFound(str(organizationNotFound))
+            except database.OrganizationError as organizationError:
+                raise ConflictError(str(organizationError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(orgNeedKeys)))
+
+
+
+
+
+
+
 
 
 
