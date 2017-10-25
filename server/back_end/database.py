@@ -675,11 +675,33 @@ class DataBase(object):
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise OrganizationError('Can not get Organizations')
+            raise OrganizationError('Can not get organizations')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise OrganizationError('Can not get Organizations')
+            raise OrganizationError('Can not get organizations')
+
+
+
+    def getOrganization(self, orgId):
+        '''
+        Return a a dictionary with organization data
+        '''
+        try:
+            sql = ('SELECT * FROM Organization WHERE id = {}'.format(orgId))
+            self.execute(sql)
+            organization = self.cursor.fetchone()
+            if not organization:
+                raise OrganizationNotFound('Organization not found')
+            return organization
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise OrganizationError('Can not get specified organization')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not get specified organization')
 
 
                                              
