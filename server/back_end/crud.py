@@ -578,16 +578,9 @@ class CrudMngr(genmngr.GenericMngr):
 
                 ## For GET method
                 if request.method == 'GET':
-                    doors = self.dataBase.getDoors(zoneId=zoneId)
-                    
-                    for door in doors:
-                        door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
-                        #All the door will have the same zoneId, this parametter is given by the
-                        #user in REST request.
-                        door.pop('zoneId')
-                        #door.pop('id')
-                    return jsonify(doors)
-
+                    zone = self.dataBase.getZone(zoneId)
+                    zone['uri'] = request.url
+                    return jsonify(zone)
 
                 ## For PUT and DELETE methods
                 elif request.method == 'PUT':
@@ -613,6 +606,45 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
             except KeyError:
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
+
+
+
+
+
+        @app.route('/api/v1.0/zone/<int:zoneId>/door', methods=['GET',])
+        @auth.login_required
+        def zoneDoors(zoneId):
+            '''
+            GET: List all doors in the zone
+            PUT/DELETE: Update or delete a Zone in the database.
+            '''
+            try:
+
+                doors = self.dataBase.getDoors(zoneId=zoneId)
+                for door in doors:
+                    door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
+                    #All the door will have the same zoneId, this parametter is given by the
+                    #user in REST request.
+                    door.pop('zoneId')
+                    #door.pop('id')
+                return jsonify(doors)
+
+            except database.ZoneNotFound as zoneNotFound:
+                raise NotFound(str(zoneNotFound))
+            except database.ZoneError as zoneError:
+                raise ConflictError(str(zoneError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(zoneNeedKeys)))
+
+
+
+
+
 
 
 
@@ -1014,18 +1046,9 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 ## For GET method
                 if request.method == 'GET':
-                    accesses = self.dataBase.getAccesses(doorId=doorId)
-                    for access in accesses:
-                        access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
-                        try:
-                            for liAccess in access['liAccesses']:
-                                liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
-                        except KeyError:
-                            #This exception will happen when the access is allWeek access. In this situation
-                            #nothing should be done.
-                            pass
-
-                    return jsonify(accesses)
+                    door = self.dataBase.getDoor(doorId)
+                    door['uri'] = request.url
+                    return jsonify(door)
 
                 elif request.method == 'PUT':
                     # Create a clean door dictionary with only required door params,
@@ -1061,6 +1084,48 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
             except KeyError:
                 raise BadRequest('Invalid request. Required: {}'.format(', '.join(doorNeedKeys)))
+
+
+
+
+
+
+        @app.route('/api/v1.0/door/<int:doorId>/access', methods=['GET',])
+        @auth.login_required
+        def doorAccesses(doorId):
+            '''
+            GET: Return a JSON with all accesses that this person has
+            '''
+
+            try:
+                ## For GET method
+                accesses = self.dataBase.getAccesses(doorId=doorId)
+                for access in accesses:
+                    access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
+                    try:
+                        for liAccess in access['liAccesses']:
+                            liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
+                    except KeyError:
+                        #This exception will happen when the access is allWeek access. In this situation
+                        #nothing should be done.
+                        pass
+
+                return jsonify(accesses)
+
+
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
+            except database.PersonError as personError:
+                raise ConflictError(str(personError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
+
 
 
 
