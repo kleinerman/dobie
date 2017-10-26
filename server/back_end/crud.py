@@ -832,6 +832,48 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+
+
+        @app.route('/api/v1.0/person/<int:personId>/access', methods=['GET',])
+        @auth.login_required
+        def personAccesses(personId):
+            '''
+            GET: Return a JSON with all accesses that this person has
+            '''
+
+            try:
+                ## For GET method
+                accesses = self.dataBase.getAccesses(personId=personId)
+                for access in accesses:
+                    access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
+                    try:
+                        for liAccess in access['liAccesses']:
+                            liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
+                    except KeyError:
+                        #This exception will happen when the access is allWeek access. In this situation
+                        #nothing should be done.
+                        pass
+
+                return jsonify(accesses)
+
+
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
+            except database.PersonError as personError:
+                raise ConflictError(str(personError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
+
+
+
+
+
 #--------------------------------------Controller------------------------------------------
 
         ctrllerNeedKeys = ('ctrllerModelId', 'macAddress')
