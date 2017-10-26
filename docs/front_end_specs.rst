@@ -336,7 +336,7 @@ To get from server the current list of persons in each organization, the followi
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/organization/2
+  http://172.18.0.3:5000/api/v1.0/organization/2/person
   
   
 **Response:**
