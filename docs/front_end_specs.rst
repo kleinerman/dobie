@@ -502,7 +502,7 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
 
 
 
-Get one person
+Get one Person
 ~~~~~~~~~~~~~~
 
 **Method:** POST
@@ -677,7 +677,7 @@ For this screen, to get all accesses of an specific person to show them in the r
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/person/6
+  http://172.18.0.3:5000/api/v1.0/person/6/access
 
 **Response:**
 
@@ -806,7 +806,7 @@ For this screen, to get all accesses of an specific door to show them in the rig
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/door/4
+  http://172.18.0.3:5000/api/v1.0/door/4/access
 
 **Response:**
 
