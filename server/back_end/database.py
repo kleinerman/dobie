@@ -848,13 +848,43 @@ class DataBase(object):
 
     def getZones(self):
         '''
-        Return a dictionary with all Zones
+        Return a a dictionary with all organizations
         '''
-        sql = ('SELECT * FROM Zone')
-        self.execute(sql)
-        zones = self.cursor.fetchall()
+        try:
+            sql = ('SELECT * FROM Zone')
+            self.execute(sql)
+            zones = self.cursor.fetchall()
+            return zones
 
-        return zones
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise OrganizationError('Can not get organizations')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise OrganizationError('Can not get organizations')
+
+
+
+    def getZone(self, zoneId):
+        '''
+        Return a a dictionary with zone data
+        '''
+        try:
+            sql = ('SELECT * FROM Zone WHERE id = {}'.format(zoneId))
+            self.execute(sql)
+            zone = self.cursor.fetchone()
+            if not zone:
+                raise ZoneNotFound('Zone not found')
+            return zone
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise ZoneError('Can not get specified zone')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ZoneError('Can not get specified zone')
 
 
 
@@ -1916,7 +1946,7 @@ class DataBase(object):
         Receive person id and returns a dictionary with person parameters.
         '''
 
-        sql = "SELECT id, name, cardNumber FROM Person WHERE id = {}".format(personId)
+        sql = "SELECT * FROM Person WHERE id = {}".format(personId)
         self.execute(sql)
         person = self.cursor.fetchone()
 
