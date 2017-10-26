@@ -205,7 +205,38 @@ The following REST method should be sent to the server:
     "uri": "http://172.18.0.3:5000/api/v1.0/organization/5"
   }
   
+
+
+Get one organization
+~~~~~~~~~~~~~~~~~~~~~
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/organization/2
   
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 122
+  Server: Werkzeug/0.12.2 Python/3.6.2
+  Date: Thu, 26 Oct 2017 15:06:01 GMT
+  
+  {
+    "id": 2, 
+    "name": "Rufato Corporation", 
+    "resStateId": 3, 
+    "uri": "http://172.18.0.3:5000/api/v1.0/organization/2"
+  }
+
+
 Update Organization
 ~~~~~~~~~~~~~~~~~~~
 
@@ -469,6 +500,36 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
     "status": "conflict"
   }
 
+
+
+Get one person
+~~~~~~~~~~~~~~
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/person/2
+
+ 
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 119
+  Server: Werkzeug/0.12.2 Python/3.6.2
+  Date: Thu, 26 Oct 2017 15:08:39 GMT
+  
+  {
+    "cardNumber": 5326224, 
+    "id": 2, 
+    "name": "Carlos Alvarez", 
+    "uri": "http://172.18.0.3:5000/api/v1.0/person/2"
+  }
 
 
 
