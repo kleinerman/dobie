@@ -445,7 +445,8 @@ class CrudMngr(genmngr.GenericMngr):
                 ## For GET method
                 if request.method == 'GET':
                     organization = self.dataBase.getOrganization(orgId)
-                    organization['uri'] = url_for('Organization', orgId=orgId, _external=True)
+                    organization['uri'] = request.url
+                    #organization['uri'] = url_for('Organization', orgId=orgId, _external=True)
                     return jsonify(organization)
                     
                 # Update an organization
@@ -784,18 +785,9 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 ## For GET method
                 if request.method == 'GET':
-                    accesses = self.dataBase.getAccesses(personId=personId)
-                    for access in accesses:
-                        access['uri'] = url_for('modAccess', accessId=access['id'], _external=True)
-                        try:
-                            for liAccess in access['liAccesses']:
-                                liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
-                        except KeyError:
-                            #This exception will happen when the access is allWeek access. In this situation
-                            #nothing should be done.
-                            pass
-
-                    return jsonify(accesses)
+                    person = self.dataBase.getPerson(personId)
+                    person['uri'] = request.url
+                    return jsonify(person)
 
 				## For PUT and DELETE method
                 elif request.method == 'PUT':
