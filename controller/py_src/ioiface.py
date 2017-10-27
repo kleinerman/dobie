@@ -8,7 +8,7 @@ import threading
 import subprocess
 
 
-import passage
+import door
 import database
 from config import *
 
@@ -34,24 +34,24 @@ class IoIface(object):
     def start(self):
         '''
         Start the IO Interface process.
-        Leave self.ioIfaceProc and self.pssgsControl with new objects.
+        Leave self.ioIfaceProc and self.doorsControl with new objects.
         '''
 
         #In the followng section we generate the arguments to pass to the ioIface external program
         ioIfaceArgs = ''
 
         gpioNames = self.dataBase.getGpioNames()
-        gpiosPssgs = self.dataBase.getGpiosPssgs()
+        gpiosDoors = self.dataBase.getGpiosDoors()
 
-        for gpiosPssg in gpiosPssgs:
+        for gpiosDoor in gpiosDoors:
             for gpioName in gpioNames:
-                gpioNumber = gpiosPssg[gpioName]
+                gpioNumber = gpiosDoor[gpioName]
                 if gpioNumber:
                     ioIfaceArgs += '--{} {} '.format(gpioName, gpioNumber)
 
 
         #With the arguments to pass to the ioIface program, it is lauched using Popen
-        #and saving the process object to be able to kill it when a passage is added, updated
+        #and saving the process object to be able to kill it when a door is added, updated
         #or deleted.
         ioIfaceCmd = '{} {}'.format(IOIFACE_BIN, ioIfaceArgs)
 
@@ -69,9 +69,9 @@ class IoIface(object):
 
     def stop(self):
         '''
-        This method is called by crud thread when a passage is added, updated or
+        This method is called by crud thread when a door is added, updated or
         deleted.
-        It set self.pssgsReconfFlag to tell all the "cleanerPssgMngr" or "starterAlrmMngr"
+        It set self.doorsReconfFlag to tell all the "cleanerDoorMngr" or "starterAlrmMngr"
         threads to finish when they are running
         '''
 

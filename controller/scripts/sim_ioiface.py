@@ -32,7 +32,7 @@ else:
 
 
     while True:
-        ioIfaceData = input('Enter simulated pssg iface data: ')
+        ioIfaceData = input('Enter simulated door iface data: ')
         ioIfaceQue.send(ioIfaceData)
 
 

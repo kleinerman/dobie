@@ -27,16 +27,16 @@ class CrudMngr(genmngr.GenericMngr):
     are happening.
     '''
 
-    def __init__(self, lockPssgsControl, pssgsControl, exitFlag):
+    def __init__(self, lockDoorsControl, doorsControl, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('CrudMngr', exitFlag)
 
-        #When receiving a passage CRUD is necessary to re launch the ioiface proccess.
+        #When receiving a door CRUD is necessary to re launch the ioiface proccess.
         #For this reason it is necessary a reference to "ioIface" object.
-        self.lockPssgsControl = lockPssgsControl
-        self.pssgsControl = pssgsControl
+        self.lockDoorsControl = lockDoorsControl
+        self.doorsControl = doorsControl
 
         #Reference to network manager to answer the CRUD messages
         #sent by the server
@@ -61,9 +61,9 @@ class CrudMngr(genmngr.GenericMngr):
         #from diffrent thread each thread shoud crate its own connection.
         self.dataBase = database.DataBase(DB_FILE)
 
-        self.crudHndlrs = {'SC': self.dataBase.addPassage,
-                           'SU': self.dataBase.updPassage,
-                           'SD': self.dataBase.delPassage,
+        self.crudHndlrs = {'SC': self.dataBase.addDoor,
+                           'SU': self.dataBase.updDoor,
+                           'SD': self.dataBase.delDoor,
                            'AC': self.dataBase.addAccess,
                            'AU': self.dataBase.updAccess,
                            'AD': self.dataBase.delAccess,
@@ -94,11 +94,11 @@ class CrudMngr(genmngr.GenericMngr):
                     #Calling the corresponding DB method according to the CRUD command received
                     self.crudHndlrs[crudCmd](crudObject)
 
-                    #If the CRUD command do a modification in a passage, it is necessary to 
-                    #load the passage params again in pssgsControl object
+                    #If the CRUD command do a modification in a door, it is necessary to 
+                    #load the door params again in doorsControl object
                     if crudCmd[0] == 'S':
-                        with self.lockPssgsControl:
-                            self.pssgsControl.loadParams()
+                        with self.lockDoorsControl:
+                            self.doorsControl.loadParams()
                         
                     #If we are at this point of code means that the database method executed 
                     #did not throw an exception and therefore we can answer with OK to the server.

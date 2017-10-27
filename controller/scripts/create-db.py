@@ -29,11 +29,11 @@ cursor.execute('''CREATE UNIQUE INDEX cardNumberIndex
 )
 
 
-#----------------Passage Table-----------------#
+#----------------Door Table-----------------#
 
 
 cursor.execute('''
-    CREATE TABLE PssgGpios (
+    CREATE TABLE DoorGpios (
         id       INTEGER PRIMARY KEY,
         i0In     INTEGER, 
         i1In     INTEGER,
@@ -50,19 +50,19 @@ cursor.execute('''
 
 
 cursor.execute('''
-    CREATE TABLE Passage (
+    CREATE TABLE Door (
         id       INTEGER PRIMARY KEY,
-        pssgNum  INTEGER,
+        doorNum  INTEGER,
         rlseTime INTEGER,
         bzzrTime INTEGER,
         alrmTime INTEGER,
-        FOREIGN KEY(pssgNum) REFERENCES PssgGpios(id) ON DELETE CASCADE
+        FOREIGN KEY(doorNum) REFERENCES DoorGpios(id) ON DELETE CASCADE
     )
     '''
 )
 
-cursor.execute('''CREATE UNIQUE INDEX pssgNumIndex
-                  ON Passage (pssgNum)
+cursor.execute('''CREATE UNIQUE INDEX doorNumIndex
+                  ON Door (doorNum)
                '''
 )
 
@@ -73,7 +73,7 @@ cursor.execute('''CREATE UNIQUE INDEX pssgNumIndex
 cursor.execute('''
     CREATE TABLE Access (
         id          INTEGER PRIMARY KEY,
-        pssgId      INTEGER,
+        doorId      INTEGER,
         personId    INTEGER,
         allWeek     BOOLEAN,
         iSide       BOOLEAN,
@@ -82,15 +82,15 @@ cursor.execute('''
         endTime     DATETIME,
         expireDate  DATETIME,
         FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
-        FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
+        FOREIGN KEY(doorId) REFERENCES Door(id) ON DELETE CASCADE
     )
     '''
 )
 
-#FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
+#FOREIGN KEY(doorId) REFERENCES Door(id) ON DELETE CASCADE
 
-cursor.execute('''CREATE UNIQUE INDEX pssgPersonIndex
-                  ON Access (pssgId, personId)
+cursor.execute('''CREATE UNIQUE INDEX doorPersonIndex
+                  ON Access (doorId, personId)
                '''
 )
 
@@ -98,7 +98,7 @@ cursor.execute('''CREATE UNIQUE INDEX pssgPersonIndex
 cursor.execute('''
     CREATE TABLE LimitedAccess (
         id         INTEGER PRIMARY KEY,
-        pssgId     INTEGER,
+        doorId     INTEGER,
         personId   INTEGER,
         weekDay    INTEGER, 
         iSide      BOOLEAN,
@@ -106,13 +106,13 @@ cursor.execute('''
         startTime  DATETIME,
         endTime    DATETIME,
         FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
-        FOREIGN KEY(pssgId) REFERENCES Passage(id) ON DELETE CASCADE
+        FOREIGN KEY(doorId) REFERENCES Door(id) ON DELETE CASCADE
     )
     '''
 )
 
-cursor.execute('''CREATE UNIQUE INDEX pssgPersonWeekDayIndex
-                  ON LimitedAccess (pssgId, personId, weekDay)
+cursor.execute('''CREATE UNIQUE INDEX doorPersonWeekDayIndex
+                  ON LimitedAccess (doorId, personId, weekDay)
                '''
 )
 
@@ -122,19 +122,19 @@ cursor.execute('''CREATE UNIQUE INDEX pssgPersonWeekDayIndex
 cursor.execute('''
     CREATE TABLE Event (
         id          INTEGER PRIMARY KEY,
-        pssgId      INTEGER,
+        doorId      INTEGER,
         eventTypeId INTEGER,
         dateTime    DATETIME,
-        latchId     INTEGER,   
+        doorLockId     INTEGER,   
         personId    INTEGER,
         side        BOOLEAN,
         allowed     BOOLEAN,
-        notReasonId INTEGER,
-        FOREIGN KEY(pssgId) REFERENCES Passage(id),
+        denialCauseId INTEGER,
+        FOREIGN KEY(doorId) REFERENCES Door(id),
         FOREIGN KEY(eventTypeId) REFERENCES EventType(id),
-        FOREIGN KEY(latchId) REFERENCES Latch(id),
+        FOREIGN KEY(doorLockId) REFERENCES DoorLock(id),
         FOREIGN KEY(personId) REFERENCES Person(id),
-        FOREIGN KEY(notReasonId) REFERENCES NotReason(id)
+        FOREIGN KEY(denialCauseId) REFERENCES DenialCause(id)
    )
     '''
 )
@@ -152,7 +152,7 @@ cursor.execute('''
 
 
 cursor.execute('''
-    CREATE TABLE Latch (
+    CREATE TABLE DoorLock (
         id          INTEGER PRIMARY KEY,
         description TEXT
 
@@ -162,7 +162,7 @@ cursor.execute('''
 
 
 cursor.execute('''
-    CREATE TABLE NotReason (
+    CREATE TABLE DenialCause (
         id          INTEGER PRIMARY KEY,
         description TEXT
 

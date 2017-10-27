@@ -38,20 +38,20 @@ for cardNum in cardNumList:
 
 
 
-#######Filling Passage table########
+#######Filling Door table########
 
 
 
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(21, 20, null, null, 26, 19, 10, 22, 7, 3, 10)")
-cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(16, 12, 7, 8, 13, 6, 27, 17, 7, 3, 10)")
-#cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
-#cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(null, null, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
-#cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
-#cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(null, null, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
-#cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
-#cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
-#cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, null, 6, 7, 8, 7, 3, 10)")
-#cursor.execute("insert into Passage(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, null, 6, 7, 8, 7, 3, 10)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(21, 20, null, null, 26, 19, 10, 22, 7, 3, 10)")
+cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(16, 12, 7, 8, 13, 6, 27, 17, 7, 3, 10)")
+#cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+#cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(null, null, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+#cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+#cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(null, null, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+#cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+#cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, 5, 6, 7, 8, 7, 3, 10)")
+#cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, null, 6, 7, 8, 7, 3, 10)")
+#cursor.execute("insert into Door(i0In, i1In, o0In, o1In, bttnIn, stateIn, rlseOut, bzzrOut, rlseTime, bzzrTime, alrmTime) values(1, 2, 3, 4, null, 6, 7, 8, 7, 3, 10)")
 
 
 
@@ -61,108 +61,108 @@ cursor.execute("SELECT id from Person where id not in (1)") #Excluding the unkno
 allRows = cursor.fetchall()
 personIds = [row[0] for row in allRows]
 
-cursor.execute("SELECT id from Passage")
+cursor.execute("SELECT id from Door")
 allRows = cursor.fetchall()
-pssgIds = [row[0] for row in allRows]
+doorIds = [row[0] for row in allRows]
 
 
-#All persons will have access to all pssgs all week
+#All persons will have access to all doors all week
 
-pssgIdsPersonIds = []
+doorIdsPersonIds = []
 
-for pssgId in pssgIds:
+for doorId in doorIds:
     for personId in personIds:
         
-        pssgIdsPersonIds.append([pssgId, personId, 1])
+        doorIdsPersonIds.append([doorId, personId, 1])
 
 #Shuffling the dictionary to be more real
-random.shuffle(pssgIdsPersonIds)
+random.shuffle(doorIdsPersonIds)
 
 
-#Now, some of the persons, in some of the pssgs,
+#Now, some of the persons, in some of the doors,
 #will not have access all week days
-resPssgIdsPersonIds = []
+resDoorIdsPersonIds = []
 
 for i in range(SIM_LIM_ACCESS_QUANT):
 
-    elecPssgIdPersonId = random.choice(pssgIdsPersonIds)
-    if elecPssgIdPersonId not in resPssgIdsPersonIds:
-        elecPssgIdPersonId[2] = 0
-        resPssgIdsPersonIds.append(elecPssgIdPersonId)
+    elecDoorIdPersonId = random.choice(doorIdsPersonIds)
+    if elecDoorIdPersonId not in resDoorIdsPersonIds:
+        elecDoorIdPersonId[2] = 0
+        resDoorIdsPersonIds.append(elecDoorIdPersonId)
 
 
 
 
 #Filling the SQL Access Table
-for pssgIdPersonId in pssgIdsPersonIds:
+for doorIdPersonId in doorIdsPersonIds:
 
-    pssgId, personId, allWeek = pssgIdPersonId
+    doorId, personId, allWeek = doorIdPersonId
         
-    sqlSentence = ("INSERT INTO Access(pssgId, personId, allWeek, iSide, oSide, startTime, endTime, expireDate) "
-                   "VALUES({}, {}, {}, 1, 1, '07:20', '23:30', '2016-12-30')".format(pssgId, personId, allWeek)
+    sqlSentence = ("INSERT INTO Access(doorId, personId, allWeek, iSide, oSide, startTime, endTime, expireDate) "
+                   "VALUES({}, {}, {}, 1, 1, '07:20', '23:30', '2016-12-30')".format(doorId, personId, allWeek)
                   )
 
     cursor.execute(sqlSentence)
 
 
 #Filling the SQL LimitedAccess Table generating entries for mon, tue, wed, thu, fry
-for pssgIdPersonId in resPssgIdsPersonIds:
+for doorIdPersonId in resDoorIdsPersonIds:
 
-    pssgId, personId = pssgIdPersonId[:2]
+    doorId, personId = doorIdPersonId[:2]
 
-    sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 1, '07:20', '23:40')".format(pssgId, personId)
+    sqlSentence = ("INSERT INTO LimitedAccess(doorId, personId, iSide, oSide, weekDay, startTime, endTime) "
+                   "VALUES({}, {}, 1, 1, 1, '07:20', '23:40')".format(doorId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
-    sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 2, '07:20', '23:40')".format(pssgId, personId)
+    sqlSentence = ("INSERT INTO LimitedAccess(doorId, personId, iSide, oSide, weekDay, startTime, endTime) "
+                   "VALUES({}, {}, 1, 1, 2, '07:20', '23:40')".format(doorId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
-    sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 3, '07:20', '23:40')".format(pssgId, personId)
+    sqlSentence = ("INSERT INTO LimitedAccess(doorId, personId, iSide, oSide, weekDay, startTime, endTime) "
+                   "VALUES({}, {}, 1, 1, 3, '07:20', '23:40')".format(doorId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
-    sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 4, '07:20', '23:40')".format(pssgId, personId)
+    sqlSentence = ("INSERT INTO LimitedAccess(doorId, personId, iSide, oSide, weekDay, startTime, endTime) "
+                   "VALUES({}, {}, 1, 1, 4, '07:20', '23:40')".format(doorId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
-    sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 5, '07:20', '23:40')".format(pssgId, personId)
+    sqlSentence = ("INSERT INTO LimitedAccess(doorId, personId, iSide, oSide, weekDay, startTime, endTime) "
+                   "VALUES({}, {}, 1, 1, 5, '07:20', '23:40')".format(doorId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
-    sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 6, '07:20', '23:40')".format(pssgId, personId)
+    sqlSentence = ("INSERT INTO LimitedAccess(doorId, personId, iSide, oSide, weekDay, startTime, endTime) "
+                   "VALUES({}, {}, 1, 1, 6, '07:20', '23:40')".format(doorId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
-    sqlSentence = ("INSERT INTO LimitedAccess(pssgId, personId, iSide, oSide, weekDay, startTime, endTime) "
-                   "VALUES({}, {}, 1, 1, 7, '12:20', '15:30')".format(pssgId, personId)
+    sqlSentence = ("INSERT INTO LimitedAccess(doorId, personId, iSide, oSide, weekDay, startTime, endTime) "
+                   "VALUES({}, {}, 1, 1, 7, '12:20', '15:30')".format(doorId, personId)
                   )
     cursor.execute(sqlSentence)
 
 
 
-#Filling NotReason Table
-sqlSentence = ("INSERT INTO NotReason(id, description) "
+#Filling DenialCause Table
+sqlSentence = ("INSERT INTO DenialCause(id, description) "
                "VALUES (1, 'No access'), (2, 'Expired card'), (3, 'Out of time')"
               )
 cursor.execute(sqlSentence)
 
 
 
-#Filling Latch Table
-sqlSentence = ("INSERT INTO Latch(id, description) "
+#Filling DoorLock Table
+sqlSentence = ("INSERT INTO DoorLock(id, description) "
                "VALUES (1, 'Card reader'), (2, 'Fingerprint reader'), (3, 'Button')"
               )
 cursor.execute(sqlSentence)
@@ -170,9 +170,9 @@ cursor.execute(sqlSentence)
 
 #Filling Event Table
 sqlSentence = ("INSERT INTO Event(id, description) "
-               "VALUES (1, 'Person opening a passage with card'), " 
-                      "(2, 'Person opening a passage with button'), "
-                      "(3, 'The passage remains opened')"
+               "VALUES (1, 'Person opening a door with card'), " 
+                      "(2, 'Person opening a door with button'), "
+                      "(3, 'The door remains opened')"
               )
 cursor.execute(sqlSentence)
 

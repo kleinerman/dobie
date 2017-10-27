@@ -17,6 +17,6 @@ try:
         print(ioIfaceData)
             
 except posix_ipc.SignalError:
-    print('Passage Interface Queue was interrupted by a OS signal.')
+    print('Door Interface Queue was interrupted by a OS signal.')
 
 
