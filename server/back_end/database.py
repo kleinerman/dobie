@@ -1373,6 +1373,27 @@ class DataBase(object):
 
 
 
+    def getDoor(self, doorId):
+        '''
+        Receive door id and returns a dictionary with door parameters.
+        '''
+        try:
+            sql = "SELECT * FROM Door WHERE id = {}".format(doorId)
+            self.execute(sql)
+            door = self.cursor.fetchone()
+
+            if not door:
+                raise DoorNotFound("Door not found.")
+            return door
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise DoorError('Can not get door with this ID.')
+
+
+
+
+
     def getUncmtDoors(self, ctrllerMac, resStateId):
         '''
         This method is an iterator, in each iteration it returns a door
@@ -1945,14 +1966,18 @@ class DataBase(object):
         '''
         Receive person id and returns a dictionary with person parameters.
         '''
+        try:
+            sql = "SELECT * FROM Person WHERE id = {}".format(personId)
+            self.execute(sql)
+            person = self.cursor.fetchone()
 
-        sql = "SELECT * FROM Person WHERE id = {}".format(personId)
-        self.execute(sql)
-        person = self.cursor.fetchone()
+            if not person:
+                raise PersonNotFound("Person not found.")
+            return person
 
-        if not person:
-            raise PersonNotFound("Person not found.")
-        return person
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Can not get person with this ID.')
 
 
 
