@@ -931,7 +931,7 @@ To get all doors from a zone, the following REST method should be sent to the se
 .. code-block::
 
 
-  http://172.18.0.3:5000/api/v1.0/zone/1
+  http://172.18.0.3:5000/api/v1.0/zone/1/door
 
  
 **Response:**
@@ -1070,7 +1070,7 @@ To get all persons from an organization, the following REST method should be sen
 .. code-block::
 
 
-  http://172.18.0.3:5000/api/v1.0/organization/2
+  http://172.18.0.3:5000/api/v1.0/organization/2/person
 
  
 **Response:**
@@ -1204,7 +1204,7 @@ Add Day Access (Limited Access)
 For the first screen **(Person -> Door)**, if all the doors of a zone is selected, an "access" or the necessary "limited access" should be sent to the server for each door of the zone.
 If an entire organization is selected, all the above should be repeated for each person of the organization. 
 
-For the second screen **(Door -> Person)**, if all the persons of an organization is selected, an "access" or the necessary "limited access" should be sent to the server for each person of the organizatino.
+For the second screen **(Door -> Person)**, if all the persons of an organization is selected, an "access" or the necessary "limited access" should be sent to the server for each person of the organization.
 If an entire zone is selected, all the above should be repeated for each door of the zone. 
 
 An entire organization can be selected and an entire zone too.
