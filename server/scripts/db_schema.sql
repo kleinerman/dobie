@@ -21,7 +21,7 @@ CREATE UNIQUE INDEX usernameIndex ON User (username)
 
 
 
-CREATE TABLE `RowState` (
+CREATE TABLE `ResState` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `description` varchar(20) NOT NULL
 )
@@ -30,24 +30,27 @@ CREATE TABLE `RowState` (
 CREATE TABLE `Organization` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL,
-    `rowStateId` integer NOT NULL
+    `resStateId` integer NOT NULL
 )
 ;
 
 CREATE TABLE `Person` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL,
+    `identNumber` varchar(40) NOT NULL,
     `cardNumber` integer NOT NULL,
     `orgId` integer,
     `visitedOrgId` integer,
-    `rowStateId` integer NOT NULL,
+    `resStateId` integer NOT NULL,
     CONSTRAINT `fk_Person_Organization` FOREIGN KEY (`orgId`) REFERENCES `Organization` (`id`),
     CONSTRAINT `fk_Person_VisitedOrganization` FOREIGN KEY (`visitedOrgId`) REFERENCES `Organization` (`id`),
-    CONSTRAINT `fk_Person_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
+    CONSTRAINT `fk_Person_ResState` FOREIGN KEY (`resStateId`) REFERENCES `ResState` (`id`)
 )
 ;
 
 CREATE UNIQUE INDEX cardNumberIndex ON Person (cardNumber)
+;
+CREATE UNIQUE INDEX identNumberIndex ON Person (identNumber)
 ;
 
 
@@ -55,7 +58,7 @@ CREATE TABLE `CtrllerModel` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL,
     `boardModel` varchar(40) NOT NULL,
-    `pssgsQuant` integer NOT NULL
+    `doorsQuant` integer NOT NULL
 )
 ;
 
@@ -81,41 +84,41 @@ CREATE TABLE `Zone` (
 ;
 
 
-CREATE TABLE `Passage` (
+CREATE TABLE `Door` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `pssgNum` integer NOT NULL,
+    `doorNum` integer NOT NULL,
     `description` varchar(40),
     `controllerId` integer NOT NULL,
     `rlseTime` integer NOT NULL,
     `bzzrTime` integer NOT NULL,
     `alrmTime` integer NOT NULL,
     `zoneId` integer NOT NULL,
-    `rowStateId` integer NOT NULL,
-    CONSTRAINT `fk_Passage_Controller` FOREIGN KEY (`controllerId`) REFERENCES `Controller` (`id`),
-    CONSTRAINT `fk_Passage_Zone` FOREIGN KEY (`zoneId`) REFERENCES `Zone` (`id`),
-    CONSTRAINT `fk_Passage_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
+    `resStateId` integer NOT NULL,
+    CONSTRAINT `fk_Door_Controller` FOREIGN KEY (`controllerId`) REFERENCES `Controller` (`id`),
+    CONSTRAINT `fk_Door_Zone` FOREIGN KEY (`zoneId`) REFERENCES `Zone` (`id`),
+    CONSTRAINT `fk_Door_ResState` FOREIGN KEY (`resStateId`) REFERENCES `ResState` (`id`)
 )
 ;
 
-CREATE UNIQUE INDEX CtrllerPssgNumIndex ON Passage (controllerId, pssgNum)
+CREATE UNIQUE INDEX CtrllerDoorNumIndex ON Door (controllerId, doorNum)
 ;
 
-CREATE TABLE `VisitorsPassages` (
+CREATE TABLE `VisitorsDoors` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL
 )
 ;
 
-CREATE TABLE `VisitorsPassagesPassage` (
+CREATE TABLE `VisitorsDoorsDoor` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `visitorsPssgsId` integer NOT NULL,
-    `pssgId` integer NOT NULL,
-    CONSTRAINT `fk_VisitorsPassagesPassage_VisitorsPassages` FOREIGN KEY (`visitorsPssgsId`) REFERENCES `VisitorsPassages` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_VisitorsPassagesPassage_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE
+    `visitorsDoorsId` integer NOT NULL,
+    `doorId` integer NOT NULL,
+    CONSTRAINT `fk_VisitorsDoorsDoor_VisitorsDoors` FOREIGN KEY (`visitorsDoorsId`) REFERENCES `VisitorsDoors` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_VisitorsDoorsDoor_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE
 )
 ;
 
-CREATE UNIQUE INDEX VisitorsPassagesPassageIndex ON VisitorsPassagesPassage (visitorsPssgsId, pssgId)
+CREATE UNIQUE INDEX VisitorsDoorsDoorIndex ON VisitorsDoorsDoor (visitorsDoorsId, doorId)
 ;
 
 
@@ -123,7 +126,7 @@ CREATE UNIQUE INDEX VisitorsPassagesPassageIndex ON VisitorsPassagesPassage (vis
 
 CREATE TABLE `Access` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `pssgId` integer NOT NULL,
+    `doorId` integer NOT NULL,
     `personId` integer NOT NULL,
     `allWeek` boolean NOT NULL,
     `iSide` boolean NOT NULL,
@@ -131,75 +134,69 @@ CREATE TABLE `Access` (
     `startTime` time,
     `endTime` time,
     `expireDate` date NOT NULL,
-    `rowStateId` integer NOT NULL,
-    CONSTRAINT `fk_Access_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
+    `resStateId` integer NOT NULL,
+    CONSTRAINT `fk_Access_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Access_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_Access_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
+    CONSTRAINT `fk_Access_ResState` FOREIGN KEY (`resStateId`) REFERENCES `ResState` (`id`)
 )
 ;
 
-CREATE UNIQUE INDEX pssgPersonIndex ON Access (pssgId, personId)
+CREATE UNIQUE INDEX doorPersonIndex ON Access (doorId, personId)
 ;
 
 CREATE TABLE `LimitedAccess` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `pssgId` integer NOT NULL,
+    `doorId` integer NOT NULL,
     `personId` integer NOT NULL,
     `weekDay` integer NOT NULL,
     `iSide` boolean NOT NULL,
     `oSide` boolean NOT NULL,
     `startTime` time NOT NULL,
     `endTime` time NOT NULL,
-    `rowStateId` integer NOT NULL,
-    CONSTRAINT `fk_LimitedAccess_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
+    `resStateId` integer NOT NULL,
+    CONSTRAINT `fk_LimitedAccess_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_LimitedAccess_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_LimitedAccess_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`))
+    CONSTRAINT `fk_LimitedAccess_ResState` FOREIGN KEY (`resStateId`) REFERENCES `ResState` (`id`))
 ;
 
-CREATE UNIQUE INDEX pssgPersonWeekDayIndex ON LimitedAccess (pssgId, personId, weekDay)
+CREATE UNIQUE INDEX doorPersonWeekDayIndex ON LimitedAccess (doorId, personId, weekDay)
 ;
 
 
 
 CREATE TABLE `EventType` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `description` varchar(40) NOT NULL,
-    `rowStateId` integer NOT NULL,
-    CONSTRAINT `fk_EventType_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
+    `description` varchar(40) NOT NULL
 )
 ;
 
-CREATE TABLE `Latch` (
+CREATE TABLE `DoorLock` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `description` varchar(40) NOT NULL,
-    `rowStateId` integer NOT NULL,
-    CONSTRAINT `fk_Latch_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
+    `description` varchar(40) NOT NULL
 )
 ;
 
-CREATE TABLE `NotReason` (
+CREATE TABLE `DenialCause` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `description` varchar(40) NOT NULL,
-    `rowStateId` integer NOT NULL,
-    CONSTRAINT `fk_NotReason_RowState` FOREIGN KEY (`rowStateId`) REFERENCES `RowState` (`id`)
+    `description` varchar(40) NOT NULL
 )
 ;
 
 CREATE TABLE `Event` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `eventTypeId` integer NOT NULL,
-    `pssgId` integer NOT NULL,
+    `doorId` integer NOT NULL,
     `dateTime` datetime NOT NULL,
-    `latchId` integer,
+    `doorLockId` integer,
     `personId` integer,
     `side` boolean,
     `allowed` boolean,
-    `notReasonId` integer,
+    `denialCauseId` integer,
     CONSTRAINT `fk_Event_EventType` FOREIGN KEY (`eventTypeId`) REFERENCES `EventType` (`id`),
-    CONSTRAINT `fk_Event_Passage` FOREIGN KEY (`pssgId`) REFERENCES `Passage` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_Event_Latch` FOREIGN KEY (`latchId`) REFERENCES `Latch` (`id`),    
+    CONSTRAINT `fk_Event_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_Event_DoorLock` FOREIGN KEY (`doorLockId`) REFERENCES `DoorLock` (`id`),    
     CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_Event_NotReason` FOREIGN KEY (`notReasonId`) REFERENCES `NotReason` (`id`)
+    CONSTRAINT `fk_Event_DenialCause` FOREIGN KEY (`denialCauseId`) REFERENCES `DenialCause` (`id`)
 
 )
 ;
@@ -210,7 +207,7 @@ CREATE TABLE `PersonPendingOperation` (
     `macAddress` varchar(12) NOT NULL,
     `pendingOp` integer NOT NULL,
     CONSTRAINT `fk_PersonPendingOperation_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`),
-    CONSTRAINT `fk_PersonPendingOperation_RowState` FOREIGN KEY (`pendingOp`) REFERENCES `RowState` (`id`)
+    CONSTRAINT `fk_PersonPendingOperation_ResState` FOREIGN KEY (`pendingOp`) REFERENCES `ResState` (`id`)
 
 )
 ;
