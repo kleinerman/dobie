@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Dobie</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="keywords" content="dobie, access, doors">
+<meta name="description" content="Dobie">
+<meta name="robots" content="all">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="Dobie">
+<meta property="og:description" content="Dobie">
+<meta property="og:type" content="website">
+<meta property="og:url" content="">
+<meta property="og:image" content="">
+<meta property="og:site_name" content="Dobie">
+
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="manifest" href="manifest.json">
+<link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+<meta name="theme-color" content="#ffffff">
+
+<link href="dist/css/bootstrap.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
+<link href="dist/css/font-awesome.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
+<!-- Custom CSS -->
+<link href="dist/css/sb-admin-2.css" rel="stylesheet" type='text/css'>
+<!-- More Custom CSS -->
+<link href='dist/css/custom.css' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<div id="wrapper">
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-static-top" style="margin-bottom:0px">
+<div class="navbar-header">
+<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="navbar-brand" href="dashboard"> Dobie Access Control System</a>
+</div>
+<!-- /.navbar-header -->
+<ul class="nav navbar-top-links navbar-right">
+<li class="dropdown">
+<span id="plan_length">
+Hello, <span class='bold'>gaf210</span>!</span>
+</li>
+<!-- /.dropdown -->
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+<i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+</a>
+<ul class="dropdown-menu dropdown-user">
+<li><a href="settings"><i class="fa fa-gear fa-fw"></i> Settings</a></li>
+<li><a href="help"><i class="fa fa-life-saver fa-fw"></i> Help</a></li>
+<li class="divider"></li>
+<li><a href="logout"><i class="fa fa-sign-out fa-fw"></i> Log out</a>
+</li>
+</ul>
+<!-- /.dropdown-user -->
+</li>
+<!-- /.dropdown -->
+</ul>
+<!-- /.navbar-top-links -->
+
+<div class="navbar-default sidebar" role="navigation">
+<div class="sidebar-nav navbar-collapse">
+<ul class="nav" id="side-menu">
+<li>
+<a href="dashboard"><i class="fa fa-fw fa-list-ul"></i> Events<span class="fa arrow"></span></a>
+<ul class="nav nav-second-level">
+<li>
+<a href="#">Reports 1</a>
+</li>
+<li>
+<a href="#">Reports 2</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#"><i class="fa fa-fw fa-male"></i> Visitors <span class="fa arrow"></span></a>
+<ul class="nav nav-second-level">
+<li>
+<a href="#">Reports 1</a>
+</li>
+<li>
+<a href="#">Reports 2</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#"><i class="fa fa-fw fa-sitemap"></i> Organizations</a>
+</li>
+<li>
+<a href="#"><i class="fa fa-fw fa-users"></i> Persons</a>
+</li>
+<li>
+<a href="#"><i class="fa fa-fw fa-gamepad"></i> Controllers</a>
+</li>
+<li>
+<a href="#"><i class="fa fa-fw fa-object-ungroup"></i> Zone</a>
+</li>
+<li>
+<a href="#"><i class="fa fa-fw fa-building"></i> Passages</a>
+</li>
+<li>
+<a href="#"><i class="fa fa-fw fa-handshake-o"></i> Access<span class="fa arrow"></span></a>
+<ul class="nav nav-second-level">
+<li>
+<a href="#" class="active">Person -> Passage</a>
+</li>
+<li>
+<a href="#">Passage -> Person</a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+</div>
+<!-- /.navbar-static-side -->
+</nav>
+<div id="page-wrapper">
+
+<!--END HEADER - START BODY-->
+
+<div class="row">
+<!-- /.col-lg-12 -->
+<div class="col-lg-12">
+<h1 class="page-header">Access - Person -> Passage</h1>
+</div>
+<!-- /.col-lg-12 -->
+</div>
+
+<div class="row">
+<!-- left column start -->
+<div class="col-lg-12 center">
+<br>
+
+<div class="row">
+
+<div class="col-lg-3">
+
+<div class="select-container">
+<div class="select-container-title">Organizations</div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select">
+<select id="organizations-select" class="select-options form-control" name="organizations-select" multiple>
+<option value="1">Travel Inc</option>
+<option value="2">Ruffato Foundation</option>
+<option value="3">Scannia Trucks</option>
+<option value="4">Trovatto Hotel</option>
+</select>
+</div>
+</div>
+
+<br><br>
+
+<div class="select-container">
+<div class="select-container-title">Person</div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="person-select">
+<select id="person-select" class="select-options form-control" name="person-select" multiple>
+<option value="1">Romina Tevez</option>
+<option value="2">Daniel Suarez</option>
+<option value="3">María Tuluz</option>
+<option value="4" class="pendingrow">Pablo Gomez</option>
+<option value="5">Carlos Menares</option>
+<option value="6" class="failrow">Ariel Mina Flores</option>
+<option value="7">Lucio Hernandez</option>
+<option value="8">Constanza Perez</option>
+</select>
+</div>
+</div>
+
+</div>
+
+<div class="col-lg-9 center">
+
+<div class="table-container">
+<input type="text" name="filter" placeholder="Filter names..." class="form-control data-filter-table" data-filter="access-table">
+<table id="access-table" class="table-bordered table-hover table-condensed table-responsive table-striped left">
+<tr><th class="smallcol"><input type="checkbox" id="accessesAll" name="accessesAll" value="1"></th><th>Passage</th><th>Zone</th><th class="center">All Week</th></tr>
+<tr><td><input type="checkbox" name="accesses[]" value="1"></td><td>Barrera de Playa</td><td>Playa Este</td><td class="center"><span class="fa fa-check"></span></td></tr>
+<tr><td><input type="checkbox" name="accesses[]" value="2"></td><td>Terraza Norte</td><td>Terrazas</td><td class="center"><span class="fa fa-check"></span></td></tr>
+<tr><td><input type="checkbox" name="accesses[]" value="3"></td><td>Terraza Sur</td><td>Terrazas</td><td></td></tr>
+<tr><td><input type="checkbox" name="accesses[]" value="4"></td><td>Palier Puerta 1</td><td>Ingreso Sur</td><td></td></tr>
+<tr><td><input type="checkbox" name="accesses[]" value="5"></td><td>Palier Puerta 2</td><td>Ingreso Sur</td><td class="center"><span class="fa fa-check"></span></td></tr>
+<tr><td><input type="checkbox" name="accesses[]" value="6"></td><td>Baño Subsuelo</td><td>Subsuelo</td><td class="center"></td></tr>
+<tr><td><input type="checkbox" name="accesses[]" value="7"></td><td>Oficina Puerta 1</td><td>Subsuelo</td><td class="center"><span class="fa fa-check"></span></td></tr>
+<tr><td><input type="checkbox" name="accesses[]" value="8"></td><td>Oficina Puerta 2</td><td>Subsuelo</td><td></td></tr>
+</table>
+</div>
+
+</div>
+
+</div>
+
+<br><br>
+<div class="row">
+<div class="col-sm-4"><button class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">Add</button></div>
+<div class="col-sm-4"><button class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit">Edit</button></div>
+<div class="col-sm-4"><button class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete">Delete</button></div>
+</div>
+
+</div>
+
+</div>
+<!-- /.row -->
+
+<br><br><br>
+<!--END BODY -->
+</div>
+<!-- /#page-wrapper -->
+</div>
+<!-- /#wrapper -->
+
+<script type="text/javascript" src="dist/js/jquery.min.js"></script>
+<script type="text/javascript" src="dist/js/bootstrap.min.js"></script>
+<!-- Metis Menu Plugin JavaScript -->
+<script type="text/javascript" src="bower_components/metisMenu/dist/metisMenu.min.js"></script>
+<!-- Custom Theme JavaScript -->
+<script type="text/javascript" src="dist/js/sb-admin-2.js"></script>
+<script type="text/javascript" src="lib/jslib.js"></script>
+<script type="text/javascript">
+// tooltip demo
+$('body').tooltip({
+selector: "[data-toggle=tooltip]",
+container: "body"
+})
+</script>
+
+<script type="text/javascript">
+
+//filter for selects
+$(".data-filter").keyup(function(){
+	var options=$("#"+$(this).data("filter") + " option");
+	var filterValue=$(this).val().toLowerCase();
+	options.each(function(){
+		if($(this).text().toLowerCase().includes(filterValue)) $(this).show();
+		else $(this).hide();
+	})
+});
+
+//filter for tables
+$(".data-filter-table").keyup(function(){
+	var rows=$("#"+$(this).data("filter") + " tr:nth-child(n+2)");
+	var filterValue=$(this).val().toLowerCase();
+	rows.each(function(){
+		if($(this).find("td").text().toLowerCase().includes(filterValue)) $(this).show();
+		else $(this).hide();
+	})
+});
+
+//clickable rows for access tables
+$("#access-table tr td:nth-child(n+2)").click(function(){
+	$(this).parent().find("input[type=checkbox]").click();
+})
+
+//unclick All checkbox on row click
+$("#access-table tr td input[type=checkbox]").click(function(){
+	if($("#accessesAll").prop("checked")) $("#accessesAll").prop("checked",false);
+})
+
+//click All event
+$("#accessesAll").click(function(){
+	if($(this).prop("checked")) $("#access-table td input[type=checkbox]").prop("checked",true);
+	else $("#access-table td input[type=checkbox]").prop("checked",false);
+})
+</script>
+
+<style>
+.select-container{
+	width:250px;
+	display:inline-block;
+	margin-right:50px;
+}
+
+.select-container-title{
+	font-size:20px;
+	font-weight:bold;
+	text-align:left
+}
+
+.select-options{
+	height:200px !important;
+}
+
+.select-container-footer{
+	text-align:right;
+	margin-top:10px;
+}
+
+.pendingrow{
+	background:#ffa;
+}
+
+.failrow{
+	background:#faa;
+}
+
+
+.table-container{
+	display:grid;
+	margin:0px auto;
+	max-height:600px;
+	overflow:auto;
+}
+
+#access-table tr:nth-child(n+2){
+	cursor:pointer;
+}
+
+.smallcol{
+	width:30px;
+}
+</style>
+
+<!-- MODALS -->
+<div class="modal fade" id="modal-delete" tabindex="-1" role="dialog" aria-labelledby="modal-delete-label" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-body center">
+Deleting this organization will remove all persons that belong to it.<br>
+Are you sure?
+</div>
+<div class="modal-footer center">
+<button type="button" class="btn btn-success">Ok</button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
+</div>
+</div>
+</div>
+</div>
+<!-- /.modal -->
+
+<!-- Submit modal -->
+<div class="modal fade" id="modal-new" tabindex="-1" role="dialog" aria-labelledby="modal-new-label" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<h4 class="modal-title" id="modal-new-label">New Organization</h4>
+</div>
+<form class="form-horizontal">
+<div class="modal-body">
+<div class="form-group">
+ <label class="control-label col-sm-2" for="name">Name:</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control" name="name">
+ </div>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-success">Save</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+<!-- /.modal -->
+</div>
+
+<!-- Edit modal -->
+<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="modal-edit-label" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<h4 class="modal-title" id="modal-edit-label">Edit Organization</h4>
+</div>
+<form class="form-horizontal">
+<div class="modal-body">
+<div class="form-group">
+ <label class="control-label col-sm-2" for="name">Name:</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control" name="name" value="Tarjeta Naranja">
+ </div>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-success">Save</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+<!-- /.modal -->
+</div>
+
+</body>
+</html>
