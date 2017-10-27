@@ -3,19 +3,18 @@ import logging
 SIM_PERSON_QUANT = 5000
 SIM_LIM_ACCESS_QUANT = 500
 
-IOIFACE_BIN = '../c_src/ioiface'
+IOIFACE_BIN = '/opt/dobie/controller/c_src/ioiface'
 IOIFACE_ARGS = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut']
 
 
-DB_FILE = 'access.db'
+DB_FILE = '/opt/dobie/controller/py_src/access.db'
 QUEUE_FILE = '/ioiface_queue'
 
 
-LOGGING_FILE ='logevents.log'
+LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'
 
-#SERVER_IP = '192.168.1.74'
-SERVER_IP = '10.10.7.74'
-#SERVER_IP = '127.0.0.1'
+#SERVER_IP = '192.168.1.79'
+SERVER_IP = '10.10.7.79'
 SERVER_PORT = 7979
 
 EXIT_CHECK_TIME = 2
@@ -34,7 +33,7 @@ RE_SEND_EVTS_QUANT = 4
 IOIFACE_WAIT_FINISH_TIME = 4
 
 
-#This parametter should be put in db for each pssg
+#This parametter should be put in db for each door
 PSSG_RLSE_TIME = 10
 
 

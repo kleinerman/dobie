@@ -42,65 +42,65 @@ int get_number_of(int argc, char** argv, const char *str)
 
 
 /*
- * Parses the command-line arguments (GPIO pins) and fill the pssg structures
+ * Parses the command-line arguments (GPIO pins) and fill the door structures
  * A negative attribute means that it is not in use
  * It returns a negative value if there are wrong arguments
  */
-int parser(int argc, char **argv, pssg_t *pssg)
+int parser(int argc, char **argv, door_t *door)
 {
-    int i, j, number_of_pssgs;
+    int i, j, number_of_doors;
 
-    // the arguments should start with pssg ID
+    // the arguments should start with door ID
     if ( strcmp(argv[1], "--id") != 0 ) {
         return RETURN_FAILURE;
     }
 
-    // number of pssg in this controller
-    number_of_pssgs = get_number_of(argc, argv, "--id");
+    // number of door in this controller
+    number_of_doors = get_number_of(argc, argv, "--id");
 
     // initialization: a negative value means not in use.
-    for (i = 0; i < number_of_pssgs; i++) {
-        pssg[i].id = UNDEFINED;
-        pssg[i].i0In = UNDEFINED;
-        pssg[i].i1In = UNDEFINED;
-        pssg[i].o0In = UNDEFINED;
-        pssg[i].o1In = UNDEFINED;
-        pssg[i].button = UNDEFINED;
-        pssg[i].state = UNDEFINED;
+    for (i = 0; i < number_of_doors; i++) {
+        door[i].id = UNDEFINED;
+        door[i].i0In = UNDEFINED;
+        door[i].i1In = UNDEFINED;
+        door[i].o0In = UNDEFINED;
+        door[i].o1In = UNDEFINED;
+        door[i].button = UNDEFINED;
+        door[i].state = UNDEFINED;
     }
 
-    /* Parse the arguments and fills the pssg structures.
+    /* Parse the arguments and fills the door structures.
      *
-     * Each "--id" determines different passages
-     * Arguments preceding the "--id" are related to the passage GPIOs
+     * Each "--id" determines different doors
+     * Arguments preceding the "--id" are related to the door GPIOs
      *
-     * 'j' is the pssg structure index. Each "--id" found in the arguments,
-     * should increase the index because it means another passage
+     * 'j' is the door structure index. Each "--id" found in the arguments,
+     * should increase the index because it means another door
      */
-    j = -1; // 'j' is the pssg struct index
+    j = -1; // 'j' is the door struct index
 
     for (i=1; i<argc; i+=2) { // argument(i) value(i+1) argument(i+2)
          if ( strcmp(argv[i], "--id") == 0 ) {
-             j++; // increase the index for each pssg.
-                  // whenever it finds an "id" is another passage
-             pssg[j].id = atoi(argv[i+1]);
+             j++; // increase the index for each door.
+                  // whenever it finds an "id" is another door
+             door[j].id = atoi(argv[i+1]);
          }
          if ( strcmp(argv[i], "--i0In") == 0 )
-             pssg[j].i0In = atoi(argv[i+1]);
+             door[j].i0In = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--i1In") == 0 )
-             pssg[j].i1In = atoi(argv[i+1]);
+             door[j].i1In = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--o0In") == 0 )
-             pssg[j].o0In = atoi(argv[i+1]);
+             door[j].o0In = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--o1In") == 0 )
-             pssg[j].o1In = atoi(argv[i+1]);
+             door[j].o1In = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--bttnIn") == 0 )
-             pssg[j].button = atoi(argv[i+1]);
+             door[j].button = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--stateIn") == 0 )
-             pssg[j].state = atoi(argv[i+1]);
+             door[j].state = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--bzzrOut") == 0 )
-             pssg[j].buzzer = atoi(argv[i+1]);
+             door[j].buzzer = atoi(argv[i+1]);
          if ( strcmp(argv[i], "--rlseOut") == 0 )
-             pssg[j].release = atoi(argv[i+1]);
+             door[j].release = atoi(argv[i+1]);
     }
 
     return RETURN_SUCCESS;
@@ -217,83 +217,83 @@ int gpio_set_edge(unsigned int gpio, unsigned int edge)
 
 
 /* Export used GPIOs to the userspace, set direction and trigger edge */
-int set_gpio_pins (pssg_t *pssg, int number_of_pssgs)
+int set_gpio_pins (door_t *door, int number_of_doors)
 {
     int i;
     char gpio_cmd[70];
 
-    for (i = 0; i < number_of_pssgs; i++) {
-        if (pssg[i].i0In != UNDEFINED) {
-            if ( export_gpio(pssg[i].i0In) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_direction(pssg[i].i0In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_edge(pssg[i].i0In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+    for (i = 0; i < number_of_doors; i++) {
+        if (door[i].i0In != UNDEFINED) {
+            if ( export_gpio(door[i].i0In) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(door[i].i0In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(door[i].i0In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
 
 #ifdef RPi
-            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",pssg[i].i0In);
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",door[i].i0In);
             system(gpio_cmd);
 #endif
         }
-        if (pssg[i].i1In != UNDEFINED) {
-            if ( export_gpio(pssg[i].i1In) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_direction(pssg[i].i1In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_edge(pssg[i].i1In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].i1In != UNDEFINED) {
+            if ( export_gpio(door[i].i1In) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(door[i].i1In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(door[i].i1In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
 
 #ifdef RPi
-            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",pssg[i].i1In);
-            system(gpio_cmd);
-#endif
-
-        }
-        if (pssg[i].o0In != UNDEFINED) {
-            if ( export_gpio(pssg[i].o0In) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_direction(pssg[i].o0In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_edge(pssg[i].o0In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
-#ifdef RPi
-            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",pssg[i].o0In);
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",door[i].i1In);
             system(gpio_cmd);
 #endif
 
         }
-        if (pssg[i].o1In != UNDEFINED) {
-            if ( export_gpio(pssg[i].o1In) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_direction(pssg[i].o1In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_edge(pssg[i].o1In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
-
+        if (door[i].o0In != UNDEFINED) {
+            if ( export_gpio(door[i].o0In) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(door[i].o0In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(door[i].o0In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
 #ifdef RPi
-            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",pssg[i].o1In);
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",door[i].o0In);
             system(gpio_cmd);
 #endif
 
         }
-        if (pssg[i].button != UNDEFINED) {
-            if ( export_gpio(pssg[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_direction(pssg[i].button, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_edge(pssg[i].button, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].o1In != UNDEFINED) {
+            if ( export_gpio(door[i].o1In) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(door[i].o1In, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(door[i].o1In, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
 
 #ifdef RPi
-            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d up",pssg[i].button);
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d tri",door[i].o1In);
             system(gpio_cmd);
 #endif
 
         }
-        if (pssg[i].state != UNDEFINED) {
-            if ( export_gpio(pssg[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_direction(pssg[i].state, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_edge(pssg[i].state, BOTH) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].button != UNDEFINED) {
+            if ( export_gpio(door[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(door[i].button, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(door[i].button, FALLING) == RETURN_FAILURE ) return RETURN_FAILURE;
 
 #ifdef RPi
-            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d up",pssg[i].state);
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d up",door[i].button);
             system(gpio_cmd);
 #endif
 
         }
-        if (pssg[i].buzzer != UNDEFINED) {
-            if ( export_gpio(pssg[i].buzzer) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_direction(pssg[i].buzzer, OUT) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].state != UNDEFINED) {
+            if ( export_gpio(door[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(door[i].state, IN) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_edge(door[i].state, BOTH) == RETURN_FAILURE ) return RETURN_FAILURE;
+
+#ifdef RPi
+            sprintf(gpio_cmd,"/usr/bin/gpio -g mode %d up",door[i].state);
+            system(gpio_cmd);
+#endif
+
         }
-        if (pssg[i].release != UNDEFINED) {
-            if ( export_gpio(pssg[i].release) == RETURN_FAILURE ) return RETURN_FAILURE;
-            if ( gpio_set_direction(pssg[i].release, OUT) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].buzzer != UNDEFINED) {
+            if ( export_gpio(door[i].buzzer) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(door[i].buzzer, OUT) == RETURN_FAILURE ) return RETURN_FAILURE;
+        }
+        if (door[i].release != UNDEFINED) {
+            if ( export_gpio(door[i].release) == RETURN_FAILURE ) return RETURN_FAILURE;
+            if ( gpio_set_direction(door[i].release, OUT) == RETURN_FAILURE ) return RETURN_FAILURE;
         }
 
     }
@@ -302,27 +302,27 @@ int set_gpio_pins (pssg_t *pssg, int number_of_pssgs)
 }
 
 /* Remove all GPIOs from userspace */
-int unset_gpio_pins (pssg_t *pssg, int number_of_pssgs)
+int unset_gpio_pins (door_t *door, int number_of_doors)
 {
     int i;
    
-    for (i = 0; i < number_of_pssgs; i++) {
-        if (pssg[i].i0In != UNDEFINED)
-            if ( unexport_gpio(pssg[i].i0In) == RETURN_FAILURE ) return RETURN_FAILURE;
-        if (pssg[i].i1In != UNDEFINED)
-            if ( unexport_gpio(pssg[i].i1In) == RETURN_FAILURE ) return RETURN_FAILURE;
-        if (pssg[i].o0In != UNDEFINED)
-            if ( unexport_gpio(pssg[i].o0In) == RETURN_FAILURE ) return RETURN_FAILURE;
-        if (pssg[i].o1In != UNDEFINED)
-            if ( unexport_gpio(pssg[i].o1In) == RETURN_FAILURE ) return RETURN_FAILURE;
-        if (pssg[i].button != UNDEFINED)
-            if ( unexport_gpio(pssg[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
-        if (pssg[i].state != UNDEFINED)
-            if ( unexport_gpio(pssg[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
-        if (pssg[i].buzzer != UNDEFINED)
-            if ( unexport_gpio(pssg[i].buzzer) == RETURN_FAILURE ) return RETURN_FAILURE;
-        if (pssg[i].release != UNDEFINED)
-            if ( unexport_gpio(pssg[i].release) == RETURN_FAILURE ) return RETURN_FAILURE;
+    for (i = 0; i < number_of_doors; i++) {
+        if (door[i].i0In != UNDEFINED)
+            if ( unexport_gpio(door[i].i0In) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].i1In != UNDEFINED)
+            if ( unexport_gpio(door[i].i1In) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].o0In != UNDEFINED)
+            if ( unexport_gpio(door[i].o0In) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].o1In != UNDEFINED)
+            if ( unexport_gpio(door[i].o1In) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].button != UNDEFINED)
+            if ( unexport_gpio(door[i].button) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].state != UNDEFINED)
+            if ( unexport_gpio(door[i].state) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].buzzer != UNDEFINED)
+            if ( unexport_gpio(door[i].buzzer) == RETURN_FAILURE ) return RETURN_FAILURE;
+        if (door[i].release != UNDEFINED)
+            if ( unexport_gpio(door[i].release) == RETURN_FAILURE ) return RETURN_FAILURE;
     }
 
     return 0;
@@ -409,7 +409,7 @@ void *read_card (void *args)
             card_number = (card_number & 33554430) >> 1;
         
             // preparing the queue message for sending
-            sprintf(message, "%d;%c;card=%08d", arg->pssg_id, arg->side, card_number);
+            sprintf(message, "%d;%c;card=%08d", arg->door_id, arg->side, card_number);
 
             // put the message into the queue
             mq_send(arg->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
@@ -443,9 +443,9 @@ void *read_card (void *args)
 /*
  * This function starts one thread per reader.
  * Each thread reads the card reader lines (D0 and D1), form the card number and
- * put into the queue a message with: pssgID+reader+card number
+ * put into the queue a message with: doorID+reader+card number
  */
-int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthread_t *r_thread, mqd_t mq) 
+int start_readers(int number_of_doors, int number_of_readers, door_t *door, pthread_t *r_thread, mqd_t mq) 
 {
     int i; // array index
     struct read_card_args *args; // thread arguments
@@ -453,12 +453,12 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
     /* Define an array of arguments. One argument struct per card reader */
     args = (struct read_card_args *)malloc(sizeof(struct read_card_args) * number_of_readers);
 
-    for (i=0 ; i<number_of_pssgs; i++) {
-        if (pssg[i].i0In != UNDEFINED && pssg[i].i1In != UNDEFINED ) { // if the pssg has input card reader
+    for (i=0 ; i<number_of_doors; i++) {
+        if (door[i].i0In != UNDEFINED && door[i].i1In != UNDEFINED ) { // if the door has input card reader
             /* fill the structure */
-            args->pssg_id = pssg[i].id;
-            args->d0 = pssg[i].i0In;
-            args->d1 = pssg[i].i1In;
+            args->door_id = door[i].id;
+            args->d0 = door[i].i0In;
+            args->d1 = door[i].i1In;
             args->side = '1';
             args->mq = mq;
 
@@ -467,11 +467,11 @@ int start_readers(int number_of_pssgs, int number_of_readers, pssg_t *pssg, pthr
             r_thread++;
             args++;
         }
-        if (pssg[i].o0In != UNDEFINED && pssg[i].o1In != UNDEFINED ) { // if the pssg has output card reader
+        if (door[i].o0In != UNDEFINED && door[i].o1In != UNDEFINED ) { // if the door has output card reader
             /* fill the structure */
-            args->pssg_id = pssg[i].id;
-            args->d0 = pssg[i].o0In;
-            args->d1 = pssg[i].o1In;
+            args->door_id = door[i].id;
+            args->d0 = door[i].o0In;
+            args->d1 = door[i].o1In;
             args->side = '0';
             args->mq = mq;
 
@@ -505,7 +505,7 @@ void *buttons (void *b_args)
     events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_buttons);
 
     /* Allocate memory for a table. The table has 2 columns and many rows as the number of buttons.
-     * Column 1: pssg_ID; Column 2: file descriptor of the GPIO button
+     * Column 1: door_ID; Column 2: file descriptor of the GPIO button
      */
     bttn_tbl = (int **) malloc(sizeof(int *) * args->number_of_buttons);
     for (i=0; i<(args->number_of_buttons); i++)
@@ -518,13 +518,13 @@ void *buttons (void *b_args)
         exit(EXIT_FAILURE);
     }
 
-    /* fill the table with pssg id and the file descriptor of button GPIO */
-    for (i=0; i < (args->number_of_pssgs); i++) {
-        if (args->pssg[i].button != UNDEFINED) {    // if the pssg has button
-            bttn_tbl[j][0] = args->pssg[i].id;      // save the pssg id in the first col of the table
+    /* fill the table with door id and the file descriptor of button GPIO */
+    for (i=0; i < (args->number_of_doors); i++) {
+        if (args->door[i].button != UNDEFINED) {    // if the door has button
+            bttn_tbl[j][0] = args->door[i].id;      // save the door id in the first col of the table
 
             // save the button pin fd in the second column of the table
-            sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].button);
+            sprintf(filename, "/sys/class/gpio/gpio%d/value", args->door[i].button);
             bttn_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
             if (bttn_tbl[j][1] == -1) {
                 fprintf(stderr,"Error(%d) opening %s: %s\n", errno, filename, strerror(errno));
@@ -597,7 +597,7 @@ void *state (void *s_args)
     events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * args->number_of_states);
 
     /* Allocate memory for a table. The table has 3 columns and many rows as number of states.
-     * Column 1: the pssg_ID; Column 2: file descriptor of the GPIO value; Column 3: current pin states
+     * Column 1: the door_ID; Column 2: file descriptor of the GPIO value; Column 3: current pin states
      */
     state_tbl = (int **) malloc(sizeof(int *) * args->number_of_states);
     for (i=0; i<(args->number_of_states); i++)
@@ -610,12 +610,12 @@ void *state (void *s_args)
         exit(1);
     }
 
-    for (i=0; i < (args->number_of_pssgs); i++) {
-        if (args->pssg[i].state != UNDEFINED) {     // if the pssg has state
-            state_tbl[j][0] = args->pssg[i].id; // save the pssg id in the first col of the table
+    for (i=0; i < (args->number_of_doors); i++) {
+        if (args->door[i].state != UNDEFINED) {     // if the door has state
+            state_tbl[j][0] = args->door[i].id; // save the door id in the first col of the table
 
             // save the state pin fd in the second col of the table
-            sprintf(filename, "/sys/class/gpio/gpio%d/value", args->pssg[i].state);
+            sprintf(filename, "/sys/class/gpio/gpio%d/value", args->door[i].state);
             state_tbl[j][1] = open(filename, O_RDWR | O_NONBLOCK);
             if (state_tbl[j][1] == -1) {
                 fprintf(stderr,"Error(%d) opening %s: %s\n", errno, filename, strerror(errno));
@@ -627,7 +627,7 @@ void *state (void *s_args)
             // Add the file descriptor to the interest list for epfd
             epoll_ctl(epfd, EPOLL_CTL_ADD, state_tbl[j][1], &ev[j]); 
             
-            // Read the initial passages state and save them into the third table column
+            // Read the initial doors state and save them into the third table column
             read(state_tbl[j][1], value, 1);
             lseek(state_tbl[j][1],0,SEEK_SET);
             state_tbl[j][2] = atoi(value);
