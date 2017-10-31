@@ -1,0 +1,25 @@
+version: '3.3'
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: backend
+    ports:
+      - "7979:7979"
+      - "5000:5000"
+    volumes:
+      - ../back_end:/opt/dobie-server
+    depends_on:
+      - database
+#    links:
+#      - database
+  database:
+    container_name: database
+    build:
+      context: database
+    volumes:
+      - database-volume:/var/lib/mysql
+
+volumes:
+    database-volume:

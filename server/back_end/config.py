@@ -4,7 +4,7 @@ LOGGER_NAME = 'BackEndSrvr'
 
 LOGGING_FILE ='/opt/dobie-server/logevents.log'
 
-DB_HOST = '172.18.0.2'
+DB_HOST = 'database'
 DB_USER = 'dobie_usr'
 DB_PASSWD = 'qwe123qwe'
 DB_DATABASE = 'dobie_db'
