@@ -5,7 +5,7 @@ $config->sitetitle="Dobie";
 $config->sitedesc="Dobie Access Control";
 if(isset($windowtitle)) $config->sitetitle.= " - $windowtitle";
 $config->tableprefix="";
-$wwwroot = "//defiant.capitalinasdc.com/dobie/";
+$wwwroot = "//";
 $config->wwwroot = $wwwroot;
 
 //api config
