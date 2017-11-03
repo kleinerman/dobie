@@ -56,16 +56,21 @@ class InternalError(Exception):
 
 
 class CrudMngr(genmngr.GenericMngr):
+#class CrudMngr(object):
     '''
     Through a RESTful API, this clase manages creations, deletions and modifications in
     the database.
     '''
-    def __init__(self):
+    def __init__(self, exitFlag):
+
+        super().__init__('Main', exitFlag)
 
         #Database object to access DB
-        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+        self.dataBase = None
 
         self.ctrllerMsger = None
+
+        self.exitFlag = exitFlag
 
 
     #---------------------------------------------------------------------------#
@@ -74,6 +79,7 @@ class CrudMngr(genmngr.GenericMngr):
         '''
         Launch the Flask server and wait for REST request
         '''
+        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self)
 
         app = Flask(__name__)
         auth = HTTPBasicAuth()
@@ -1436,6 +1442,6 @@ class CrudMngr(genmngr.GenericMngr):
 
 #----------------------------------------Main--------------------------------------------
 
-
+        self.logger.info('Starting Werkzeug to listen for REST methods..') 
         app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
 

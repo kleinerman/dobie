@@ -28,7 +28,7 @@ class CrudReSndr(genmngr.GenericMngr):
         super().__init__('CrudReSender', exitFlag)
 
         #Database object to answer the CRUDs not committed.
-        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+        self.dataBase = None
 
         #Controller Messanger to resend the corresponding CRUDs.
         #As the "ctrllerMsger" use the only "netMngr" object and the "netMngr" has to
@@ -64,6 +64,7 @@ class CrudReSndr(genmngr.GenericMngr):
         controllers which have uncommitted CRUDs 
         '''
 
+        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self)
 
         while True:
             try:
