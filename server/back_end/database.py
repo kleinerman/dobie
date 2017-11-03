@@ -3,6 +3,8 @@ import queue
 import logging
 import datetime
 import crypt
+import threading
+import time
 
 from config import *
 
@@ -243,7 +245,7 @@ class DenialCauseNotFound(DenialCauseError):
 
 class DataBase(object):
 
-    def __init__(self, host, user, passwd, dataBase):
+    def __init__(self, host, user, passwd, dataBase, callingMngr):
 
 
         self.logger = logging.getLogger(LOGGER_NAME)
@@ -252,6 +254,7 @@ class DataBase(object):
         self.user = user
         self.passwd = passwd
         self.dataBase = dataBase
+        self.callingMngr = callingMngr
 
 
         self.connect()
@@ -268,11 +271,28 @@ class DataBase(object):
     def connect(self):
         '''
         '''
-        # With this client_flag, cursor.rowcount will have found rows instead of affected rows
-        self.connection = pymysql.connect(self.host, self.user, self.passwd, self.dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
-        self.connection.autocommit(True)
-        # The following line makes all "fetch" calls return a dictionary instead a tuple
-        self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+        while True:
+            # With this client_flag, cursor.rowcount will have found rows instead of affected rows
+            try:
+                self.logger.info('Connecting to database...')
+                self.connection = pymysql.connect(self.host, self.user, 
+                                                  self.passwd, self.dataBase,
+                                                  connect_timeout = EXIT_CHECK_TIME,
+                                                  client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
+                self.logger.info('Database connected.')
+                self.connection.autocommit(True)
+                # The following line makes all "fetch" calls return a dictionary instead a tuple
+                self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+                break
+
+            except pymysql.err.OperationalError:
+                self.logger.info("Database not reachable. Retrying...")
+                #if (threading.current_thread() is not threading.main_thread()):
+                #    self.callingMngr.checkExit()
+                self.callingMngr.checkExit()
+                time.sleep(EXIT_CHECK_TIME)
+
+
 
 
 
@@ -286,10 +306,11 @@ class DataBase(object):
         try:
             self.cursor.execute(sql)
 
-        except pymysql.err.OperationalError:
+        except (pymysql.err.OperationalError, pymysql.err.InterfaceError):
             self.logger.info("Database is not connected. Reconnecting...")
             self.connect()
             self.cursor.execute(sql)
+
 
 
 
@@ -2655,7 +2676,7 @@ class DataBase(object):
 
 if __name__ == "__main__": 
     print("Testing Database")
-    dataBase = DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+    dataBase = DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, None)  #Passing None to pass something
 
     sql = ("SELECT doorId FROM Access WHERE personId = 2 AND allWeek = 0")
     dataBase.execute(sql)

@@ -81,7 +81,7 @@ class NetMngr(genmngr.GenericMngr):
         self.netToMsgRec = netToMsgRec
 
         #DataBase object 
-        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+        self.dataBase = None
 
         #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
@@ -269,6 +269,8 @@ class NetMngr(genmngr.GenericMngr):
         When there is no connection to the server, this method tries to reconnect to 
         the server every "RECONNECT_TIME"
         '''
+
+        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self)
 
         while True:
 
