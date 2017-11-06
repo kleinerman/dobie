@@ -28,6 +28,8 @@ class CrudReSndr(genmngr.GenericMngr):
         super().__init__('CrudReSender', exitFlag)
 
         #Database object to answer the CRUDs not committed.
+        #The creation of this object was moved to the run method to avoid
+        #freezing the main thread when there is no connection to database.
         self.dataBase = None
 
         #Controller Messanger to resend the corresponding CRUDs.
@@ -64,6 +66,7 @@ class CrudReSndr(genmngr.GenericMngr):
         controllers which have uncommitted CRUDs 
         '''
 
+        #First of all, the database should be connected by the execution of this thread
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self)
 
         while True:

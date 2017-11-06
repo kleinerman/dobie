@@ -80,7 +80,9 @@ class NetMngr(genmngr.GenericMngr):
         #Queue to send message to msgReceiver thread
         self.netToMsgRec = netToMsgRec
 
-        #DataBase object 
+        #DataBase object
+        #The creation of this object was moved to the run method to avoid
+        #freezing the main thread when there is no connection to database.
         self.dataBase = None
 
         #Poll Network Object to monitor the sockets
@@ -270,6 +272,7 @@ class NetMngr(genmngr.GenericMngr):
         the server every "RECONNECT_TIME"
         '''
 
+        #First of all, the database should be connected by the execution of this thread.
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self)
 
         while True:
@@ -424,10 +427,32 @@ class NetMngr(genmngr.GenericMngr):
                         self.netPoller.unregister(fd)
                         connObject = self.fdConnObjects.pop(fd)
 
+                    #There are situations in which "fdConnObjects" can have
+                    #more entries than "macConnObjects" and when a "fd" is
+                    #removed from "fdConnObjects", the whole "for loop" is
+                    #executed without removing any "mac" from "macConnObjects".
+                    #This can happen, for example, when the backend loses the
+                    #connection with the database engine while a controller
+                    #tries to connect the backend.
+                    #Since on this situation, the "netMngr" thread is frozeen
+                    #trying to connect the database, seems that more than socket
+                    #is opened from the controller to server, more than one entry
+                    #is added in "fdConnObjects" with different "fd" but with the
+                    #same "connObject". On this situation, as the controller is
+                    #the same and the MAC is the same, just one entry is added in
+                    #"macConnObjects".
+                    #When those socket times out and POLLHUP, POLLERR or POLLNVAL
+                    #events are triggered, the subsecuents "pop(fd)" calls,
+                    #empties "fdConnObjects" dictionary while "pop(mac)" call to
+                    #"macConnObjects" is done only the first time and the subsecuent
+                    #events execute the entire "for loop" without finding the MAC.
                     for mac in self.macConnObjects:
                         if connObject == self.macConnObjects[mac]:
+                            self.macConnObjects.pop(mac)
                             break
-                    self.macConnObjects.pop(mac)
+                    #This call was moved to above loop taking into account
+                    #the above explanation.
+                    #self.macConnObjects.pop(mac)
 
             #print('MAC-->',self.macConnObjects)
             #print('FD-->',self.fdConnObjects)
