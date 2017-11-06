@@ -115,12 +115,21 @@ class BackEndSrvr(object):
 
         #Starting "CRUD Manager" It will run in main thread
 
+        #In the common situation, the main thread is blocked in the execution
+        #of werkzeug. On that situation if a SIGTERM signal arrives (Ctrl + C
+        #or docker stop backend) seems that Werkzeug or Flask framework handle
+        #the "KeyboardInterrupt" exception and the main thread is able to finish
+        #the execution joining the rest of the threads.
+        #When the backend starts without connection with database, the main thread
+        #freezes in the connection to database and the Werkzeug server doesn't
+        #reach to execute.
+        #On this situation, when the SIGTERM arrives "KeyboardInterrupt" should be
+        #handled by us. The only thing we have to do on this situation is to allow
+        #it join the rest of the threads and to finish.
         try:
             self.crudMngr.run()
         except KeyboardInterrupt:
             pass
-
-        
 
         for thread in threading.enumerate():
             if thread is not threading.currentThread():

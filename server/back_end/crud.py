@@ -56,11 +56,18 @@ class InternalError(Exception):
 
 
 class CrudMngr(genmngr.GenericMngr):
-#class CrudMngr(object):
     '''
     Through a RESTful API, this clase manages creations, deletions and modifications in
     the database.
     '''
+
+    #Although this is not a typical thread because it is the "mainThread", it has
+    #a constructor that receives the "exitFlag" because when somebody send a REST
+    #query, a new thread is created by the werkzeug server with the name "thread-N"
+    #and with the same attributes that the "mainThread". When there is no connection
+    #to data base, this thread (thread-N) freezes trying to connect the data base.
+    #If in that situation a SIGTERM arrives, the "exitflag" clonned by the "mainThread",
+    #allows it to finish as the rest of the threads.
     def __init__(self, exitFlag):
 
         super().__init__('Main', exitFlag)
@@ -79,6 +86,10 @@ class CrudMngr(genmngr.GenericMngr):
         '''
         Launch the Flask server and wait for REST request
         '''
+        #Maybe this connection to database could stay in the constructor, but
+        #just to be sure it was put here because I don't know what will happend with
+        #the clonned threads created by werkzeug server when REST messages arrives
+        #and there is no connection to database.
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self)
 
         app = Flask(__name__)
