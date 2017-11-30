@@ -1130,10 +1130,13 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify(accesses)
 
 
+
             except database.PersonNotFound as personNotFound:
                 raise NotFound(str(personNotFound))
-            except database.PersonError as personError:
-                raise ConflictError(str(personError))
+            except database.DoorNotFound as doorNotFound:
+                raise NotFound(str(doorNotFound))
+            except database.AccessError as accessError:
+                raise ConflictError(str(accessError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
