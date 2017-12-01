@@ -10,7 +10,7 @@ $config->wwwroot = $wwwroot;
 
 //api config
 $config->api_protocol="http";
-$config->api_hostname="quebec.capitalinasdc.com";
+$config->api_hostname="backend";
 $config->api_port="5000";
 $config->api_path="/api/v1.0/";
 if($config->api_port!="") $config->api_fullpath=$config->api_protocol."://".$config->api_hostname.":".$config->api_port.$config->api_path;
