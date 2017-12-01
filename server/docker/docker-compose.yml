@@ -1,0 +1,49 @@
+version: '3.3'
+
+services:
+
+  backend:
+    container_name: backend
+    build:
+      context: backend
+    ports:
+      - "7979:7979"
+      - "5000:5000"
+    volumes:
+      - ../back_end:/opt/dobie-server
+    depends_on:
+      - database
+#    links:
+#      - database
+
+  database:
+    container_name: database
+    build:
+      context: database
+    volumes:
+      - database-volume:/var/lib/mysql
+
+  webserver:
+    container_name: webserver
+    build:
+      context: webserver
+    ports:
+      - "80:80"
+    volumes:
+      - ../front_end:/site
+#    links:
+#      - php
+    depends_on:
+      - php
+
+  php:
+    image: php:7-fpm-alpine
+    container_name: php
+    volumes:
+      - ../front_end:/site
+
+
+volumes:
+    database-volume:
+
+
