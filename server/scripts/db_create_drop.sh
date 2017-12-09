@@ -46,19 +46,27 @@ function drop {
 }
 
 
+if [[ $2 ]]; then
+    DB_DOCKER_IP=$2
+else
+    DB_DOCKER_IP=$(tr -d '", ' <<< $(docker inspect database | grep '"IPAddress": "1' | gawk '{print $2}'))
+fi    
+
+echo "Working in DB: $DB_DOCKER_IP"
+
 case "$1" in
     -c)
-    create $2
+    create $DB_DOCKER_IP
     ;;
     -d)
-    drop $2
+    drop $DB_DOCKER_IP
     ;;
     -r)
-    drop $2
-    create $2
+    drop $DB_DOCKER_IP
+    create $DB_DOCKER_IP
     ;;
   *)
-    echo "Usage: $0 {-c|-d|-r} DATABASE_SERVER_IP"
+    echo "Usage: $0 {-c|-d|-r}"
     exit 1
     ;;
 esac
