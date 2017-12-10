@@ -415,6 +415,27 @@ class NetMngr(genmngr.GenericMngr):
                             except queue.Empty:
                                 #No more messages to send in "outBufferQue"
                                 pass
+
+                            #This exception happens when a controller interface used to 
+                            #connect the server loses the connection and the controller
+                            #try to send a message to it.
+                            #This exception should be captured and then, the PULLHUP, PULLERR or PULLNVAL
+                            #will come
+                            except (OSError, ConnectionRefusedError, ConnectionResetError) as connectionError:
+                                logMsg = ("Connection Error: {} while sending message"
+                                            "".format(str(connectionError))
+                                         )
+                                self.logger.info(logMsg)
+                                #The "outBufferQue" should be emptied because the resender
+                                #thread put every interval of time the event in the "outBufferQue"
+                                #while the "netMngr" thread gets it and try to send it to the server.
+                                #In this situation of connection lost, at some point, the "netMngr"
+                                #thread freezes trying to send the event, while the "resender" thread
+                                #continue putting the same event in "outBufferQueue" many times.
+                                #If the "outBufferQueue" is not emptied, when the connection is 
+                                #recovered, this event is sent many times to the server.
+                                self.outBufferQue.queue.clear()
+
                             #Once we finished sending all the messages, we should modify the
                             #"netPoller" object to be able to receive bytes again.
                             with self.lockNetPoller:
