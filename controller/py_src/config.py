@@ -13,8 +13,8 @@ QUEUE_FILE = '/ioiface_queue'
 
 LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'
 
-#SERVER_IP = '192.168.1.79'
-SERVER_IP = '10.10.7.79'
+SERVER_IP = '192.168.1.79'
+#SERVER_IP = '10.10.7.79'
 SERVER_PORT = 7979
 
 EXIT_CHECK_TIME = 2
