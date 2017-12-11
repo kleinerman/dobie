@@ -10,11 +10,13 @@ IOIFACE_ARGS = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlse
 DB_FILE = '/opt/dobie/controller/py_src/access.db'
 QUEUE_FILE = '/ioiface_queue'
 
+WIRED_IFACE_NAME = 'eth0'
+
 
 LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'
 
-SERVER_IP = '192.168.1.79'
-#SERVER_IP = '10.10.7.79'
+#SERVER_IP = '192.168.1.79'
+SERVER_IP = '10.10.7.79'
 SERVER_PORT = 7979
 
 EXIT_CHECK_TIME = 2
