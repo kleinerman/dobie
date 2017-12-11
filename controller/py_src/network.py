@@ -12,42 +12,13 @@ import json
 import database
 import queue
 
+import sys
+import netifaces
+
 import genmngr
 from config import *
 from msgheaders import *
 
-import sys
-import uuid
-
-
-
-#int_CON  = 0x01
-#int_RCON = 0x02
-#int_EVT  = 0x03
-#int_REVT = 0x04
-#int_EVS  = 0x05
-#int_REVS = 0x06
-#int_CUD  = 0x07
-#int_RCUD = 0x08
-#int_END  = 0x1F
-#
-#
-#CON  = bytes([int_CON])
-#RCON = bytes([int_RCON])
-#EVT  = bytes([int_EVT])
-#REVT = bytes([int_REVT])
-#EVS  = bytes([int_EVS])
-#REVS = bytes([int_REVS])
-#CUD  = bytes([int_CUD])
-#RCUD = bytes([int_RCUD])
-#END  = bytes([int_END])
-
-
-#EVT  = b'#'
-#REVT = b'$'
-#CUD  = b'%'
-#RCUD = b'&'
-#END  = b'.\n'
 
 
 
@@ -275,12 +246,21 @@ class NetMngr(genmngr.GenericMngr):
 
     def sendConMsg(self):
         '''
+        This method send the inital connection message to the server.
+        This message has the wired iface mac address of the controller.
+        This is the way the server recognize the controller as valid controller
+        Also when connecting using wifi iface, the wired iface mac is sent.
         '''
+
         if not self.srvSock:
             raise ServerNotConnected
-   
-        macAsInt = uuid.getnode()
-        mac = ('{0:0{1}x}'.format(macAsInt, 12)).encode('utf8')
+
+        #Getting all link layer parameters of the wired interface of the controller 
+        linkParams = netifaces.ifaddresses(WIRED_IFACE_NAME)[netifaces.AF_LINK]
+        #Getting the mac parameter 
+        mac = linkParams[0]['addr']
+        #Removing the ":" from mac and encode the string as bytes
+        mac = mac.replace(':','').encode('utf8')
  
         conMsg = CON + mac + END
         self.logger.info('Sending connection message {} to server'.format(conMsg))
@@ -293,6 +273,7 @@ class NetMngr(genmngr.GenericMngr):
         This method receive the response to Connection Message.
         It waits until all response comes
         '''
+
         if not self.srvSock:
             raise ServerNotConnected
 
