@@ -1,6 +1,10 @@
 <?
-//$requirelogin=0;
-//require_once("../config.php");
+$DEBUG=0;
+
+if($DEBUG){
+	$requirelogin=0;
+	require_once("../config.php");
+}
 
 function send_request($url,$username,$password,$method="get",$payload="{}"){
 	//assumes valid input
@@ -24,9 +28,9 @@ function send_request($url,$username,$password,$method="get",$payload="{}"){
 	$response = curl_exec($ch);
 //	error_log($response);
 //	error_log(grab_dump($response));
-	//var_dump($response);
-//	$response_info=curl_getinfo($ch);
-//	var_dump($response_info);
+//var_dump($response);
+//$response_info=curl_getinfo($ch);
+//var_dump($response_info);
 	$response_decoded= new stdClass();
 	if($response) {
 		$response_decoded->response_status=curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -142,13 +146,89 @@ function delete_person($user,$pass,$id){
 	else return $response->data;
 }
 
+//Accesses
 
-//$res=get_organizations("admin","admin");
-//$res=do_auth("admin","admin");
-//echo "<pre>";
-//var_dump($res);
+//get person accesses
+function get_person_accesses($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."person/$id/access",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
 
-// get person
-// get credential
-// get events
+function get_access($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."access/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//not working
+function get_door_accesses($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."door/$id/access",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function get_door($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."door/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function get_zones($user,$pass){
+	global $config;
+	$response=send_request($config->api_fullpath."zone",$user,$pass);
+	if($response->response_status != "200") return false;
+	else {
+		for($i=0;$i<count($response->data);$i++){
+			if(!isset($response->data[$i]->id)) {
+				$uri_parts=explode("/",$response->data[$i]->uri);
+				$response->data[$i]->id = end($uri_parts);
+			}
+		}
+		return $response->data;
+	}
+}
+
+function get_zone($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."zone/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//get doors in a zone
+function get_doors($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."zone/$id/door",$user,$pass);
+	if($response->response_status != "200") return false;
+	else {
+		for($i=0;$i<count($response->data);$i++){
+			if(!isset($response->data[$i]->name)) {
+				$response->data[$i]->name = $response->data[$i]->description;
+			}
+		}
+		return $response->data;
+	}
+}
+
+
+if($DEBUG){
+	//$res=get_organizations("admin","admin");
+	//$res=do_auth("admin","admin");
+	//$res=get_organizations("admin","admin",2);
+
+	//$res=get_person_accesses("admin","admin",3);
+	//$res=get_access("admin","admin",10);
+	//$res=get_door_accesses("admin","admin",1);
+	//$res=get_zones("admin","admin");
+	//$res=get_zone("admin","admin",1);
+	$res=get_doors("admin","admin",1);
+
+	echo "<pre>";
+	var_dump($res);
+}
 ?>

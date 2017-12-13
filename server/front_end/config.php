@@ -26,7 +26,7 @@ ini_set("session.cookie_lifetime",1296000);
 session_set_cookie_params(1296000);
 
 //js extra includes array init
-$include_extra_js=array();
+if(!isset($include_extra_js)) $include_extra_js=array();
 
 //define common libraries
 require_once("lib/lib.php");
