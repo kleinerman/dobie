@@ -18,10 +18,10 @@ include("header.php");
 <div class="select-container-title">Organizations</div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select">
-<select id="organizations-select" class="select-options form-control" name="organizations-select" size="2" onchange="updateButtons(this.id)"></select>
+<select id="organizations-select" class="select-options form-control" name="organizations-select" size="2"></select>
 </div>
 <div class="select-container-footer">
-<button id="organizations-select-pick" class="btn btn-primary" type="button">Select <span class="fa fa-arrow-right"></span></button>
+&nbsp;
 </div>
 </form>
 </div>
@@ -175,7 +175,7 @@ var organizationId;
 //populate select list
 populateList("organizations-select","organizations");
 
-$("#organizations-select-pick").click(function(){
+$("#organizations-select").change(function(){
 	organizationId=$("#organizations-select").val();
 	if(!isNaN(organizationId) && organizationId!="undefined"){
 		//populate list
@@ -288,8 +288,6 @@ $("#person-edit-form").submit(function(){
 		//invalid values sent
 		$('#modal-error .modal-body').text("Invalid values sent");
 		$("#modal-error").modal("show");
-		console.log(personId);
-		console.log(personName);
 	}
 	return false;
 });
