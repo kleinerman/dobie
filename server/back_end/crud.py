@@ -1224,6 +1224,14 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 if request.method == 'GET':
                     access = self.dataBase.getAccess(accessId)
+                    try:
+                        for liAccess in access['liAccesses']:
+                            liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
+                    except KeyError:
+                        #This exception will happen when the access is allWeek access. In this situation
+                        #nothing should be done.
+                        pass
+
                     access['uri'] = request.url
                     return jsonify(access)
 
