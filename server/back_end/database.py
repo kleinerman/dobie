@@ -406,7 +406,7 @@ class DataBase(object):
         startEvtSql = startEvt - 1
         
         sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
-               "Door.description AS doorName, Organization.name AS orgName, "
+               "Door.name AS doorName, Organization.name AS orgName, "
                "Person.name AS personName, Event.doorLockId, Event.dateTime, "
                "Event.side, Event.allowed, Event.denialCauseId "
                "FROM Event LEFT JOIN Door ON (Event.doorId = Door.id) "
@@ -1454,9 +1454,9 @@ class DataBase(object):
         It returns the id of the added door
         '''
 
-        sql = ("INSERT INTO Door(doorNum, description, controllerId, rlseTime, bzzrTime, "
+        sql = ("INSERT INTO Door(doorNum, name, controllerId, rlseTime, bzzrTime, "
                "alrmTime, zoneId, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {})"
-               "".format(door['doorNum'], door['description'], door['controllerId'], 
+               "".format(door['doorNum'], door['name'], door['controllerId'], 
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'], 
                          door['zoneId'], TO_ADD)
               )
@@ -1548,9 +1548,9 @@ class DataBase(object):
         Receive a dictionary with door parametters and update it in DB
         '''
 
-        sql = ("UPDATE Door SET doorNum = {}, description = '{}', controllerId = {}, rlseTime = {}, "
+        sql = ("UPDATE Door SET doorNum = {}, name = '{}', controllerId = {}, rlseTime = {}, "
                "bzzrTime = {}, alrmTime = {}, zoneId = {}, resStateId = {} WHERE id = {}"
-               "".format(door['doorNum'], door['description'], door['controllerId'],
+               "".format(door['doorNum'], door['name'], door['controllerId'],
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'],
                          door['zoneId'], TO_UPDATE, door['id'])
               )
@@ -2005,12 +2005,54 @@ class DataBase(object):
 
 #-------------------------------Access-----------------------------------
 
+    def getAccess(self, accessId):
+        '''
+        '''
+
+
+        try:
+            sql = ("SELECT Access.id, Access.personId, Person.name AS personName, "
+                   "Organization.name AS organizationName, Access.doorId, "
+                   "Door.name AS doorName, Zone.name AS zoneName, "
+                   "Access.allWeek, Access.iSide, Access.oSide, Access.startTime, "
+                   "Access.endTime, Access.expireDate, Access.resStateId "
+                   "FROM Access JOIN Person ON (Access.personId = Person.id) "
+                   "JOIN Organization ON (Person.orgId = Organization.id) "
+                   "JOIN Door ON (Access.doorId = Door.id) "
+                   "JOIN Zone ON (Door.zoneId = Zone.id) WHERE Access.id = {}"
+                   "".format(accessId)
+                  )
+            self.execute(sql)
+            access = self.cursor.fetchone()
+
+            if not access:
+                raise AccessNotFound("Access not found.")
+
+            if not access['allWeek']:
+                access['liAccesses'] = self.getLiAccesses(access['doorId'], access['personId'])
+                #When the the access is not allWeek access, startTime, endTime, iSide and 
+                #oSide fields are present in each limitedAccess, so we can remove this
+                #field from access.
+                access.pop('startTime')
+                access.pop('endTime')
+                access.pop('iSide')
+                access.pop('oSide')
+
+            return access
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise AccessError('Can not get access with this ID.')
+
+
+
+
     def getAccesses(self, personId=None, doorId=None):
         '''
         Return a dictionary with all access with the personId
         '''
         if (not personId and not doorId) or (personId and doorId):
-            raise AccessError("Error of arguments received in getAccess method.")
+            raise AccessError("Error of arguments received in getAccesses method.")
         
         elif personId:
             # check if the person id exist in the database
@@ -2022,7 +2064,7 @@ class DataBase(object):
                 raise PersonNotFound('Person not found')
 
             # Get all accesses from an specific person
-            sql = ("SELECT Access.id, Access.doorId, Door.description AS doorDescription, "
+            sql = ("SELECT Access.id, Access.doorId, Door.name AS doorName, "
                    "Zone.name AS zoneName, Access.allWeek, Access.iSide, Access.oSide, "
                    "Access.startTime, Access.endTime, Access.expireDate, Access.resStateId "
                    "FROM Access JOIN Door ON (Access.doorId = Door.id) JOIN Zone ON "
@@ -2060,8 +2102,6 @@ class DataBase(object):
             access['startTime'] = str(access['startTime'])
             access['endTime'] = str(access['endTime'])
             access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
-            #The description is usefull to show the access in the front end for an
-            #specific person.
 
             if not access['allWeek']:
                 if personId:

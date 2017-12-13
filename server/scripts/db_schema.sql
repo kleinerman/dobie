@@ -87,7 +87,7 @@ CREATE TABLE `Zone` (
 CREATE TABLE `Door` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `doorNum` integer NOT NULL,
-    `description` varchar(40),
+    `name` varchar(40) NOT NULL,
     `controllerId` integer NOT NULL,
     `rlseTime` integer NOT NULL,
     `bzzrTime` integer NOT NULL,
