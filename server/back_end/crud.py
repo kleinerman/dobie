@@ -560,7 +560,7 @@ class CrudMngr(genmngr.GenericMngr):
                     zones = self.dataBase.getZones()
                     for zone in zones:
                         zone['uri'] = url_for('Zone', zoneId=zone['id'], _external=True)
-                        zone.pop('id')
+                        #zone.pop('id')
                     return jsonify(zones)
 
                 ## For POST method
@@ -1016,7 +1016,7 @@ class CrudMngr(genmngr.GenericMngr):
 #--------------------------------------Door------------------------------------------
 
 
-        doorNeedKeys = ('description', 'doorNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId')
+        doorNeedKeys = ('name', 'doorNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId')
 
         @app.route('/api/v1.0/door', methods=['POST'])
         @auth.login_required
@@ -1032,7 +1032,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Door dictionary modified for the controller database (same server door id)
                 door['id'] = doorId
-                door.pop('description')
+                door.pop('name')
                 door.pop('zoneId')
                 door.pop('controllerId')
                 # Get the controller mac address
@@ -1076,7 +1076,7 @@ class CrudMngr(genmngr.GenericMngr):
                     for param in doorNeedKeys:
                         door[param] = request.json[param]
                     self.dataBase.updDoor(door)
-                    door.pop('description')
+                    door.pop('name')
                     door.pop('zoneId')
                     door.pop('controllerId')
                     ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
@@ -1214,7 +1214,7 @@ class CrudMngr(genmngr.GenericMngr):
 
         updAccessNeedKeys = ('iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
 
-        @app.route('/api/v1.0/access/<int:accessId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/access/<int:accessId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
         def modAccess(accessId):
             '''
@@ -1222,7 +1222,12 @@ class CrudMngr(genmngr.GenericMngr):
             the appropriate controller.
             '''
             try:
-                if request.method == 'PUT':
+                if request.method == 'GET':
+                    access = self.dataBase.getAccess(accessId)
+                    access['uri'] = request.url
+                    return jsonify(access)
+
+                elif request.method == 'PUT':
                     # Create a clean access dictionary with only required access params,
                     # removing unnecessary parameters if the client send them.
                     # Also a KeyError wil be raised if the client misses any parameter.
