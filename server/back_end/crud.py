@@ -898,10 +898,13 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify(accesses)
 
 
-            except database.PersonNotFound as personNotFound:
-                raise NotFound(str(personNotFound))
-            except database.PersonError as personError:
-                raise ConflictError(str(personError))
+
+            except (database.AccessNotFound, database.PersonNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
+
+            except database.AccessError as accessError:
+                raise ConflictError(str(accessError))
+
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -1130,19 +1133,17 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify(accesses)
 
 
+            except (database.AccessNotFound, database.PersonNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
 
-            except database.PersonNotFound as personNotFound:
-                raise NotFound(str(personNotFound))
-            except database.DoorNotFound as doorNotFound:
-                raise NotFound(str(doorNotFound))
             except database.AccessError as accessError:
                 raise ConflictError(str(accessError))
+
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-
 
 
 
@@ -1224,6 +1225,14 @@ class CrudMngr(genmngr.GenericMngr):
             try:
                 if request.method == 'GET':
                     access = self.dataBase.getAccess(accessId)
+                    try:
+                        for liAccess in access['liAccesses']:
+                            liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
+                    except KeyError:
+                        #This exception will happen when the access is allWeek access. In this situation
+                        #nothing should be done.
+                        pass
+
                     access['uri'] = request.url
                     return jsonify(access)
 
@@ -1250,12 +1259,14 @@ class CrudMngr(genmngr.GenericMngr):
                     self.ctrllerMsger.delAccess(ctrllerMac, accessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
-            except database.DoorNotFound as doorNotFound:
-                raise NotFound(str(doorNotFound))
-            except database.AccessNotFound as accessNotFound:
-                raise NotFound(str(accessNotFound))
+
+
+            except (database.AccessNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
+
             except database.AccessError as accessError:
                 raise ConflictError(str(accessError))
+
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
