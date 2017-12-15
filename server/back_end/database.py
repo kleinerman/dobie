@@ -2005,10 +2005,10 @@ class DataBase(object):
 
 #-------------------------------Access-----------------------------------
 
+
     def getAccess(self, accessId):
         '''
         '''
-
 
         try:
             sql = ("SELECT Access.id, Access.personId, Person.name AS personName, "
@@ -2028,6 +2028,8 @@ class DataBase(object):
             if not access:
                 raise AccessNotFound("Access not found.")
 
+            access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+
             if not access['allWeek']:
                 access['liAccesses'] = self.getLiAccesses(access['doorId'], access['personId'])
                 #When the the access is not allWeek access, startTime, endTime, iSide and 
@@ -2037,6 +2039,11 @@ class DataBase(object):
                 access.pop('endTime')
                 access.pop('iSide')
                 access.pop('oSide')
+
+            else:
+                #If the access is allWeek startTime and endTime should be formatted correctly
+                access['startTime'] = str(access['startTime'])
+                access['endTime'] = str(access['endTime'])
 
             return access
 
@@ -2055,10 +2062,10 @@ class DataBase(object):
             raise AccessError("Error of arguments received in getAccesses method.")
         
         elif personId:
-            # check if the person id exist in the database
+            # check if the person id exists in the database
             sql = ("SELECT * FROM Person WHERE id='{}'".format(personId))
             self.execute(sql)
-            person = self.cursor.fetchall()
+            person = self.cursor.fetchone()
 
             if not person:
                 raise PersonNotFound('Person not found')
@@ -2075,17 +2082,15 @@ class DataBase(object):
             accesses = self.cursor.fetchall()
 
         else:
-            # check if the person id exist in the database
+            # check if the door id exists in the database
             sql = ("SELECT * FROM Door WHERE id='{}'".format(doorId))
             self.execute(sql)
-            door = self.cursor.fetchall()
+            door = self.cursor.fetchone()
 
             if not door:
                 raise DoorNotFound('Door not found')
 
-            # Get all persons from the organization
-
-
+            # Get all access from an specific door
             sql = ("SELECT Access.id, Access.personId, Person.name AS personName, "
                    "Organization.name AS organizationName, Access.allWeek, Access.iSide, Access.oSide, "
                    "Access.startTime, Access.endTime, Access.expireDate, Access.resStateId "
@@ -2097,12 +2102,11 @@ class DataBase(object):
             accesses = self.cursor.fetchall()
 
 
+        if not accesses:
+            raise AccessNotFound('Access not found')
+
         for access in accesses:
-
-            access['startTime'] = str(access['startTime'])
-            access['endTime'] = str(access['endTime'])
             access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
-
             if not access['allWeek']:
                 if personId:
                     access['liAccesses'] = self.getLiAccesses(access['doorId'], personId)
@@ -2115,6 +2119,11 @@ class DataBase(object):
                 access.pop('endTime')
                 access.pop('iSide')
                 access.pop('oSide')
+
+            else:
+                #If the access is allWeek startTime and endTime should be formatted correctly
+                access['startTime'] = str(access['startTime'])
+                access['endTime'] = str(access['endTime'])
 
         return accesses
 
