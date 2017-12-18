@@ -1265,33 +1265,43 @@ All the information of the access shown in the above window should be retrieved 
         "weekDay": 7
       }
     ], 
-    "organizationName": "Datacenter", 
+    "organizationName": "Larriquin Corp.", 
     "personId": 2, 
-    "personName": "Ary Kleinerman", 
+    "personName": "Carlos Sanchez", 
     "resStateId": 3, 
     "uri": "http://172.18.0.5:5000/api/v1.0/access/2", 
     "zoneName": "Ingreso Sur"
   }
 
 
-
-.. image:: images_front_end_specs/get_accesses_per_pas.png
-
-
-For example, if a Week Access in door with id = 5 and person with id = 8 should be edited from the Door -> Person screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
-
-
-**Method:** GET
-
-**URI:**
+The above response is a Limited Access with two days of a week. An example of a response with full access could be:
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/door/5/access
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 398
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Mon, 18 Dec 2017 15:05:32 GMT
+  
+  {
+    "allWeek": 1, 
+    "doorId": 6, 
+    "doorName": "Ingreso 2", 
+    "endTime": "23:59:00", 
+    "expireDate": "2018-12-12 00:00", 
+    "iSide": 1, 
+    "id": 9, 
+    "oSide": 1, 
+    "organizationName": "Building Networks", 
+    "personId": 3, 
+    "personName": "Manuel Bobadilla", 
+    "resStateId": 1, 
+    "startTime": "0:00:00", 
+    "uri": "http://172.18.0.5:5000/api/v1.0/access/9", 
+    "zoneName": "Ingreso Sur"
+  }
 
-**Response:**
-
-.. image:: images_front_end_specs/get_accesses_pas_per.png
 
 
 
