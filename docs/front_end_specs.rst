@@ -1217,9 +1217,7 @@ To edit and modify an access, an access should be selected. This can be done usi
 
 .. image:: images_front_end_specs/upd_access.png
 
-All the information of the access shown in the above window should be retrieved in the same way to retrieve all the accesses for a person (Person -> Door screen) or to retrieve all the accesses of a door (Door -> Person screen) but just using the information needed for this access.
-
-For example, if the Day Accesses (Limited Access) of person with id = 7 and and door with id = 6 should be edited from the Person -> Door screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
+All the information of the access shown in the above window should be retrieved with the ID of the access, sending a GET metod.
 
 **Method:** GET
 
@@ -1227,9 +1225,55 @@ For example, if the Day Accesses (Limited Access) of person with id = 7 and and 
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/person/7/access
+  http://172.18.0.5:5000/api/v1.0/access/2
 
 **Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 798
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Mon, 18 Dec 2017 14:26:03 GMT
+  
+  {
+    "allWeek": 0, 
+    "doorId": 4, 
+    "doorName": "Ba\u00f1o 3", 
+    "expireDate": "2016-01-02 00:00", 
+    "id": 2, 
+    "liAccesses": [
+      {
+        "endTime": "21:37:00", 
+        "iSide": 1, 
+        "id": 1, 
+        "oSide": 1, 
+        "resStateId": 1, 
+        "startTime": "20:37:00", 
+        "uri": "http://172.18.0.5:5000/api/v1.0/liaccess/1", 
+        "weekDay": 2
+      }, 
+      {
+        "endTime": "21:37:00", 
+        "iSide": 1, 
+        "id": 11, 
+        "oSide": 1, 
+        "resStateId": 1, 
+        "startTime": "20:37:00", 
+        "uri": "http://172.18.0.5:5000/api/v1.0/liaccess/11", 
+        "weekDay": 7
+      }
+    ], 
+    "organizationName": "Datacenter", 
+    "personId": 2, 
+    "personName": "Ary Kleinerman", 
+    "resStateId": 3, 
+    "uri": "http://172.18.0.5:5000/api/v1.0/access/2", 
+    "zoneName": "Ingreso Sur"
+  }
+
+
 
 .. image:: images_front_end_specs/get_accesses_per_pas.png
 
