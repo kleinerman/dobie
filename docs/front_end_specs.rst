@@ -1377,10 +1377,19 @@ To **modify a Week Access (Full Access)** the following PUT method should be sen
   }
 
 
+
+Changing Full Access by Limited Access and vice versa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 If a person has a "Limited Access" on a door and the user modifies it giving a "Full Access", a POST method with the "Full Access" should be sent to the server. This will automatically remove all the "Limited Accesses" who this person had on this door.
+
 In the same way, if the person had a "Full Access" and the user modifies it giving a "Limited Access", a POST method with "Limited Access" should be sent to the server and this will automatically remove the previous "Full Access" 
 
-To delete a Full Access, a DELETE method should be sent to the server:
+
+
+
+To **delete a Full Access**, a DELETE method should be sent to the server:
 
 **Method:** DELETE
 
@@ -1407,7 +1416,9 @@ To delete a Full Access, a DELETE method should be sent to the server:
   }
 
 
-To delete a "Limited Access" (when removing a day of access of a person) a DELETE method should be sent to the server:
+
+
+To **delete a "Limited Access"** (when removing a day of access of a person) a DELETE method should be sent to the server:
 
 **Method:** DELETE
 
@@ -1433,7 +1444,8 @@ To delete a "Limited Access" (when removing a day of access of a person) a DELET
   }
 
 
-To delete all Limited Accesses of a person in a door, it should be done in the same way a Full Access is deleted pointing to the corresponding ID.
+
+To **delete all Limited Accesses** of a person in a door, it should be done in the same way a Full Access is deleted pointing to the corresponding ID.
 
 **Method:** DELETE
 
