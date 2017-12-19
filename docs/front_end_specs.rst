@@ -1380,10 +1380,84 @@ To **modify a Week Access (Full Access)** the following PUT method should be sen
 If a person has a "Limited Access" on a door and the user modifies it giving a "Full Access", a POST method with the "Full Access" should be sent to the server. This will automatically remove all the "Limited Accesses" who this person had on this door.
 In the same way, if the person had a "Full Access" and the user modifies it giving a "Limited Access", a POST method with "Limited Access" should be sent to the server and this will automatically remove the previous "Full Access" 
 
+To delete a Full Access, a DELETE method should be sent to the server:
 
-To delete a Limited Access (when removing a day of access of a person) a DELETE method should be sent to the server:
+**Method:** DELETE
 
-To delete a Full Access also a DELETE method should be sent to the server
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/access/7
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 53
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 19 Dec 2017 23:46:05 GMT
+  
+  {
+    "message": "Access deleted", 
+    "status": "OK"
+  }
+
+
+To delete a "Limited Access" (when removing a day of access of a person) a DELETE method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/liaccess/11
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 53
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 19 Dec 2017 23:46:05 GMT
+  
+  {
+    "message": "Access deleted", 
+    "status": "OK"
+  }
+
+
+To delete all Limited Accesses of a person in a door, it should be done in the same way a Full Access is deleted pointing to the corresponding ID.
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/access/2
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 53
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 19 Dec 2017 23:46:05 GMT
+  
+  {
+    "message": "Access deleted", 
+    "status": "OK"
+  }
 
 
 Events
