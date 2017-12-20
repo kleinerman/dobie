@@ -496,9 +496,24 @@ class DataBase(object):
         Then all the persons who has no access to any door are also deleted manually.
         '''
         try:
+
+            sql = "SELECT allWeek, doorId, personId FROM Access WHERE id = {}".format(access['id'])
+            self.cursor.execute(sql)
+            row = self.cursor.fetchone()
+            allWeek = row[0]
+            #The following fields will be used when deleting an entire Limited Access.
+            doorId = row[1]
+            personId = row[2]
+
+            #When the access is a Limited Access, all the entries in LimitedAccess should be deleted too.
+            if not allWeek:
+                sql = "DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}".format(doorId, personId)
+                self.cursor.execute(sql)
+
             sql = "DELETE FROM Access WHERE id = {}".format(access['id'])
             self.cursor.execute(sql)
 
+            #Deleting all persons who have no access to any door.
             sql = ("DELETE FROM Person WHERE id NOT IN "
                    "(SELECT DISTINCT personId FROM Access) AND id != 1"
                   )
