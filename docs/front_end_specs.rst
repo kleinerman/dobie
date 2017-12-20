@@ -1303,9 +1303,10 @@ The above response is a Limited Access with two days of a week. An example of a 
   }
 
 
+Modify a Day Access (Limited Access)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-To **modify a Day Access (Limited Access)** the following PUT method should be send to the server:
+To modify a Day Access (Limited Access) the following PUT method should be send to the server:
 
 
 **Method:** PUT
@@ -1342,7 +1343,10 @@ To **modify a Day Access (Limited Access)** the following PUT method should be s
 Modify a "Day Accesses" of a person could imply add a new "Limited Access",  when adding a new day of access for the person, or delete a "Limited Access", when removing a day of access for the person
 
 
-To **modify a Week Access (Full Access)** the following PUT method should be sent to the server:
+Modify a Week Access (Full Access)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To modify a Week Access (Full Access) the following PUT method should be sent to the server:
 
 
 **Method:** PUT
@@ -1387,9 +1391,10 @@ If a person has a "Limited Access" on a door and the user modifies it giving a "
 In the same way, if the person had a "Full Access" and the user modifies it giving a "Limited Access", a POST method with "Limited Access" should be sent to the server and this will automatically remove the previous "Full Access" 
 
 
+Delete a Full Access
+~~~~~~~~~~~~~~~~~~~~
 
-
-To **delete a Full Access**, a DELETE method should be sent to the server:
+To delete a Full Access, a DELETE method should be sent to the server:
 
 **Method:** DELETE
 
@@ -1417,8 +1422,10 @@ To **delete a Full Access**, a DELETE method should be sent to the server:
 
 
 
+Delete a Limited Access
+~~~~~~~~~~~~~~~~~~~~~~~
 
-To **delete a "Limited Access"** (when removing a day of access of a person) a DELETE method should be sent to the server:
+To delete a "Limited Access" (when removing a day of access of a person) a DELETE method should be sent to the server:
 
 **Method:** DELETE
 
@@ -1444,8 +1451,11 @@ To **delete a "Limited Access"** (when removing a day of access of a person) a D
   }
 
 
+Delete all Limited Accesses** of a person in a door
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To **delete all Limited Accesses** of a person in a door, it should be done in the same way a Full Access is deleted pointing to the corresponding ID.
+
+To delete all Limited Accesses of a person in a door, it should be done in the same way a Full Access is deleted pointing to the corresponding ID.
 
 **Method:** DELETE
 
