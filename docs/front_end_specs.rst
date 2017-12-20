@@ -1210,8 +1210,8 @@ If an entire zone is selected, all the above should be repeated for each door of
 An entire organization can be selected and an entire zone too.
 
 
-Edit an Access
---------------
+Modifying  Accesses
++++++++++++++++++++
 
 To edit and modify an access, an access should be selected. This can be done using the first access screen (Person -> Door) or the second screen (Door -> Person). When an access is selected and "edit" button is pressed the following  window should appear.
 
