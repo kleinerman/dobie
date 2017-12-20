@@ -2199,8 +2199,11 @@ class DataBase(object):
                 #and formatted using strftime() function.
                 #To do it, the timedelta object should be added to the minimum datetime
                 #object, then retrieve the time from it and call the strftime() method.
-                access['startTime'] = (datetime.datetime.min + access['startTime']).time().strftime('%H:%M')
-                access['endTime'] = (datetime.datetime.min + access['endTime']).time().strftime('%H:%M')
+
+                if access['startTime']: #Asking if not None because in liaccess this field is None.
+                    access['startTime'] = (datetime.datetime.min + access['startTime']).time().strftime('%H:%M')
+                if access['endTime']: #Asking if not None because in liaccess this field is None.
+                    access['endTime'] = (datetime.datetime.min + access['endTime']).time().strftime('%H:%M')
                 access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
                 
                 yield access
@@ -2331,11 +2334,17 @@ class DataBase(object):
         TO_UPDATE state or mark it as DELETED if it was previously in TO_DELETE state
         '''
 
-        sql = "SELECT resStateId FROM Access WHERE id = {}".format(accessId)
+        sql = "SELECT resStateId, allWeek, doorId, personId FROM Access WHERE id = {}".format(accessId)
 
         try:
             self.execute(sql)
-            resState = self.cursor.fetchone()['resStateId']
+            row = self.cursor.fetchone()
+            resState = row['resStateId']
+            allWeek = row['allWeek']
+            #The following fields will be used when deleting an entire Limited Access (*)
+            doorId = row['doorId']
+            personId = row['personId']
+
 
             if resState in (TO_ADD, TO_UPDATE):
                 sql = ("UPDATE Access SET resStateId = {} WHERE id = {}"
@@ -2345,6 +2354,13 @@ class DataBase(object):
                 self.connection.commit()
 
             elif resState == TO_DELETE:
+
+                #When the access is a Limited Access, all the entries in LimitedAccess should be deleted too
+                if not allWeek:
+                    sql = "DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}".format(doorId, personId)
+                    self.execute(sql)
+                    self.connection.commit()
+
                 sql = ("DELETE FROM Access WHERE id = {}"
                        "".format(accessId)
                       )
