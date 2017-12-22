@@ -2200,9 +2200,11 @@ class DataBase(object):
                 #To do it, the timedelta object should be added to the minimum datetime
                 #object, then retrieve the time from it and call the strftime() method.
 
-                if access['startTime']: #Asking if not None because in liaccess this field is None.
+                #We can't ask if access['startTime']: because when startTime is 00:00 (timdelta(0))
+                #it evaluates as False
+                if access['startTime'] is not None: #Asking if not None because in liaccess this field is None.
                     access['startTime'] = (datetime.datetime.min + access['startTime']).time().strftime('%H:%M')
-                if access['endTime']: #Asking if not None because in liaccess this field is None.
+                if access['endTime'] is not None: #Asking if not None because in liaccess this field is None.
                     access['endTime'] = (datetime.datetime.min + access['endTime']).time().strftime('%H:%M')
                 access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
                 
