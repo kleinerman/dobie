@@ -75,12 +75,12 @@ class CrudReSndr(genmngr.GenericMngr):
                 ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
                 for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_ADD):
-                    door.pop('description')
+                    door.pop('name')
                     door.pop('controllerId')
                     door.pop('zoneId')
                     self.ctrllerMsger.addDoor(ctrllerMac, door)
                 for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_UPDATE):
-                    door.pop('description')
+                    door.pop('name')
                     door.pop('controllerId')
                     door.pop('zoneId')
                     self.ctrllerMsger.updDoor(ctrllerMac, door)
