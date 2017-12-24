@@ -709,20 +709,14 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def visitorsDoors(visitorsDoorsId):
             '''
-            Update or delete a Visitors Doors in the database.
+            Retrieve update or delete a Visitors Doors in database.
             '''
             try:
-
     
-                ## For GET method
                 if request.method == 'GET':
-                    doors = self.dataBase.getDoors(visitorsDoorsId=visitorsDoorsId)
-
-                    for door in doors:
-                        door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
-                        door.pop('id')
-                    return jsonify(doors)
-
+                    visitorsDoors = self.dataBase.getVisitorsDoors(visitorsDoorsId)
+                    visitorsDoors['uri'] = request.url
+                    return jsonify(visitorsDoors)
 
                 elif request.method == 'PUT':
                     visitorsDoors = {}
@@ -750,7 +744,31 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+        @app.route('/api/v1.0/visitorsdoors/<int:visitorsDoorsId>/door', methods=['GET',])
+        @auth.login_required
+        def visitorsDoorsDoor(visitorsDoorsId):
+            '''
+            Update or delete a Visitors Doors in the database.
+            '''
+            try:
+                doors = self.dataBase.getDoors(visitorsDoorsId=visitorsDoorsId)
 
+                for door in doors:
+                    door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
+                    #door.pop('id')
+                return jsonify(doors)
+
+            except database.VisitorsDoorsNotFound as visitorsDoorsNotFound:
+                raise NotFound(str(visitorsDoorsNotFound))
+            except database.VisitorsDoorsError as visitorsDoorsError:
+                raise ConflictError(str(visitorsDoorsError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitorsDoorsNeedKeys)))
 
 
 

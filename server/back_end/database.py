@@ -95,7 +95,7 @@ class VisitorsDoorsError(Exception):
         return self.errorMessage
 
 
-class VisitorsDoorsNotFound(ZoneError):
+class VisitorsDoorsNotFound(VisitorsDoorsError):
     '''
     '''
     pass
@@ -986,15 +986,46 @@ class DataBase(object):
 
     def getVisitorsDoorss(self):
         '''
-        Return a dictionary with all Zones
+        Return a dictionary with all Visitors Doors
         '''
-        sql = ('SELECT * FROM VisitorsDoors')
-        self.execute(sql)
-        visitorsDoorss = self.cursor.fetchall()
+        sql = ("SELECT * FROM VisitorsDoors")
+        try:
+            self.execute(sql)
+            visitorsDoorss = self.cursor.fetchall()
+            return visitorsDoorss
 
-        return visitorsDoorss
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise VisitorsDoorsError('Can not get VisitorsDoorss')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitorsDoorsError('Can not get VisitorsDoorss')
 
 
+
+    def getVisitorsDoors(self, visitorsDoorsId):
+        '''
+        Return a a dictionary with Visitors Doors data
+        '''
+    
+        sql = ("SELECT * FROM VisitorsDoors WHERE id = {}"
+               "".format(visitorsDoorsId)
+              )
+        try:
+            self.execute(sql)
+            visitorsDoors = self.cursor.fetchone()
+            if not visitorsDoors:
+                raise VisitorsDoorsNotFound('Visitors Doors not found')
+            return visitorsDoors
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise VisitorsDoorsError('Can not get specified VisitorsDoors')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitorsDoorsError('Can not get specified VisitorsDoors')
 
 
     def addVisitorsDoors(self, visitorsDoors):
