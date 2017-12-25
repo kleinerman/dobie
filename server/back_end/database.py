@@ -85,7 +85,7 @@ class ZoneNotFound(ZoneError):
 
 
 
-class VisitorsDoorsError(Exception):
+class VisitDoorsGroupError(Exception):
     '''
     '''
     def __init__(self, errorMessage):
@@ -95,7 +95,7 @@ class VisitorsDoorsError(Exception):
         return self.errorMessage
 
 
-class VisitorsDoorsNotFound(VisitorsDoorsError):
+class VisitDoorsGroupNotFound(VisitDoorsGroupError):
     '''
     '''
     pass
@@ -979,63 +979,63 @@ class DataBase(object):
 
 
 
-#----------------------------------Visitors Door-----------------------------------
+#------------------------------Visit Doors Group--------------------------------
 
 
 
 
-    def getVisitorsDoorss(self):
+    def getVisitDoorsGroups(self):
         '''
-        Return a dictionary with all Visitors Doors
+        Return a dictionary with all Visit Doors Groups
         '''
-        sql = ("SELECT * FROM VisitorsDoors")
+        sql = ("SELECT * FROM VisitDoorsGroup")
         try:
             self.execute(sql)
-            visitorsDoorss = self.cursor.fetchall()
-            return visitorsDoorss
+            visitDoorsGroups = self.cursor.fetchall()
+            return visitDoorsGroups
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise VisitorsDoorsError('Can not get VisitorsDoorss')
+            raise VisitDoorsGroupError('Can not get VisitDoorsGroups')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not get VisitorsDoorss')
+            raise VisitDoorsGroupError('Can not get VisitDoorsGroups')
 
 
 
-    def getVisitorsDoors(self, visitorsDoorsId):
+    def getVisitDoorsGroup(self, visitDoorsGroupId):
         '''
-        Return a a dictionary with Visitors Doors data
+        Return a a dictionary with Visit Doors Group data
         '''
     
-        sql = ("SELECT * FROM VisitorsDoors WHERE id = {}"
-               "".format(visitorsDoorsId)
+        sql = ("SELECT * FROM VisitDoorsGroup WHERE id = {}"
+               "".format(visitDoorsGroupId)
               )
         try:
             self.execute(sql)
-            visitorsDoors = self.cursor.fetchone()
-            if not visitorsDoors:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
-            return visitorsDoors
+            visitDoorsGroup = self.cursor.fetchone()
+            if not visitDoorsGroup:
+                raise VisitDoorsGroupNotFound('Visit Doors Group not found')
+            return visitDoorsGroup
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise VisitorsDoorsError('Can not get specified VisitorsDoors')
+            raise VisitDoorsGroupError('Can not get specified VisitDoorsGroup')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not get specified VisitorsDoors')
+            raise VisitDoorsGroupError('Can not get specified VisitDoorsGroup')
 
 
-    def addVisitorsDoors(self, visitorsDoors):
+    def addVisitDoorsGroup(self, visitDoorsGroup):
         '''
-        Receive a dictionary with Visitors Doorss parametters 
-        and save it in DB. It returns the id of the added Visitor Doors.
+        Receive a dictionary with Visit Doors Group parametters 
+        and save it in DB. It returns the id of the added Visit Doors Group.
         '''
 
-        sql = ("INSERT INTO VisitorsDoors(name) VALUES('{}')"
-               "".format(visitorsDoors['name'])
+        sql = ("INSERT INTO VisitDoorsGroup(name) VALUES('{}')"
+               "".format(visitDoorsGroup['name'])
               )
 
         try:
@@ -1045,66 +1045,66 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not add this Visitors Doors')
+            raise VisitDoorsGroupError('Can not add this Visit Doors Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not add this Visitors Doors: wrong argument')
+            raise VisitDoorsGroupError('Can not add this Visit Doors Group: wrong argument')
 
 
 
-    def delVisitorsDoors(self, visitorsDoorsId):
+    def delVisitDoorsGroup(self, visitDoorsGroupId):
         '''
-        Receive a dictionary with Visitors Door id and delete the Visitor Door
+        Receive the Visit Door Group ID and delete the Visit Doors Group
         '''
 
-        sql = ("DELETE FROM VisitorsDoors WHERE id = {}"
-               "".format(visitorsDoorsId)
+        sql = ("DELETE FROM VisitDoorsGroup WHERE id = {}"
+               "".format(visitDoorsGroupId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
+                raise VisitDoorsGroupNotFound('Visit Doors Group not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not delete this Visitors Doors')
+            raise VisitDoorsGroupError('Can not delete this Visit Doors Group')
 
 
 
 
-    def updVisitorsDoors(self, visitorsDoors):
+    def updVisitDoorsGroup(self, visitDoorsGroup):
         '''
-        Receive a dictionary with Visitors Doors parametters and update it in DB
+        Receive a dictionary with Visit Doors Group parametters and update it in DB
         '''
 
-        sql = ("UPDATE VisitorsDoors SET name = '{}' WHERE id = {}"
-               "".format(visitorsDoors['name'], visitorsDoors['id'])
+        sql = ("UPDATE VisitDoorsGroup SET name = '{}' WHERE id = {}"
+               "".format(visitDoorsGroup['name'], visitDoorsGroup['id'])
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
+                raise VisitDoorsGroupNotFound('Visit Doors Group not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not update this Visitors Doors')
+            raise VisitDoorsGroupError('Can not update this Visit Doors Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not update this Visitors Doors: wrong argument')
+            raise VisitDoorsGroupError('Can not update this Visit Doors Group: wrong argument')
 
 
 
 
-    def addDoorToVisitorsDoors(self, visitorsDoorsId, doorId):
+    def addDoorToVisitDoorsGroup(self, visitDoorsGroupId, doorId):
         '''
         '''
 
-        sql = ("INSERT INTO VisitorsDoorsDoor(visitorsDoorsId, doorId) "
-               "VALUES ({}, {})".format(visitorsDoorsId, doorId)
+        sql = ("INSERT INTO VisitDoorsGroupDoor(visitDoorsGroupId, doorId) "
+               "VALUES ({}, {})".format(visitDoorsGroupId, doorId)
               )
 
         try:
@@ -1114,32 +1114,32 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not add this door to Visitors Door')
+            raise VisitDoorsGroupError('Can not add this door to Visit Doors Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not add this door to Visitors Door: wrong argument')
+            raise VisitDoorsGroupError('Can not add this door to Visit Doors Group: wrong argument')
 
 
 
 
-    def delDoorFromVisitorsDoors(self, visitorsDoorsId, doorId):
+    def delDoorFromVisitDoorsGroup(self, visitDoorsGroupId, doorId):
         '''
         '''
 
-        sql = ("DELETE FROM VisitorsDoorsDoor WHERE "
-               "visitorsDoorsId = {} AND doorId = {}"
-               "".format(visitorsDoorsId, doorId)
+        sql = ("DELETE FROM VisitDoorsGroupDoor WHERE "
+               "visitDoorsGroupId = {} AND doorId = {}"
+               "".format(visitDoorsGroupId, doorId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsDoorsNotFound('Door not found in Visitors Doors.')
+                raise VisitDoorsGroupNotFound('Door not found in Visit Doors Group.')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not delete this Door from Visitors Doors')
+            raise VisitDoorsGroupError('Can not delete this Door from Visit Doors Group')
 
 
 
@@ -1378,13 +1378,13 @@ class DataBase(object):
 #----------------------------------Door----------------------------------------
 
 
-    def getDoors(self, zoneId=None, visitorsDoorsId=None):
+    def getDoors(self, zoneId=None, visitDoorsGroupId=None):
         '''
-        Return a dictionary with all doors in a Zone or in a visitorsDoors
+        Return a dictionary with all doors in a Zone or in a Visit Doors Group
         according to the argument received
         '''
 
-        if not zoneId and not visitorsDoorsId:
+        if not zoneId and not visitDoorsGroupId:
             raise DoorNotFound
 
         elif zoneId:
@@ -1404,23 +1404,23 @@ class DataBase(object):
         
             return doors
 
-        elif visitorsDoorsId:
-            sql = ("SELECT COUNT(*) FROM VisitorsDoors WHERE id='{}'".format(visitorsDoorsId))
+        elif visitDoorsGroupId:
+            sql = ("SELECT COUNT(*) FROM VisitDoorsGroup WHERE id='{}'".format(visitDoorsGroupId))
             self.execute(sql)
             
             if self.cursor.fetchone()['COUNT(*)']:
         
-                sql = ("SELECT Door.* from Door JOIN VisitorsDoorsDoor "
-                       "ON (Door.id = VisitorsDoorsDoor.doorId) "
-                       "WHERE VisitorsDoorsDoor.visitorsDoorsId = {}"
-                       "".format(visitorsDoorsId)
+                sql = ("SELECT Door.* from Door JOIN VisitDoorsGroupDoor "
+                       "ON (Door.id = VisitDoorsGroupDoor.doorId) "
+                       "WHERE VisitDoorsGroupDoor.visitDoorsGroupId = {}"
+                       "".format(visitDoorsGroupId)
                       )
                 self.execute(sql)
                 doors = self.cursor.fetchall()
                 return doors
 
             else:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
+                raise VisitDoorsGroupNotFound('Visit Doors Group not found')
 
 
 
