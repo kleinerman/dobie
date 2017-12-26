@@ -1901,3 +1901,13 @@ Event Reports
 When all the filters are applied and search button is pressed a pop up window will appear with the report:
 
 .. image:: images_front_end_specs/events_report.png
+
+
+Visits
+------
+
+The visits will be allowed to enter the building through some group of doors depending the organization to be visited.
+With the following screen, the user can create, edit or delete visit doors groups.
+
+.. image:: images_front_end_specs/visit_doors_group.png
+
