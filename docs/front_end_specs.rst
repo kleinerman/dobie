@@ -2067,3 +2067,65 @@ Get one Visit Doors Group
   }
 
 
+To get all the doors from a Visit Door Group the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/1/door
+  
+  
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 742
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 20:34:30 GMT
+  
+  [
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 1, 
+      "id": 1, 
+      "name": "Molinete 1", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://172.18.0.4:5000/api/v1.0/door/1", 
+      "zoneId": 1
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 2, 
+      "id": 2, 
+      "name": "Puerta 2", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://172.18.0.4:5000/api/v1.0/door/2", 
+      "zoneId": 1
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 1, 
+      "doorNum": 1, 
+      "id": 4, 
+      "name": "Ba\u00f1o 3", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://172.18.0.4:5000/api/v1.0/door/4", 
+      "zoneId": 1
+    }
+  ]
+
+
