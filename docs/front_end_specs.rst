@@ -505,7 +505,7 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
 Get one Person
 ~~~~~~~~~~~~~~
 
-**Method:** POST
+**Method:** GET
 
 **URI:**
 
@@ -1907,15 +1907,51 @@ Visits
 ------
 
 The visits will be allowed to enter the building through some group of doors depending the organization to be visited.
-With the following screen, the user can create, edit or delete visit doors groups.
+With the following screen, the user can view, create, edit or delete visit doors groups.
 
 .. image:: images_front_end_specs/visit_doors_group.png
 
 
-Create a  Visit Door Group
+Get Visit Doors Groups
+~~~~~~~~~~~~~~~~~~~~~~
+
+To get from the server the current list of Visit Doors Group, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/visitdoorsgroup
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 220
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 20:04:20 GMT
+  
+  [
+    {
+      "name": "Molinetes Torre A", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/1"
+    }, 
+    {
+      "name": "Puertas Front Torre B", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3"
+    }
+  ]
+
+
+
+Add a Visit Door Group
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To create a new Visit Door Group, the **new** button should be pressed and a window to create the group should appear. 
+To add a new Visit Door Group, the **new** button should be pressed and a window to create the group should appear. 
 First of all, a name should be assigned to it. This will be done sending a POST method.
 
 **Method:** POST
@@ -2001,13 +2037,9 @@ With the ID of the Visit Doors Group and the ID of the door, the following metho
   }
 
 
-Get Visit Doors Groups
-~~~~~~~~~~~~~~~~~~~~~~
 
-Get Organizations
-~~~~~~~~~~~~~~~~~
-
-To get from the server the current list of Visit Doors Group, the following REST method should be sent:
+Get one Visit Doors Group
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Method:** GET
 
@@ -2015,25 +2047,23 @@ To get from the server the current list of Visit Doors Group, the following REST
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/visitdoorsgroup
+  http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3
 
+ 
 **Response:**
 
 .. code-block::
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 220
+  Content-Length: 113
   Server: Werkzeug/0.13 Python/3.6.2
-  Date: Tue, 26 Dec 2017 20:04:20 GMT
+  Date: Tue, 26 Dec 2017 20:07:53 GMT
   
-  [
-    {
-      "name": "Molinetes Torre A", 
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/1"
-    }, 
-    {
-      "name": "Puertas Front Torre B", 
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3"
-    }
-  ]
+  {
+    "id": 3, 
+    "name": "Puertas Front Torre B", 
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3"
+  }
+
+
