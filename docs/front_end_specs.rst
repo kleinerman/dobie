@@ -1982,7 +1982,7 @@ With the ID of the Visit Doors Group and the ID of the door, the following metho
 
 .. code-block::
 
-  http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/1/door/4
+  http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3/door/4
   
   
 **Response:**
@@ -2001,3 +2001,39 @@ With the ID of the Visit Doors Group and the ID of the door, the following metho
   }
 
 
+Get Visit Doors Groups
+~~~~~~~~~~~~~~~~~~~~~~
+
+Get Organizations
+~~~~~~~~~~~~~~~~~
+
+To get from the server the current list of Visit Doors Group, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/visitdoorsgroup
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 220
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 20:04:20 GMT
+  
+  [
+    {
+      "name": "Molinetes Torre A", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/1"
+    }, 
+    {
+      "name": "Puertas Front Torre B", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3"
+    }
+  ]
