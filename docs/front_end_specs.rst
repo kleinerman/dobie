@@ -1911,3 +1911,93 @@ With the following screen, the user can create, edit or delete visit doors group
 
 .. image:: images_front_end_specs/visit_doors_group.png
 
+
+Create a  Visit Door Group
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To create a new Visit Door Group, the **new** button should be pressed and a window to create the group should appear. 
+First of all, a name should be assigned to it. This will be done sending a POST method.
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/visitdoorsgroup
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Puertas Front Torre A"}
+
+**Response:**
+
+.. code-block::
+
+  **Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/organization
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Zipper Corp."}
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 141
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 18:42:18 GMT
+  
+  {
+    "code": 201, 
+    "message": "Visit Doors Group added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3"
+  }
+  
+ 
+
+Then, the user should select the doors he wants to assign to this Visit Door Group. To do this, a Zone should be selected and the corresponding door from the selected zone.
+
+To get all the Zones see Get Zones
+To get all the Doors from a Zone, see Get Doors
+
+With the ID of the Visit Doors Group and the ID of the door, the following method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/1/door/4
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 70
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 19:14:00 GMT
+  
+  {
+    "message": "Door added to Visit Doors Group", 
+    "status": "OK"
+  }
+
+
