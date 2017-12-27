@@ -1451,7 +1451,7 @@ To delete a "Limited Access" (when removing a day of access of a person) a DELET
   }
 
 
-Delete all Limited Accesses** of a person in a door
+Delete all Limited Accesses of a person in a door
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
