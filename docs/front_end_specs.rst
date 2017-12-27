@@ -2133,7 +2133,7 @@ To get all the doors from a Visit Door Group the following method should be sent
 Modify a Visit Door Group
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To modify a Week Access (Full Access) the following PUT method should be sent to the server:
+To modify the name of the Visit Door Group the followin method should be sent to the server:
 
 
 **Method:** PUT
@@ -2142,14 +2142,14 @@ To modify a Week Access (Full Access) the following PUT method should be sent to
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/access/7 
+  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/1  
 
 
 **JSON**
 
 .. code-block::
 
-  {"iSide": 0, "oSide": 1, "startTime": "21:01:00", "endTime": "23:35:00", "expireDate": "2019-09-09 00:00"}
+  {"name": "FrontDesk Torre B"}
 
 
 **Response:**
@@ -2158,12 +2158,12 @@ To modify a Week Access (Full Access) the following PUT method should be sent to
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 53
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 27 Jul 2017 18:28:08 GMT
+  Content-Length: 63
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Wed, 27 Dec 2017 19:09:10 GMT
   
   {
-    "message": "Access updated", 
+    "message": "Visit Door Group updated", 
     "status": "OK"
   }
 
