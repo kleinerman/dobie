@@ -2198,8 +2198,8 @@ To remove doors from a Visit Door Group the following method should be sent to t
   }
   
   
-  Remove an entire Vist Door Group and all its doors
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Remove an entire Vist Door Group and all its doors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
 **Method:** DELETE
 
