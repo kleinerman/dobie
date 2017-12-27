@@ -1912,8 +1912,8 @@ With the following screen, the user can view, create, edit or delete visit doors
 .. image:: images_front_end_specs/visit_doors_group.png
 
 
-Get Visit Door Group
-~~~~~~~~~~~~~~~~~~~~~~
+Get Visit Door Groups
+~~~~~~~~~~~~~~~~~~~~~
 
 To get from the server the current list of Visit Door Group, the following REST method should be sent:
 
@@ -2130,8 +2130,8 @@ To get all the doors from a Visit Door Group the following method should be sent
 
 
 
-Modify a Visit Door Group
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Modify a Visit Door Group Name
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To modify the name of the Visit Door Group the followin method should be sent to the server:
 
@@ -2168,3 +2168,59 @@ To modify the name of the Visit Door Group the followin method should be sent to
   }
 
 
+Remove doors from a Visit Door Group
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To remove doors from a Visit Door Group the following method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/1/door/2  
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 73
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Wed, 27 Dec 2017 19:15:01 GMT
+  
+  {
+    "message": "Door deleted from Visit Door Group", 
+    "status": "OK"
+  }
+  
+  
+  Remove an entire Vist Door Group and all its doors
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/3
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 63
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Wed, 27 Dec 2017 19:21:12 GMT
+  
+  {
+    "message": "Visit Door Group deleted", 
+    "status": "OK"
+  }
