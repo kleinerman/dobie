@@ -1912,10 +1912,10 @@ With the following screen, the user can view, create, edit or delete visit doors
 .. image:: images_front_end_specs/visit_doors_group.png
 
 
-Get Visit Doors Groups
+Get Visit Door Groups
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To get from the server the current list of Visit Doors Group, the following REST method should be sent:
+To get from the server the current list of Visit Door Group, the following REST method should be sent:
 
 **Method:** GET
 
@@ -1923,7 +1923,7 @@ To get from the server the current list of Visit Doors Group, the following REST
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/visitdoorsgroup
+  http://172.18.0.3:5000/api/v1.0/visitdoorgroup
 
 **Response:**
 
@@ -1938,11 +1938,11 @@ To get from the server the current list of Visit Doors Group, the following REST
   [
     {
       "name": "Molinetes Torre A", 
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/1"
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1"
     }, 
     {
       "name": "Puertas Front Torre B", 
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3"
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
     }
   ]
 
@@ -1960,7 +1960,7 @@ First of all, a name should be assigned to it. This will be done sending a POST 
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/visitdoorsgroup
+  http://172.18.0.3:5000/api/v1.0/visitdoorgroup
   
 **JSON**
 
@@ -1998,9 +1998,9 @@ First of all, a name should be assigned to it. This will be done sending a POST 
   
   {
     "code": 201, 
-    "message": "Visit Doors Group added", 
+    "message": "Visit Door Group added", 
     "status": "OK", 
-    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3"
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
   }
   
  
@@ -2010,7 +2010,7 @@ Then, the user should select the doors he wants to assign to this Visit Door Gro
 To get all the Zones see Get Zones
 To get all the Doors from a Zone, see Get Doors
 
-With the ID of the Visit Doors Group and the ID of the door, the following method should be sent to the server:
+With the ID of the Visit Door Group and the ID of the door, the following method should be sent to the server:
 
 **Method:** PUT
 
@@ -2018,7 +2018,7 @@ With the ID of the Visit Doors Group and the ID of the door, the following metho
 
 .. code-block::
 
-  http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3/door/4
+  http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3/door/4
   
   
 **Response:**
@@ -2032,13 +2032,13 @@ With the ID of the Visit Doors Group and the ID of the door, the following metho
   Date: Tue, 26 Dec 2017 19:14:00 GMT
   
   {
-    "message": "Door added to Visit Doors Group", 
+    "message": "Door added to Visit Door Group", 
     "status": "OK"
   }
 
 
 
-Get one Visit Doors Group
+Get one Visit Door Group
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Method:** GET
@@ -2047,7 +2047,7 @@ Get one Visit Doors Group
 
 .. code-block::
 
-  http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3
+  http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3
 
  
 **Response:**
@@ -2063,7 +2063,7 @@ Get one Visit Doors Group
   {
     "id": 3, 
     "name": "Puertas Front Torre B", 
-    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/3"
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
   }
 
 
@@ -2075,7 +2075,7 @@ To get all the doors from a Visit Door Group the following method should be sent
 
 .. code-block::
 
-  http://172.18.0.4:5000/api/v1.0/visitdoorsgroup/1/door
+  http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1/door
   
   
 **Response:**
