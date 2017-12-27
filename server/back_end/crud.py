@@ -673,7 +673,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def visitDoorGroups():
             ''' 
-            Add a new Visit Doors Group into the database.
+            Add a new Visit Door Group into the database.
             '''     
             try:    
                 ## For GET method
@@ -690,7 +690,7 @@ class CrudMngr(genmngr.GenericMngr):
                         visitDoorGroup[param] = request.json[param]
                     visitDoorGroupId = self.dataBase.addVisitDoorGroup(visitDoorGroup)
                     uri = url_for('visitDoorGroup', visitDoorGroupId=visitDoorGroupId, _external=True)
-                    return jsonify({'status': 'OK', 'message': 'Visit Doors Group added', 'code': CREATED, 'uri': uri}), CREATED
+                    return jsonify({'status': 'OK', 'message': 'Visit Door Group added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.VisitDoorGroupError as visitDoorGroupError:
                 raise ConflictError(str(visitDoorGroupError))
@@ -709,7 +709,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def visitDoorGroup(visitDoorGroupId):
             '''
-            Retrieve update or delete a Visit Doors Group into the database.
+            Retrieve update or delete a Visit Door Group into the database.
             '''
             try:
     
@@ -724,11 +724,11 @@ class CrudMngr(genmngr.GenericMngr):
                     for param in visitDoorGroupNeedKeys:
                         visitDoorGroup[param] = request.json[param]
                     self.dataBase.updVisitDoorGroup(visitDoorGroup)
-                    return jsonify({'status': 'OK', 'message': 'Visit Doors Group updated'}), OK
+                    return jsonify({'status': 'OK', 'message': 'Visit Door Group updated'}), OK
 
                 elif request.method == 'DELETE':
                     self.dataBase.delVisitDoorGroup(visitDoorGroupId)
-                    return jsonify({'status': 'OK', 'message': 'Visit Doors Group deleted'}), OK
+                    return jsonify({'status': 'OK', 'message': 'Visit Door Group deleted'}), OK
 
             except database.VisitDoorGroupNotFound as visitDoorGroupNotFound:
                 raise NotFound(str(visitDoorGroupNotFound))
@@ -748,7 +748,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def visitDoorGroupDoor(visitDoorGroupId):
             '''
-            Update or delete a Visit Doors Group into the database.
+            Update or delete a Visit Door Group into the database.
             '''
             try:
                 doors = self.dataBase.getDoors(visitDoorGroupId=visitDoorGroupId)
@@ -778,15 +778,15 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def doorInVisitDoorGroup(visitDoorGroupId, doorId):
             ''' 
-            Add or delete a Door into Visit Doors Group.
+            Add or delete a Door into Visit Door Group.
             '''
             try:
                 if request.method == 'PUT':
                     self.dataBase.addDoorToVisitDoorGroup(visitDoorGroupId, doorId)
-                    return jsonify({'status': 'OK', 'message': 'Door added to Visit Doors Group'}), OK
+                    return jsonify({'status': 'OK', 'message': 'Door added to Visit Door Group'}), OK
                 elif request.method == 'DELETE':
                     self.dataBase.delDoorFromVisitDoorGroup(visitDoorGroupId, doorId)
-                    return jsonify({'status': 'OK', 'message': 'Door deleted from Visit Doors Group'}), OK
+                    return jsonify({'status': 'OK', 'message': 'Door deleted from Visit Door Group'}), OK
 
             except database.VisitDoorGroupError as visitDoorGroupError:
                 raise ConflictError(str(visitDoorGroupError))
