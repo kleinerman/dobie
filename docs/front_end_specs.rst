@@ -1912,7 +1912,7 @@ With the following screen, the user can view, create, edit or delete visit doors
 .. image:: images_front_end_specs/visit_doors_group.png
 
 
-Get Visit Door Groups
+Get Visit Door Group
 ~~~~~~~~~~~~~~~~~~~~~~
 
 To get from the server the current list of Visit Door Group, the following REST method should be sent:
@@ -1949,7 +1949,7 @@ To get from the server the current list of Visit Door Group, the following REST 
 
 
 Add a Visit Door Group
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 To add a new Visit Door Group, the **new** button should be pressed and a window to create the group should appear. 
 First of all, a name should be assigned to it. This will be done sending a POST method.
@@ -2039,7 +2039,7 @@ With the ID of the Visit Door Group and the ID of the door, the following method
 
 
 Get one Visit Door Group
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Method:** GET
 
