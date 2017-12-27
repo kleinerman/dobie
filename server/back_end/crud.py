@@ -665,133 +665,133 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-#----------------------------------VisitDoorsGroup------------------------------------
+#----------------------------------VisitDoorGroup------------------------------------
 
-        visitDoorsGroupNeedKeys = ('name',)
+        visitDoorGroupNeedKeys = ('name',)
 
-        @app.route('/api/v1.0/visitdoorsgroup', methods=['POST', 'GET'])
+        @app.route('/api/v1.0/visitdoorgroup', methods=['POST', 'GET'])
         @auth.login_required
-        def visitDoorsGroups():
+        def visitDoorGroups():
             ''' 
             Add a new Visit Doors Group into the database.
             '''     
             try:    
                 ## For GET method
                 if request.method == 'GET':
-                    visitDoorsGroups = self.dataBase.getVisitDoorsGroups()
-                    for visitDoorsGroup in visitDoorsGroups:
-                        visitDoorsGroup['uri'] = url_for('visitDoorsGroup', visitDoorsGroupId=visitDoorsGroup['id'], _external=True)
-                        visitDoorsGroup.pop('id')
-                    return jsonify(visitDoorsGroups)
+                    visitDoorGroups = self.dataBase.getVisitDoorGroups()
+                    for visitDoorGroup in visitDoorGroups:
+                        visitDoorGroup['uri'] = url_for('visitDoorGroup', visitDoorGroupId=visitDoorGroup['id'], _external=True)
+                        visitDoorGroup.pop('id')
+                    return jsonify(visitDoorGroups)
                 ## For POST method
                 elif request.method == 'POST':
-                    visitDoorsGroup = {}
-                    for param in visitDoorsGroupNeedKeys:
-                        visitDoorsGroup[param] = request.json[param]
-                    visitDoorsGroupId = self.dataBase.addVisitDoorsGroup(visitDoorsGroup)
-                    uri = url_for('visitDoorsGroup', visitDoorsGroupId=visitDoorsGroupId, _external=True)
+                    visitDoorGroup = {}
+                    for param in visitDoorGroupNeedKeys:
+                        visitDoorGroup[param] = request.json[param]
+                    visitDoorGroupId = self.dataBase.addVisitDoorGroup(visitDoorGroup)
+                    uri = url_for('visitDoorGroup', visitDoorGroupId=visitDoorGroupId, _external=True)
                     return jsonify({'status': 'OK', 'message': 'Visit Doors Group added', 'code': CREATED, 'uri': uri}), CREATED
 
-            except database.VisitDoorsGroupError as visitDoorsGroupError:
-                raise ConflictError(str(visitDoorsGroupError))
+            except database.VisitDoorGroupError as visitDoorGroupError:
+                raise ConflictError(str(visitDoorGroupError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
-                raise BadRequest('Invalid request. Required: {}'.format(', '.join(visitDoorsGroupNeedKeys)))
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(visitDoorGroupNeedKeys)))
 
 
 
 
-        @app.route('/api/v1.0/visitdoorsgroup/<int:visitDoorsGroupId>', methods=['GET', 'PUT', 'DELETE'])
+        @app.route('/api/v1.0/visitdoorgroup/<int:visitDoorGroupId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
-        def visitDoorsGroup(visitDoorsGroupId):
+        def visitDoorGroup(visitDoorGroupId):
             '''
             Retrieve update or delete a Visit Doors Group into the database.
             '''
             try:
     
                 if request.method == 'GET':
-                    visitDoorsGroup = self.dataBase.getVisitDoorsGroup(visitDoorsGroupId)
-                    visitDoorsGroup['uri'] = request.url
-                    return jsonify(visitDoorsGroup)
+                    visitDoorGroup = self.dataBase.getVisitDoorGroup(visitDoorGroupId)
+                    visitDoorGroup['uri'] = request.url
+                    return jsonify(visitDoorGroup)
 
                 elif request.method == 'PUT':
-                    visitDoorsGroup = {}
-                    visitDoorsGroup['id'] = visitDoorsGroupId
-                    for param in visitDoorsGroupNeedKeys:
-                        visitDoorsGroup[param] = request.json[param]
-                    self.dataBase.updVisitDoorsGroup(visitDoorsGroup)
+                    visitDoorGroup = {}
+                    visitDoorGroup['id'] = visitDoorGroupId
+                    for param in visitDoorGroupNeedKeys:
+                        visitDoorGroup[param] = request.json[param]
+                    self.dataBase.updVisitDoorGroup(visitDoorGroup)
                     return jsonify({'status': 'OK', 'message': 'Visit Doors Group updated'}), OK
 
                 elif request.method == 'DELETE':
-                    self.dataBase.delVisitDoorsGroup(visitDoorsGroupId)
+                    self.dataBase.delVisitDoorGroup(visitDoorGroupId)
                     return jsonify({'status': 'OK', 'message': 'Visit Doors Group deleted'}), OK
 
-            except database.VisitDoorsGroupNotFound as visitDoorsGroupNotFound:
-                raise NotFound(str(visitDoorsGroupNotFound))
-            except database.VisitDoorsGroupError as visitDoorsGroupError:
-                raise ConflictError(str(visitDoorsGroupError))
+            except database.VisitDoorGroupNotFound as visitDoorGroupNotFound:
+                raise NotFound(str(visitDoorGroupNotFound))
+            except database.VisitDoorGroupError as visitDoorGroupError:
+                raise ConflictError(str(visitDoorGroupError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitDoorsGroupNeedKeys)))
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitDoorGroupNeedKeys)))
 
 
 
-        @app.route('/api/v1.0/visitdoorsgroup/<int:visitDoorsGroupId>/door', methods=['GET',])
+        @app.route('/api/v1.0/visitdoorgroup/<int:visitDoorGroupId>/door', methods=['GET',])
         @auth.login_required
-        def visitDoorsGroupDoor(visitDoorsGroupId):
+        def visitDoorGroupDoor(visitDoorGroupId):
             '''
             Update or delete a Visit Doors Group into the database.
             '''
             try:
-                doors = self.dataBase.getDoors(visitDoorsGroupId=visitDoorsGroupId)
+                doors = self.dataBase.getDoors(visitDoorGroupId=visitDoorGroupId)
 
                 for door in doors:
                     door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
                     #door.pop('id')
                 return jsonify(doors)
 
-            except database.VisitDoorsGroupNotFound as visitDoorsGroupNotFound:
-                raise NotFound(str(visitDoorsGroupNotFound))
-            except database.VisitDoorsGroupError as visitDoorsGroupError:
-                raise ConflictError(str(visitDoorsGroupError))
+            except database.VisitDoorGroupNotFound as visitDoorGroupNotFound:
+                raise NotFound(str(visitDoorGroupNotFound))
+            except database.VisitDoorGroupError as visitDoorGroupError:
+                raise ConflictError(str(visitDoorGroupError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitDoorsGroupNeedKeys)))
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitDoorGroupNeedKeys)))
 
 
 
 
 
-        @app.route('/api/v1.0/visitdoorsgroup/<int:visitDoorsGroupId>/door/<int:doorId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/visitdoorgroup/<int:visitDoorGroupId>/door/<int:doorId>', methods=['PUT', 'DELETE'])
         @auth.login_required
-        def doorInVisitDoorsGroup(visitDoorsGroupId, doorId):
+        def doorInVisitDoorGroup(visitDoorGroupId, doorId):
             ''' 
             Add or delete a Door into Visit Doors Group.
             '''
             try:
                 if request.method == 'PUT':
-                    self.dataBase.addDoorToVisitDoorsGroup(visitDoorsGroupId, doorId)
+                    self.dataBase.addDoorToVisitDoorGroup(visitDoorGroupId, doorId)
                     return jsonify({'status': 'OK', 'message': 'Door added to Visit Doors Group'}), OK
                 elif request.method == 'DELETE':
-                    self.dataBase.delDoorFromVisitDoorsGroup(visitDoorsGroupId, doorId)
+                    self.dataBase.delDoorFromVisitDoorGroup(visitDoorGroupId, doorId)
                     return jsonify({'status': 'OK', 'message': 'Door deleted from Visit Doors Group'}), OK
 
-            except database.VisitDoorsGroupError as visitDoorsGroupError:
-                raise ConflictError(str(visitDoorsGroupError))
-            except database.VisitDoorsGroupNotFound as visitDoorsGroupNotFound:
-                raise NotFound(str(visitDoorsGroupNotFound))
+            except database.VisitDoorGroupError as visitDoorGroupError:
+                raise ConflictError(str(visitDoorGroupError))
+            except database.VisitDoorGroupNotFound as visitDoorGroupNotFound:
+                raise NotFound(str(visitDoorGroupNotFound))
 
 
             except TypeError:
