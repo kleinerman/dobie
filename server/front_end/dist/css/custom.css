@@ -57,7 +57,7 @@ iframe,a img{
 	border:0px;
 }
 
-label{
+label,input[type=checkbox],input[type=radio]{
 	cursor:pointer;
 }
 
@@ -200,15 +200,17 @@ label{
 .smallcol{
 	width:30px;
 }
-
+/*
 #access-table tr:nth-of-type(2n+1) {
     background-color: #f9f9f9;
-}
-#access-table, #access-table td, #access-table th {
-    border: 1px solid #ddd;
-    padding: 5px;
 }
 
 #access-table tr:hover{
     background-color: #f7f7f7;
+}
+*/
+
+#access-table, #access-table td, #access-table th {
+    border: 1px solid #ddd;
+    padding: 5px;
 }
