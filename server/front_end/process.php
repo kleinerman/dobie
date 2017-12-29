@@ -231,6 +231,93 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				} else array_push($ret,0,"No doors found");
 			}
 		break;
+		case "add_access_allweek":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$doorid = (isset($_POST['doorid']) and is_numeric($_POST['doorid'])) ? intval($_POST['doorid']) : "";
+				$personid = (isset($_POST['personid']) and is_numeric($_POST['personid'])) ? intval($_POST['personid']) : "";
+				$iside = (isset($_POST['iside']) and is_numeric($_POST['iside'])) ? intval($_POST['iside']) : "";
+				$oside = (isset($_POST['oside']) and is_numeric($_POST['oside'])) ? intval($_POST['oside']) : "";
+				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
+				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
+				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+
+				$access_rec = add_access_allweek($logged->name, $logged->pw, $doorid, $personid, $iside, $oside,$starttime,$endtime,$expiredate);
+				if($access_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Access could not be added");
+			}
+		break;
+		case "add_access_liaccess":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$doorid = (isset($_POST['doorid']) and is_numeric($_POST['doorid'])) ? intval($_POST['doorid']) : "";
+				$personid = (isset($_POST['personid']) and is_numeric($_POST['personid'])) ? intval($_POST['personid']) : "";
+				$weekday = (isset($_POST['weekday']) and is_numeric($_POST['weekday'])) ? intval($_POST['weekday']) : "";
+				$iside = (isset($_POST['iside']) and is_numeric($_POST['iside'])) ? intval($_POST['iside']) : "";
+				$oside = (isset($_POST['oside']) and is_numeric($_POST['oside'])) ? intval($_POST['oside']) : "";
+				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
+				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
+				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+
+				$access_rec = add_access_liaccess($logged->name, $logged->pw, $doorid, $personid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate);
+				//if($access_rec) array_push($ret,1,"Information saved successfully!");
+				//else array_push($ret,0,"Access could not be added");
+				//INSTEAD, entire response received. show error accordingly
+				if($access_rec->response_status != "201") array_push($ret,0,$access_rec->error);
+				else array_push($ret,1,"Information saved successfully!");
+			}
+		break;
+		case "edit_access_allweek":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? intval($_POST['id']) : "";
+				$iside = (isset($_POST['iside']) and is_numeric($_POST['iside'])) ? intval($_POST['iside']) : "";
+				$oside = (isset($_POST['oside']) and is_numeric($_POST['oside'])) ? intval($_POST['oside']) : "";
+				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
+				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
+				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+
+				if($id==""){
+					array_push($ret,0,"Invalid id sent");
+				} else {
+					$access_rec = edit_access_allweek($logged->name, $logged->pw, $id, $iside, $oside, $starttime, $endtime, $expiredate);
+					if($access_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Access could not be modified");
+				}
+			}
+		break;
+		case "edit_access_liaccess":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? intval($_POST['id']) : "";
+				$doorid = (isset($_POST['doorid']) and is_numeric($_POST['doorid'])) ? intval($_POST['doorid']) : "";
+				$personid = (isset($_POST['personid']) and is_numeric($_POST['personid'])) ? intval($_POST['personid']) : "";
+				$days_payload = (isset($_POST['days_payload'])) ? $_POST['days_payload'] : "";
+				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+
+				if($id==""){
+					array_push($ret,0,"Invalid id sent");
+				} else {
+					$access_rec = edit_access_liaccess($logged->name, $logged->pw, $doorid, $personid, $id, $days_payload, $expiredate);
+					if($access_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Access could not be modified");
+				}
+			}
+		break;
+		case "delete_access_bulk":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$ids = (isset($_POST['ids'])) ? $_POST['ids'] : "";
+
+				if($ids==""){
+					array_push($ret,0,"No ids sent");
+				} else {
+					$access_rec = delete_access_bulk($logged->name, $logged->pw, $ids);
+					if($access_rec) array_push($ret,1,"Accesses deleted successfully!");
+					else array_push($ret,0,"Accesses could not be deleted");
+				}
+			}
+		break;
 /*		case "login":
 			$dbcnx = imvustylez_connect_db();
 

@@ -6,7 +6,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Access - Person -> Passage</h1>
+<h1 class="page-header">Access - Person -> Door</h1>
 </div>
 </div>
 
@@ -53,7 +53,7 @@ include("header.php");
 
 <br><br>
 <div class="row" id="buttons-row" style="display:none">
-<div class="col-sm-4"><button id="access-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">Add</button></div>
+<div class="col-sm-4"><button id="access-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit">Add</button></div>
 <div class="col-sm-4"><button id="access-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit">Edit</button></div>
 <div class="col-sm-4"><button id="access-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete">Delete</button></div>
 </div>
@@ -69,13 +69,32 @@ include("footer.php");
 ?>
 
 <!-- MODALS -->
+<!-- add modal -->
+<div class="modal fade" id="modal-add" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<h4 class="modal-title" id="modal-add-label">&nbsp;</h4>
+</div>
+<div class="modal-body center">
+<iframe class="iframe" src="blank"></iframe>
+</div>
+</div>
+</div>
+<!-- /.modal -->
+</div>
+
 <!-- edit modal -->
 <div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog">
 <div class="modal-content">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<h4 class="modal-title" id="modal-edit-label">&nbsp;</h4>
+</div>
 <div class="modal-body center">
-<!--<iframe src="blank"></iframe>-->
-hola
+<iframe class="iframe" src="blank"></iframe>
 </div>
 </div>
 </div>
@@ -90,7 +109,7 @@ hola
 Are you sure?
 </div>
 <div class="modal-footer center">
-<form class="form-horizontal" id="person-delete-form" action="#">
+<form class="form-horizontal" id="access-delete-form" action="#">
 <button class="btn btn-success">Ok</button>
 <button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
 </form>
@@ -106,7 +125,7 @@ Are you sure?
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-edit-label">&nbsp;</h4>
+<h4 class="modal-title" id="modal-error-label">&nbsp;</h4>
 </div>
 <div class="modal-body center">
 </div>
@@ -120,6 +139,21 @@ Are you sure?
 .select-options{
 	height:200px !important;
 }
+
+.modal-content iframe{
+	width:100%;
+	height:750px;
+}
+
+#modal-edit .modal-dialog {
+    width: 95%;
+}
+
+#modal-edit .modal-body {
+    /* 100% = dialog height, 120px = header + footer */
+    max-height: calc(100% - 60px);
+    overflow-y: scroll;
+}
 </style>
 
 <script type="text/javascript">
@@ -131,7 +165,9 @@ var organizationId;
 //populate select list
 populateList("organizations-select","organizations");
 
+//populate accesses table
 function populateTable(tableId,personId){
+	//clear table
 	$('#'+tableId).empty();
 	$.ajax({
 		type: "POST",
@@ -141,13 +177,20 @@ function populateTable(tableId,personId){
 			if(resp[0]=='1'){
 				var values = resp[1];
 				//set table headers
-				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"accessesAll\" name=\"accessesAll\" value=\"1\"></th><th>Passage</th><th>Zone</th><th class=\"center\">All Week</th></tr>");
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"accessesAll\" name=\"accessesAll\" value=\"1\"></th><th>Door</th><th>Zone</th><th class=\"center\">All Week</th></tr>");
 				//populate fields with rec info
 				for(i=0;i<values.length;i++){
+					//set row class
+					itemClass="";
+					if(values[i].resStateId==1) itemClass=" class='toadd' ";
+					else if(values[i].resStateId==2) itemClass=" class='toupd' ";
+					else if(values[i].resStateId==4) itemClass=" class='todel' ";
+					//show row
 					if(values[i].allWeek=="1") allWeekStr="<span class=\"fa fa-check\"></span>";
 					else allWeekStr = "";
-					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"accesses[]\" value="+values[i].id+"></td><td>"+values[i].doorDescription+"</td><td>"+values[i].zoneName+"</td><td class=\"center\">"+allWeekStr+"</td></tr>");
+					$('#'+tableId).append("<tr"+itemClass+"><td><input type=\"checkbox\" name=\"accesses[]\" value="+values[i].id+"></td><td>"+values[i].doorName+"</td><td>"+values[i].zoneName+"</td><td class=\"center\">"+allWeekStr+"</td></tr>");
 				}
+				//add trigger events for rows
 				tableClickEvents();
 			} else {
 				//show error in table
@@ -196,6 +239,7 @@ $("#persons-select").change(function(){
 	}
 });
 
+//events for table rows
 function tableClickEvents(){
 	//clickable rows for access tables
 	$("#access-table tr td:nth-child(n+2)").click(function(){
@@ -235,38 +279,34 @@ function tableClickEvents(){
 	});
 }
 
-
-
-/*
-TODO:
-- make pop up open on edit click, access-edit?id=rowid
-- make delete function getting all row ids and deleting each one. Hide rows once finised.
-- for Add new access, access-edit?personid=selpersonid
-
-Make a edit-access.php that fetches an access ID and sets values for edit
-and also taking a personid and allowing the access to be defined
-*/
-
-$("#access-edit").click(function(){
-	$("#modal-edit").modal("show");
-	//$("#modal-edit").find('iframe').prop('src','access-edit');
+//Add button > open iframe modal
+$("#access-new").click(function(){
+	var personId= $("#persons-select").val();
+	$("#modal-edit").find('iframe').prop('src','access-edit?personid='+personId);
 });
 
-//delete action
-$("#person-delete-form").submit(function(){
-	var personId = $("#persons-select").val();
+//Edit button > open iframe modal
+$("#access-edit").click(function(){
+	var accessId= $("input[name='accesses[]']:checked").val();
+	$("#modal-edit").find('iframe').prop('src','access-edit?id='+accessId);
+});
 
-	if(!isNaN(personId)){
+//Delete button action
+$("#access-delete-form").submit(function(){
+	var selectedItems = [];
+	$("input[name='accesses[]']:checked").each(function() {selectedItems.push($(this).val())});
+
+	if(selectedItems.length>0){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=delete_person&id=" + personId,
+			data: "action=delete_access_bulk&ids=" + selectedItems.join("|"),
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
 					$("#modal-delete").modal("hide");
-					//repopulate select box
-					populateList("persons-select","persons",organizationId);
+					//repopulate table
+					populateTable("access-table",$("#persons-select").val());
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -280,8 +320,8 @@ $("#person-delete-form").submit(function(){
 			}
 		});
 	} else {
-		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		//no rows selected
+		$('#modal-error .modal-body').text("Make sure to select at least 1 row");
 		$("#modal-error").modal("show");
 	}
 	return false;

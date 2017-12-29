@@ -5,7 +5,7 @@ $config->sitetitle="Dobie";
 $config->sitedesc="Dobie Access Control";
 if(isset($windowtitle)) $config->sitetitle.= " - $windowtitle";
 $config->tableprefix="";
-$wwwroot = "//";
+$wwwroot = "/";
 $config->wwwroot = $wwwroot;
 
 //api config
@@ -55,7 +55,7 @@ if($islogged){
 		//destroy cookies
 		setcookie($config->sesskeycookiename, "", time() - $config->cookie_lifetime);
 		//destroy session
-		session_start();
+		//session_start();
 		session_unset();
 		session_destroy();
 		header("Location:$config->wwwroot");
