@@ -2208,8 +2208,8 @@ class DataBase(object):
         cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         sql = ("SELECT access.* FROM Access access JOIN Door door ON "
                "(access.doorId = door.id) JOIN Controller controller ON "
-               "(door.controllerId = controller.id) WHERE "
-               "controller.macAddress = '{}' AND access.resStateId = {}"
+               "(door.controllerId = controller.id) WHERE access.allWeek = 1 "
+               "AND controller.macAddress = '{}' AND access.resStateId = {}"
                "".format(ctrllerMac, resStateId)
               )
 
@@ -2316,19 +2316,38 @@ class DataBase(object):
         and it should be added again.
         '''
 
-        sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
-               "endTime = '{}', expireDate = '{}', resStateId = {} WHERE id = {}"
-               "".format(access['iSide'], access['oSide'],
-                         access['startTime'], access['endTime'],
-                         access['expireDate'], TO_UPDATE, access['id'])
-              )
 
         try:
+            #The user shouldn't be allowed to modify a Limited Access via
+            #access endpoint
+            sql = "SELECT allWeek from Access WHERE id = {}".format(access['id'])
             self.execute(sql)
-            if self.cursor.rowcount < 1:
-                raise AccessNotFound('Access not found')
-            self.connection.commit()
+            allWeek = self.cursor.fetchone()['allWeek']
 
+            if allWeek:
+
+                sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
+                       "endTime = '{}', expireDate = '{}', resStateId = {} WHERE id = {}"
+                       "".format(access['iSide'], access['oSide'],
+                                 access['startTime'], access['endTime'],
+                                 access['expireDate'], TO_UPDATE, access['id'])
+                      )
+
+                self.execute(sql)
+                if self.cursor.rowcount < 1:
+                    raise AccessNotFound('Access not found')
+                self.connection.commit()
+
+            else:
+                self.logger.debug('Can not update Limited Access from access endpoint.')
+                raise AccessError('Can not update this access')
+
+
+        #This exception (TypeError) could be raised by the SELECT statement when fetchone()
+        #returns None. This should never happen.
+        except TypeError:
+            self.logger.debug('Error fetching allWeek from access.')
+            raise AccessError('Can not update this access.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise AccessError('Can not update this access')
@@ -2565,7 +2584,7 @@ class DataBase(object):
                    "ON DUPLICATE KEY UPDATE allWeek = FALSE, iSide = FALSE, oSide = FALSE, startTime = NULL, "
                    "endTime = NULL, expireDate = '{}', resStateId = {}"
                    "".format(liAccess['doorId'], liAccess['personId'], liAccess['expireDate'], 
-                             COMMITTED, liAccess['expireDate'], COMMITTED)
+                             TO_ADD, liAccess['expireDate'], TO_ADD)
                   )
             self.execute(sql)
             self.connection.commit()
@@ -2618,8 +2637,8 @@ class DataBase(object):
         '''
 
         try:
-            #The only thing we should modify in "Access" table is the "expireDate" field.
-            #To modify the access table, we need "doorId" and "personId"
+            #The only thing we should modify in "Access" table is the "expireDate" and 
+            #"resStateId" field. To modify the access table, we need "doorId" and "personId"
             sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
                    "".format(liAccess['id'])
                   )
@@ -2630,8 +2649,9 @@ class DataBase(object):
             personId = row['personId']
 
 
-            sql = ("UPDATE Access SET expireDate = '{}' WHERE doorId = {} AND personId = {}"
-                   "".format(liAccess['expireDate'], doorId, personId)
+            sql = ("UPDATE Access SET expireDate = '{}', resStateId = {} "
+                   "WHERE doorId = {} AND personId = {}"
+                   "".format(liAccess['expireDate'], TO_UPDATE,  doorId, personId)
                   )
 
             self.execute(sql)
@@ -2673,14 +2693,40 @@ class DataBase(object):
         Set limited access row state in state pending to delete.
         '''
 
-        sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
-               "".format(TO_DELETE, liAccessId)
-              )
         try:
+
+            sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
+                   "".format(TO_DELETE, liAccessId)
+                  )
+
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise AccessNotFound('Access not found')
             self.connection.commit()
+
+
+            #The only thing we should modify in "Access" table is the "resStateId" 
+            #field. To modify the access table, we need "doorId" and "personId"
+            sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
+                   "".format(liAccessId)
+                  )
+
+            self.execute(sql)
+            row = self.cursor.fetchone()
+            doorId = row['doorId']
+            personId = row['personId']
+
+
+            sql = ("UPDATE Access SET resStateId = {} WHERE doorId = {} AND personId = {}"
+                   "".format(TO_UPDATE,  doorId, personId)
+                  )
+
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise AccessNotFound('Access not found')
+            self.connection.commit()
+
+
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -2699,30 +2745,28 @@ class DataBase(object):
         '''
 
         try:
-            sql = "SELECT resStateId FROM LimitedAccess WHERE id = {}".format(liAccessId)
-            self.execute(sql)
-            resState = self.cursor.fetchone()['resStateId']
 
-            if resState in (TO_ADD, TO_UPDATE):
+
+            sql = ("SELECT doorId, personId, resStateId FROM LimitedAccess WHERE id = {}"
+                   "".format(liAccessId)
+                  )
+
+            self.execute(sql)
+            row = self.cursor.fetchone() #KeyError exception could be raised here
+            doorId = row['doorId']       #Me parece que es TypeError y no KeyError
+            personId = row['personId']
+            resStateId = row['resStateId']
+
+
+            if resStateId in (TO_ADD, TO_UPDATE):
                 sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
                        "".format(COMMITTED, liAccessId)
                       )
-
                 self.execute(sql)
                 self.connection.commit()
 
 
-            elif resState == TO_DELETE:
-
-                sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
-                       "".format(liAccessId)
-                      )
-
-                self.execute(sql)
-                row = self.cursor.fetchone() #KeyError exception could be raised here
-                doorId = row['doorId']       #Me parece que es TypeError y no KeyError
-                personId = row['personId']
-        
+            elif resStateId == TO_DELETE:
                 sql = ("DELETE FROM LimitedAccess WHERE id = {}"
                        "".format(liAccessId)
                       )
@@ -2745,13 +2789,30 @@ class DataBase(object):
                          )
                    self.execute(sql)
                    self.connection.commit()
+                   return
 
-            elif resState == COMMITTED:
+            elif resStateId == COMMITTED:
                 self.logger.info("Limited access already committed.")
+                return
 
             else:
                 self.logger.error("Invalid state detected in Limited Access table.")
                 raise AccessError('Error committing this limited access.')
+
+
+            sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE doorId = {} AND "
+                   "personId = {} AND resStateId != {}"
+                   "".format(doorId, personId, COMMITTED)
+                  )
+            self.execute(sql)
+            notCommitted = self.cursor.fetchone()['COUNT(*)']
+
+            if not notCommitted:
+                sql = ("UPDATE Access SET resStateId = {} WHERE doorId = {} "
+                       "AND personId = {}".format(COMMITTED, doorId, personId)
+                      )
+                self.execute(sql)
+                self.connection.commit()
 
 
 
