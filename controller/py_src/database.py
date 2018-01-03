@@ -520,6 +520,16 @@ class DataBase(object):
             self.cursor.execute(sql)
             #self.connection.commit()
 
+
+        except TypeError:
+            #This exception can happen when the server asks the controller
+            #to delete an Access that doesn't exists. On this situation,
+            #the controller should answer to the server with OK to avoid
+            #the server resend this DELETE message.
+            #For this reason, on this situation an exception is not thrown.
+            self.logger.warning('Can not find a Access with this id.')
+            #raise IntegrityError('Integrity error deleting an Access.')
+
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
             raise OperationalError('Operational error deleting an Access.')
@@ -684,9 +694,16 @@ class DataBase(object):
                 self.cursor.execute(sql)
                 #self.connection.commit()
 
+
+
         except TypeError:
-            self.logger.debug('Can not find a Limited Access with this id.')
-            raise IntegrityError('Integrity error deleting a Limited Access.')
+            #This exception can happen when the server asks the controller
+            #to delete an Access that doesn't exists. On this situation,
+            #the controller should answer to the server with OK to avoid
+            #the server resend this DELETE message.
+            #For this reason, on this situation an exception is not thrown.
+            self.logger.warning('Can not find a Limited Access with this id.')
+            #raise IntegrityError('Integrity error deleting a Limited Access.')
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
