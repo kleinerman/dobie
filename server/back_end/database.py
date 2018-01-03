@@ -85,7 +85,7 @@ class ZoneNotFound(ZoneError):
 
 
 
-class VisitorsDoorsError(Exception):
+class VisitDoorGroupError(Exception):
     '''
     '''
     def __init__(self, errorMessage):
@@ -95,7 +95,7 @@ class VisitorsDoorsError(Exception):
         return self.errorMessage
 
 
-class VisitorsDoorsNotFound(ZoneError):
+class VisitDoorGroupNotFound(VisitDoorGroupError):
     '''
     '''
     pass
@@ -979,32 +979,63 @@ class DataBase(object):
 
 
 
-#----------------------------------Visitors Door-----------------------------------
+#------------------------------Visit Door Group--------------------------------
 
 
 
 
-    def getVisitorsDoorss(self):
+    def getVisitDoorGroups(self):
         '''
-        Return a dictionary with all Zones
+        Return a dictionary with all Visit Door Groups
         '''
-        sql = ('SELECT * FROM VisitorsDoors')
-        self.execute(sql)
-        visitorsDoorss = self.cursor.fetchall()
+        sql = ("SELECT * FROM VisitDoorGroup")
+        try:
+            self.execute(sql)
+            visitDoorGroups = self.cursor.fetchall()
+            return visitDoorGroups
 
-        return visitorsDoorss
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise VisitDoorGroupError('Can not get VisitDoorGroups')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitDoorGroupError('Can not get VisitDoorGroups')
 
 
 
-
-    def addVisitorsDoors(self, visitorsDoors):
+    def getVisitDoorGroup(self, visitDoorGroupId):
         '''
-        Receive a dictionary with Visitors Doorss parametters 
-        and save it in DB. It returns the id of the added Visitor Doors.
+        Return a a dictionary with Visit Door Group data
+        '''
+    
+        sql = ("SELECT * FROM VisitDoorGroup WHERE id = {}"
+               "".format(visitDoorGroupId)
+              )
+        try:
+            self.execute(sql)
+            visitDoorGroup = self.cursor.fetchone()
+            if not visitDoorGroup:
+                raise VisitDoorGroupNotFound('Visit Door Group not found')
+            return visitDoorGroup
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise VisitDoorGroupError('Can not get specified VisitDoorGroup')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitDoorGroupError('Can not get specified VisitDoorGroup')
+
+
+    def addVisitDoorGroup(self, visitDoorGroup):
+        '''
+        Receive a dictionary with Visit Door Group parametters 
+        and save it in DB. It returns the id of the added Visit Door Group.
         '''
 
-        sql = ("INSERT INTO VisitorsDoors(name) VALUES('{}')"
-               "".format(visitorsDoors['name'])
+        sql = ("INSERT INTO VisitDoorGroup(name) VALUES('{}')"
+               "".format(visitDoorGroup['name'])
               )
 
         try:
@@ -1014,66 +1045,66 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not add this Visitors Doors')
+            raise VisitDoorGroupError('Can not add this Visit Door Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not add this Visitors Doors: wrong argument')
+            raise VisitDoorGroupError('Can not add this Visit Door Group: wrong argument')
 
 
 
-    def delVisitorsDoors(self, visitorsDoorsId):
+    def delVisitDoorGroup(self, visitDoorGroupId):
         '''
-        Receive a dictionary with Visitors Door id and delete the Visitor Door
+        Receive the Visit Door Group ID and delete the Visit Door Group
         '''
 
-        sql = ("DELETE FROM VisitorsDoors WHERE id = {}"
-               "".format(visitorsDoorsId)
+        sql = ("DELETE FROM VisitDoorGroup WHERE id = {}"
+               "".format(visitDoorGroupId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
+                raise VisitDoorGroupNotFound('Visit Door Group not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not delete this Visitors Doors')
+            raise VisitDoorGroupError('Can not delete this Visit Door Group')
 
 
 
 
-    def updVisitorsDoors(self, visitorsDoors):
+    def updVisitDoorGroup(self, visitDoorGroup):
         '''
-        Receive a dictionary with Visitors Doors parametters and update it in DB
+        Receive a dictionary with Visit Door Group parametters and update it in DB
         '''
 
-        sql = ("UPDATE VisitorsDoors SET name = '{}' WHERE id = {}"
-               "".format(visitorsDoors['name'], visitorsDoors['id'])
+        sql = ("UPDATE VisitDoorGroup SET name = '{}' WHERE id = {}"
+               "".format(visitDoorGroup['name'], visitDoorGroup['id'])
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
+                raise VisitDoorGroupNotFound('Visit Door Group not found')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not update this Visitors Doors')
+            raise VisitDoorGroupError('Can not update this Visit Door Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not update this Visitors Doors: wrong argument')
+            raise VisitDoorGroupError('Can not update this Visit Door Group: wrong argument')
 
 
 
 
-    def addDoorToVisitorsDoors(self, visitorsDoorsId, doorId):
+    def addDoorToVisitDoorGroup(self, visitDoorGroupId, doorId):
         '''
         '''
 
-        sql = ("INSERT INTO VisitorsDoorsDoor(visitorsDoorsId, doorId) "
-               "VALUES ({}, {})".format(visitorsDoorsId, doorId)
+        sql = ("INSERT INTO VisitDoorGroupDoor(visitDoorGroupId, doorId) "
+               "VALUES ({}, {})".format(visitDoorGroupId, doorId)
               )
 
         try:
@@ -1083,32 +1114,32 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not add this door to Visitors Door')
+            raise VisitDoorGroupError('Can not add this door to Visit Door Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not add this door to Visitors Door: wrong argument')
+            raise VisitDoorGroupError('Can not add this door to Visit Door Group: wrong argument')
 
 
 
 
-    def delDoorFromVisitorsDoors(self, visitorsDoorsId, doorId):
+    def delDoorFromVisitDoorGroup(self, visitDoorGroupId, doorId):
         '''
         '''
 
-        sql = ("DELETE FROM VisitorsDoorsDoor WHERE "
-               "visitorsDoorsId = {} AND doorId = {}"
-               "".format(visitorsDoorsId, doorId)
+        sql = ("DELETE FROM VisitDoorGroupDoor WHERE "
+               "visitDoorGroupId = {} AND doorId = {}"
+               "".format(visitDoorGroupId, doorId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsDoorsNotFound('Door not found in Visitors Doors.')
+                raise VisitDoorGroupNotFound('Door not found in Visit Door Group.')
             self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not delete this Door from Visitors Doors')
+            raise VisitDoorGroupError('Can not delete this Door from Visit Door Group')
 
 
 
@@ -1347,13 +1378,13 @@ class DataBase(object):
 #----------------------------------Door----------------------------------------
 
 
-    def getDoors(self, zoneId=None, visitorsDoorsId=None):
+    def getDoors(self, zoneId=None, visitDoorGroupId=None):
         '''
-        Return a dictionary with all doors in a Zone or in a visitorsDoors
+        Return a dictionary with all doors in a Zone or in a Visit Door Group
         according to the argument received
         '''
 
-        if not zoneId and not visitorsDoorsId:
+        if not zoneId and not visitDoorGroupId:
             raise DoorNotFound
 
         elif zoneId:
@@ -1373,23 +1404,23 @@ class DataBase(object):
         
             return doors
 
-        elif visitorsDoorsId:
-            sql = ("SELECT COUNT(*) FROM VisitorsDoors WHERE id='{}'".format(visitorsDoorsId))
+        elif visitDoorGroupId:
+            sql = ("SELECT COUNT(*) FROM VisitDoorGroup WHERE id='{}'".format(visitDoorGroupId))
             self.execute(sql)
             
             if self.cursor.fetchone()['COUNT(*)']:
         
-                sql = ("SELECT Door.* from Door JOIN VisitorsDoorsDoor "
-                       "ON (Door.id = VisitorsDoorsDoor.doorId) "
-                       "WHERE VisitorsDoorsDoor.visitorsDoorsId = {}"
-                       "".format(visitorsDoorsId)
+                sql = ("SELECT Door.* from Door JOIN VisitDoorGroupDoor "
+                       "ON (Door.id = VisitDoorGroupDoor.doorId) "
+                       "WHERE VisitDoorGroupDoor.visitDoorGroupId = {}"
+                       "".format(visitDoorGroupId)
                       )
                 self.execute(sql)
                 doors = self.cursor.fetchall()
                 return doors
 
             else:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
+                raise VisitDoorGroupNotFound('Visit Door Group not found')
 
 
 
@@ -2177,8 +2208,8 @@ class DataBase(object):
         cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         sql = ("SELECT access.* FROM Access access JOIN Door door ON "
                "(access.doorId = door.id) JOIN Controller controller ON "
-               "(door.controllerId = controller.id) WHERE "
-               "controller.macAddress = '{}' AND access.resStateId = {}"
+               "(door.controllerId = controller.id) WHERE access.allWeek = 1 "
+               "AND controller.macAddress = '{}' AND access.resStateId = {}"
                "".format(ctrllerMac, resStateId)
               )
 
@@ -2285,19 +2316,38 @@ class DataBase(object):
         and it should be added again.
         '''
 
-        sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
-               "endTime = '{}', expireDate = '{}', resStateId = {} WHERE id = {}"
-               "".format(access['iSide'], access['oSide'],
-                         access['startTime'], access['endTime'],
-                         access['expireDate'], TO_UPDATE, access['id'])
-              )
 
         try:
+            #The user shouldn't be allowed to modify a Limited Access via
+            #access endpoint
+            sql = "SELECT allWeek from Access WHERE id = {}".format(access['id'])
             self.execute(sql)
-            if self.cursor.rowcount < 1:
-                raise AccessNotFound('Access not found')
-            self.connection.commit()
+            allWeek = self.cursor.fetchone()['allWeek']
 
+            if allWeek:
+
+                sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
+                       "endTime = '{}', expireDate = '{}', resStateId = {} WHERE id = {}"
+                       "".format(access['iSide'], access['oSide'],
+                                 access['startTime'], access['endTime'],
+                                 access['expireDate'], TO_UPDATE, access['id'])
+                      )
+
+                self.execute(sql)
+                if self.cursor.rowcount < 1:
+                    raise AccessNotFound('Access not found')
+                self.connection.commit()
+
+            else:
+                self.logger.debug('Can not update Limited Access from access endpoint.')
+                raise AccessError('Can not update this access')
+
+
+        #This exception (TypeError) could be raised by the SELECT statement when fetchone()
+        #returns None. This should never happen.
+        except TypeError:
+            self.logger.debug('Error fetching allWeek from access.')
+            raise AccessError('Can not update this access.')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise AccessError('Can not update this access')
@@ -2534,7 +2584,7 @@ class DataBase(object):
                    "ON DUPLICATE KEY UPDATE allWeek = FALSE, iSide = FALSE, oSide = FALSE, startTime = NULL, "
                    "endTime = NULL, expireDate = '{}', resStateId = {}"
                    "".format(liAccess['doorId'], liAccess['personId'], liAccess['expireDate'], 
-                             COMMITTED, liAccess['expireDate'], COMMITTED)
+                             TO_ADD, liAccess['expireDate'], TO_ADD)
                   )
             self.execute(sql)
             self.connection.commit()
@@ -2587,8 +2637,8 @@ class DataBase(object):
         '''
 
         try:
-            #The only thing we should modify in "Access" table is the "expireDate" field.
-            #To modify the access table, we need "doorId" and "personId"
+            #The only thing we should modify in "Access" table is the "expireDate" and 
+            #"resStateId" field. To modify the access table, we need "doorId" and "personId"
             sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
                    "".format(liAccess['id'])
                   )
@@ -2599,8 +2649,9 @@ class DataBase(object):
             personId = row['personId']
 
 
-            sql = ("UPDATE Access SET expireDate = '{}' WHERE doorId = {} AND personId = {}"
-                   "".format(liAccess['expireDate'], doorId, personId)
+            sql = ("UPDATE Access SET expireDate = '{}', resStateId = {} "
+                   "WHERE doorId = {} AND personId = {}"
+                   "".format(liAccess['expireDate'], TO_UPDATE,  doorId, personId)
                   )
 
             self.execute(sql)
@@ -2642,14 +2693,40 @@ class DataBase(object):
         Set limited access row state in state pending to delete.
         '''
 
-        sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
-               "".format(TO_DELETE, liAccessId)
-              )
         try:
+
+            sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
+                   "".format(TO_DELETE, liAccessId)
+                  )
+
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise AccessNotFound('Access not found')
             self.connection.commit()
+
+
+            #The only thing we should modify in "Access" table is the "resStateId" 
+            #field. To modify the access table, we need "doorId" and "personId"
+            sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
+                   "".format(liAccessId)
+                  )
+
+            self.execute(sql)
+            row = self.cursor.fetchone()
+            doorId = row['doorId']
+            personId = row['personId']
+
+
+            sql = ("UPDATE Access SET resStateId = {} WHERE doorId = {} AND personId = {}"
+                   "".format(TO_UPDATE,  doorId, personId)
+                  )
+
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise AccessNotFound('Access not found')
+            self.connection.commit()
+
+
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -2668,30 +2745,28 @@ class DataBase(object):
         '''
 
         try:
-            sql = "SELECT resStateId FROM LimitedAccess WHERE id = {}".format(liAccessId)
-            self.execute(sql)
-            resState = self.cursor.fetchone()['resStateId']
 
-            if resState in (TO_ADD, TO_UPDATE):
+
+            sql = ("SELECT doorId, personId, resStateId FROM LimitedAccess WHERE id = {}"
+                   "".format(liAccessId)
+                  )
+
+            self.execute(sql)
+            row = self.cursor.fetchone() #KeyError exception could be raised here
+            doorId = row['doorId']       #Me parece que es TypeError y no KeyError
+            personId = row['personId']
+            resStateId = row['resStateId']
+
+
+            if resStateId in (TO_ADD, TO_UPDATE):
                 sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
                        "".format(COMMITTED, liAccessId)
                       )
-
                 self.execute(sql)
                 self.connection.commit()
 
 
-            elif resState == TO_DELETE:
-
-                sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
-                       "".format(liAccessId)
-                      )
-
-                self.execute(sql)
-                row = self.cursor.fetchone() #KeyError exception could be raised here
-                doorId = row['doorId']       #Me parece que es TypeError y no KeyError
-                personId = row['personId']
-        
+            elif resStateId == TO_DELETE:
                 sql = ("DELETE FROM LimitedAccess WHERE id = {}"
                        "".format(liAccessId)
                       )
@@ -2714,13 +2789,30 @@ class DataBase(object):
                          )
                    self.execute(sql)
                    self.connection.commit()
+                   return
 
-            elif resState == COMMITTED:
+            elif resStateId == COMMITTED:
                 self.logger.info("Limited access already committed.")
+                return
 
             else:
                 self.logger.error("Invalid state detected in Limited Access table.")
                 raise AccessError('Error committing this limited access.')
+
+
+            sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE doorId = {} AND "
+                   "personId = {} AND resStateId != {}"
+                   "".format(doorId, personId, COMMITTED)
+                  )
+            self.execute(sql)
+            notCommitted = self.cursor.fetchone()['COUNT(*)']
+
+            if not notCommitted:
+                sql = ("UPDATE Access SET resStateId = {} WHERE doorId = {} "
+                       "AND personId = {}".format(COMMITTED, doorId, personId)
+                      )
+                self.execute(sql)
+                self.connection.commit()
 
 
 
