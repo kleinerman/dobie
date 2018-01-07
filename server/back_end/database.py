@@ -1144,6 +1144,48 @@ class DataBase(object):
 
 
 
+#-----------------------------------Visitors-----------------------------------------
+
+    def getVisitors(self, visitedOrgId, visitDoorGroupId):
+        '''
+        '''
+
+        if visitedOrgId: 
+            visitedOrgFilter = ' Person.visitedOrgId = {}'.format(visitedOrgId)
+        else:
+            visitedOrgFilter = ' Person.visitedOrgId IS NOT NULL'
+
+        if visitDoorGroupId:
+            visitDoorGroupFilter = (" AND VisitDoorGroupDoor.visitDoorGroupId = {}"
+                                    "".format(visitDoorGroupId)
+                                   ) 
+        else:
+            visitDoorGroupFilter = ''
+
+        sql = ("SELECT Person.* FROM Person JOIN Access ON "
+               "(Person.id = Access.personId) JOIN VisitDoorGroupDoor "
+               "ON (Access.doorId = VisitDoorGroupDoor.doorId) "
+               "WHERE {}{}".format(visitedOrgFilter, visitDoorGroupFilter)
+
+              )
+
+        try:
+            self.execute(sql)
+            visitors = self.cursor.fetchall()
+            if not visitors:
+                raise PersonNotFound('Visitors not found')
+            return visitors
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise PersonError('Can not get specified visitors.')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Can not get specified visitors.')
+    
+
+
 
 #----------------------------------Controller----------------------------------------
 
