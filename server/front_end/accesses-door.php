@@ -35,11 +35,6 @@ include("header.php");
 <input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="person-select">
 <select id="persons-select" class="select-options form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
-<div class="select-container-footer">
-<div class="left">
-<button id="access-new-all" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit">Add to all...</button>
-</div>
-</div>
 </div>
 
 </div>
@@ -193,8 +188,7 @@ function populateTable(tableId,personId){
 					//show row
 					if(values[i].allWeek=="1") allWeekStr="<span class=\"fa fa-check\"></span>";
 					else allWeekStr = "";
-					if(values[i].resStateId==3) $('#'+tableId).append("<tr"+itemClass+"><td><input type=\"checkbox\" name=\"accesses[]\" value="+values[i].id+"></td><td>"+values[i].doorName+"</td><td>"+values[i].zoneName+"</td><td class=\"center\">"+allWeekStr+"</td></tr>");
-					else $('#'+tableId).append("<tr"+itemClass+"><td></td><td>"+values[i].doorName+"</td><td>"+values[i].zoneName+"</td><td class=\"center\">"+allWeekStr+"</td></tr>");
+					$('#'+tableId).append("<tr"+itemClass+"><td><input type=\"checkbox\" name=\"accesses[]\" value="+values[i].id+"></td><td>"+values[i].doorName+"</td><td>"+values[i].zoneName+"</td><td class=\"center\">"+allWeekStr+"</td></tr>");
 				}
 				//add trigger events for rows
 				tableClickEvents();
@@ -226,8 +220,6 @@ $("#organizations-select").change(function(){
 	if(!isNaN(organizationId) && organizationId!="undefined"){
 		//populate list
 		populateList("persons-select","persons",organizationId);
-		//hide accesses table
-		$("#accesses-table-container").hide();
 		//show list
 		$("#select-container-persons").fadeIn();
 	}
@@ -334,13 +326,6 @@ $("#access-delete-form").submit(function(){
 	}
 	return false;
 });
-
-//Add button > open iframe modal
-$("#access-new-all").click(function(){
-	var orgId= $("#organizations-select").val();
-	$("#modal-edit").find('iframe').prop('src','access-edit-person?personid=all&orgid='+orgId);
-});
-
 </script>
 
 </body>

@@ -273,9 +273,10 @@ function add_access_liaccess($user,$pass,$doorid,$personid,$weekday,$iside,$osid
 
 function edit_access_liaccess($user,$pass,$doorid,$personid,$id,$days_payload,$expiredate){
 	global $config;
-	//make a delete access first
+/*	VERSION WITH DELETE ALL > ADD ALL
+//make a delete access first
 	$response=delete_access($user,$pass,$id,1); //parameter allWeek as true for deleting all liaccess accesses
-
+	sleep(1);// delay added so delete can impact on the database
 	if($response->response_status == "200"){
 		$payload_obj = new stdClass();
 		//add fixed values
@@ -297,9 +298,65 @@ function edit_access_liaccess($user,$pass,$doorid,$personid,$id,$days_payload,$e
 			//send an add request for liaccess day
 			$response_inner=send_request($config->api_fullpath."liaccess",$user,$pass,"post",json_encode($payload_obj));
 			if($response_inner->response_status != "201") $response=$response_inner;
-			var_dump($response_inner);
+			//var_dump($response_inner);
+		
+}
+	}
+	return $response;
+*/
+
+	//get current liaccess
+	$response = get_access($user,$pass,$id);
+	if($response and isset($response->liAccesses) and is_array($response->liAccesses)){
+
+		//build array key,value with arr[weekday] = obj;
+		$access_current=array();
+		foreach($response->liAccesses as $obj) $access_current[$obj->weekDay]=$obj;
+//var_dump($access_current);die();
+
+		//explode and build the sent liaccesses for each weekday
+		$days_payload_arr=explode("|",$days_payload);
+		$days_payload_arr_objs=array();
+		foreach($days_payload_arr as $day_payload) $days_payload_arr_objs[]=json_decode($day_payload);
+
+		//build array key,value with arr[weekday] = obj;
+		$access_sent=array();
+		foreach($days_payload_arr_objs as $obj) $access_sent[$obj->weekDay]=$obj;
+//var_dump($access_sent);die();
+		//foreach sent liaccess weekday
+		foreach($access_sent as $k=>$v){
+			if(!isset($access_current[$k])){
+				//if not in current > ADD
+				//echo "<br>ADD $k";
+				//echo "<pre>";
+				//echo json_encode($v);
+				$response=send_request($config->api_fullpath."liaccess",$user,$pass,"post",json_encode($v));
+			} else {
+				//else if in current >
+				//check each value to know if its different
+				if(($v->iSide!=$access_current[$k]->iSide) or ($v->oSide!=$access_current[$k]->oSide) or ($v->startTime!=$access_current[$k]->startTime) or ($v->endTime!=$access_current[$k]->endTime)){
+					//if different > EDIT
+					//echo "<br>EDIT $k";
+					//send UPDATE to /liaccess/$access_current[$k]->id
+					//echo "<pre>";
+					//echo json_encode($v);
+					$response=send_request($config->api_fullpath."liaccess/".$access_current[$k]->id,$user,$pass,"put",json_encode($v));
+				} //else SKIP > no edits needed
+			}
+		}
+		//foreach current liaccess weekday
+		foreach($access_current as $k=>$v){
+			//if not in sent > DELETE
+			if(!isset($access_sent[$k])){
+				//echo "<br>DELETE $k";
+				//echo "<pre>";
+				//echo json_encode($v);
+				//send DELETE to /liaccess/$v->id
+				delete_access($user,$pass,$v->id,0);
+			} //else SKIP > leave existing days
 		}
 	}
+
 	return $response;
 }
 
@@ -314,13 +371,58 @@ function delete_access_bulk($user,$pass, $ids){
 	return $success;
 }
 
+function add_access_allweek_organization($user,$pass,$doorid,$orgid,$iside,$oside,$starttime,$endtime,$expiredate){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->doorId = $doorid;
+	$payload_obj->iSide = $iside;
+	$payload_obj->oSide = $oside;
+	$payload_obj->startTime = $starttime;
+	$payload_obj->endTime = $endtime;
+	$payload_obj->expireDate = $expiredate;
+	
+	//get all persons in organization
+	$persons_recs = get_persons($user,$pass,$orgid);
+
+	if($persons_recs){
+		//for each person, add
+		foreach($persons_recs as $person_rec){
+			$payload_obj->personId = $person_rec->id;
+			$response=send_request($config->api_fullpath."access",$user,$pass,"post",json_encode($payload_obj));
+		}
+	}
+}
+
+function add_access_liaccess_organization($user,$pass,$doorid,$orgid,$weekday,$iside,$oside,$starttime,$endtime,$expiredate){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->doorId = $doorid;
+	$payload_obj->weekDay = $weekday;
+	$payload_obj->iSide = $iside;
+	$payload_obj->oSide = $oside;
+	$payload_obj->startTime = $starttime;
+	$payload_obj->endTime = $endtime;
+	$payload_obj->expireDate = $expiredate;
+
+	//get all persons in organization
+	$persons_recs = get_persons($user,$pass,$orgid);
+
+	if($persons_recs){
+		//for each person, add
+		foreach($persons_recs as $person_rec){
+			$payload_obj->personId = $person_rec->id;
+			$response=send_request($config->api_fullpath."liaccess",$user,$pass,"post",json_encode($payload_obj));
+		}
+	}
+}
+
 if($DEBUG){
 	//$res=get_organizations("admin","admin");
 	//$res=do_auth("admin","admin");
 	//$res=get_organizations("admin","admin",2);
 
 	//$res=get_person_accesses("admin","admin",3);
-//	$res=get_access("admin","admin",32);
+	$res=get_access("admin","admin",44);
 //	$res=get_door_accesses("admin","admin",3);
 	//$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
@@ -332,7 +434,13 @@ if($DEBUG){
 	//$res=add_access_liaccess("admin","admin",1,3,1,1,1,"08:00:00","18:00:00","9999-12-31 00:00");
 	//$res=add_access_liaccess("admin", "admin", 4, 3, 2, 1, 1, "08:00:00", "18:00:00", "9999-12-31 00:00");
 	//$res=delete_access("admin","admin",11,0);
-	$res=edit_access_liaccess("admin","admin",32,'{"expireDate":"2018-12-28","weekDay":1,"startTime":"9:00","endTime":"18:00","iSide":1,"oSide":1}|{"expireDate":"2018-12-28","weekDay":3,"startTime":"9:00","endTime":"18:00","iSide":1,"oSide":0}|{"expireDate":"2018-12-28","weekDay":5,"startTime":"9:00","endTime":"18:00","iSide":1,"oSide":1}|{"expireDate":"2018-12-28","weekDay":6,"startTime":"08:00","endTime":"18:00","iSide":1,"oSide":1}',"2018-12-28");
+
+//$res=edit_access_liaccess("admin","admin",4,3,44,'{"expireDate":"9999-12-31","doorId":4,"personId":3,"weekDay":3,"startTime":"08:00","endTime":"18:00","iSide":1,"oSide":1}|{"expireDate":"9999-12-31","doorId":4,"personId":3,"weekDay":5,"startTime":"08:00","endTime":"18:00","iSide":1,"oSide":1}',"9999-12-31");
+//$res=edit_access_liaccess("admin","admin",4,3,44,'{"expireDate":"9999-12-31","doorId":4,"personId":3,"weekDay":3,"startTime":"08:00","endTime":"18:00","iSide":1,"oSide":1}',"2018-12-31");
+
+//	add_access_allweek($user,$pass,$doorid,$personid,$iside,$oside,$starttime,$endtime,$expiredate){
+//	edit_access_allweek($user,$pass,$id,$iside,$oside,$starttime,$endtime,$expiredate){
+//	$res=add_access_allweek("admin","admin",1,3,1,1,"09:00","13:00","9999-12-31");
 	echo "<pre>";
 	var_dump($res);
 }
