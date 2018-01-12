@@ -4,8 +4,9 @@ $innerheader=1;
 $include_extra_js=array("clockpicker","datepicker");
 
 //get access ID or create mode
-$id = (isset($_GET["id"]) & is_numeric($_GET["id"])) ? $_GET["id"] : "0";
-$personid = (isset($_GET["personid"]) & is_numeric($_GET["personid"])) ? $_GET["personid"] : "0";
+$id = (isset($_GET["id"]) and is_numeric($_GET["id"])) ? $_GET["id"] : "0";
+$personid = (isset($_GET["personid"]) and $_GET["personid"]!="") ? $_GET["personid"] : "0";
+$orgid = (isset($_GET["orgid"]) and is_numeric($_GET["orgid"])) ? $_GET["orgid"] : "0";
 
 include("header.php");
 ?>
@@ -67,8 +68,8 @@ include("header.php");
 <tr><th>Day</th><th>Time interval</th><th class="center">Incoming</th><th class="center">Outgoing</th><th class="center">Both</th></tr>
 <tr><td><label><input type="checkbox" id="allWeek_check" name="days" value="" checked> Every day</label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="08:00" name="from0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="18:00" name="to0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way0" value="1">
 </td><td class="center"><input type="radio" name="way0" value="2">
 </td><td class="center"><input type="radio" name="way0" value="3" checked>
@@ -77,8 +78,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="1"> Monday</label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="08:00" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="18:00" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way1" value="1">
 </td><td class="center"><input type="radio" name="way1" value="2">
 </td><td class="center"><input type="radio" name="way1" value="3" checked>
@@ -87,8 +88,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="2"> Tuesday</label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="08:00" name="from2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="18:00" name="to2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way2" value="1">
 </td><td class="center"><input type="radio" name="way2" value="2">
 </td><td class="center"><input type="radio" name="way2" value="3" checked>
@@ -97,8 +98,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="3"> Wednesday</label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="08:00" name="from3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="18:00" name="to3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way3" value="1">
 </td><td class="center"><input type="radio" name="way3" value="2">
 </td><td class="center"><input type="radio" name="way3" value="3" checked>
@@ -107,8 +108,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="4"> Thursday</label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="08:00" name="from4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="18:00" name="to4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way4" value="1">
 </td><td class="center"><input type="radio" name="way4" value="2">
 </td><td class="center"><input type="radio" name="way4" value="3" checked>
@@ -117,8 +118,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="5"> Friday</label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="08:00" name="from5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="18:00" name="to5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way5" value="1">
 </td><td class="center"><input type="radio" name="way5" value="2">
 </td><td class="center"><input type="radio" name="way5" value="3" checked>
@@ -127,8 +128,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="6"> Saturday</label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="08:00" name="from6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="18:00" name="to6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way6" value="1">
 </td><td class="center"><input type="radio" name="way6" value="2">
 </td><td class="center"><input type="radio" name="way6" value="3" checked>
@@ -137,8 +138,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="7"> Sunday</label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="08:00" name="from7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="18:00" name="to7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way7" value="1">
 </td><td class="center"><input type="radio" name="way7" value="2">
 </td><td class="center"><input type="radio" name="way7" value="3" checked>
@@ -292,7 +293,9 @@ $(".dayrow").hide();
 				
 //fetch values if set
 var accessId=<?=$id?>;
-var personId=<?=$personid?>;
+var personId='<?=$personid?>';
+var orgId=<?=$orgid?>;
+if(personId!="" && personId!="all") personId = parseInt(personId);
 //init array for edit access values
 var values;
 
@@ -300,7 +303,8 @@ var values;
 if(!accessId){
 	//if create
 	//populate header with person name
-	$("#page-header").text("New access for " + parent.$("#persons-select option:selected").text());
+	if(personId!="all") $("#page-header").text("New access for " + parent.$("#persons-select option:selected").text());
+	else $("#page-header").text("New access for " + parent.$("#organizations-select option:selected").text());
 } else {
 	//if edit
 	//fetch access data
@@ -389,7 +393,7 @@ $("#access-edit-form").submit(function(){
 	if(hasExpiration==1) accessRec.expireDate = $("#expiration_date").val();
 	else accessRec.expireDate = "9999-12-31";
 
-	// get access ID
+	// check if create or edit
 	if(!accessId){
 		//create
 		accessRec.doorId = parseInt($("#doors-select").val());
@@ -405,12 +409,20 @@ $("#access-edit-form").submit(function(){
 			var way = $("input[name=way0]:checked").val();
 			accessRec.iSide = (way%2);
 			accessRec.oSide = Math.floor(way/2);
-			//here post ajax to allweek access
-			//console.log(JSON.stringify(accessRec));
+
+			//check if add access to all persons
+			if(accessRec.personId=="all"){
+				//all persons
+				var datastring = "action=add_access_allweek_organization&doorid=" + accessRec.doorId+ "&orgid=" + orgId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+			} else {
+				//single person
+				var datastring = "action=add_access_allweek&doorid=" + accessRec.doorId+"&personid=" + accessRec.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate; 
+			}
+
 			$.ajax({
 				type: "POST",
 				url: "process",
-				data: "action=add_access_allweek&doorid=" + accessRec.doorId+"&personid=" + accessRec.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate,
+				data: datastring,
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate access table
@@ -437,19 +449,24 @@ $("#access-edit-form").submit(function(){
 					//get week day and parse as int
 					accessRec.weekDay=parseInt($(this).val());
 					// get start, end and way
-// 					accessRec.startTime= $("input[name=from"+accessRec.weekDay+"]").val()+":00";
-// 					accessRec.endTime = $("input[name=to"+accessRec.weekDay+"]").val()+":00";
  					accessRec.startTime= $("input[name=from"+accessRec.weekDay+"]").val();
  					accessRec.endTime = $("input[name=to"+accessRec.weekDay+"]").val();
 					var way = $("input[name=way"+accessRec.weekDay+"]:checked").val();
 					accessRec.iSide= (way%2);
 					accessRec.oSide= Math.floor(way/2);
-					//here post ajax to liaccess access
-					//console.log(JSON.stringify(accessRec));
+
+					//check if add access to all persons
+					if(accessRec.personId=="all"){
+						//all persons
+						var datastring = "action=add_access_liaccess_organization&doorid=" + accessRec.doorId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+					} else {
+						//single person
+						var datastring = "action=add_access_liaccess&doorid=" + accessRec.doorId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+					}
 					$.ajax({
 						type: "POST",
 						url: "process",
-						data: "action=add_access_liaccess&doorid=" + accessRec.doorId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate,
+						data: datastring,
 						success: function(resp){
 							//console.log(resp);
 						},
@@ -476,19 +493,20 @@ $("#access-edit-form").submit(function(){
 		if(allWeek_check){
 			//is allWeek
 			// get start, end and way
-			//accessRec.startTime= $("input[name=from0]").val()+":00";
-			//accessRec.endTime = $("input[name=to0]").val()+":00";
 			accessRec.startTime= $("input[name=from0]").val();
 			accessRec.endTime = $("input[name=to0]").val();
 			var way = $("input[name=way0]:checked").val();
 			accessRec.iSide= (way%2);
 			accessRec.oSide= Math.floor(way/2);
-			//here post ajax to allweek access
-			//console.log(JSON.stringify(accessRec));
+			//check if its changing access type from liaccess to allweek
+			if(!values.allWeek) var datastring = "action=add_access_allweek&doorid=" + values.doorId+"&personid=" + values.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+			else var datastring = "action=edit_access_allweek&id=" + accessId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+			//console.log(datastring);
+
 			$.ajax({
 				type: "POST",
 				url: "process",
-				data: "action=edit_access_allweek&id=" + accessId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate,
+				data: datastring,
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate access table
@@ -507,8 +525,8 @@ $("#access-edit-form").submit(function(){
 			});
 		} else {
 			//is liAccesses
-			accessRec.doorId = parseInt($("#doors-select").val());
-			accessRec.personId = personId;
+			accessRec.doorId = values.doorId;
+			accessRec.personId = values.personId;
 			//for each day, get start, end and way. Send each liaccess as payload json to process
 			var days_payload=[];
 			$("input[name=days]:checked").each(function(){
@@ -516,27 +534,26 @@ $("#access-edit-form").submit(function(){
 					//get week day and parse as int
 					accessRec.weekDay=parseInt($(this).val());
 					// get start, end and way
-					//accessRec.startTime= $("input[name=from"+accessRec.weekDay+"]").val()+":00";
-					//accessRec.endTime = $("input[name=to"+accessRec.weekDay+"]").val()+":00";
 					accessRec.startTime= $("input[name=from"+accessRec.weekDay+"]").val();
 					accessRec.endTime = $("input[name=to"+accessRec.weekDay+"]").val();
 					var way = $("input[name=way"+accessRec.weekDay+"]:checked").val();
 					accessRec.iSide= (way%2);
 					accessRec.oSide= Math.floor(way/2);
 					//add liaccess as json to payload array
-					//console.log(JSON.stringify(accessRec));
 					days_payload.push(JSON.stringify(accessRec));
 				}
 			});
+			//console.log("action=edit_access_liaccess&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId + "&id=" + accessId + "&days_payload="+ days_payload.join("|") + "&expiredate=" + accessRec.expireDate);
+
 			$.ajax({
 				type: "POST",
 				url: "process",
 				data: "action=edit_access_liaccess&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId + "&id=" + accessId + "&days_payload="+ days_payload.join("|") + "&expiredate=" + accessRec.expireDate,
+				//complete: function(resp){console.log(resp)},
 				success: function(resp){
-					console.log(resp);
 					if(resp[0]=='1'){
 						//populate access table
-						parent.populateTable("access-table",personId);
+						parent.populateTable("access-table",accessRec.personId);
 						//close modal
 						parent.$("#modal-edit").modal("hide");
 					} else {
@@ -546,8 +563,9 @@ $("#access-edit-form").submit(function(){
 				},
 				failure: function(){
 					//show modal error
-					alert("Error when trying to create access");
-				}
+					alert("Failure when trying to edit access");
+				},
+				error: function(){alert("Error when trying to edit access")}
 			});
 		}
 	}

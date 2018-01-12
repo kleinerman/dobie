@@ -9,7 +9,7 @@ fi
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eba30655"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "fa163e76206f"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
 
 #curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827ebf65300"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"ctrllerModelId": 1, "macAddress": "b827eb277791"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller

@@ -299,7 +299,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 					array_push($ret,0,"Invalid id sent");
 				} else {
 					$access_rec = edit_access_liaccess($logged->name, $logged->pw, $doorid, $personid, $id, $days_payload, $expiredate);
-					if($access_rec) array_push($ret,1,"Information saved successfully!");
+					if($access_rec and ($access_rec->response_status==200 or $access_rec->response_status==201)) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"Access could not be modified");
 				}
 			}
@@ -316,6 +316,41 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 					if($access_rec) array_push($ret,1,"Accesses deleted successfully!");
 					else array_push($ret,0,"Accesses could not be deleted");
 				}
+			}
+		break;
+		case "add_access_allweek_organization":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$doorid = (isset($_POST['doorid']) and is_numeric($_POST['doorid'])) ? intval($_POST['doorid']) : "";
+				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? intval($_POST['orgid']) : "";
+				$iside = (isset($_POST['iside']) and is_numeric($_POST['iside'])) ? intval($_POST['iside']) : "";
+				$oside = (isset($_POST['oside']) and is_numeric($_POST['oside'])) ? intval($_POST['oside']) : "";
+				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
+				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
+				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+
+				add_access_allweek_organization($logged->name, $logged->pw, $doorid, $orgid, $iside, $oside,$starttime,$endtime,$expiredate);
+
+				//function doesnt return any value > return success always
+				array_push($ret,1,"Accesses added to all persons in organization");
+			}
+		break;
+		case "add_access_liaccess_organization":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$doorid = (isset($_POST['doorid']) and is_numeric($_POST['doorid'])) ? intval($_POST['doorid']) : "";
+				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? intval($_POST['orgid']) : "";
+				$weekday = (isset($_POST['weekday']) and is_numeric($_POST['weekday'])) ? intval($_POST['weekday']) : "";
+				$iside = (isset($_POST['iside']) and is_numeric($_POST['iside'])) ? intval($_POST['iside']) : "";
+				$oside = (isset($_POST['oside']) and is_numeric($_POST['oside'])) ? intval($_POST['oside']) : "";
+				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
+				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
+				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+
+				$access_rec = add_access_liaccess_organization($logged->name, $logged->pw, $doorid, $orgid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate);
+
+				//function doesnt return any value > return success always
+				array_push($ret,1,"Accesses added to all persons in organization");
 			}
 		break;
 /*		case "login":

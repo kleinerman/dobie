@@ -71,9 +71,9 @@ function populateList(selectId,entity,id=0){
 			values.forEach(function(item,index){
 				if(item.resStateId!=5){
 					itemClass="";
-					if(item.resStateId==1) itemClass=" class='toadd' ";
-					else if(item.resStateId==2) itemClass=" class='toupd' ";
-					else if(item.resStateId==4) itemClass=" class='todel' ";
+					if(item.resStateId==1) itemClass=" class='toadd' disabled ";
+					else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
+					else if(item.resStateId==4) itemClass=" class='todel' disabled ";
 					$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
 				}
 			});
