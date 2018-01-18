@@ -65,6 +65,7 @@ function populateList(selectId,entity,id=0){
 	data: "action=get_"+entity + extraActionStr,
 	success: function(resp){
 		$("#"+selectId).empty();
+		var qValidItems=0;
 		if(resp[0]=='1'){
 			var values = resp[1];
 			var itemClass="";
@@ -75,11 +76,18 @@ function populateList(selectId,entity,id=0){
 					else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
 					else if(item.resStateId==4) itemClass=" class='todel' disabled ";
 					$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
+					qValidItems++;
 				}
 			});
 		} else {
 			//show error option
-			$("#"+selectId).append("<option value=''>"+ resp[1] +"</option>");
+			$("#"+selectId).append("<option value='' disabled>"+ resp[1] +"</option>");
+		}
+		//toggle visibility of -all button if exists
+		if($("#"+selectId+"-all").length>0){
+				//if more than one valid option > show
+			if(qValidItems>1) $("#"+selectId+"-all").show();
+			else $("#"+selectId+"-all").hide();
 		}
 	},
 	failure: function(){
@@ -87,4 +95,85 @@ function populateList(selectId,entity,id=0){
 			$("#"+selectId).append("<option value=''>Operation failed, please try again</option>");
 		}
 	});
+}
+
+
+//events for access table rows
+function tableClickEvents(){
+	//clickable rows for access tables
+	$("#access-table tr td:nth-child(n+2)").click(function(){
+		$(this).parent().find("input[type=checkbox]").click();
+	})
+
+	//unclick All checkbox on row click
+	$("#access-table tr td input[type=checkbox]").click(function(){
+		if($("#accessesAll").prop("checked")) $("#accessesAll").prop("checked",false);
+	})
+
+	//click All event
+	$("#accessesAll").click(function(){
+		if($(this).prop("checked")) {
+			$("#access-table td input[type=checkbox]").prop("checked",true);
+			$("#access-del").prop("disabled",false);
+			if($('#access-table tr td input[type=checkbox]:checked').length == 1) $("#access-edit").prop("disabled",false);
+		} else {
+			$("#access-table td input[type=checkbox]").prop("checked",false);
+			//no rows selected > disable both
+			$("#access-edit,#access-del").prop("disabled",true);
+		}
+	})
+	
+	//edit / delete  button toggle
+	$('#access-table tr td input:checkbox').change(function(){
+		if($('#access-table tr td input[type=checkbox]:checked').length > 0) {
+			//if at least 1 row selected > enable delete
+			$("#access-del").prop("disabled",false);
+			//enable edit only if 1 row is selected
+			if($('#access-table tr td input[type=checkbox]:checked').length > 1) $("#access-edit").prop("disabled",true);
+			else $("#access-edit").prop("disabled",false);
+		} else {
+			//no rows selected > disable both
+			$("#access-edit,#access-del").prop("disabled",true);
+		}
+	});
+}
+
+//event for access table row filter and checkboxes actions
+function setFilterActionTable(){
+	//init table input filter
+	$(".data-filter-table").keyup(function(){
+		var rows=$("#"+$(this).data("filter") + " tr");
+		var filterValue=$(this).val().toLowerCase();
+		rows.each(function(){
+			if($(this).find("td").text().toLowerCase().includes(filterValue)) $(this).show();
+			else $(this).hide();
+		})
+		//show header row
+		$("#"+$(this).data("filter") + " tr:first-child").show();
+	});
+	
+	//checkbox click events
+	$("input[name=days]").click(function(){
+		if($(this).val()==""){
+			//if All button
+			if($(this).prop("checked")){
+				//check all days
+				$("input[name=days]").prop("checked",true);
+				$(".dayrow").hide();
+			} else {
+				//uncheck all days
+				$("input[name=days]").prop("checked",false);
+				$(".dayrow").show();
+			}
+		} else {
+			//rest of buttons
+			$("input[name=days]:first").prop("checked",false);
+		}
+	});
+}
+
+function addZeroPadding(str){
+	str_parts=str.split(":");
+	if(str_parts.length>1 && str_parts[0].length==1) str_parts[0]="0"+str_parts[0];
+	return str_parts.join(":");
 }

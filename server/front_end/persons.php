@@ -65,19 +65,19 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2">Name:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-name" name="name" value="" required>
+      <input type="text" class="form-control" id="person-new-name" name="name" value="" required maxlength="64">
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2">Identification Number:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-idnum" name="idnum" value="">
+      <input type="text" class="form-control" id="person-new-idnum" name="idnum" value="" maxlength="64">
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2">Card Number:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-cardnum" name="cardnum" value="">
+      <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646" maxlength="10">
  </div>
 </div>
 
@@ -105,20 +105,20 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2">Name:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-edit-name" name="name" value="" required>
+      <input type="text" class="form-control" id="person-edit-name" name="name" value="" maxlength="64" required>
       <input type="hidden" id="person-edit-id" name="id" value="">
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2">Identification Number:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-edit-idnum" name="idnum" value="">
+      <input type="text" class="form-control" id="person-edit-idnum" name="idnum" value="" maxlength="64">
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2">Card Number:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-edit-cardnum" name="cardnum" value="">
+      <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646" maxlength="10">
  </div>
 </div>
 

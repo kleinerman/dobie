@@ -23,7 +23,7 @@ include("header.php");
 <div class="select-container-title">Organizations</div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select">
-<select id="organizations-select" class="select-options form-control" name="organizations-select" size="2"></select>
+<select id="organizations-select" class="select-options select-options-small form-control" name="organizations-select" size="2"></select>
 </div>
 </div>
 
@@ -33,11 +33,11 @@ include("header.php");
 <div class="select-container-title">Person</div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="person-select">
-<select id="persons-select" class="select-options form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
+<select id="persons-select" class="select-options select-options-small form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
 <div class="select-container-footer">
 <div class="left">
-<button id="access-new-all" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit">Add to all...</button>
+<button id="persons-select-all" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit">Add to all...</button>
 </div>
 </div>
 </div>
@@ -83,7 +83,7 @@ include("footer.php");
 <h4 class="modal-title" id="modal-add-label">&nbsp;</h4>
 </div>
 <div class="modal-body center">
-<iframe class="iframe" src="blank"></iframe>
+<iframe class="iframe iframe-big" src="blank"></iframe>
 </div>
 </div>
 </div>
@@ -91,7 +91,7 @@ include("footer.php");
 </div>
 
 <!-- edit modal -->
-<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade modal-full" id="modal-edit" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-header">
@@ -99,7 +99,7 @@ include("footer.php");
 <h4 class="modal-title" id="modal-edit-label">&nbsp;</h4>
 </div>
 <div class="modal-body center">
-<iframe class="iframe" src="blank"></iframe>
+<iframe class="iframe iframe-big" src="blank"></iframe>
 </div>
 </div>
 </div>
@@ -138,28 +138,6 @@ Are you sure?
 </div>
 <!-- /.modal -->
 </div>
-
-
-<style type="text/css">
-.select-options{
-	height:200px !important;
-}
-
-.modal-content iframe{
-	width:100%;
-	height:750px;
-}
-
-#modal-edit .modal-dialog {
-    width: 95%;
-}
-
-#modal-edit .modal-body {
-    /* 100% = dialog height, 120px = header + footer */
-    max-height: calc(100% - 60px);
-    overflow-y: scroll;
-}
-</style>
 
 <script type="text/javascript">
 //init filters
@@ -247,45 +225,11 @@ $("#persons-select").change(function(){
 	}
 });
 
-//events for table rows
-function tableClickEvents(){
-	//clickable rows for access tables
-	$("#access-table tr td:nth-child(n+2)").click(function(){
-		$(this).parent().find("input[type=checkbox]").click();
-	})
-
-	//unclick All checkbox on row click
-	$("#access-table tr td input[type=checkbox]").click(function(){
-		if($("#accessesAll").prop("checked")) $("#accessesAll").prop("checked",false);
-	})
-
-	//click All event
-	$("#accessesAll").click(function(){
-		if($(this).prop("checked")) {
-			$("#access-table td input[type=checkbox]").prop("checked",true);
-			$("#access-del").prop("disabled",false);
-			if($('#access-table tr td input[type=checkbox]:checked').length == 1) $("#access-edit").prop("disabled",false);
-		} else {
-			$("#access-table td input[type=checkbox]").prop("checked",false);
-			//no rows selected > disable both
-			$("#access-edit,#access-del").prop("disabled",true);
-		}
-	})
-	
-	//edit / delete  button toggle
-	$('#access-table tr td input:checkbox').change(function(){
-		if($('#access-table tr td input[type=checkbox]:checked').length > 0) {
-			//if at least 1 row selected > enable delete
-			$("#access-del").prop("disabled",false);
-			//enable edit only if 1 row is selected
-			if($('#access-table tr td input[type=checkbox]:checked').length > 1) $("#access-edit").prop("disabled",true);
-			else $("#access-edit").prop("disabled",false);
-		} else {
-			//no rows selected > disable both
-			$("#access-edit,#access-del").prop("disabled",true);
-		}
-	});
-}
+//Add to all button > open iframe modal
+$("#persons-select-all").click(function(){
+	var orgId= $("#organizations-select").val();
+	$("#modal-edit").find('iframe').prop('src','access-edit-person?personid=all&orgid='+orgId);
+});
 
 //Add button > open iframe modal
 $("#access-new").click(function(){
@@ -334,13 +278,6 @@ $("#access-delete-form").submit(function(){
 	}
 	return false;
 });
-
-//Add button > open iframe modal
-$("#access-new-all").click(function(){
-	var orgId= $("#organizations-select").val();
-	$("#modal-edit").find('iframe').prop('src','access-edit-person?personid=all&orgid='+orgId);
-});
-
 </script>
 
 </body>

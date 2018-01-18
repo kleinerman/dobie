@@ -5,8 +5,8 @@ $include_extra_js=array("clockpicker","datepicker");
 
 //get access ID or create mode
 $id = (isset($_GET["id"]) and is_numeric($_GET["id"])) ? $_GET["id"] : "0";
-$personid = (isset($_GET["personid"]) and $_GET["personid"]!="") ? $_GET["personid"] : "0";
-$orgid = (isset($_GET["orgid"]) and is_numeric($_GET["orgid"])) ? $_GET["orgid"] : "0";
+$doorid = (isset($_GET["doorid"]) and $_GET["doorid"]!="") ? $_GET["doorid"] : "0";
+$zoneid = (isset($_GET["zoneid"]) and is_numeric($_GET["zoneid"])) ? $_GET["zoneid"] : "0";
 
 include("header.php");
 ?>
@@ -27,31 +27,26 @@ include("header.php");
 <div class="col-lg-3">
 
 <div class="select-container">
-<form action="javascript:void(0)">
-<div class="select-container-title">Zone</div>
+<div class="select-container-title">Organizations</div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="zones-select">
-<select id="zones-select" class="select-options select-options-small form-control" name="zones-select" size="2"></select>
+<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select">
+<select id="organizations-select" class="select-options select-options-small form-control" name="organizations-select" size="2"></select>
 </div>
-<div class="select-container-footer">
-&nbsp;
-</div>
-</form>
 </div>
 
-<div class="select-container" id="select-container-doors" style="display:none">
-<form action="javascript:void(0)">
-<div class="select-container-title">Doors</div>
+<br><br>
+
+<div class="select-container" id="select-container-persons" style="display:none">
+<div class="select-container-title">Person</div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="doors-select">
-<select id="doors-select" class="select-options select-options-small form-control" name="doors-select" size="2" onchange="updateButtons(this.id)"></select>
+<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="person-select">
+<select id="persons-select" class="select-options select-options-small form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
 <div class="select-container-footer">
 <div class="left">
-<button id="doors-select-all" class="btn btn-success" type="button">Add to all...</button>
+<button id="persons-select-all" class="btn btn-success" type="button">Add to all...</button>
 </div>
 </div>
-</form>
 </div>
 
 </div>
@@ -179,37 +174,37 @@ Expiration Date: <label><input type="radio" name="expiration" value="0" checked>
 setFilterAction();
 setFilterActionTable();
 
-var zoneId;
+var organizationId;
 
 //populate select list
-populateList("zones-select","zones");
+populateList("organizations-select","organizations");
 
-$("#zones-select").change(function(){
-	zoneId=$("#zones-select").val();
-	if(!isNaN(zoneId) && zoneId!="undefined"){
+$("#organizations-select").change(function(){
+	organizationId=$("#organizations-select").val();
+	if(!isNaN(organizationId) && organizationId!="undefined"){
 		//populate list
-		populateList("doors-select","doors",zoneId);
+		populateList("persons-select","persons",organizationId);
 		//show list
-		$("#select-container-doors").fadeIn();
+		$("#select-container-persons").fadeIn();
 		//hide schedule
 		$("#schedule-container").hide();
 	}
 });
 
-$("#doors-select").change(function(){
-	//enable all doors
-	doorAll=0;
+$("#persons-select").change(function(){
+	//enable all persons
+	personAll=0;
 	//show schedule
 	$("#schedule-container").fadeIn();
 });
 
-$("#doors-select-all").click(function(){
+$("#persons-select-all").click(function(){
 	//unselect values if existent
-	if($("#doors-select option:selected").length>0) $("#doors-select option:selected").prop("selected", false);
+	if($("#persons-select option:selected").length>0) $("#persons-select option:selected").prop("selected", false);
 	//show schedule
 	$("#schedule-container").fadeIn();
-	//enable all doors
-	doorAll=1;
+	//enable all persons
+	personAll=1;
 });
 
 //expiration date toggle
@@ -236,19 +231,19 @@ $(".dayrow").hide();
 				
 //fetch values if set
 var accessId=<?=$id?>;
-var personId='<?=$personid?>';
-var orgId=<?=$orgid?>;
-if(personId!="" && personId!="all") personId = parseInt(personId);
+var doorId='<?=$doorid?>';
+var zoneId=<?=$zoneid?>;
+if(doorId!="" && doorId!="all") doorId = parseInt(doorId);
 //init array for edit access values
 var values;
-var doorAll=0;
+var personAll=0;
 
 //populate form if edit or create
 if(!accessId){
 	//if create
-	//populate header with person name
-	if(personId!="all") $("#page-header").text("New access for " + parent.$("#persons-select option:selected").text());
-	else $("#page-header").text("New access for " + parent.$("#organizations-select option:selected").text());
+	//populate header with door name
+	if(doorId!="all") $("#page-header").text("New access for " + parent.$("#doors-select option:selected").text());
+	else $("#page-header").text("New access for " + parent.$("#zones-select option:selected").text());
 } else {
 	//if edit
 	//fetch access data
@@ -262,7 +257,7 @@ if(!accessId){
 			values = resp[1];
 			//console.log(values);
 			//populate header as Edit Access for Door/Person
-			$("#page-header").text("Editing "+ values.personName + " -> " + values.doorName);
+			$("#page-header").text("Editing "+ values.doorName + " -> " + values.personName);
 			//mark checkboxes according to days
 			if(values.allWeek){
 				//check allweek box > is checked by default
@@ -340,9 +335,9 @@ $("#access-edit-form").submit(function(){
 	// check if create or edit
 	if(!accessId){
 		//create
-		if(!doorAll) accessRec.doorId = parseInt($("#doors-select").val());
-		else accessRec.zoneId = parseInt($("#zones-select").val());
-		accessRec.personId = personId;
+		if(!personAll) accessRec.personId = parseInt($("#persons-select").val());
+		else accessRec.orgId = parseInt($("#organizations-select").val());
+		accessRec.doorId = doorId;
 		// get allWeek
 		var allWeek_check = $("#allWeek_check").prop("checked");
 		if(allWeek_check){
@@ -355,19 +350,19 @@ $("#access-edit-form").submit(function(){
 			accessRec.iSide = (way%2);
 			accessRec.oSide = Math.floor(way/2);
 
-			//check if add access to all persons
-			if(accessRec.personId=="all"){
-				//all persons
-				//if all doors > add access to organization for a zone
-				if(doorAll) var datastring = "action=add_access_allweek_organization_zone&zoneid=" + accessRec.zoneId+ "&orgid=" + orgId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
-				//else > add access to organizations for a single door
-				else var datastring = "action=add_access_allweek_organization&doorid=" + accessRec.doorId+ "&orgid=" + orgId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+			//check if add access to all doors
+			if(accessRec.doorId=="all"){
+				//all doors
+				//if all person > add access to zone for an organization
+				if(personAll) var datastring = "action=add_access_allweek_organization_zone&zoneid=" + zoneId + "&orgid=" + accessRec.orgId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+				//else > add access to zones for a single person
+				else var datastring = "action=add_access_allweek_zone&personid=" + accessRec.personId + "&zoneid=" + zoneId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
 			} else {
-				//single person
-				//if all doors > add access to a single person for a zone
-				if(doorAll) var datastring = "action=add_access_allweek_zone&zoneid=" + accessRec.zoneId+"&personid=" + accessRec.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
-				//else > add access to a single person for a single door
-				else var datastring = "action=add_access_allweek&doorid=" + accessRec.doorId+"&personid=" + accessRec.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+				//single door
+				//if all persons > add access to a single door for an organization
+				if(personAll) var datastring = "action=add_access_allweek_organization&orgid=" + accessRec.orgId + "&doorid=" + accessRec.doorId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+				//else > add access to a single door for a single person
+				else var datastring = "action=add_access_allweek&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
 			}
 
 			$.ajax({
@@ -378,11 +373,11 @@ $("#access-edit-form").submit(function(){
 					if(resp[0]=='1'){
 						//populate access table
 						//if all, hide accesses table
-						if(accessRec.personId=="all") {
+						if(accessRec.doorId=="all") {
 							parent.$("#accesses-table-container").hide();
-							//unselect person if any
-							parent.$("#persons-select option:selected").prop("selected", false);
-						} else parent.populateTable("access-table",accessRec.personId);
+							//unselect door if any
+							parent.$("#doors-select option:selected").prop("selected", false);
+						} else parent.populateTable("access-table",accessRec.doorId);
 						//close modal
 						parent.$("#modal-edit").modal("hide");
 					} else {
@@ -395,6 +390,7 @@ $("#access-edit-form").submit(function(){
 					alert("Operation failed, please try again");
 				}
 			});
+
 		} else {
 			//is liAccesses
 			accessRec.allWeek=0;
@@ -411,18 +407,18 @@ $("#access-edit-form").submit(function(){
 					accessRec.iSide= (way%2);
 					accessRec.oSide= Math.floor(way/2);
 
-					//check if add access to all persons
-					if(accessRec.personId=="all"){
-						//all persons
-						//if all doors > add liaccess to organization for a zone
-						if(doorAll) var datastring = "action=add_access_liaccess_organization_zone&zoneid=" + accessRec.zoneId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
-						//else > add liaccess to organizations for a single door
-						else var datastring = "action=add_access_liaccess_organization&doorid=" + accessRec.doorId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+					//check if add access to all doors
+					if(accessRec.doorId=="all"){
+						//all doors
+						//if all persons > add liaccess to zone for an organization
+						if(personAll) var datastring = "action=add_access_liaccess_organization_zone&zoneid=" + zoneId +"&orgid=" + accessRec.orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+						//else > add liaccess to zones for a single person
+						else var datastring = "action=add_access_liaccess_zone&personid=" + accessRec.personId +"&zoneid=" + zoneId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
 					} else {
-						//single person
-						//if all doors > add liaccess to a single person for a zone
-						if(doorAll) var datastring = "action=add_access_liaccess_zone&zoneid=" + accessRec.zoneId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
-						//else > add liaccess to a single person for a single door
+						//single door
+						//if all persons > add liaccess to a single door for an organization
+						if(personAll) var datastring = "action=add_access_liaccess_organization&orgid=" + accessRec.orgId +"&doorid=" + accessRec.doorId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+						//else > add liaccess to a single door for a single person
 						else var datastring = "action=add_access_liaccess&doorid=" + accessRec.doorId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
 					}
 					$.ajax({
@@ -441,11 +437,11 @@ $("#access-edit-form").submit(function(){
 			if(!error){
 				//populate access table
 				//if all, hide accesses table
-				if(accessRec.personId=="all") {
+				if(accessRec.doorId=="all") {
 					parent.$("#accesses-table-container").hide();
-					//unselect person if any
-					parent.$("#persons-select option:selected").prop("selected", false);
-				} else parent.populateTable("access-table",accessRec.personId);
+					//unselect door if any
+					parent.$("#doors-select option:selected").prop("selected", false);
+				} else parent.populateTable("access-table",accessRec.doorId);
 				//close modal
 				parent.$("#modal-edit").modal("hide");
 			} else {
@@ -477,7 +473,7 @@ $("#access-edit-form").submit(function(){
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate access table
-						parent.populateTable("access-table",values.personId);
+						parent.populateTable("access-table",values.doorId);
 						//close modal
 						parent.$("#modal-edit").modal("hide");
 					} else {
@@ -519,7 +515,7 @@ $("#access-edit-form").submit(function(){
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate access table
-						parent.populateTable("access-table",accessRec.personId);
+						parent.populateTable("access-table",accessRec.doorId);
 						//close modal
 						parent.$("#modal-edit").modal("hide");
 					} else {

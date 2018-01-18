@@ -6,7 +6,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Access - Person -> Door</h1>
+<h1 class="page-header">Access - Door -> Person</h1>
 </div>
 </div>
 
@@ -20,21 +20,31 @@ include("header.php");
 <div class="col-lg-3">
 
 <div class="select-container">
-<div class="select-container-title">Organizations</div>
+<form action="javascript:void(0)">
+<div class="select-container-title">Zone</div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select">
-<select id="organizations-select" class="select-options form-control" name="organizations-select" size="2"></select>
+<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="zones-select">
+<select id="zones-select" class="select-options select-options-small form-control" name="zones-select" size="2"></select>
 </div>
+<div class="select-container-footer">
+&nbsp;
+</div>
+</form>
 </div>
 
-<br><br>
-
-<div class="select-container" id="select-container-persons" style="display:none">
-<div class="select-container-title">Person</div>
+<div class="select-container" id="select-container-doors" style="display:none">
+<form action="javascript:void(0)">
+<div class="select-container-title">Doors</div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="person-select">
-<select id="persons-select" class="select-options form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
+<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="doors-select">
+<select id="doors-select" class="select-options select-options-small form-control" name="doors-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
+<div class="select-container-footer">
+<div class="left">
+<button id="doors-select-all" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit">Add to all...</button>
+</div>
+</div>
+</form>
 </div>
 
 </div>
@@ -78,7 +88,7 @@ include("footer.php");
 <h4 class="modal-title" id="modal-add-label">&nbsp;</h4>
 </div>
 <div class="modal-body center">
-<iframe class="iframe" src="blank"></iframe>
+<iframe class="iframe iframe-big" src="blank"></iframe>
 </div>
 </div>
 </div>
@@ -86,7 +96,7 @@ include("footer.php");
 </div>
 
 <!-- edit modal -->
-<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade modal-full" id="modal-edit" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-header">
@@ -94,7 +104,7 @@ include("footer.php");
 <h4 class="modal-title" id="modal-edit-label">&nbsp;</h4>
 </div>
 <div class="modal-body center">
-<iframe class="iframe" src="blank"></iframe>
+<iframe class="iframe iframe-big" src="blank"></iframe>
 </div>
 </div>
 </div>
@@ -134,50 +144,28 @@ Are you sure?
 <!-- /.modal -->
 </div>
 
-
-<style type="text/css">
-.select-options{
-	height:200px !important;
-}
-
-.modal-content iframe{
-	width:100%;
-	height:750px;
-}
-
-#modal-edit .modal-dialog {
-    width: 95%;
-}
-
-#modal-edit .modal-body {
-    /* 100% = dialog height, 120px = header + footer */
-    max-height: calc(100% - 60px);
-    overflow-y: scroll;
-}
-</style>
-
 <script type="text/javascript">
 //init filters
 setFilterAction();
 
-var organizationId;
+var zoneId;
 
 //populate select list
-populateList("organizations-select","organizations");
+populateList("zones-select","zones");
 
 //populate accesses table
-function populateTable(tableId,personId){
+function populateTable(tableId,doorId){
 	//clear table
 	$('#'+tableId).empty();
 	$.ajax({
 		type: "POST",
 		url: "process",
-		data: "action=get_person_accesses&id=" + personId,
+		data: "action=get_door_accesses&id=" + doorId,
 		success: function(resp){
 			if(resp[0]=='1'){
 				var values = resp[1];
 				//set table headers
-				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"accessesAll\" name=\"accessesAll\" value=\"1\"></th><th>Door</th><th>Zone</th><th class=\"center\">All Week</th></tr>");
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"accessesAll\" name=\"accessesAll\" value=\"1\"></th><th>Person</th><th>Organization</th><th class=\"center\">All Week</th></tr>");
 				//populate fields with rec info
 				for(i=0;i<values.length;i++){
 					//set row class
@@ -188,7 +176,8 @@ function populateTable(tableId,personId){
 					//show row
 					if(values[i].allWeek=="1") allWeekStr="<span class=\"fa fa-check\"></span>";
 					else allWeekStr = "";
-					$('#'+tableId).append("<tr"+itemClass+"><td><input type=\"checkbox\" name=\"accesses[]\" value="+values[i].id+"></td><td>"+values[i].doorName+"</td><td>"+values[i].zoneName+"</td><td class=\"center\">"+allWeekStr+"</td></tr>");
+					if(values[i].resStateId==3) $('#'+tableId).append("<tr"+itemClass+"><td><input type=\"checkbox\" name=\"accesses[]\" value="+values[i].id+"></td><td>"+values[i].personName+"</td><td>"+values[i].organizationName+"</td><td class=\"center\">"+allWeekStr+"</td></tr>");
+					else $('#'+tableId).append("<tr"+itemClass+"><td></td><td>"+values[i].personName+"</td><td>"+values[i].organizationName+"</td><td class=\"center\">"+allWeekStr+"</td></tr>");
 				}
 				//add trigger events for rows
 				tableClickEvents();
@@ -215,21 +204,23 @@ $(".data-filter-table").keyup(function(){
 	})
 });
 
-$("#organizations-select").change(function(){
-	organizationId=$("#organizations-select").val();
-	if(!isNaN(organizationId) && organizationId!="undefined"){
+$("#zones-select").change(function(){
+	zoneId=$("#zones-select").val();
+	if(!isNaN(zoneId) && zoneId!="undefined"){
 		//populate list
-		populateList("persons-select","persons",organizationId);
+		populateList("doors-select","doors",zoneId);
+		//hide accesses table
+		$("#accesses-table-container").hide();
 		//show list
-		$("#select-container-persons").fadeIn();
+		$("#select-container-doors").fadeIn();
 	}
 });
 
-$("#persons-select").change(function(){
-	personId=$("#persons-select").val();
-	if(!isNaN(personId) && personId!="undefined"){
+$("#doors-select").change(function(){
+	doorId=$("#doors-select").val();
+	if(!isNaN(doorId) && doorId!="undefined"){
 		//populate access list
-		populateTable("access-table",personId);
+		populateTable("access-table",doorId);
 		//show list
 		$("#accesses-table-container").fadeIn();
 		//show buttons
@@ -239,56 +230,22 @@ $("#persons-select").change(function(){
 	}
 });
 
-//events for table rows
-function tableClickEvents(){
-	//clickable rows for access tables
-	$("#access-table tr td:nth-child(n+2)").click(function(){
-		$(this).parent().find("input[type=checkbox]").click();
-	})
-
-	//unclick All checkbox on row click
-	$("#access-table tr td input[type=checkbox]").click(function(){
-		if($("#accessesAll").prop("checked")) $("#accessesAll").prop("checked",false);
-	})
-
-	//click All event
-	$("#accessesAll").click(function(){
-		if($(this).prop("checked")) {
-			$("#access-table td input[type=checkbox]").prop("checked",true);
-			$("#access-del").prop("disabled",false);
-			if($('#access-table tr td input[type=checkbox]:checked').length == 1) $("#access-edit").prop("disabled",false);
-		} else {
-			$("#access-table td input[type=checkbox]").prop("checked",false);
-			//no rows selected > disable both
-			$("#access-edit,#access-del").prop("disabled",true);
-		}
-	})
-	
-	//edit / delete  button toggle
-	$('#access-table tr td input:checkbox').change(function(){
-		if($('#access-table tr td input[type=checkbox]:checked').length > 0) {
-			//if at least 1 row selected > enable delete
-			$("#access-del").prop("disabled",false);
-			//enable edit only if 1 row is selected
-			if($('#access-table tr td input[type=checkbox]:checked').length > 1) $("#access-edit").prop("disabled",true);
-			else $("#access-edit").prop("disabled",false);
-		} else {
-			//no rows selected > disable both
-			$("#access-edit,#access-del").prop("disabled",true);
-		}
-	});
-}
+//Add to all button > open iframe modal
+$("#doors-select-all").click(function(){
+	var zoneId= $("#zones-select").val();
+	$("#modal-edit").find('iframe').prop('src','access-edit-door?doorid=all&zoneid='+zoneId);
+});
 
 //Add button > open iframe modal
 $("#access-new").click(function(){
-	var personId= $("#persons-select").val();
-	$("#modal-edit").find('iframe').prop('src','access-edit-person?personid='+personId);
+	var doorId= $("#doors-select").val();
+	$("#modal-edit").find('iframe').prop('src','access-edit-door?doorid='+doorId);
 });
 
 //Edit button > open iframe modal
 $("#access-edit").click(function(){
 	var accessId= $("input[name='accesses[]']:checked").val();
-	$("#modal-edit").find('iframe').prop('src','access-edit-person?id='+accessId);
+	$("#modal-edit").find('iframe').prop('src','access-edit-door?id='+accessId);
 });
 
 //Delete button action
@@ -306,7 +263,7 @@ $("#access-delete-form").submit(function(){
 					//close modal
 					$("#modal-delete").modal("hide");
 					//repopulate table
-					populateTable("access-table",$("#persons-select").val());
+					populateTable("access-table",$("#doors-select").val());
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -326,6 +283,7 @@ $("#access-delete-form").submit(function(){
 	}
 	return false;
 });
+
 </script>
 
 </body>
