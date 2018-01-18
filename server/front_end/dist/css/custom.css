@@ -214,3 +214,51 @@ label,input[type=checkbox],input[type=radio]{
     border: 1px solid #ddd;
     padding: 5px;
 }
+
+.select-options-small{
+	height:200px !important;
+}
+
+.modal-content .iframe-big{
+	width:100%;
+	height:750px;
+}
+
+.modal-full .modal-dialog {
+    width: 95%;
+}
+
+.modal-full .modal-body {
+    /* 100% = dialog height, 120px = header + footer */
+    max-height: calc(100% - 60px);
+    overflow-y: scroll;
+}
+
+.clockpicker{
+	display:inline-table;
+	width:100px;
+}
+
+#expiration_date{
+	display:none;
+	width: 100px;
+}
+
+#schedule-table{
+	border: 1px solid #ccc;
+	width: 100%;
+}
+
+.ui-datepicker{
+	z-index:10 !important;
+}
+
+input[type='number']{
+    -moz-appearance:textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin:0px;
+}

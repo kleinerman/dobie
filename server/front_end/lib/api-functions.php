@@ -122,8 +122,9 @@ function add_person($user,$pass,$orgid,$name,$idnum,$cardnum){
 	$payload_obj->cardNumber= $cardnum;
 	$payload_obj->visitedOrgId= null;
 	$response=send_request($config->api_fullpath."person",$user,$pass,"post",json_encode($payload_obj));
-	if($response->response_status != "201") return false;
-	else return $response->data;
+	//if($response->response_status != "201") return false;
+	//else return $response->data;
+	return $response;
 }
 
 function set_person($user,$pass,$id,$orgid,$name,$idnum,$cardnum){
@@ -156,20 +157,19 @@ function get_person_accesses($user,$pass,$id){
 	else return $response->data;
 }
 
+function get_door_accesses($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."door/$id/access",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
 function get_access($user,$pass,$id){
 	global $config;
 	$response=send_request($config->api_fullpath."access/$id",$user,$pass);
 	if($response->response_status != "200") return false;
 	else return $response->data;
 }
-
-//not working
-// function get_door_accesses($user,$pass,$id){
-// 	global $config;
-// 	$response=send_request($config->api_fullpath."door/$id/access",$user,$pass);
-// 	if($response->response_status != "200") return false;
-// 	else return $response->data;
-// }
 
 function get_door($user,$pass,$id){
 	global $config;
@@ -312,7 +312,6 @@ function edit_access_liaccess($user,$pass,$doorid,$personid,$id,$days_payload,$e
 		//build array key,value with arr[weekday] = obj;
 		$access_current=array();
 		foreach($response->liAccesses as $obj) $access_current[$obj->weekDay]=$obj;
-//var_dump($access_current);die();
 
 		//explode and build the sent liaccesses for each weekday
 		$days_payload_arr=explode("|",$days_payload);
@@ -322,24 +321,17 @@ function edit_access_liaccess($user,$pass,$doorid,$personid,$id,$days_payload,$e
 		//build array key,value with arr[weekday] = obj;
 		$access_sent=array();
 		foreach($days_payload_arr_objs as $obj) $access_sent[$obj->weekDay]=$obj;
-//var_dump($access_sent);die();
+
 		//foreach sent liaccess weekday
 		foreach($access_sent as $k=>$v){
 			if(!isset($access_current[$k])){
 				//if not in current > ADD
-				//echo "<br>ADD $k";
-				//echo "<pre>";
-				//echo json_encode($v);
 				$response=send_request($config->api_fullpath."liaccess",$user,$pass,"post",json_encode($v));
 			} else {
 				//else if in current >
 				//check each value to know if its different
 				if(($v->iSide!=$access_current[$k]->iSide) or ($v->oSide!=$access_current[$k]->oSide) or ($v->startTime!=$access_current[$k]->startTime) or ($v->endTime!=$access_current[$k]->endTime)){
 					//if different > EDIT
-					//echo "<br>EDIT $k";
-					//send UPDATE to /liaccess/$access_current[$k]->id
-					//echo "<pre>";
-					//echo json_encode($v);
 					$response=send_request($config->api_fullpath."liaccess/".$access_current[$k]->id,$user,$pass,"put",json_encode($v));
 				} //else SKIP > no edits needed
 			}
@@ -348,10 +340,6 @@ function edit_access_liaccess($user,$pass,$doorid,$personid,$id,$days_payload,$e
 		foreach($access_current as $k=>$v){
 			//if not in sent > DELETE
 			if(!isset($access_sent[$k])){
-				//echo "<br>DELETE $k";
-				//echo "<pre>";
-				//echo json_encode($v);
-				//send DELETE to /liaccess/$v->id
 				delete_access($user,$pass,$v->id,0);
 			} //else SKIP > leave existing days
 		}
@@ -388,7 +376,9 @@ function add_access_allweek_organization($user,$pass,$doorid,$orgid,$iside,$osid
 		//for each person, add
 		foreach($persons_recs as $person_rec){
 			$payload_obj->personId = $person_rec->id;
-			$response=send_request($config->api_fullpath."access",$user,$pass,"post",json_encode($payload_obj));
+			if($person_rec->resStateId==3){
+				$response=send_request($config->api_fullpath."access",$user,$pass,"post",json_encode($payload_obj));
+			}
 		}
 	}
 }
@@ -411,7 +401,126 @@ function add_access_liaccess_organization($user,$pass,$doorid,$orgid,$weekday,$i
 		//for each person, add
 		foreach($persons_recs as $person_rec){
 			$payload_obj->personId = $person_rec->id;
-			$response=send_request($config->api_fullpath."liaccess",$user,$pass,"post",json_encode($payload_obj));
+			if($person_rec->resStateId==3){
+				$response=send_request($config->api_fullpath."liaccess",$user,$pass,"post",json_encode($payload_obj));
+			}
+		}
+	}
+}
+
+function add_access_allweek_zone($user,$pass,$personid,$zoneid,$iside,$oside,$starttime,$endtime,$expiredate){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->personId = $personid;
+	$payload_obj->iSide = $iside;
+	$payload_obj->oSide = $oside;
+	$payload_obj->startTime = $starttime;
+	$payload_obj->endTime = $endtime;
+	$payload_obj->expireDate = $expiredate;
+	
+	//get all doors in zone
+	$doors_recs = get_doors($user,$pass,$zoneid);
+
+	if($doors_recs){
+		//for each door, add
+		foreach($doors_recs as $door_rec){
+			$payload_obj->doorId = $door_rec->id;
+			if($door_rec->resStateId==3){
+				$response=send_request($config->api_fullpath."access",$user,$pass,"post",json_encode($payload_obj));
+			}
+		}
+	}
+}
+
+function add_access_liaccess_zone($user,$pass,$personid,$zoneid,$weekday,$iside,$oside,$starttime,$endtime,$expiredate){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->personId = $personid;
+	$payload_obj->weekDay = $weekday;
+	$payload_obj->iSide = $iside;
+	$payload_obj->oSide = $oside;
+	$payload_obj->startTime = $starttime;
+	$payload_obj->endTime = $endtime;
+	$payload_obj->expireDate = $expiredate;
+
+	//get all doors in zone
+	$doors_recs = get_doors($user,$pass,$zoneid);
+
+	if($doors_recs){
+		//for each door, add
+		foreach($doors_recs as $door_rec){
+			$payload_obj->doorId = $door_rec->id;
+			if($door_rec->resStateId==3){
+				$response=send_request($config->api_fullpath."liaccess",$user,$pass,"post",json_encode($payload_obj));
+			}
+		}
+	}
+}
+
+function add_access_allweek_organization_zone($user,$pass,$zoneid,$orgid,$iside,$oside,$starttime,$endtime,$expiredate){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->iSide = $iside;
+	$payload_obj->oSide = $oside;
+	$payload_obj->startTime = $starttime;
+	$payload_obj->endTime = $endtime;
+	$payload_obj->expireDate = $expiredate;
+	
+	//get all persons in organization
+	$persons_recs = get_persons($user,$pass,$orgid);
+
+	if($persons_recs){
+		//get all doors in zone
+		$doors_recs = get_doors($user,$pass,$zoneid);
+		if($doors_recs){
+			//for each person
+			foreach($persons_recs as $person_rec){
+				$payload_obj->personId = $person_rec->id;
+				if($person_rec->resStateId==3){
+					//and each door, add
+					foreach($doors_recs as $door_rec){
+						$payload_obj->doorId = $door_rec->id;
+						if($door_rec->resStateId==3){
+							$response=send_request($config->api_fullpath."access",$user,$pass,"post",json_encode($payload_obj));
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+function add_access_liaccess_organization_zone($user,$pass,$zoneid,$orgid,$weekday,$iside,$oside,$starttime,$endtime,$expiredate){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->weekDay = $weekday;
+	$payload_obj->iSide = $iside;
+	$payload_obj->oSide = $oside;
+	$payload_obj->startTime = $starttime;
+	$payload_obj->endTime = $endtime;
+	$payload_obj->expireDate = $expiredate;
+	
+	//get all persons in organization
+	$persons_recs = get_persons($user,$pass,$orgid);
+
+	if($persons_recs){
+		//get all doors in zone
+		$doors_recs = get_doors($user,$pass,$zoneid);
+		if($doors_recs){
+			//for each person
+			foreach($persons_recs as $person_rec){
+				$payload_obj->personId = $person_rec->id;
+				if($person_rec->resStateId==3){
+					//and each door, add
+					foreach($doors_recs as $door_rec){
+						$payload_obj->doorId = $door_rec->id;
+						if($door_rec->resStateId==3){
+							$response=send_request($config->api_fullpath."liaccess",$user,$pass,"post",json_encode($payload_obj));
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -420,11 +529,11 @@ if($DEBUG){
 	//$res=get_organizations("admin","admin");
 	//$res=do_auth("admin","admin");
 	//$res=get_organizations("admin","admin",2);
-
 	//$res=get_person_accesses("admin","admin",3);
-	$res=get_access("admin","admin",44);
-//	$res=get_door_accesses("admin","admin",3);
-	//$res=get_zones("admin","admin");
+//	$res=get_access("admin","admin",44);
+	//$res=add_person("admin","admin","7","Ricky Martin","",123132);
+	$res=get_door_accesses("admin","admin",3);
+//	$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
 //	$res=get_doors("admin","admin",1);
 	//$res=add_access_allweek("admin","admin",3,1,1,1,"08:00:00","18:00:00","9999-12-31 00:00");
