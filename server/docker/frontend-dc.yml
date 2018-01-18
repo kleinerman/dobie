@@ -15,7 +15,7 @@ services:
       - php
 
   php:
-    image: php:7-fpm-alpine
+    image: php:fpm
     container_name: php
     volumes:
       - ../front_end:/site

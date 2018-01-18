@@ -89,12 +89,6 @@ class CrudReSndr(genmngr.GenericMngr):
                 self.checkExit()
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
-                    #"cardNumber" parameter is not present in access dictionary, but should be sent
-                    #when sending a CRUD access to controller.
-                    #Get the person parameters as a dictionary.
-                    person = self.dataBase.getPerson(access['personId'])
-                    #Adding "cardNumber" to access dictionary.
-                    access['cardNumber'] = person['cardNumber']
                     self.ctrllerMsger.addAccess(ctrllerMac, access)
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
@@ -102,6 +96,7 @@ class CrudReSndr(genmngr.GenericMngr):
                     access.pop('doorId')
                     access.pop('personId')
                     access.pop('allWeek')
+                    access.pop('cardNumber')
                     self.ctrllerMsger.updAccess(ctrllerMac, access)
 
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_DELETE):
@@ -110,19 +105,14 @@ class CrudReSndr(genmngr.GenericMngr):
 
 
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD):
-                    #"cardNumber" parameter is not present in liAccess dictionary, but should be sent
-                    #when sending a CRUD liAccess to controller.
-                    #Get the person parameters as a dictionary.
-                    person = self.dataBase.getPerson(liAccess['personId'])
-                    #Adding "cardNumber" to liAccess dictionary.
-                    liAccess['cardNumber'] = person['cardNumber']
                     self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
 
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_UPDATE):
                     #The following parameters should not be sent when updating an access.
                     liAccess.pop('accessId')
-                    liAccess.pop('personId')
                     liAccess.pop('doorId')
+                    liAccess.pop('personId')
+                    liAccess.pop('cardNumber')
                     self.ctrllerMsger.updLiAccess(ctrllerMac, liAccess)
 
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_DELETE):
