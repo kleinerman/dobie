@@ -2673,6 +2673,20 @@ class DataBase(object):
                 self.connection.commit()
                 row = localCursorTwo.fetchone()
 
+                if not row:
+                    #If there are entries in "LimitedAccess" table which doesn't have its corresponding entry in "Access" 
+                    #table should be deleted to avoid "crudresender" thread continue trying to resend them.
+                    logMsg = 'Removing LimitedAccess entries to solve the inconsistency between Access and LimitedAccess'
+                    self.logger.warning(logMsg)
+                    sql = ("DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}"
+                           "".format(liAccess['doorId'], liAccess['personId'])
+                          )
+                    localCursorTwo.execute(sql)
+                    self.connection.commit()
+                    self.execute("UNLOCK TABLES")
+                    raise AccessError('Inconsistency between Access and LimitedAccess')
+
+
                 self.execute("UNLOCK TABLES")
 
                 accessId = row['id']
@@ -2712,9 +2726,7 @@ class DataBase(object):
             self.execute("UNLOCK TABLES")
 
         except TypeError:
-            #If the tables were locked when this exception was raised, they will be unlocked
             self.execute("UNLOCK TABLES")
-            self.logger.debug('Error fetching expireDate.')
             raise AccessError('Error getting accesses of not committed controllers')
 
         except pymysql.err.InternalError as internalError:
