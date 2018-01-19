@@ -74,68 +74,76 @@ class CrudReSndr(genmngr.GenericMngr):
                 #Blocking until Network thread sends an msg or EXIT_CHECK_TIME expires 
                 ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
-                for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_ADD):
-                    door.pop('name')
-                    door.pop('controllerId')
-                    door.pop('zoneId')
-                    self.ctrllerMsger.addDoor(ctrllerMac, door)
-                for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_UPDATE):
-                    door.pop('name')
-                    door.pop('controllerId')
-                    door.pop('zoneId')
-                    self.ctrllerMsger.updDoor(ctrllerMac, door)
-                for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_DELETE):
-                    self.ctrllerMsger.delDoor(ctrllerMac, door['id'])
-                self.checkExit()
 
-                for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
-                    self.ctrllerMsger.addAccess(ctrllerMac, access)
-
-                for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
-                    #The following parameters should not be sent when updating an access.
-                    access.pop('doorId')
-                    access.pop('personId')
-                    access.pop('allWeek')
-                    access.pop('cardNumber')
-                    self.ctrllerMsger.updAccess(ctrllerMac, access)
-
-                for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_DELETE):
-                    self.ctrllerMsger.delAccess(ctrllerMac, access['id'])
-                self.checkExit()
+                try:
+                    for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_ADD):
+                        door.pop('name')
+                        door.pop('controllerId')
+                        door.pop('zoneId')
+                        self.ctrllerMsger.addDoor(ctrllerMac, door)
+                    for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_UPDATE):
+                        door.pop('name')
+                        door.pop('controllerId')
+                        door.pop('zoneId')
+                        self.ctrllerMsger.updDoor(ctrllerMac, door)
+                    for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_DELETE):
+                        self.ctrllerMsger.delDoor(ctrllerMac, door['id'])
+                    self.checkExit()
 
 
-                for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD):
-                    self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
-
-                for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_UPDATE):
-                    #The following parameters should not be sent when updating an access.
-                    liAccess.pop('accessId')
-                    liAccess.pop('doorId')
-                    liAccess.pop('personId')
-                    liAccess.pop('cardNumber')
-                    self.ctrllerMsger.updLiAccess(ctrllerMac, liAccess)
-
-                for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_DELETE):
-                    self.ctrllerMsger.delLiAccess(ctrllerMac, liAccess['id'])
-                self.checkExit()
+                    for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
+                        self.ctrllerMsger.addAccess(ctrllerMac, access)
+                    for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
+                        #The following parameters should not be sent when updating an access.
+                        access.pop('doorId')
+                        access.pop('personId')
+                        access.pop('allWeek')
+                        access.pop('cardNumber')
+                        self.ctrllerMsger.updAccess(ctrllerMac, access)
+                    for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_DELETE):
+                        self.ctrllerMsger.delAccess(ctrllerMac, access['id'])
+                    self.checkExit()
 
 
-                #Persons never colud be in state TO_ADD. For this reason,
-                #only TO_UPDATE or TO_DELETE state is retrieved
-                for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE):
-                    person.pop('name')
-                    person.pop('orgId')
-                    person.pop('visitedOrgId')
-                    #"updPerson" method receive a list of MAC addresses to update. Because in this case only one
-                    #controller is being updated, a list with only the MAC address of the controller is created.
-                    self.ctrllerMsger.updPerson([ctrllerMac], person)
-                for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_DELETE):
-                    #"delPerson" method receive a list of MAC addresses to update. Because in this case only one
-                    #controller is being updated, a list with only the MAC address of the controller is created.
-                    self.ctrllerMsger.delPerson([ctrllerMac], person['id'])
-                self.checkExit()
+                    for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD):
+                        self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
+                    for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_UPDATE):
+                        #The following parameters should not be sent when updating an access.
+                        liAccess.pop('accessId')
+                        liAccess.pop('doorId')
+                        liAccess.pop('personId')
+                        liAccess.pop('cardNumber')
+                        self.ctrllerMsger.updLiAccess(ctrllerMac, liAccess)
+                    for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_DELETE):
+                        self.ctrllerMsger.delLiAccess(ctrllerMac, liAccess['id'])
+                    self.checkExit()
 
 
+                    #Persons never colud be in state TO_ADD. For this reason,
+                    #only TO_UPDATE or TO_DELETE state is retrieved
+                    for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE):
+                        person.pop('name')
+                        person.pop('orgId')
+                        person.pop('visitedOrgId')
+                        #"updPerson" method receive a list of MAC addresses to update. Because in this case only one
+                        #controller is being updated, a list with only the MAC address of the controller is created.
+                        self.ctrllerMsger.updPerson([ctrllerMac], person)
+                    for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_DELETE):
+                        #"delPerson" method receive a list of MAC addresses to update. Because in this case only one
+                        #controller is being updated, a list with only the MAC address of the controller is created.
+                        self.ctrllerMsger.delPerson([ctrllerMac], person['id'])
+                    self.checkExit()
+
+
+                except database.DoorError as doorError:
+                    logMsg = 'Error retransmitting uncommitted doors: {}'.format(str(doorError))
+                    self.logger.warning(logMsg)
+                except database.AccessError as accessError:
+                    logMsg = 'Error retransmitting uncommitted accesses: {}'.format(str(accessError))
+                    self.logger.warning(logMsg)
+                except database.PersonError as personError:
+                    logMsg = 'Error retransmitting uncommitted persons: {}'.format(str(personError))
+                    self.logger.warning(logMsg)
 
 
             except queue.Empty:
