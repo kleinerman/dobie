@@ -44,14 +44,11 @@ ob_start('ob_gzhandler');
 <?}?>
 <!-- Custom CSS -->
 <link href="dist/css/sb-admin-2.css" rel="stylesheet" type='text/css'>
-<?if(in_array("datepicker",$include_extra_js)){?>
-<link rel="stylesheet" href="/javascript/datepicker/jquery-ui.css" type='text/css'>
-<?}?>
 <?if(in_array("graphics",$include_extra_js)){?>
 <!-- Morris Charts CSS -->
 <link href="bower_components/morrisjs/morris.css" rel="stylesheet" type='text/css'>
 <?}?>
-<?if(in_array("jqueryui",$include_extra_js)){?>
+<?if(in_array("jqueryui",$include_extra_js) or in_array("datepicker",$include_extra_js)){?>
 <!-- jqueryUI CSS -->
 <link href="dist/css/jquery-ui.css" type="text/css" rel="stylesheet" property='stylesheet'>
 <?}?>
@@ -67,7 +64,7 @@ ob_start('ob_gzhandler');
 <div id="wrapper">
 <?if($islogged){?>
 <!-- Navigation -->
-<nav class="navbar navbar-default navbar-static-top" style="margin-bottom:0px">
+<nav class="navbar navbar-default navbar-static-top">
 <div class="navbar-header">
 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 <span class="sr-only"><?print_text($lang,"Toggle navigation","Cambiar navegación");?></span>

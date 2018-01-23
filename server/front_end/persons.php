@@ -18,10 +18,10 @@ include("header.php");
 <div class="select-container-title">Organizations</div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select">
-<select id="organizations-select" class="select-options form-control" name="organizations-select" size="2" onchange="updateButtons(this.id)"></select>
+<select id="organizations-select" class="select-options form-control" name="organizations-select" size="2"></select>
 </div>
 <div class="select-container-footer">
-<button id="organizations-select-pick" class="btn btn-primary" type="button">Select <span class="fa fa-arrow-right"></span></button>
+&nbsp;
 </div>
 </form>
 </div>
@@ -65,19 +65,19 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2">Name:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-name" name="name" value="" required>
+      <input type="text" class="form-control" id="person-new-name" name="name" value="" required maxlength="64">
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2">Identification Number:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-idnum" name="idnum" value="">
+      <input type="text" class="form-control" id="person-new-idnum" name="idnum" value="" maxlength="64">
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2">Card Number:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-cardnum" name="cardnum" value="">
+      <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646" maxlength="10">
  </div>
 </div>
 
@@ -105,20 +105,20 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2">Name:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-edit-name" name="name" value="" required>
+      <input type="text" class="form-control" id="person-edit-name" name="name" value="" maxlength="64" required>
       <input type="hidden" id="person-edit-id" name="id" value="">
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2">Identification Number:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-edit-idnum" name="idnum" value="">
+      <input type="text" class="form-control" id="person-edit-idnum" name="idnum" value="" maxlength="64">
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2">Card Number:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-edit-cardnum" name="cardnum" value="">
+      <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646" maxlength="10">
  </div>
 </div>
 
@@ -175,7 +175,7 @@ var organizationId;
 //populate select list
 populateList("organizations-select","organizations");
 
-$("#organizations-select-pick").click(function(){
+$("#organizations-select").change(function(){
 	organizationId=$("#organizations-select").val();
 	if(!isNaN(organizationId) && organizationId!="undefined"){
 		//populate list
@@ -288,8 +288,6 @@ $("#person-edit-form").submit(function(){
 		//invalid values sent
 		$('#modal-error .modal-body').text("Invalid values sent");
 		$("#modal-error").modal("show");
-		console.log(personId);
-		console.log(personName);
 	}
 	return false;
 });
