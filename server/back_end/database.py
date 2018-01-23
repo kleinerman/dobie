@@ -2488,6 +2488,36 @@ class DataBase(object):
             sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
             self.execute(sql)
 
+
+            #The following parameters are got when all limited accesses of a 
+            #person in a door are deleted via access endpoint.            
+            sql = ("SELECT allWeek, doorId, personId FROM Access WHERE id = {}"
+                   "".format(accessId)
+                  )
+            self.execute(sql)
+
+            row = self.cursor.fetchone()
+            allWeek = row['allWeek']
+            doorId = row['doorId']
+            personId = row['personId']
+
+            #This can happen when all limited access of a person in a door 
+            #are being deleted via access endpoint.
+            #On this situation is better start marking the Limited Access entries
+            #before marking the Access entries because if an error occurs the 
+            #Access entry is not altered and inconsistency is avoided between 
+            #Access and Limited Access table.
+            if not allWeek:
+
+                sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE doorId = {} "
+                       "AND personId = {}".format(TO_DELETE, doorId, personId)
+                      )
+                self.execute(sql)
+                if self.cursor.rowcount < 1:
+                    self.execute("UNLOCK TABLES")
+                    raise AccessNotFound('Access not found')
+
+
             sql = ("UPDATE Access SET resStateId = {} WHERE id = {}"
                    "".format(TO_DELETE, accessId)
                   )
@@ -2498,6 +2528,11 @@ class DataBase(object):
 
             self.execute("UNLOCK TABLES")
 
+
+        except TypeError:
+            self.execute("UNLOCK TABLES")
+            self.logger.debug('Error getting allWeek, doorId or personId from Access.')
+            raise AccessError('Error marking the Access to be deleted.')
 
         except pymysql.err.IntegrityError as integrityError:
             self.execute("UNLOCK TABLES")
@@ -2744,11 +2779,46 @@ class DataBase(object):
         Receive a dictionary with limited access parametters and save it in DB.
         In addition to creating an entry in the table "LimitedAccess" it also 
         creates an entry in "Access" table with allWeek = False.
+        NOTE: The insertion in LimitedAccess table, is using the "ON DUPLICATE KEY UPDATE"
+        to avoid complaining when adding a limited access with the same person,
+        door and day.
+        On this situation, the limited access will be updated.
+        This was specially necesary when adding multiple limited accesses to a person
+        or a door that already have the same combination (door, person, weekDay).
+        When this didn't work in this way, the limited access never was sent to the 
+        controller, because a database exception was raised, the confirmation never came
+        and the access entry in Access table remains in state TO_ADD or TO_UPDATE.
+        In the past the change of the resState in the access entry also was done before
+        inserting in LimitedAccess table. Now the change is done after. In this way,
+        if an error ocurs during the insertion on LimitedAccess, the Acces table is not modified. 
         '''
 
         try:
             sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
             self.execute(sql)
+
+
+            sql = ("INSERT INTO LimitedAccess(doorId, personId, weekDay, iSide, oSide, startTime, "
+                   "endTime, resStateId) VALUES({}, {}, {}, {}, {}, '{}', '{}', {}) ON DUPLICATE KEY "
+                   "UPDATE iSide = {}, oSide = {}, startTime = '{}', endTime = '{}', resStateId = {}"
+                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['weekDay'],
+                             liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
+                             liAccess['endTime'], TO_ADD, liAccess['iSide'], liAccess['oSide'],
+                             liAccess['startTime'], liAccess['endTime'], TO_ADD)
+                  )
+            self.execute(sql)
+
+            #As it is necessary to return the liAccess ID, we could use "cursor.lastrowid" attribute,
+            #but when all the parametters are the same and nothing is updated, lastrowid returns 0.
+            #For this reason, a SELECT statement should be executed.
+            sql = ("SELECT id FROM LimitedAccess WHERE doorId = {} AND personId = {} AND weekDay = {}"
+                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['weekDay'])
+                  )     
+            self.execute(sql)
+            liAccessId = self.cursor.fetchone()['id']
+
+
+
 
             #Each time an entry in "LimitedAccess" table is created with the same
             #combination (doorId, personId), this method will try to add an entry
@@ -2766,7 +2836,6 @@ class DataBase(object):
                   )
             self.execute(sql)
 
-
             #As it is necessary to return the access ID, we could use "cursor.lastrowid" attribute,
             #but when all the parametters are the same and nothing is updated, lastrowid returns 0.
             #For this reason, a SELECT statement should be executed.
@@ -2775,26 +2844,17 @@ class DataBase(object):
                   )
             self.execute(sql)
             accessId = self.cursor.fetchone()['id']
-            
 
-            sql = ("INSERT INTO LimitedAccess(doorId, personId, weekDay, iSide, oSide, startTime, "
-                   "endTime, resStateId) VALUES({}, {}, {}, {}, {}, '{}', '{}', {})"
-                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['weekDay'],
-                             liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
-                             liAccess['endTime'], TO_ADD)
-                  )
-            self.execute(sql)
-            liAccessId = self.cursor.lastrowid
             self.execute("UNLOCK TABLES")
+
             return accessId, liAccessId
 
 
         #This exception (TypeError) could be raised by the SELECT statement when fetchone()
         #returns None. This should never happen.
         except TypeError:
-            #If the tables were locked when this exception was raised, they will be unlocked
             self.execute("UNLOCK TABLES")
-            self.logger.debug('Error fetching access id.')
+            self.logger.debug('Error fetching access id or limited access id.')
             raise AccessError('Can not add this limited access.')
         except pymysql.err.IntegrityError as integrityError:
             #If the tables were locked when this exception was raised, they will be unlocked
@@ -3001,6 +3061,8 @@ class DataBase(object):
                 raise AccessError('Error committing this limited access.')
 
 
+            #If there is no more limited accesses in a state different than COMMITTED,
+            #the access entry should be changed to COMMITTED.
             sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE doorId = {} AND "
                    "personId = {} AND resStateId != {}"
                    "".format(doorId, personId, COMMITTED)
