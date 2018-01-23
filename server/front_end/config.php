@@ -5,7 +5,7 @@ $config->sitetitle="Dobie";
 $config->sitedesc="Dobie Access Control";
 if(isset($windowtitle)) $config->sitetitle.= " - $windowtitle";
 $config->tableprefix="";
-$wwwroot = "//";
+$wwwroot = "/";
 $config->wwwroot = $wwwroot;
 
 //api config
@@ -26,7 +26,7 @@ ini_set("session.cookie_lifetime",1296000);
 session_set_cookie_params(1296000);
 
 //js extra includes array init
-$include_extra_js=array();
+if(!isset($include_extra_js)) $include_extra_js=array();
 
 //define common libraries
 require_once("lib/lib.php");
@@ -55,7 +55,7 @@ if($islogged){
 		//destroy cookies
 		setcookie($config->sesskeycookiename, "", time() - $config->cookie_lifetime);
 		//destroy session
-		session_start();
+		//session_start();
 		session_unset();
 		session_destroy();
 		header("Location:$config->wwwroot");
