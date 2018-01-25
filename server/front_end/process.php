@@ -425,6 +425,29 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				array_push($ret,1,"Accesses added to all doors in zone");
 			}
 		break;
+
+		case "get_events":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? intval($_POST['orgid']) : "";
+				$personid = (isset($_POST['personid']) and is_numeric($_POST['personid'])) ? intval($_POST['personid']) : "";
+				$zoneid = (isset($_POST['zoneid']) and is_numeric($_POST['zoneid'])) ? intval($_POST['zoneid']) : "";
+				$doorid = (isset($_POST['doorid']) and is_numeric($_POST['doorid'])) ? intval($_POST['doorid']) : "";
+				$side = (isset($_POST['side']) and is_numeric($_POST['side'])) ? $_POST['side'] : "";
+				$startdate = (isset($_POST['startdate'])) ? $_POST['startdate'] : "2000-01-01";
+				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
+				$enddate = (isset($_POST['enddate'])) ? $_POST['enddate'] : "9999-12-31";
+				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "00:00";
+				$startevt = (isset($_POST['startevt']) and is_numeric($_POST['startevt'])) ? intval($_POST['startevt']) : 1;
+				$evtsqtty = (isset($_POST['evtsqtty']) and is_numeric($_POST['evtsqtty'])) ? intval($_POST['evtsqtty']) : 15;
+
+				$events_rec=get_events($logged->name, $logged->pw, $orgid, $personid, $zoneid, $doorid, $side, $startdate, $starttime, $enddate, $endtime, $startevt, $evtsqtty);
+
+				if($events_rec and $events_rec->response_status==200) array_push($ret,1,$events_rec->data);
+				else array_push($ret,0,$events_rec->data->message);
+			}
+		break;
+		
 		default:
 			array_push($ret,0,"Operation not defined"); //send out error
 		break;
