@@ -1,5 +1,5 @@
 <?
-$DEBUG=0;
+$DEBUG=0;//0: debug disabled - 1: basic debug - 2: debug with curl responses
 
 if($DEBUG){
 	$requirelogin=0;
@@ -7,6 +7,8 @@ if($DEBUG){
 }
 
 function send_request($url,$username,$password,$method="get",$payload="{}"){
+	global $DEBUG;
+
 	//assumes valid input
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
@@ -26,11 +28,14 @@ function send_request($url,$username,$password,$method="get",$payload="{}"){
 	if($method=="post" or $method=="put") curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 	//curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 	$response = curl_exec($ch);
-//	error_log($response);
-//	error_log(grab_dump($response));
-//var_dump($response);
-//$response_info=curl_getinfo($ch);
-//var_dump($response_info);
+
+	if($DEBUG==2){
+		var_dump($response);
+		//$response_info=curl_getinfo($ch);
+		//var_dump($response_info);
+	}
+
+	//build response
 	$response_decoded= new stdClass();
 	if($response) {
 		$response_decoded->response_status=curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -44,7 +49,7 @@ function send_request($url,$username,$password,$method="get",$payload="{}"){
 	return $response_decoded;
 }
 
-// do auth
+// Front end auth
 function do_auth($user,$pass){
 	global $config;
 	$response=send_request($config->api_fullpath."login",$user,$pass);
@@ -52,9 +57,8 @@ function do_auth($user,$pass){
 	return (isset($response->response_status) and $response->response_status=="200");
 }
 
-// get user (system)
 
-//organizations
+//Organizations
 
 // get organizations
 function get_organizations($user,$pass){
@@ -96,6 +100,7 @@ function delete_organization($user,$pass,$id){
 	if($response->response_status != "200") return false;
 	else return $response->data;
 }
+
 
 //Persons
 
@@ -146,6 +151,7 @@ function delete_person($user,$pass,$id){
 	if($response->response_status != "200") return false;
 	else return $response->data;
 }
+
 
 //Accesses
 
@@ -490,7 +496,6 @@ function add_access_allweek_organization_zone($user,$pass,$zoneid,$orgid,$iside,
 	}
 }
 
-
 function add_access_liaccess_organization_zone($user,$pass,$zoneid,$orgid,$weekday,$iside,$oside,$starttime,$endtime,$expiredate){
 	global $config;
 	$payload_obj = new stdClass();
@@ -525,6 +530,25 @@ function add_access_liaccess_organization_zone($user,$pass,$zoneid,$orgid,$weekd
 	}
 }
 
+
+//Events
+function get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$side="",$fromdate="",$fromtime="",$untildate="",$untiltime="",$startevt=1,$q=15){
+	global $config;
+	$querystring="";
+	if($orgid!="") $querystring.="orgId=".$orgid;
+	if($personid!="") $querystring.="&personId=".$personid;
+	if($zoneid!="") $querystring.="&zoneId=".$zoneid;
+	if($doorid!="") $querystring.="&doorId=".$doorid;
+	if($side!="") $querystring.="&side=".$side;
+	if($fromdate!="") $querystring.="&startDateTime=".$fromdate."+".$fromtime;
+	if($untildate!="") $querystring.="&endDateTime=".$untildate."+".$untiltime;
+	if($startevt!="") $querystring.="&startEvt=".$startevt;
+	if($q!="") $querystring.="&evtsQtty=".$q;
+
+	$response=send_request($config->api_fullpath."events?$querystring",$user,$pass);
+	return $response;
+}
+
 if($DEBUG){
 	//$res=get_organizations("admin","admin");
 	//$res=do_auth("admin","admin");
@@ -532,7 +556,7 @@ if($DEBUG){
 	//$res=get_person_accesses("admin","admin",3);
 //	$res=get_access("admin","admin",44);
 	//$res=add_person("admin","admin","7","Ricky Martin","",123132);
-	$res=get_door_accesses("admin","admin",3);
+//	$res=get_door_accesses("admin","admin",3);
 //	$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
 //	$res=get_doors("admin","admin",1);
@@ -550,6 +574,7 @@ if($DEBUG){
 //	add_access_allweek($user,$pass,$doorid,$personid,$iside,$oside,$starttime,$endtime,$expiredate){
 //	edit_access_allweek($user,$pass,$id,$iside,$oside,$starttime,$endtime,$expiredate){
 //	$res=add_access_allweek("admin","admin",1,3,1,1,"09:00","13:00","9999-12-31");
+	$res=get_events("admin","admin","","","","","","2017-01-16","00:00","2018-08-16","00:00");
 	echo "<pre>";
 	var_dump($res);
 }
