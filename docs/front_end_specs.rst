@@ -2243,7 +2243,7 @@ To get a list of visitors, the following POST method should be sent to the serve
 
 .. code-block::
 
-  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1&visitedOrgId
+  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1&visitedOrgId=2
   
 
 ``visitDoorGroupId`` variable should have the ID of the visit door group where the visitor was authorized to enter the building.
@@ -2284,7 +2284,7 @@ An the tipical response would be:
   ]
 
 If one of the above variables is omitted, all the resources that this variable could filter, would be retrieved.
-For example, if "visitedOrgId" variable is omitted, all the visitors that were registered to enter trough the visit door group with ID = 1 will be retrieved.
+For example, if ``visitedOrgId`` variable is omitted, all the visitors that were registered to enter trough the visit door group with ID = 1 who are visiting different organizations, will be retrieved.
 
 **Method:** GET
 
@@ -2292,8 +2292,7 @@ For example, if "visitedOrgId" variable is omitted, all the visitors that were r
 
 .. code-block::
 
-  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1&visitedOrgId
-  
+  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1  
 
 **Response:**
 
@@ -2351,5 +2350,48 @@ For example, if "visitedOrgId" variable is omitted, all the visitors that were r
       "orgId": 1, 
       "resStateId": 3, 
       "visitedOrgId": 7
+    }
+  ]
+
+In the same way, if ``visitDoorGroupId`` variable is omitted, all the visitors that were registered to visit organization with ID = 2 who could have entered trough different visit door groups, will be retrieved.
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitor?visitedOrgId=2
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 353
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 28 Jan 2018 20:37:54 GMT
+
+  [
+    {
+      "cardNumber": 5120734, 
+      "id": 9, 
+      "identNumber": "11064146", 
+      "name": "Fulbio Suarez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 9134877, 
+      "id": 10, 
+      "identNumber": "25033546", 
+      "name": "Romina Tutilo", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
     }
   ]
