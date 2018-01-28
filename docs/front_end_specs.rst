@@ -2284,7 +2284,7 @@ An the tipical response would be:
   ]
 
 If one of the above variables is omitted, all the resources that this variable could filter, would be retrieved.
-For example, if ``visitedOrgId`` variable is omitted, all the visitors that were registered to enter trough the visit door group with ID = 1 who are visiting different organizations, will be retrieved.
+For example, if ``visitedOrgId`` variable is omitted, all the visitors who were registered to enter trough the visit door group with ID = 1 who are visiting different organizations, will be retrieved.
 
 **Method:** GET
 
@@ -2353,7 +2353,7 @@ For example, if ``visitedOrgId`` variable is omitted, all the visitors that were
     }
   ]
 
-In the same way, if ``visitDoorGroupId`` variable is omitted, all the visitors that were registered to visit organization with ID = 2 who could have entered trough different visit door groups, will be retrieved.
+In the same way, if ``visitDoorGroupId`` variable is omitted, all the visitors who were registered to visit organization with ID = 2 who could have entered trough different visit door groups, will be retrieved.
 
 
 **Method:** GET
@@ -2465,3 +2465,37 @@ If both variables are omitted, all the visitors in the building will be retrieve
     }
   ]
 
+An specific visitor could be retrieved using his card number. In this case, the GET method should have the cardNumber variable.
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitor?cardNumber=9134877  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 178
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 28 Jan 2018 21:04:00 GMT
+  
+  [
+    {
+      "cardNumber": 9134877, 
+      "id": 10, 
+      "identNumber": "25033546", 
+      "name": "Romina Tutilo", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }
+  ]
+
+In any case, from the list of retrieved visitors, they could be selected, and pressing the remove button a DELETE method should be sent to the server in the same way of deleting a person.
