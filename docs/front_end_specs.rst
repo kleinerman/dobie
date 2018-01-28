@@ -2465,7 +2465,7 @@ If both variables are omitted, all the visitors in the building will be retrieve
     }
   ]
 
-An specific visitor could be retrieved using his card number. In this case, the GET method should have the cardNumber variable.
+An specific visitor could be retrieved using his card number. In this case, the GET method should have the ``cardNumber`` variable.
 
 
 **Method:** GET
