@@ -1907,7 +1907,7 @@ Visits
 ------
 
 The visits will be allowed to enter the building through some group of doors depending the organization to be visited.
-With the following screen, the user can view, create, edit or delete visit doors groups.
+With the following screen, the user can view, create, edit or delete a **visit door group**.
 
 .. image:: images_front_end_specs/visit_door_group.png
 
@@ -2224,3 +2224,10 @@ Remove an entire Vist Door Group and all its doors
     "message": "Visit Door Group deleted", 
     "status": "OK"
   }
+
+View and remove visitors
+------------------------
+
+With the following screen, the user will be able to view the visitors that are at this moment in the building. Also, it will be possible to remove a visitor from the system.
+
+.. image:: images_front_end_specs/view_remove_visitor.png
