@@ -2234,3 +2234,5 @@ View and remove visitors
 With the following screen, the user will be able to view the visitors that are at this moment in the building. Also, it will be possible to remove a visitor from the system.
 
 .. image:: images_front_end_specs/view_remove_visitor.png
+
+To get a list of visitors, the following POST method should be sent to the server
