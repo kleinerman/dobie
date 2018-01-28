@@ -1502,8 +1502,9 @@ class CrudMngr(genmngr.GenericMngr):
 
                 visitedOrgId = request.args.get('visitedOrgId')
                 visitDoorGroupId = request.args.get('visitDoorGroupId')
+                cardNumber = request.args.get('cardNumber')
 
-                visitors = self.dataBase.getVisitors(visitedOrgId, visitDoorGroupId)
+                visitors = self.dataBase.getVisitors(visitedOrgId, visitDoorGroupId, cardNumber)
                 return jsonify(visitors)
 
             except database.PersonNotFound as personNotFound:
