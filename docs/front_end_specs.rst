@@ -1906,6 +1906,9 @@ When all the filters are applied and search button is pressed a pop up window wi
 Visits
 ------
 
+Visit Door Groups
+~~~~~~~~~~~~~~~~~
+
 The visits will be allowed to enter the building through some group of doors depending the organization to be visited.
 With the following screen, the user can view, create, edit or delete a **visit door group**.
 
@@ -1913,7 +1916,7 @@ With the following screen, the user can view, create, edit or delete a **visit d
 
 
 Get Visit Door Groups
-~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++
 
 To get from the server the current list of Visit Door Group, the following REST method should be sent:
 
@@ -1949,7 +1952,7 @@ To get from the server the current list of Visit Door Group, the following REST 
 
 
 Add a Visit Door Group
-~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++
 
 To add a new Visit Door Group, the **new** button should be pressed and a window to create the group should appear. 
 First of all, a name should be assigned to it. This will be done sending a POST method.
@@ -2039,7 +2042,7 @@ With the ID of the Visit Door Group and the ID of the door, the following method
 
 
 Get one Visit Door Group
-~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++
 
 **Method:** GET
 
@@ -2131,7 +2134,7 @@ To get all the doors from a Visit Door Group the following method should be sent
 
 
 Modify a Visit Door Group Name
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++
 
 To modify the name of the Visit Door Group the followin method should be sent to the server:
 
@@ -2169,7 +2172,7 @@ To modify the name of the Visit Door Group the followin method should be sent to
 
 
 Remove doors from a Visit Door Group
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++++++
 
 To remove doors from a Visit Door Group the following method should be sent to the server:
 
@@ -2199,7 +2202,7 @@ To remove doors from a Visit Door Group the following method should be sent to t
   
   
 Remove an entire Vist Door Group and all its doors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++++++++++++++++++++
   
 **Method:** DELETE
 
@@ -2226,7 +2229,7 @@ Remove an entire Vist Door Group and all its doors
   }
 
 View and remove visitors
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 With the following screen, the user will be able to view the visitors that are at this moment in the building. Also, it will be possible to remove a visitor from the system.
 
