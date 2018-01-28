@@ -1133,27 +1133,35 @@ class DataBase(object):
 
 #-----------------------------------Visitors-----------------------------------------
 
-    def getVisitors(self, visitedOrgId, visitDoorGroupId):
+
+    def getVisitors(self, visitedOrgId, visitDoorGroupId, cardNumber):
         '''
         '''
 
-        if visitedOrgId: 
-            visitedOrgFilter = ' Person.visitedOrgId = {}'.format(visitedOrgId)
+        if visitedOrgId:
+            visitedOrgFilter = " Person.visitedOrgId = {}".format(visitedOrgId)
         else:
-            visitedOrgFilter = ' Person.visitedOrgId IS NOT NULL'
+            visitedOrgFilter = " Person.visitedOrgId IS NOT NULL"
 
         if visitDoorGroupId:
             visitDoorGroupFilter = (" AND VisitDoorGroupDoor.visitDoorGroupId = {}"
                                     "".format(visitDoorGroupId)
-                                   ) 
+                                   )
         else:
             visitDoorGroupFilter = ''
+
+
+        if cardNumber:
+            cardNumberFilter = " AND Person.cardNumber = {}".format(cardNumber)
+        else:
+            cardNumberFilter = ''
+
 
         sql = ("SELECT Person.* FROM Person JOIN Access ON "
                "(Person.id = Access.personId) JOIN VisitDoorGroupDoor "
                "ON (Access.doorId = VisitDoorGroupDoor.doorId) "
-               "WHERE {}{}".format(visitedOrgFilter, visitDoorGroupFilter)
-
+               "WHERE {}{}{}"
+               "".format(visitedOrgFilter, visitDoorGroupFilter, cardNumberFilter)
               )
 
         try:
