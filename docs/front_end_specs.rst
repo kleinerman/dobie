@@ -2235,4 +2235,121 @@ With the following screen, the user will be able to view the visitors that are a
 
 .. image:: images_front_end_specs/view_remove_visitor.png
 
-To get a list of visitors, the following POST method should be sent to the server
+To get a list of visitors, the following POST method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1&visitedOrgId
+  
+
+``visitDoorGroupId`` variable should have the ID of the visit door group where the visitor was authorized to enter the building.
+
+``visitedOrgId`` variable should have the ID of the organization the visitor was registered to visit.
+
+An the tipical response would be:
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 353
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 28 Jan 2018 20:15:14 GMT
+  
+  [
+    {
+      "cardNumber": 5120734, 
+      "id": 9, 
+      "identNumber": "11064146", 
+      "name": "Fulbio Suarez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 9134877, 
+      "id": 10, 
+      "identNumber": "25033546", 
+      "name": "Romina Tutilo", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }
+  ]
+
+If one of the above variables is omitted, all the resources that this variable could filter, would be retrieved.
+For example, if "visitedOrgId" variable is omitted, all the visitors that were registered to enter trough the visit door group with ID = 1 will be retrieved.
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1&visitedOrgId
+  
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 885
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 28 Jan 2018 20:30:22 GMT
+
+  [
+    {
+      "cardNumber": 5120734, 
+      "id": 9, 
+      "identNumber": "11064146", 
+      "name": "Fulbio Suarez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 9134877, 
+      "id": 10, 
+      "identNumber": "25033546", 
+      "name": "Romina Tutilo", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 7306735, 
+      "id": 13, 
+      "identNumber": "65263146", 
+      "name": "Marcos Vison", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 5
+    }, 
+    {
+      "cardNumber": 4310747, 
+      "id": 14, 
+      "identNumber": "36043156", 
+      "name": "Carlos Vazquez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 6
+    }, 
+    {
+      "cardNumber": 8304763, 
+      "id": 15, 
+      "identNumber": "29063356", 
+      "name": "Tatiana Rodriguez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 7
+    }
+  ]
