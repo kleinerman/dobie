@@ -1909,7 +1909,7 @@ Visits
 The visits will be allowed to enter the building through some group of doors depending the organization to be visited.
 With the following screen, the user can view, create, edit or delete visit doors groups.
 
-.. image:: images_front_end_specs/visit_doors_group.png
+.. image:: images_front_end_specs/visit_door_group.png
 
 
 Get Visit Door Groups
