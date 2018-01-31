@@ -239,9 +239,9 @@ class StarterAlrmMngr(genmngr.GenericMngr):
                          'eventTypeId' : 3,
                          'dateTime' : dateTime,
                          'doorLockId' : None,
-                         'personId' : 1,
+                         'personId' : None,
                          'side' : None,
-                         'allowed' : False,
+                         'allowed' : None,
                          'denialCauseId' : None
                         }
                 #Sending the event to the "Event Manager" thread
