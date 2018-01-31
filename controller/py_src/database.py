@@ -153,7 +153,10 @@ class DataBase(object):
         else:
             side = 'NULL'
 
-        allowed = int(event['allowed'])
+        if event['allowed']:
+            allowed = int(event['allowed'])
+        else:
+            allowed = 'NULL'
 
         if event['denialCauseId']:
             denialCauseId = event['denialCauseId']
