@@ -505,7 +505,7 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
 Get one Person
 ~~~~~~~~~~~~~~
 
-**Method:** POST
+**Method:** GET
 
 **URI:**
 
@@ -1210,16 +1210,14 @@ If an entire zone is selected, all the above should be repeated for each door of
 An entire organization can be selected and an entire zone too.
 
 
-Edit an Access
---------------
+Modifying Accesses
+~~~~~~~~~~~~~~~~~~~
 
 To edit and modify an access, an access should be selected. This can be done using the first access screen (Person -> Door) or the second screen (Door -> Person). When an access is selected and "edit" button is pressed the following  window should appear.
 
 .. image:: images_front_end_specs/upd_access.png
 
-All the information of the access shown in the above window should be retrieved in the same way to retrieve all the accesses for a person (Person -> Door screen) or to retrieve all the accesses of a door (Door -> Person screen) but just using the information needed for this access.
-
-For example, if the Day Accesses (Limited Access) of person with id = 7 and and door with id = 6 should be edited from the Person -> Door screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
+All the information of the access shown in the above window should be retrieved with the ID of the access, sending a GET metod.
 
 **Method:** GET
 
@@ -1227,31 +1225,88 @@ For example, if the Day Accesses (Limited Access) of person with id = 7 and and 
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/person/7/access
+  http://172.18.0.5:5000/api/v1.0/access/2
 
 **Response:**
-
-.. image:: images_front_end_specs/get_accesses_per_pas.png
-
-
-For example, if a Week Access in door with id = 5 and person with id = 8 should be edited from the Door -> Person screen, the highlithed information of the GET response should be used to fill the information of the Edit Access window:
-
-
-**Method:** GET
-
-**URI:**
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/door/5/access
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 798
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Mon, 18 Dec 2017 14:26:03 GMT
+  
+  {
+    "allWeek": 0, 
+    "doorId": 4, 
+    "doorName": "Ba\u00f1o 3", 
+    "expireDate": "2016-01-02 00:00", 
+    "id": 2, 
+    "liAccesses": [
+      {
+        "endTime": "21:37:00", 
+        "iSide": 1, 
+        "id": 1, 
+        "oSide": 1, 
+        "resStateId": 1, 
+        "startTime": "20:37:00", 
+        "uri": "http://172.18.0.5:5000/api/v1.0/liaccess/1", 
+        "weekDay": 2
+      }, 
+      {
+        "endTime": "21:37:00", 
+        "iSide": 1, 
+        "id": 11, 
+        "oSide": 1, 
+        "resStateId": 1, 
+        "startTime": "20:37:00", 
+        "uri": "http://172.18.0.5:5000/api/v1.0/liaccess/11", 
+        "weekDay": 7
+      }
+    ], 
+    "organizationName": "Larriquin Corp.", 
+    "personId": 2, 
+    "personName": "Carlos Sanchez", 
+    "resStateId": 3, 
+    "uri": "http://172.18.0.5:5000/api/v1.0/access/2", 
+    "zoneName": "Ingreso Sur"
+  }
 
-**Response:**
 
-.. image:: images_front_end_specs/get_accesses_pas_per.png
+The above response is a Limited Access with two days of a week. An example of a response with full access could be:
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 398
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Mon, 18 Dec 2017 15:05:32 GMT
+  
+  {
+    "allWeek": 1, 
+    "doorId": 6, 
+    "doorName": "Ingreso 2", 
+    "endTime": "23:59:00", 
+    "expireDate": "2018-12-12 00:00", 
+    "iSide": 1, 
+    "id": 9, 
+    "oSide": 1, 
+    "organizationName": "Building Networks", 
+    "personId": 3, 
+    "personName": "Manuel Bobadilla", 
+    "resStateId": 1, 
+    "startTime": "0:00:00", 
+    "uri": "http://172.18.0.5:5000/api/v1.0/access/9", 
+    "zoneName": "Ingreso Sur"
+  }
 
 
+Modify a Day Access (Limited Access)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To **modify a Day Access (Limited Access)** the following PUT method should be send to the server:
+To modify a Day Access (Limited Access) the following PUT method should be send to the server:
 
 
 **Method:** PUT
@@ -1285,10 +1340,13 @@ To **modify a Day Access (Limited Access)** the following PUT method should be s
     "status": "OK"
   }
 
-Modify a "Day Accesses" of a person could imply add new "Limited Access",  when adding a new day of access for the person, or delete "Limited Access", when removing a day of access for the person
+Modify a "Day Accesses" of a person could imply add a new "Limited Access",  when adding a new day of access for the person, or delete a "Limited Access", when removing a day of access for the person
 
 
-To **modify a Week Access (Full Access)** the following PUT method should be send to the server:
+Modify a Week Access (Full Access)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To modify a Week Access (Full Access) the following PUT method should be sent to the server:
 
 
 **Method:** PUT
@@ -1323,9 +1381,105 @@ To **modify a Week Access (Full Access)** the following PUT method should be sen
   }
 
 
-If a person has a "Limited Access" on a door and the user modify it giving a "Full Access", a POST method with the "Full Access" should be sent to the server. This will automatically erase all the "Limited Accesses" who this person had on this door.
-In the same way, if the person had a "Full Access" and the user modify it giving a "Limited Access", a POST method with "Limited Access" should be sent to the server and this will automatically erase the previous "Full Access" 
 
+Changing Full Access by Limited Access and vice versa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+If a person has a "Limited Access" on a door and the user modifies it giving a "Full Access", a POST method with the "Full Access" should be sent to the server. This will automatically remove all the "Limited Accesses" who this person had on this door.
+
+In the same way, if the person had a "Full Access" and the user modifies it giving a "Limited Access", a POST method with "Limited Access" should be sent to the server and this will automatically remove the previous "Full Access" 
+
+
+Delete a Full Access
+~~~~~~~~~~~~~~~~~~~~
+
+To delete a Full Access, a DELETE method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/access/7
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 53
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 19 Dec 2017 23:46:05 GMT
+  
+  {
+    "message": "Access deleted", 
+    "status": "OK"
+  }
+
+
+
+Delete a Limited Access
+~~~~~~~~~~~~~~~~~~~~~~~
+
+To delete a "Limited Access" (when removing a day of access of a person) a DELETE method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/liaccess/11
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 53
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 19 Dec 2017 23:46:05 GMT
+  
+  {
+    "message": "Access deleted", 
+    "status": "OK"
+  }
+
+
+Delete all Limited Accesses of a person in a door
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+To delete all Limited Accesses of a person in a door, it should be done in the same way a Full Access is deleted pointing to the corresponding ID.
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/access/2
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 53
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 19 Dec 2017 23:46:05 GMT
+  
+  {
+    "message": "Access deleted", 
+    "status": "OK"
+  }
 
 
 Events
@@ -1747,3 +1901,601 @@ Event Reports
 When all the filters are applied and search button is pressed a pop up window will appear with the report:
 
 .. image:: images_front_end_specs/events_report.png
+
+
+Visits
+------
+
+Visit Door Groups
+~~~~~~~~~~~~~~~~~
+
+The visits will be allowed to enter the building through some group of doors depending the organization to be visited.
+With the following screen, the user can view, create, edit or delete a **visit door group**.
+
+.. image:: images_front_end_specs/visit_door_group.png
+
+
+Get Visit Door Groups
++++++++++++++++++++++
+
+To get from the server the current list of Visit Door Group, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/visitdoorgroup
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 220
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 20:04:20 GMT
+  
+  [
+    {
+      "name": "Molinetes Torre A", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1"
+    }, 
+    {
+      "name": "Puertas Front Torre B", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
+    }
+  ]
+
+
+
+Add a Visit Door Group
+++++++++++++++++++++++
+
+To add a new Visit Door Group, the **new** button should be pressed and a window to create the group should appear. 
+First of all, a name should be assigned to it. This will be done sending a POST method.
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/visitdoorgroup
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Puertas Front Torre A"}
+
+**Response:**
+
+.. code-block::
+
+  **Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/organization
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Zipper Corp."}
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 141
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 18:42:18 GMT
+  
+  {
+    "code": 201, 
+    "message": "Visit Door Group added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
+  }
+  
+ 
+
+Then, the user should select the doors he wants to assign to this Visit Door Group. To do this, a Zone should be selected and the corresponding door from the selected zone.
+
+To get all the Zones see Get Zones
+To get all the Doors from a Zone, see Get Doors
+
+With the ID of the Visit Door Group and the ID of the door, the following method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3/door/4
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 70
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 19:14:00 GMT
+  
+  {
+    "message": "Door added to Visit Door Group", 
+    "status": "OK"
+  }
+
+
+
+Get one Visit Door Group
+++++++++++++++++++++++++
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3
+
+ 
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 113
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 20:07:53 GMT
+  
+  {
+    "id": 3, 
+    "name": "Puertas Front Torre B", 
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
+  }
+
+
+To get all the doors from a Visit Door Group the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1/door
+  
+  
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 742
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 20:34:30 GMT
+  
+  [
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 1, 
+      "id": 1, 
+      "name": "Molinete 1", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://172.18.0.4:5000/api/v1.0/door/1", 
+      "zoneId": 1
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 2, 
+      "id": 2, 
+      "name": "Puerta 2", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://172.18.0.4:5000/api/v1.0/door/2", 
+      "zoneId": 1
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 1, 
+      "doorNum": 1, 
+      "id": 4, 
+      "name": "Ba\u00f1o 3", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://172.18.0.4:5000/api/v1.0/door/4", 
+      "zoneId": 1
+    }
+  ]
+
+
+
+Modify a Visit Door Group Name
+++++++++++++++++++++++++++++++
+
+To modify the name of the Visit Door Group the followin method should be sent to the server:
+
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/1  
+
+
+**JSON**
+
+.. code-block::
+
+  {"name": "FrontDesk Torre B"}
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 63
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Wed, 27 Dec 2017 19:09:10 GMT
+  
+  {
+    "message": "Visit Door Group updated", 
+    "status": "OK"
+  }
+
+
+Remove doors from a Visit Door Group
+++++++++++++++++++++++++++++++++++++
+
+To remove doors from a Visit Door Group the following method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/1/door/2  
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 73
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Wed, 27 Dec 2017 19:15:01 GMT
+  
+  {
+    "message": "Door deleted from Visit Door Group", 
+    "status": "OK"
+  }
+  
+  
+Remove an entire Vist Door Group and all its doors
+++++++++++++++++++++++++++++++++++++++++++++++++++
+  
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/3
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 63
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Wed, 27 Dec 2017 19:21:12 GMT
+  
+  {
+    "message": "Visit Door Group deleted", 
+    "status": "OK"
+  }
+
+View and remove visitors
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+With the following screen, the user will be able to view the visitors that are at this moment in the building. Also, it will be possible to remove a visitor from the system.
+
+.. image:: images_front_end_specs/view_remove_visitor.png
+
+To get a list of visitors, the following POST method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1&visitedOrgId=2
+  
+
+``visitDoorGroupId`` variable should have the ID of the visit door group where the visitor was authorized to enter the building.
+
+``visitedOrgId`` variable should have the ID of the organization the visitor was registered to visit.
+
+An the tipical response would be:
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 353
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 28 Jan 2018 20:15:14 GMT
+  
+  [
+    {
+      "cardNumber": 5120734, 
+      "id": 9, 
+      "identNumber": "11064146", 
+      "name": "Fulbio Suarez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 9134877, 
+      "id": 10, 
+      "identNumber": "25033546", 
+      "name": "Romina Tutilo", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }
+  ]
+
+If one of the above variables is omitted, all the resources that this variable could filter, would be retrieved.
+For example, if ``visitedOrgId`` variable is omitted, all the visitors who were registered to enter trough the visit door group with ID = 1 who are visiting different organizations, will be retrieved.
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1  
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 885
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 28 Jan 2018 20:30:22 GMT
+
+  [
+    {
+      "cardNumber": 5120734, 
+      "id": 9, 
+      "identNumber": "11064146", 
+      "name": "Fulbio Suarez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 9134877, 
+      "id": 10, 
+      "identNumber": "25033546", 
+      "name": "Romina Tutilo", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 7306735, 
+      "id": 13, 
+      "identNumber": "65263146", 
+      "name": "Marcos Vison", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 5
+    }, 
+    {
+      "cardNumber": 4310747, 
+      "id": 14, 
+      "identNumber": "36043156", 
+      "name": "Carlos Vazquez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 6
+    }, 
+    {
+      "cardNumber": 8304763, 
+      "id": 15, 
+      "identNumber": "29063356", 
+      "name": "Tatiana Rodriguez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 7
+    }
+  ]
+
+In the same way, if ``visitDoorGroupId`` variable is omitted, all the visitors who were registered to visit organization with ID = 2 who could have entered trough different visit door groups, will be retrieved.
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitor?visitedOrgId=2
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 353
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 28 Jan 2018 20:37:54 GMT
+
+  [
+    {
+      "cardNumber": 5120734, 
+      "id": 9, 
+      "identNumber": "11064146", 
+      "name": "Fulbio Suarez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 9134877, 
+      "id": 10, 
+      "identNumber": "25033546", 
+      "name": "Romina Tutilo", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }
+  ]
+
+
+If both variables are omitted, all the visitors in the building will be retrieved
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitor  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 885
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 28 Jan 2018 20:49:35 GMT
+  
+  [
+    {
+      "cardNumber": 5120734, 
+      "id": 9, 
+      "identNumber": "11064146", 
+      "name": "Fulbio Suarez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 9134877, 
+      "id": 10, 
+      "identNumber": "25033546", 
+      "name": "Romina Tutilo", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }, 
+    {
+      "cardNumber": 7306735, 
+      "id": 13, 
+      "identNumber": "65263146", 
+      "name": "Marcos Vison", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 5
+    }, 
+    {
+      "cardNumber": 4310747, 
+      "id": 14, 
+      "identNumber": "36043156", 
+      "name": "Carlos Vazquez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 6
+    }, 
+    {
+      "cardNumber": 8304763, 
+      "id": 15, 
+      "identNumber": "29063356", 
+      "name": "Tatiana Rodriguez", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 7
+    }
+  ]
+
+An specific visitor could be retrieved using his card number. In this case, the GET method should have the ``cardNumber`` variable.
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitor?cardNumber=9134877  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 178
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 28 Jan 2018 21:04:00 GMT
+  
+  [
+    {
+      "cardNumber": 9134877, 
+      "id": 10, 
+      "identNumber": "25033546", 
+      "name": "Romina Tutilo", 
+      "orgId": 1, 
+      "resStateId": 3, 
+      "visitedOrgId": 2
+    }
+  ]
+
+In any case, from the list of retrieved visitors, they could be selected, and pressing the remove button a DELETE method should be sent to the server in the same way of deleting a person.
