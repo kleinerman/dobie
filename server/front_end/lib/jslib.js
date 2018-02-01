@@ -172,8 +172,17 @@ function setFilterActionTable(){
 	});
 }
 
+//adds zero padding to hour string
 function addZeroPadding(str){
 	str_parts=str.split(":");
 	if(str_parts.length>1 && str_parts[0].length==1) str_parts[0]="0"+str_parts[0];
+	if(str_parts.length>1 && str_parts[1].length==1) str_parts[1]="0"+str_parts[1];
 	return str_parts.join(":");
+}
+
+//adds zero padding to single number
+function addZeroPaddingSingle(number){
+	var result=number;
+	if(number<10 && number>-1) result="0"+number;
+	return result;
 }

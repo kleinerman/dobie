@@ -118,7 +118,7 @@ label,input[type=checkbox],input[type=radio]{
 	max-width:100px;
 }
 
-.throbber_container{
+.throbber-container{
 	margin:0px auto;
 	text-align:center;
 	width:99%;
@@ -234,14 +234,17 @@ label,input[type=checkbox],input[type=radio]{
     overflow-y: scroll;
 }
 
-.clockpicker{
+.clockpicker, .input_date_container{
 	display:inline-table;
 	width:100px;
 }
 
 #expiration_date{
 	display:none;
-	width: 100px;
+}
+
+#expiration_date,.input_date{
+	width: 100px !important;
 }
 
 #schedule-table{
@@ -261,4 +264,11 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin:0px;
+}
+
+/*events*/
+.container-bordered{
+	border:1px solid #ccc;
+	padding:10px;
+	border-radius:5px;
 }
