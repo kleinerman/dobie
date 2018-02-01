@@ -3,6 +3,8 @@ import queue
 import logging
 import datetime
 import crypt
+import threading
+import time
 
 from config import *
 
@@ -83,7 +85,7 @@ class ZoneNotFound(ZoneError):
 
 
 
-class VisitorsDoorsError(Exception):
+class VisitDoorGroupError(Exception):
     '''
     '''
     def __init__(self, errorMessage):
@@ -93,7 +95,7 @@ class VisitorsDoorsError(Exception):
         return self.errorMessage
 
 
-class VisitorsDoorsNotFound(ZoneError):
+class VisitDoorGroupNotFound(VisitDoorGroupError):
     '''
     '''
     pass
@@ -243,7 +245,7 @@ class DenialCauseNotFound(DenialCauseError):
 
 class DataBase(object):
 
-    def __init__(self, host, user, passwd, dataBase):
+    def __init__(self, host, user, passwd, dataBase, callingMngr):
 
 
         self.logger = logging.getLogger(LOGGER_NAME)
@@ -252,27 +254,41 @@ class DataBase(object):
         self.user = user
         self.passwd = passwd
         self.dataBase = dataBase
+        self.callingMngr = callingMngr
 
 
         self.connect()
 
 
-        # With this client_flag, cursor.rowcount will have found rows instead of affected rows
-        #self.connection = pymysql.connect(host, user, passwd, dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
-        #self.connection.autocommit(True)
-        # The following line makes all "fetch" calls return a dictionary instead a tuple 
-        #self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-
 
 
     def connect(self):
         '''
+        Try to connect to DB engine. If DB engine is not available,
+        it makes the manager that is using this object to check if the main
+        thread ask this manager to finish and then sleep EXIT_CHECK_TIME
+        before trying to connect again.
         '''
-        # With this client_flag, cursor.rowcount will have found rows instead of affected rows
-        self.connection = pymysql.connect(self.host, self.user, self.passwd, self.dataBase, client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
-        self.connection.autocommit(True)
-        # The following line makes all "fetch" calls return a dictionary instead a tuple
-        self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+        while True:
+            try:
+                self.logger.info('Connecting to database...')
+                self.connection = pymysql.connect(self.host, self.user, 
+                                                  self.passwd, self.dataBase,
+                                                  connect_timeout = EXIT_CHECK_TIME,
+                                                  client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
+                                                  #With this client_flag, cursor.rowcount will have
+                                                  #found rows instead of affected rows
+                self.logger.info('Database connected.')
+                # The following line makes all "fetch" calls return a dictionary instead a tuple
+                self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+                break
+
+            except pymysql.err.OperationalError:
+                self.logger.info("Database not reachable. Retrying...")
+                self.callingMngr.checkExit()
+                time.sleep(EXIT_CHECK_TIME)
+
+
 
 
 
@@ -285,11 +301,15 @@ class DataBase(object):
 
         try:
             self.cursor.execute(sql)
+            self.connection.commit()
 
-        except pymysql.err.OperationalError:
+        except (pymysql.err.OperationalError, pymysql.err.InterfaceError):
             self.logger.info("Database is not connected. Reconnecting...")
             self.connect()
             self.cursor.execute(sql)
+            self.connection.commit()
+            
+
 
 
 
@@ -306,7 +326,7 @@ class DataBase(object):
         self.execute(sql)
         #If commit is not present, once adding the controller via REST 
         #it is neccesary to restart the server (not sure why)
-        self.connection.commit()
+        #self.connection.commit()
         return self.cursor.fetchone()['COUNT(*)']
 
 
@@ -338,12 +358,12 @@ class DataBase(object):
                   )
             try:
                 self.execute(sql)
-                self.connection.commit()
 
             except pymysql.err.IntegrityError as integrityError:
                 self.logger.debug(integrityError)
 
-
+            except pymysql.err.InternalError as internalError:
+                self.logger.debug(internalError)
 
 
 
@@ -385,7 +405,7 @@ class DataBase(object):
         startEvtSql = startEvt - 1
         
         sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
-               "Door.description AS doorName, Organization.name AS orgName, "
+               "Door.name AS doorName, Organization.name AS orgName, "
                "Person.name AS personName, Event.doorLockId, Event.dateTime, "
                "Event.side, Event.allowed, Event.denialCauseId "
                "FROM Event LEFT JOIN Door ON (Event.doorId = Door.id) "
@@ -538,7 +558,6 @@ class DataBase(object):
         '''
         Receive a dictionary with user parametters and update it in DB
         '''
-
 
         passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
 
@@ -718,7 +737,6 @@ class DataBase(object):
         
         try:
             self.execute(sql)
-            self.connection.commit()
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
@@ -753,7 +771,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise OrganizationNotFound('Organization not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -781,7 +798,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise OrganizationNotFound('Organization not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -900,7 +916,6 @@ class DataBase(object):
 
         try:
             self.execute(sql)
-            self.connection.commit()
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
@@ -925,7 +940,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise ZoneNotFound('Zone not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -947,7 +961,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise ZoneNotFound('Zone not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -958,138 +971,214 @@ class DataBase(object):
 
 
 
-#----------------------------------Visitors Door-----------------------------------
+#------------------------------Visit Door Group--------------------------------
 
 
 
 
-    def getVisitorsDoorss(self):
+    def getVisitDoorGroups(self):
         '''
-        Return a dictionary with all Zones
+        Return a dictionary with all Visit Door Groups
         '''
-        sql = ('SELECT * FROM VisitorsDoors')
-        self.execute(sql)
-        visitorsDoorss = self.cursor.fetchall()
+        sql = ("SELECT * FROM VisitDoorGroup")
+        try:
+            self.execute(sql)
+            visitDoorGroups = self.cursor.fetchall()
+            return visitDoorGroups
 
-        return visitorsDoorss
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise VisitDoorGroupError('Can not get VisitDoorGroups')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitDoorGroupError('Can not get VisitDoorGroups')
 
 
 
-
-    def addVisitorsDoors(self, visitorsDoors):
+    def getVisitDoorGroup(self, visitDoorGroupId):
         '''
-        Receive a dictionary with Visitors Doorss parametters 
-        and save it in DB. It returns the id of the added Visitor Doors.
+        Return a a dictionary with Visit Door Group data
+        '''
+    
+        sql = ("SELECT * FROM VisitDoorGroup WHERE id = {}"
+               "".format(visitDoorGroupId)
+              )
+        try:
+            self.execute(sql)
+            visitDoorGroup = self.cursor.fetchone()
+            if not visitDoorGroup:
+                raise VisitDoorGroupNotFound('Visit Door Group not found')
+            return visitDoorGroup
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise VisitDoorGroupError('Can not get specified VisitDoorGroup')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise VisitDoorGroupError('Can not get specified VisitDoorGroup')
+
+
+    def addVisitDoorGroup(self, visitDoorGroup):
+        '''
+        Receive a dictionary with Visit Door Group parametters 
+        and save it in DB. It returns the id of the added Visit Door Group.
         '''
 
-        sql = ("INSERT INTO VisitorsDoors(name) VALUES('{}')"
-               "".format(visitorsDoors['name'])
+        sql = ("INSERT INTO VisitDoorGroup(name) VALUES('{}')"
+               "".format(visitDoorGroup['name'])
               )
 
         try:
             self.execute(sql)
-            self.connection.commit()
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not add this Visitors Doors')
+            raise VisitDoorGroupError('Can not add this Visit Door Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not add this Visitors Doors: wrong argument')
+            raise VisitDoorGroupError('Can not add this Visit Door Group: wrong argument')
 
 
 
-    def delVisitorsDoors(self, visitorsDoorsId):
+    def delVisitDoorGroup(self, visitDoorGroupId):
         '''
-        Receive a dictionary with Visitors Door id and delete the Visitor Door
+        Receive the Visit Door Group ID and delete the Visit Door Group
         '''
 
-        sql = ("DELETE FROM VisitorsDoors WHERE id = {}"
-               "".format(visitorsDoorsId)
+        sql = ("DELETE FROM VisitDoorGroup WHERE id = {}"
+               "".format(visitDoorGroupId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
-            self.connection.commit()
+                raise VisitDoorGroupNotFound('Visit Door Group not found')
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not delete this Visitors Doors')
+            raise VisitDoorGroupError('Can not delete this Visit Door Group')
 
 
 
 
-    def updVisitorsDoors(self, visitorsDoors):
+    def updVisitDoorGroup(self, visitDoorGroup):
         '''
-        Receive a dictionary with Visitors Doors parametters and update it in DB
+        Receive a dictionary with Visit Door Group parametters and update it in DB
         '''
 
-        sql = ("UPDATE VisitorsDoors SET name = '{}' WHERE id = {}"
-               "".format(visitorsDoors['name'], visitorsDoors['id'])
+        sql = ("UPDATE VisitDoorGroup SET name = '{}' WHERE id = {}"
+               "".format(visitDoorGroup['name'], visitDoorGroup['id'])
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
-            self.connection.commit()
+                raise VisitDoorGroupNotFound('Visit Door Group not found')
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not update this Visitors Doors')
+            raise VisitDoorGroupError('Can not update this Visit Door Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not update this Visitors Doors: wrong argument')
+            raise VisitDoorGroupError('Can not update this Visit Door Group: wrong argument')
 
 
 
 
-    def addDoorToVisitorsDoors(self, visitorsDoorsId, doorId):
+    def addDoorToVisitDoorGroup(self, visitDoorGroupId, doorId):
         '''
         '''
 
-        sql = ("INSERT INTO VisitorsDoorsDoor(visitorsDoorsId, doorId) "
-               "VALUES ({}, {})".format(visitorsDoorsId, doorId)
+        sql = ("INSERT INTO VisitDoorGroupDoor(visitDoorGroupId, doorId) "
+               "VALUES ({}, {})".format(visitDoorGroupId, doorId)
               )
 
         try:
             self.execute(sql)
-            self.connection.commit()
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not add this door to Visitors Door')
+            raise VisitDoorGroupError('Can not add this door to Visit Door Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitorsDoorsError('Can not add this door to Visitors Door: wrong argument')
+            raise VisitDoorGroupError('Can not add this door to Visit Door Group: wrong argument')
 
 
 
 
-    def delDoorFromVisitorsDoors(self, visitorsDoorsId, doorId):
+    def delDoorFromVisitDoorGroup(self, visitDoorGroupId, doorId):
         '''
         '''
 
-        sql = ("DELETE FROM VisitorsDoorsDoor WHERE "
-               "visitorsDoorsId = {} AND doorId = {}"
-               "".format(visitorsDoorsId, doorId)
+        sql = ("DELETE FROM VisitDoorGroupDoor WHERE "
+               "visitDoorGroupId = {} AND doorId = {}"
+               "".format(visitDoorGroupId, doorId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitorsDoorsNotFound('Door not found in Visitors Doors.')
-            self.connection.commit()
+                raise VisitDoorGroupNotFound('Door not found in Visit Door Group.')
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitorsDoorsError('Can not delete this Door from Visitors Doors')
+            raise VisitDoorGroupError('Can not delete this Door from Visit Door Group')
 
 
+
+
+#-----------------------------------Visitors-----------------------------------------
+
+
+    def getVisitors(self, visitedOrgId, visitDoorGroupId, cardNumber):
+        '''
+        '''
+
+        if visitedOrgId:
+            visitedOrgFilter = " Person.visitedOrgId = {}".format(visitedOrgId)
+        else:
+            visitedOrgFilter = " Person.visitedOrgId IS NOT NULL"
+
+        if visitDoorGroupId:
+            visitDoorGroupFilter = (" AND VisitDoorGroupDoor.visitDoorGroupId = {}"
+                                    "".format(visitDoorGroupId)
+                                   )
+        else:
+            visitDoorGroupFilter = ''
+
+
+        if cardNumber:
+            cardNumberFilter = " AND Person.cardNumber = {}".format(cardNumber)
+        else:
+            cardNumberFilter = ''
+
+
+        sql = ("SELECT Person.* FROM Person JOIN Access ON "
+               "(Person.id = Access.personId) JOIN VisitDoorGroupDoor "
+               "ON (Access.doorId = VisitDoorGroupDoor.doorId) "
+               "WHERE {}{}{}"
+               "".format(visitedOrgFilter, visitDoorGroupFilter, cardNumberFilter)
+              )
+
+        try:
+            self.execute(sql)
+            visitors = self.cursor.fetchall()
+            if not visitors:
+                raise PersonNotFound('Visitors not found')
+            return visitors
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise PersonError('Can not get specified visitors.')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Can not get specified visitors.')
+    
 
 
 
@@ -1109,7 +1198,6 @@ class DataBase(object):
 
         try:
             self.execute(sql)
-            self.connection.commit()
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
@@ -1137,7 +1225,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise ControllerNotFound('Controller not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -1161,7 +1248,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise ControllerNotFound('Controller not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -1299,6 +1385,9 @@ class DataBase(object):
                   )
             self.execute(sql)
 
+            sql = "LOCK TABLES Door WRITE, Access WRITE, LimitedAccess WRITE"
+            self.execute(sql)
+
             sql = ("UPDATE Access SET resStateId = {} WHERE doorId IN "
                    "(SELECT id FROM Door WHERE controllerId = {}) AND allWeek = 1"
                    "".format(TO_ADD, controllerId)
@@ -1310,9 +1399,12 @@ class DataBase(object):
                    "".format(TO_ADD, controllerId)
                   )
             self.execute(sql)
+
+            self.execute("UNLOCK TABLES")
         
 
         except pymysql.err.IntegrityError as integrityError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             raise ControllerError('Error reprovisioning the controller.')
 
@@ -1326,49 +1418,54 @@ class DataBase(object):
 #----------------------------------Door----------------------------------------
 
 
-    def getDoors(self, zoneId=None, visitorsDoorsId=None):
+    def getDoors(self, zoneId=None, visitDoorGroupId=None):
         '''
-        Return a dictionary with all doors in a Zone or in a visitorsDoors
+        Return a dictionary with all doors in a Zone or in a Visit Door Group
         according to the argument received
         '''
 
-        if not zoneId and not visitorsDoorsId:
-            raise DoorNotFound
+        try:
+            if not zoneId and not visitDoorGroupId:
+                raise DoorNotFound('getDoors method need zoneId or visitDoorGroupId.')
 
-        elif zoneId:
+            elif zoneId:
+                #Check if the zoneId exists in the database
+                sql = ("SELECT * FROM Zone WHERE id = {}".format(zoneId))
+                self.execute(sql)
+                zone = self.cursor.fetchone()
 
-            # check if the zoneId exists in the database
-            sql = ("SELECT * FROM Zone WHERE id='{}'".format(zoneId))
-            self.execute(sql)
-            zone = self.cursor.fetchall()
-
-            if not zone:
-                raise ZoneNotFound('Zone not found')
+                if not zone:
+                    raise ZoneNotFound('Zone not found')
        
-            # Get all persons from the organization
-            sql = ("SELECT * FROM Door WHERE zoneId='{}'".format(zoneId))
-            self.execute(sql)
-            doors = self.cursor.fetchall()
-        
-            return doors
-
-        elif visitorsDoorsId:
-            sql = ("SELECT COUNT(*) FROM VisitorsDoors WHERE id='{}'".format(visitorsDoorsId))
-            self.execute(sql)
-            
-            if self.cursor.fetchone()['COUNT(*)']:
-        
-                sql = ("SELECT Door.* from Door JOIN VisitorsDoorsDoor "
-                       "ON (Door.id = VisitorsDoorsDoor.doorId) "
-                       "WHERE VisitorsDoorsDoor.visitorsDoorsId = {}"
-                       "".format(visitorsDoorsId)
-                      )
+                #Get all doors from this zone
+                sql = ("SELECT * FROM Door WHERE zoneId = {}".format(zoneId))
                 self.execute(sql)
                 doors = self.cursor.fetchall()
-                return doors
 
-            else:
-                raise VisitorsDoorsNotFound('Visitors Doors not found')
+            elif visitDoorGroupId:
+                #Check if the visitDoorGroup exists in database
+                sql = ("SELECT * FROM VisitDoorGroup WHERE id = {}".format(visitDoorGroupId))
+                self.execute(sql)
+                visitDoorGroup = self.cursor.fetchone()
+
+                if not visitDoorGroup:
+                    raise VisitDoorGroupNotFound('Visit Door Group not found')
+
+                #Get all doors from this VisitDoorGroup 
+                sql = ("SELECT Door.* from Door JOIN VisitDoorGroupDoor "
+                       "ON (Door.id = VisitDoorGroupDoor.doorId) "
+                       "WHERE VisitDoorGroupDoor.visitDoorGroupId = {}"
+                       "".format(visitDoorGroupId)
+                       )
+                self.execute(sql)
+                doors = self.cursor.fetchall()
+
+            return doors
+
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise DoorError('Can not get doors for this zone or visitDoorGroup.')
 
 
 
@@ -1384,6 +1481,7 @@ class DataBase(object):
 
             if not door:
                 raise DoorNotFound("Door not found.")
+
             return door
 
         except pymysql.err.InternalError as internalError:
@@ -1399,26 +1497,29 @@ class DataBase(object):
         This method is an iterator, in each iteration it returns a door
         not committed with the state "resStateId" from the controller
         with the MAC address "ctrllerMac"
-        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        NOTE: As this method is an iterator and its execution is interrupted
         in each iteration and between each iteration another method can be executed using
-        "self.cursor", a separated cursor is created.
+        "self.cursor", a separated cursor is created (not happening today)
         '''
-
-        cursor = self.connection.cursor(pymysql.cursors.DictCursor)        
-        sql = ("SELECT door.* FROM Door door JOIN Controller controller ON "
-               "(door.controllerId = controller.id) WHERE controller.macAddress = '{}' AND "
-               "resStateId = {}".format(ctrllerMac, resStateId))
-
         try:
 
-            cursor.execute(sql)
-            door = cursor.fetchone()
+            localCursor = self.connection.cursor(pymysql.cursors.DictCursor)
+
+            sql = ("SELECT Door.* FROM Door JOIN Controller "
+                   "ON (Door.controllerId = Controller.id) "
+                   "WHERE Controller.macAddress = '{}' AND "
+                   "resStateId = {}".format(ctrllerMac, resStateId))
+
+
+            localCursor.execute(sql)
+            self.connection.commit()
+            door = localCursor.fetchone()
 
             while door:
                 #Removing the resStateId as this field should not be sent to the controller
                 door.pop('resStateId')
                 yield door
-                door = cursor.fetchone()
+                door = localCursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -1433,9 +1534,9 @@ class DataBase(object):
         It returns the id of the added door
         '''
 
-        sql = ("INSERT INTO Door(doorNum, description, controllerId, rlseTime, bzzrTime, "
+        sql = ("INSERT INTO Door(doorNum, name, controllerId, rlseTime, bzzrTime, "
                "alrmTime, zoneId, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {})"
-               "".format(door['doorNum'], door['description'], door['controllerId'], 
+               "".format(door['doorNum'], door['name'], door['controllerId'], 
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'], 
                          door['zoneId'], TO_ADD)
               )
@@ -1443,7 +1544,6 @@ class DataBase(object):
 
         try:
             self.execute(sql)
-            self.connection.commit()
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
@@ -1472,14 +1572,12 @@ class DataBase(object):
                        "".format(COMMITTED, doorId)
                       )
                 self.execute(sql)
-                self.connection.commit()
 
             elif resState == TO_DELETE:
                 sql = ("DELETE FROM Door WHERE id = {}"
                        "".format(doorId)
                       )
                 self.execute(sql)
-                self.connection.commit()
 
             elif resState == COMMITTED:
                 self.logger.info("Door already committed.")
@@ -1513,7 +1611,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise DoorNotFound('Door not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -1527,9 +1624,9 @@ class DataBase(object):
         Receive a dictionary with door parametters and update it in DB
         '''
 
-        sql = ("UPDATE Door SET doorNum = {}, description = '{}', controllerId = {}, rlseTime = {}, "
+        sql = ("UPDATE Door SET doorNum = {}, name = '{}', controllerId = {}, rlseTime = {}, "
                "bzzrTime = {}, alrmTime = {}, zoneId = {}, resStateId = {} WHERE id = {}"
-               "".format(door['doorNum'], door['description'], door['controllerId'],
+               "".format(door['doorNum'], door['name'], door['controllerId'],
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'],
                          door['zoneId'], TO_UPDATE, door['id'])
               )
@@ -1538,7 +1635,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise DoorNotFound('Door not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -1599,29 +1695,29 @@ class DataBase(object):
         This method is an iterator, in each iteration it returns a person
         not committed with the state "resStateId" from the controller
         with the MAC address "ctrllerMac"
-        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        NOTE: As this method is an iterator and its execution is interrupted
         in each iteration and between each iteration another method can be executed using
-        "self.cursor", a separated cursor is created.
+        "self.cursor", a separated cursor is created (not happening today)
         '''
 
-        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-        sql = ("SELECT person.* FROM "
-               "Person person JOIN PersonPendingOperation personPendingOperation ON "
-               "(person.id = personPendingOperation.personId) WHERE "
-               "personPendingOperation.macAddress = '{}' AND personPendingOperation.pendingOp = {}"
-               "".format(ctrllerMac, resStateId)
-              )
-
         try:
+            localCursor = self.connection.cursor(pymysql.cursors.DictCursor)
+            sql = ("SELECT person.* FROM "
+                   "Person person JOIN PersonPendingOperation personPendingOperation ON "
+                   "(person.id = personPendingOperation.personId) WHERE "
+                   "personPendingOperation.macAddress = '{}' AND personPendingOperation.pendingOp = {}"
+                   "".format(ctrllerMac, resStateId)
+                  )
 
-            cursor.execute(sql)
-            person = cursor.fetchone()
+            localCursor.execute(sql)
+            self.connection.commit()
+            person = localCursor.fetchone()
 
             while person:
                 #Removing the resStateId as this field should not be sent to the controller
                 person.pop('resStateId')
                 yield person
-                person = cursor.fetchone()
+                person = localCursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -1651,7 +1747,6 @@ class DataBase(object):
 
         try:
             self.execute(sql)
-            self.connection.commit()
             return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
@@ -1682,7 +1777,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PersonNotFound('Person not found')
-            self.connection.commit()
 
 
 
@@ -1748,7 +1842,6 @@ class DataBase(object):
                        "".format(DELETED, personId)
                           )
                     self.execute(sql)
-                    self.connection.commit()
 
                     self.delOrgIfNeed(personId)
 
@@ -1761,7 +1854,6 @@ class DataBase(object):
                        "".format(COMMITTED, personId)
                           )
                     self.execute(sql)
-                    self.connection.commit()
             else:
                 #Adding in PersonPendingOperation table: personId, mac address and pending operation
                 #Each entry on this table will be removed when each controller answer to the delete 
@@ -1778,7 +1870,6 @@ class DataBase(object):
                        "".format(values)
                       )
                 self.execute(sql)
-                self.connection.commit()
 
             #If the list of MACs is void or not, we always return it.
             return ctrllerMacs
@@ -1817,7 +1908,12 @@ class DataBase(object):
 
             if resState == TO_DELETE:
 
-                #Deleting all the limited accesses of this person on the doors managed by 
+                sql = ("LOCK TABLES Controller WRITE, "
+                       "Door WRITE, Access WRITE, LimitedAccess WRITE"
+                      )
+                self.execute(sql)
+
+                #Deleting all limited accesses of this person on the doors managed by 
                 #this controller
                 sql = ("DELETE FROM LimitedAccess WHERE personId = {} AND doorId IN "
                        "(SELECT door.id FROM Door door JOIN Controller controller ON "
@@ -1825,9 +1921,8 @@ class DataBase(object):
                        "".format(personId, ctrllerMac)
                       )
                 self.execute(sql)
-                self.connection.commit() 
 
-                #Deleting all the accesses of this person on the doors managed by 
+                #Deleting all accesses of this person on the doors managed by 
                 #this controller
                 sql = ("DELETE FROM Access WHERE personId = {} AND doorId IN "
                        "(SELECT door.id FROM Door door JOIN Controller controller ON "
@@ -1835,7 +1930,8 @@ class DataBase(object):
                        "".format(personId, ctrllerMac)
                       )
                 self.execute(sql)
-                self.connection.commit()                
+
+                self.execute("UNLOCK TABLES")
 
                 #Deleting the entry in "PersonPendingOperation" table which has this person id,
                 #this MAC and the corresponding pending operation.
@@ -1843,7 +1939,6 @@ class DataBase(object):
                        "AND pendingOp = {}".format(personId, ctrllerMac, TO_DELETE)
                       )
                 self.execute(sql)
-                self.connection.commit()
 
                 #If there is not more entries on "PersonPendingOperation" table with this person and 
                 #this operation type, it can delete the person definitely from the central database.                
@@ -1856,7 +1951,6 @@ class DataBase(object):
                     #sql = "DELETE FROM Person WHERE id = {}".format(personId)
                     sql = "UPDATE Person SET resStateId = {} WHERE id = {}".format(DELETED, personId)
                     self.execute(sql)
-                    self.connection.commit()
 
                 self.delOrgIfNeed(personId)
 
@@ -1868,7 +1962,6 @@ class DataBase(object):
                        "AND pendingOp = {}".format(personId, ctrllerMac, TO_UPDATE)
                       )
                 self.execute(sql)
-                self.connection.commit()
 
                 #If there is not more entries on "PersonPendingOperation" table with this person and 
                 #this operation type, it can set the person row state as COMMITTED definitely in the 
@@ -1881,7 +1974,6 @@ class DataBase(object):
                 if not pendCtrllersToUpd:
                     sql = "UPDATE Person SET resStateId = {} WHERE id = {}".format(COMMITTED, personId)
                     self.execute(sql)
-                    self.connection.commit()
 
             elif resState == COMMITTED:
                 self.logger.info('Person already committed.')
@@ -1898,6 +1990,7 @@ class DataBase(object):
             self.logger.debug('Error fetching a person.')
             self.logger.warning('The person to commit is not in data base.')
         except pymysql.err.IntegrityError as integrityError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             self.logger.warning('Error committing a person.')
         except pymysql.err.InternalError as internalError:
@@ -1922,7 +2015,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PersonNotFound('Person not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -1949,7 +2041,6 @@ class DataBase(object):
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PersonNotFound('Person not found')
-            self.connection.commit()
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -1984,69 +2075,44 @@ class DataBase(object):
 
 #-------------------------------Access-----------------------------------
 
-    def getAccesses(self, personId=None, doorId=None):
-        '''
-        Return a dictionary with all access with the personId
-        '''
-        if (not personId and not doorId) or (personId and doorId):
-            raise AccessError("Error of arguments received in getAccess method.")
-        
-        elif personId:
-            # check if the person id exist in the database
-            sql = ("SELECT * FROM Person WHERE id='{}'".format(personId))
-            self.execute(sql)
-            person = self.cursor.fetchall()
 
-            if not person:
-                raise PersonNotFound('Person not found')
+    def getAccess(self, accessId):
+        '''
+        Return all access parametters receiving the access ID.
+        If the access is a limited access, liAccesses field will
+        have a list with all liAcceses
+        '''
 
-            # Get all accesses from an specific person
-            sql = ("SELECT Access.id, Access.doorId, Door.description AS doorDescription, "
-                   "Zone.name AS zoneName, Access.allWeek, Access.iSide, Access.oSide, "
-                   "Access.startTime, Access.endTime, Access.expireDate, Access.resStateId "
-                   "FROM Access JOIN Door ON (Access.doorId = Door.id) JOIN Zone ON "
-                   "(Door.zoneId = Zone.id) WHERE personId = {}"
-                   "".format(personId)
+        try:
+
+            sql = ("LOCK TABLES Zone WRITE, Door WRITE, "
+                   "Organization WRITE, Person WRITE, "
+                   "Access WRITE, LimitedAccess WRITE"
                   )
             self.execute(sql)
-            accesses = self.cursor.fetchall()
-
-        else:
-            # check if the person id exist in the database
-            sql = ("SELECT * FROM Door WHERE id='{}'".format(doorId))
-            self.execute(sql)
-            door = self.cursor.fetchall()
-
-            if not door:
-                raise DoorNotFound('Door not found')
-
-            # Get all persons from the organization
-
 
             sql = ("SELECT Access.id, Access.personId, Person.name AS personName, "
-                   "Organization.name AS organizationName, Access.allWeek, Access.iSide, Access.oSide, "
-                   "Access.startTime, Access.endTime, Access.expireDate, Access.resStateId "
-                   "FROM Access JOIN Person ON (Access.personId = Person.id) JOIN Organization ON "
-                   "(Person.orgId = Organization.id) WHERE doorId = {}"
-                   "".format(doorId)
+                   "Organization.name AS organizationName, Access.doorId, "
+                   "Door.name AS doorName, Zone.name AS zoneName, "
+                   "Access.allWeek, Access.iSide, Access.oSide, Access.startTime, "
+                   "Access.endTime, Access.expireDate, Access.resStateId "
+                   "FROM Access JOIN Person ON (Access.personId = Person.id) "
+                   "JOIN Organization ON (Person.orgId = Organization.id) "
+                   "JOIN Door ON (Access.doorId = Door.id) "
+                   "JOIN Zone ON (Door.zoneId = Zone.id) WHERE Access.id = {}"
+                   "".format(accessId)
                   )
             self.execute(sql)
-            accesses = self.cursor.fetchall()
+            access = self.cursor.fetchone()
 
+            if not access:
+                self.execute("UNLOCK TABLES")
+                raise AccessNotFound("Access not found.")
 
-        for access in accesses:
-
-            access['startTime'] = str(access['startTime'])
-            access['endTime'] = str(access['endTime'])
             access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
-            #The description is usefull to show the access in the front end for an
-            #specific person.
 
             if not access['allWeek']:
-                if personId:
-                    access['liAccesses'] = self.getLiAccesses(access['doorId'], personId)
-                else:
-                    access['liAccesses'] = self.getLiAccesses(doorId, access['personId'])
+                access['liAccesses'] = self.getLiAccesses(access['doorId'], access['personId'])
                 #When the the access is not allWeek access, startTime, endTime, iSide and 
                 #oSide fields are present in each limitedAccess, so we can remove this
                 #field from access.
@@ -2055,7 +2121,131 @@ class DataBase(object):
                 access.pop('iSide')
                 access.pop('oSide')
 
-        return accesses
+            else:
+                #If the access is allWeek startTime and endTime should be formatted correctly
+                access['startTime'] = str(access['startTime'])
+                access['endTime'] = str(access['endTime'])
+
+            self.execute("UNLOCK TABLES")
+            return access
+
+        except TypeError:
+            #This exception could be raised by "getLiAccesses" method
+            #If the tables were locked when this exception was raised, they will be unlocked
+            self.execute("UNLOCK TABLES")
+            self.logger.warning('Error fetching a liAccesses.')
+            raise AccessError('Can not get access with this ID.')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise AccessError('Can not get access with this ID.')
+
+
+
+
+    def getAccesses(self, personId=None, doorId=None):
+        '''
+        Return a dictionary with all access with the personId
+        '''
+
+        try:
+
+            sql = ("LOCK TABLES Zone WRITE, Door WRITE, "
+                   "Organization WRITE, Person WRITE, "
+                   "Access WRITE, LimitedAccess WRITE"
+                  )
+            self.execute(sql)
+
+
+            if (not personId and not doorId) or (personId and doorId):
+                #If the tables were locked when this exception was raised, they will be unlocked
+                self.execute("UNLOCK TABLES")
+                raise AccessError("Error in arguments received in getAccesses method.")
+        
+            elif personId:
+                # check if the person id exists in the database
+                sql = ("SELECT * FROM Person WHERE id='{}'".format(personId))
+                self.execute(sql)
+                person = self.cursor.fetchone()
+
+                if not person:
+                    #If the tables were locked when this exception was raised, they will be unlocked
+                    self.execute("UNLOCK TABLES")
+                    raise PersonNotFound('Person not found')
+
+                # Get all accesses from an specific person
+                sql = ("SELECT Access.id, Access.doorId, Door.name AS doorName, "
+                       "Zone.name AS zoneName, Access.allWeek, Access.iSide, Access.oSide, "
+                       "Access.startTime, Access.endTime, Access.expireDate, Access.resStateId "
+                       "FROM Access JOIN Door ON (Access.doorId = Door.id) JOIN Zone ON "
+                       "(Door.zoneId = Zone.id) WHERE personId = {}"
+                       "".format(personId)
+                      )
+                self.execute(sql)
+                accesses = self.cursor.fetchall()
+
+            else:
+                # check if the door id exists in the database
+                sql = ("SELECT * FROM Door WHERE id='{}'".format(doorId))
+                self.execute(sql)
+                door = self.cursor.fetchone()
+
+                if not door:
+                    #If the tables were locked when this exception was raised, they will be unlocked
+                    self.execute("UNLOCK TABLES")
+                    raise DoorNotFound('Door not found')
+
+                # Get all access from an specific door
+                sql = ("SELECT Access.id, Access.personId, Person.name AS personName, "
+                       "Organization.name AS organizationName, Access.allWeek, Access.iSide, Access.oSide, "
+                       "Access.startTime, Access.endTime, Access.expireDate, Access.resStateId "
+                       "FROM Access JOIN Person ON (Access.personId = Person.id) JOIN Organization ON "
+                       "(Person.orgId = Organization.id) WHERE doorId = {}"
+                       "".format(doorId)
+                      )
+                self.execute(sql)
+                accesses = self.cursor.fetchall()
+
+
+            if not accesses:
+                self.execute("UNLOCK TABLES")
+                raise AccessNotFound('Access not found')
+
+            for access in accesses:
+                access['expireDate'] = access['expireDate'].strftime('%Y-%m-%d %H:%M')
+                if not access['allWeek']:
+                    if personId:
+                        access['liAccesses'] = self.getLiAccesses(access['doorId'], personId)
+                    else:
+                        access['liAccesses'] = self.getLiAccesses(doorId, access['personId'])
+                    #When the the access is not allWeek access, startTime, endTime, iSide and 
+                    #oSide fields are present in each limitedAccess, so we can remove this
+                    #field from access.
+                    access.pop('startTime')
+                    access.pop('endTime')
+                    access.pop('iSide')
+                    access.pop('oSide')
+
+                else:
+                    #If the access is allWeek startTime and endTime should be formatted correctly
+                    access['startTime'] = str(access['startTime'])
+                    access['endTime'] = str(access['endTime'])
+
+            self.execute("UNLOCK TABLES")
+            return accesses
+
+        
+        except TypeError:
+            #This exception could be raised by "getLiAccesses" method
+            self.execute("UNLOCK TABLES")
+            self.logger.warning('Error fetching a liAccesses.')
+            raise AccessError('Can not get accesses in getAcceses for this person or door.')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise AccessError('Can not get accesses for this person or door.')
+
+
 
 
 
@@ -2064,6 +2254,8 @@ class DataBase(object):
 
         '''
         Return a dictionary with all access with the personId
+        Note: In this method, the exception are not handled since they are
+        handled in the methods which call it (getAccess and getAccesses)
         '''
         # check if the person id exist in the database
         sql = ("SELECT * FROM Person WHERE id = '{}'".format(personId))
@@ -2094,29 +2286,42 @@ class DataBase(object):
 
     def getUncmtAccesses(self, ctrllerMac, resStateId):
         '''
-        This method is an iterator, in each iteration it returns a access
-        not committed with the state "resStateId" from the controller
-        with the MAC address "ctrllerMac"
-        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        This method is an iterator, in each iteration it returns a access not committed 
+        with the state "resStateId" from the controller with the MAC address "ctrllerMac".
+        The access also have the card number of the person involved in the access as the 
+        controller need it to add the person dinamically in its Person table.
+        NOTE 1: When this method access to "Access" table, it locks the "Access" and
+        "LimitedAccess" table to avoid inconsistency. As this method is an iterator and its
+        execution is interrupted, each time it yields a value, it leave the tables unlocked 
+        each time it yields a value and re locks them when it continues.
+        NOTE 2: As this method is an iterator and its execution is interrupted
         in each iteration and between each iteration another method can be executed using
-        "self.cursor", a separated cursor is created. In this case, between each iteration,
-        "getPerson" method is executed which would use the same cursor.
+        "self.cursor", a separated cursor is created (not happening today)
         '''
 
-
-        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-        sql = ("SELECT access.* FROM Access access JOIN Door door ON "
-               "(access.doorId = door.id) JOIN Controller controller ON "
-               "(door.controllerId = controller.id) WHERE "
-               "controller.macAddress = '{}' AND access.resStateId = {}"
-               "".format(ctrllerMac, resStateId)
-              )
-
         try:
-            cursor.execute(sql)
-            access = cursor.fetchone()
+
+            localCursor = self.connection.cursor(pymysql.cursors.DictCursor)
+
+            sql = ("LOCK TABLES Controller WRITE, "
+                   "Door WRITE, Person WRITE, "
+                   "Access WRITE, LimitedAccess WRITE"
+                  )
+            self.execute(sql)
+
+            sql = ("SELECT Access.*, Person.cardNumber FROM Access JOIN Person "
+                   "ON (Access.personId = Person.id) JOIN Door "
+                   "ON (Access.doorId = Door.id) JOIN Controller "
+                   "ON (Door.controllerId = Controller.id) WHERE Access.allWeek = 1 "
+                   "AND Controller.macAddress = '{}' AND Access.resStateId = {}"
+                   "".format(ctrllerMac, resStateId)
+                  )
+            localCursor.execute(sql)
+            self.connection.commit()
+            access = localCursor.fetchone()
 
             while access:
+                self.execute("UNLOCK TABLES")
                 #Removing resStateId as it should not be sent to the controller
                 access.pop('resStateId')
                 #Time columns in MariaDB are retrieved as timedelta type.
@@ -2129,12 +2334,27 @@ class DataBase(object):
                 #and formatted using strftime() function.
                 #To do it, the timedelta object should be added to the minimum datetime
                 #object, then retrieve the time from it and call the strftime() method.
-                access['startTime'] = (datetime.datetime.min + access['startTime']).time().strftime('%H:%M')
-                access['endTime'] = (datetime.datetime.min + access['endTime']).time().strftime('%H:%M')
+
+                #We can't ask if access['startTime']: because when startTime is 00:00 (timdelta(0))
+                #it evaluates as False
+                if access['startTime'] is not None: #Asking if not None because in liaccess this field is None.
+                    access['startTime'] = (datetime.datetime.min + access['startTime']).time().strftime('%H:%M')
+                if access['endTime'] is not None: #Asking if not None because in liaccess this field is None.
+                    access['endTime'] = (datetime.datetime.min + access['endTime']).time().strftime('%H:%M')
                 access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
                 
                 yield access
-                access = cursor.fetchone()
+
+                sql = ("LOCK TABLES Controller WRITE, "
+                       "Door WRITE, Person WRITE, "
+                       "Access WRITE, LimitedAccess WRITE"
+                      )
+                self.execute(sql)
+                
+                access = localCursor.fetchone()
+
+            self.execute("UNLOCK TABLES")
+
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -2154,11 +2374,13 @@ class DataBase(object):
 
         try:
 
+            sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
+            self.execute(sql)
+
             sql = ("DELETE FROM LimitedAccess WHERE doorId = {} and personId = {}"
                    "".format(access['doorId'], access['personId'])
                   )
             self.execute(sql)
-            self.connection.commit()
 
 
             #If there was a row in access table, it should be overwritten, avoiding the engine
@@ -2174,8 +2396,6 @@ class DataBase(object):
                              access['expireDate'], TO_ADD)
                   )
             self.execute(sql)
-            self.connection.commit()
-
 
             #As it is necessary to return the access ID, we could use "cursor.lastrowid" attribute,
             #but when all the parametters are the same and nothing is updated, lastrowid returns 0.
@@ -2184,7 +2404,11 @@ class DataBase(object):
                    "".format(access['doorId'], access['personId'])
                   )
             self.execute(sql)
-            return self.cursor.fetchone()['id']
+            accessId = self.cursor.fetchone()['id']
+
+            self.execute("UNLOCK TABLES")
+
+            return accessId
 
 
         #This exception (TypeError) could be raised by the SELECT statement when fetchone()
@@ -2193,6 +2417,7 @@ class DataBase(object):
             self.logger.debug('Error fetching access id.')
             raise AccessError('Can not add this access.')
         except pymysql.err.IntegrityError as integrityError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             raise AccessError('Can not add this access.')
         except pymysql.err.InternalError as internalError:
@@ -2210,20 +2435,48 @@ class DataBase(object):
         and it should be added again.
         '''
 
-        sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
-               "endTime = '{}', expireDate = '{}', resStateId = {} WHERE id = {}"
-               "".format(access['iSide'], access['oSide'],
-                         access['startTime'], access['endTime'],
-                         access['expireDate'], TO_UPDATE, access['id'])
-              )
 
         try:
-            self.execute(sql)
-            if self.cursor.rowcount < 1:
-                raise AccessNotFound('Access not found')
-            self.connection.commit()
 
+            sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
+            self.execute(sql)
+
+            #The user shouldn't be allowed to modify a Limited Access via
+            #access endpoint
+            sql = "SELECT allWeek from Access WHERE id = {}".format(access['id'])
+            self.execute(sql)
+            allWeek = self.cursor.fetchone()['allWeek']
+
+            if allWeek:
+
+                sql = ("UPDATE Access SET iSide = {}, oSide = {}, startTime = '{}', "
+                       "endTime = '{}', expireDate = '{}', resStateId = {} WHERE id = {}"
+                       "".format(access['iSide'], access['oSide'],
+                                 access['startTime'], access['endTime'],
+                                 access['expireDate'], TO_UPDATE, access['id'])
+                      )
+
+                self.execute(sql)
+                if self.cursor.rowcount < 1:
+                    self.execute("UNLOCK TABLES")
+                    raise AccessNotFound('Access not found')
+
+            else:
+                self.execute("UNLOCK TABLES")
+                self.logger.debug('Can not update Limited Access from access endpoint.')
+                raise AccessError('Can not update this access')
+
+
+            self.execute("UNLOCK TABLES")
+
+        #This exception (TypeError) could be raised by the SELECT statement when fetchone()
+        #returns None. This should never happen.
+        except TypeError:
+            self.execute("UNLOCK TABLES")
+            self.logger.debug('Error fetching allWeek from access.')
+            raise AccessError('Can not update this access.')
         except pymysql.err.IntegrityError as integrityError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             raise AccessError('Can not update this access')
         except pymysql.err.InternalError as internalError:
@@ -2238,18 +2491,66 @@ class DataBase(object):
         Set access row state in the server DB for a pending delete.
         '''
 
-        sql = ("UPDATE Access SET resStateId = {} WHERE id = {}"
-               "".format(TO_DELETE, accessId)
-              )
         try:
+
+            sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
+            self.execute(sql)
+
+
+            #The following parameters are got when all limited accesses of a 
+            #person in a door are deleted via access endpoint.            
+            sql = ("SELECT allWeek, doorId, personId FROM Access WHERE id = {}"
+                   "".format(accessId)
+                  )
+            self.execute(sql)
+
+            row = self.cursor.fetchone()
+            allWeek = row['allWeek']
+            doorId = row['doorId']
+            personId = row['personId']
+
+            #This can happen when all limited access of a person in a door 
+            #are being deleted via access endpoint.
+            #On this situation is better start marking the Limited Access entries
+            #before marking the Access entries because if an error occurs the 
+            #Access entry is not altered and inconsistency is avoided between 
+            #Access and Limited Access table.
+            if not allWeek:
+
+                sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE doorId = {} "
+                       "AND personId = {}".format(TO_DELETE, doorId, personId)
+                      )
+                self.execute(sql)
+                if self.cursor.rowcount < 1:
+                    self.execute("UNLOCK TABLES")
+                    raise AccessNotFound('Access not found')
+
+
+            sql = ("UPDATE Access SET resStateId = {} WHERE id = {}"
+                   "".format(TO_DELETE, accessId)
+                  )
             self.execute(sql)
             if self.cursor.rowcount < 1:
+                self.execute("UNLOCK TABLES")
                 raise AccessNotFound('Access not found')
-            self.connection.commit()
+
+            self.execute("UNLOCK TABLES")
+
+
+        except TypeError:
+            self.execute("UNLOCK TABLES")
+            self.logger.debug('Error getting allWeek, doorId or personId from Access.')
+            raise AccessError('Error marking the Access to be deleted.')
 
         except pymysql.err.IntegrityError as integrityError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             raise AccessError('Error marking the Access to be deleted.')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            self.logger.warning('Error marking the Access to be deleted.')
+
 
 
 
@@ -2261,25 +2562,40 @@ class DataBase(object):
         TO_UPDATE state or mark it as DELETED if it was previously in TO_DELETE state
         '''
 
-        sql = "SELECT resStateId FROM Access WHERE id = {}".format(accessId)
-
         try:
+
+            sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
             self.execute(sql)
-            resState = self.cursor.fetchone()['resStateId']
+
+            sql = "SELECT resStateId, allWeek, doorId, personId FROM Access WHERE id = {}".format(accessId)
+            self.execute(sql)
+
+            row = self.cursor.fetchone()
+            resState = row['resStateId']
+            allWeek = row['allWeek']
+            #The following fields will be used when deleting an entire Limited Access (*)
+            doorId = row['doorId']
+            personId = row['personId']
+
 
             if resState in (TO_ADD, TO_UPDATE):
                 sql = ("UPDATE Access SET resStateId = {} WHERE id = {}"
                        "".format(COMMITTED, accessId)
                       )
                 self.execute(sql)
-                self.connection.commit()
 
             elif resState == TO_DELETE:
+
+                #When the access is a Limited Access, all the entries in LimitedAccess should be deleted too
+                if not allWeek:
+                    sql = "DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}".format(doorId, personId)
+                    self.execute(sql)
+
                 sql = ("DELETE FROM Access WHERE id = {}"
                        "".format(accessId)
                       )
                 self.execute(sql)
-                self.connection.commit()
+
 
             elif resState == COMMITTED:
                 self.logger.info("Access already committed.")
@@ -2288,11 +2604,15 @@ class DataBase(object):
                 self.logger.error("Invalid state detected in Access table.")
                 raise AccessError('Error committing this access.')
 
+            self.execute("UNLOCK TABLES")
+
 
         except TypeError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug('Error fetching an access.')
             self.logger.warning('The access to commit is not in data base.')
         except pymysql.err.IntegrityError as integrityError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             self.logger.warning('Error committing an access.')
         except pymysql.err.InternalError as internalError:
@@ -2350,39 +2670,68 @@ class DataBase(object):
 
     def getUncmtLiAccesses(self, ctrllerMac, resStateId):
         '''
-        This method is an iterator, in each iteration it returns a liAccess
-        not committed with the state "resStateId" from the controller
-        with the MAC address "ctrllerMac"
-        IMPORTANT NOTE: As this method is an iterator and its execution is interrupted
+        This method is an iterator, in each iteration it returns a limited access not committed 
+        with the state "resStateId" from the controller with the MAC address "ctrllerMac".
+        The limited access also have the card number of the person involved in the access as the 
+        controller need it to add the person dinamically in its Person table.
+        NOTE 1: When this method access to "LimitedAccess" and "Access" table, it locks
+        the "Access" and "LimitedAccess" table to avoid inconsistency. As this method is an 
+        iterator and its execution is interrupted, each time it yields a value, it leave the tables 
+        unlocked each time it yields a value and re lock them when it continues.
+        NOTE 2: As this method is an iterator and its execution is interrupted
         in each iteration and between each iteration another method can be executed using
-        "self.cursor", a separated cursor is created. In this case, between each iteration,
-        "getPerson" method is executed which would use the same cursor.
+        "self.cursor", a separated cursor is created (not happening today)
         '''
 
-        cursor = self.connection.cursor(pymysql.cursors.DictCursor)
-        secCursor = self.connection.cursor(pymysql.cursors.DictCursor)
-
-
-        sql = ("SELECT liAccess.* FROM LimitedAccess liAccess JOIN Door door ON "
-               "(liAccess.doorId = door.id) JOIN Controller controller ON "
-               "(door.controllerId = controller.id) WHERE "
-               "controller.macAddress = '{}' AND liAccess.resStateId = {}"
-               "".format(ctrllerMac, resStateId)
-              )
-
+        
         try:
+            localCursorOne = self.connection.cursor(pymysql.cursors.DictCursor)
+            localCursorTwo = self.connection.cursor(pymysql.cursors.DictCursor)
 
-            cursor.execute(sql)
-            liAccess = cursor.fetchone()
+            sql = ("LOCK TABLES Controller WRITE, "
+                   "Door WRITE, Person WRITE, "
+                   "Access WRITE, LimitedAccess WRITE"
+                  )
+            self.execute(sql)
+
+            sql = ("SELECT LimitedAccess.*, Person.cardNumber FROM LimitedAccess JOIN Person "
+                   "ON (LimitedAccess.personId = Person.id) JOIN Door "
+                   "ON (LimitedAccess.doorId = Door.id) JOIN Controller "
+                   "ON (Door.controllerId = Controller.id) WHERE "
+                   "Controller.macAddress = '{}' AND LimitedAccess.resStateId = {}"
+                   "".format(ctrllerMac, resStateId)
+                  )
+            localCursorOne.execute(sql)
+            self.connection.commit()
+            liAccess = localCursorOne.fetchone()
+
 
             while liAccess:
                 #There are some fields from access table that should be sent to the controller
                 #when adding or updating a limited access and should be added the "liAccess" dictionary
-                secSql = ("SELECT id, expireDate FROM Access WHERE doorId = {} AND personId = {}"
-                          "".format(liAccess['doorId'], liAccess['personId'])
-                         )
-                secCursor.execute(secSql)
-                row = secCursor.fetchone()
+                sql = ("SELECT id, expireDate FROM Access WHERE doorId = {} AND personId = {}"
+                       "".format(liAccess['doorId'], liAccess['personId'])
+                      )
+                localCursorTwo.execute(sql)
+                self.connection.commit()
+                row = localCursorTwo.fetchone()
+
+                if not row:
+                    #If there are entries in "LimitedAccess" table which doesn't have its corresponding entry in "Access" 
+                    #table should be deleted to avoid "crudresender" thread continue trying to resend them.
+                    logMsg = 'Removing LimitedAccess entries to solve the inconsistency between Access and LimitedAccess'
+                    self.logger.warning(logMsg)
+                    sql = ("DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}"
+                           "".format(liAccess['doorId'], liAccess['personId'])
+                          )
+                    localCursorTwo.execute(sql)
+                    self.connection.commit()
+                    self.execute("UNLOCK TABLES")
+                    raise AccessError('Inconsistency between Access and LimitedAccess')
+
+
+                self.execute("UNLOCK TABLES")
+
                 accessId = row['id']
                 expireDate = row['expireDate']
                 expireDate = str(expireDate)
@@ -2408,10 +2757,19 @@ class DataBase(object):
                 liAccess['expireDate'] = expireDate
 
                 yield liAccess
-                liAccess = cursor.fetchone()
+
+                sql = ("LOCK TABLES Controller WRITE, "
+                       "Door WRITE, Person WRITE, "
+                       "Access WRITE, LimitedAccess WRITE"
+                      )
+                self.execute(sql)
+
+                liAccess = localCursorOne.fetchone()
+
+            self.execute("UNLOCK TABLES")
 
         except TypeError:
-            self.logger.debug('Error fetching expireDate.')
+            self.execute("UNLOCK TABLES")
             raise AccessError('Error getting accesses of not committed controllers')
 
         except pymysql.err.InternalError as internalError:
@@ -2424,16 +2782,52 @@ class DataBase(object):
 
 
 
-
-
     def addLiAccess(self, liAccess):
         '''
         Receive a dictionary with limited access parametters and save it in DB.
         In addition to creating an entry in the table "LimitedAccess" it also 
         creates an entry in "Access" table with allWeek = False.
+        NOTE: The insertion in LimitedAccess table, is using the "ON DUPLICATE KEY UPDATE"
+        to avoid complaining when adding a limited access with the same person,
+        door and day.
+        On this situation, the limited access will be updated.
+        This was specially necesary when adding multiple limited accesses to a person
+        or a door that already have the same combination (door, person, weekDay).
+        When this didn't work in this way, the limited access never was sent to the 
+        controller, because a database exception was raised, the confirmation never came
+        and the access entry in Access table remains in state TO_ADD or TO_UPDATE.
+        In the past the change of the resState in the access entry also was done before
+        inserting in LimitedAccess table. Now the change is done after. In this way,
+        if an error ocurs during the insertion on LimitedAccess, the Acces table is not modified. 
         '''
 
         try:
+            sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
+            self.execute(sql)
+
+
+            sql = ("INSERT INTO LimitedAccess(doorId, personId, weekDay, iSide, oSide, startTime, "
+                   "endTime, resStateId) VALUES({}, {}, {}, {}, {}, '{}', '{}', {}) ON DUPLICATE KEY "
+                   "UPDATE iSide = {}, oSide = {}, startTime = '{}', endTime = '{}', resStateId = {}"
+                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['weekDay'],
+                             liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
+                             liAccess['endTime'], TO_ADD, liAccess['iSide'], liAccess['oSide'],
+                             liAccess['startTime'], liAccess['endTime'], TO_ADD)
+                  )
+            self.execute(sql)
+
+            #As it is necessary to return the liAccess ID, we could use "cursor.lastrowid" attribute,
+            #but when all the parametters are the same and nothing is updated, lastrowid returns 0.
+            #For this reason, a SELECT statement should be executed.
+            sql = ("SELECT id FROM LimitedAccess WHERE doorId = {} AND personId = {} AND weekDay = {}"
+                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['weekDay'])
+                  )     
+            self.execute(sql)
+            liAccessId = self.cursor.fetchone()['id']
+
+
+
+
             #Each time an entry in "LimitedAccess" table is created with the same
             #combination (doorId, personId), this method will try to add an entry
             #in "Access" table. For this reason it is used "ON DUPLICATE KEY UPDATE"
@@ -2446,11 +2840,9 @@ class DataBase(object):
                    "ON DUPLICATE KEY UPDATE allWeek = FALSE, iSide = FALSE, oSide = FALSE, startTime = NULL, "
                    "endTime = NULL, expireDate = '{}', resStateId = {}"
                    "".format(liAccess['doorId'], liAccess['personId'], liAccess['expireDate'], 
-                             COMMITTED, liAccess['expireDate'], COMMITTED)
+                             TO_ADD, liAccess['expireDate'], TO_ADD)
                   )
             self.execute(sql)
-            self.connection.commit()
-
 
             #As it is necessary to return the access ID, we could use "cursor.lastrowid" attribute,
             #but when all the parametters are the same and nothing is updated, lastrowid returns 0.
@@ -2460,26 +2852,21 @@ class DataBase(object):
                   )
             self.execute(sql)
             accessId = self.cursor.fetchone()['id']
-            
 
-            sql = ("INSERT INTO LimitedAccess(doorId, personId, weekDay, iSide, oSide, startTime, "
-                   "endTime, resStateId) VALUES({}, {}, {}, {}, {}, '{}', '{}', {})"
-                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['weekDay'],
-                             liAccess['iSide'], liAccess['oSide'], liAccess['startTime'],
-                             liAccess['endTime'], TO_ADD)
-                  )
-            self.execute(sql)
-            self.connection.commit()
-            liAccessId = self.cursor.lastrowid
+            self.execute("UNLOCK TABLES")
+
             return accessId, liAccessId
 
 
         #This exception (TypeError) could be raised by the SELECT statement when fetchone()
         #returns None. This should never happen.
         except TypeError:
-            self.logger.debug('Error fetching access id.')
+            self.execute("UNLOCK TABLES")
+            self.logger.debug('Error fetching access id or limited access id.')
             raise AccessError('Can not add this limited access.')
         except pymysql.err.IntegrityError as integrityError:
+            #If the tables were locked when this exception was raised, they will be unlocked
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             raise AccessError('Can not add this limited access.')
         except pymysql.err.InternalError as internalError:
@@ -2499,8 +2886,12 @@ class DataBase(object):
         '''
 
         try:
-            #The only thing we should modify in "Access" table is the "expireDate" field.
-            #To modify the access table, we need "doorId" and "personId"
+
+            sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
+            self.execute(sql)
+
+            #The only thing we should modify in "Access" table is the "expireDate" and 
+            #"resStateId" field. To modify the access table, we need "doorId" and "personId"
             sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
                    "".format(liAccess['id'])
                   )
@@ -2511,14 +2902,15 @@ class DataBase(object):
             personId = row['personId']
 
 
-            sql = ("UPDATE Access SET expireDate = '{}' WHERE doorId = {} AND personId = {}"
-                   "".format(liAccess['expireDate'], doorId, personId)
+            sql = ("UPDATE Access SET expireDate = '{}', resStateId = {} "
+                   "WHERE doorId = {} AND personId = {}"
+                   "".format(liAccess['expireDate'], TO_UPDATE,  doorId, personId)
                   )
 
             self.execute(sql)
             if self.cursor.rowcount < 1:
+                self.execute("UNLOCK TABLES")
                 raise AccessNotFound('Access not found')
-            self.connection.commit()
 
 
 
@@ -2531,14 +2923,17 @@ class DataBase(object):
 
             self.execute(sql)
             if self.cursor.rowcount < 1:
+                self.execute("UNLOCK TABLES")
                 raise AccessNotFound('Access not found')
-            self.connection.commit()
 
+            self.execute("UNLOCK TABLES")
 
         except TypeError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug('Can not fetching doorId and perssonId.')
             raise AccessError('Can not update this limited access.')
         except pymysql.err.IntegrityError as integrityError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             raise AccessError('Can not update this limited access.')
         except pymysql.err.InternalError as internalError:
@@ -2554,20 +2949,57 @@ class DataBase(object):
         Set limited access row state in state pending to delete.
         '''
 
-        sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
-               "".format(TO_DELETE, liAccessId)
-              )
         try:
+
+            sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
+            self.execute(sql)
+
+            sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
+                   "".format(TO_DELETE, liAccessId)
+                  )
+
             self.execute(sql)
             if self.cursor.rowcount < 1:
+                self.execute("UNLOCK TABLES")
                 raise AccessNotFound('Access not found')
-            self.connection.commit()
 
+
+            #The only thing we should modify in "Access" table is the "resStateId" 
+            #field. To modify the access table, we need "doorId" and "personId"
+            sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
+                   "".format(liAccessId)
+                  )
+
+            self.execute(sql)
+            row = self.cursor.fetchone()
+            doorId = row['doorId']
+            personId = row['personId']
+
+
+            sql = ("UPDATE Access SET resStateId = {} WHERE doorId = {} AND personId = {}"
+                   "".format(TO_UPDATE,  doorId, personId)
+                  )
+
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                self.execute("UNLOCK TABLES")
+                raise AccessNotFound('Access not found')
+
+
+            self.execute("UNLOCK TABLES")
+
+
+        except TypeError:
+            self.execute("UNLOCK TABLES")
+            self.logger.debug('Can not fetching doorId and perssonId.')
+            raise AccessError('Error marking the Limited Access to be deleted.')
         except pymysql.err.IntegrityError as integrityError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             raise AccessError('Error marking the Limited Access to be deleted.')
-
-
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise AccessError('Error marking the Limited Access to be deleted.')
 
 
 
@@ -2576,39 +3008,37 @@ class DataBase(object):
     def commitLiAccess(self, liAccessId):
         '''
         Mark the limited access in database as COMMITTED if it was previously in TO_ADD or
-        TO_UPDATE state or mark it as DELETED if it was previously in TO_DELETE state
+        TO_UPDATE state, or delete it if it was previously in TO_DELETE state
         '''
 
         try:
-            sql = "SELECT resStateId FROM LimitedAccess WHERE id = {}".format(liAccessId)
-            self.execute(sql)
-            resState = self.cursor.fetchone()['resStateId']
 
-            if resState in (TO_ADD, TO_UPDATE):
+            sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
+            self.execute(sql)
+
+            sql = ("SELECT doorId, personId, resStateId FROM LimitedAccess WHERE id = {}"
+                   "".format(liAccessId)
+                  )
+
+            self.execute(sql)
+            row = self.cursor.fetchone()
+            doorId = row['doorId']
+            personId = row['personId']
+            resStateId = row['resStateId']
+
+
+            if resStateId in (TO_ADD, TO_UPDATE):
                 sql = ("UPDATE LimitedAccess SET resStateId = {} WHERE id = {}"
                        "".format(COMMITTED, liAccessId)
                       )
-
                 self.execute(sql)
-                self.connection.commit()
 
 
-            elif resState == TO_DELETE:
-
-                sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
-                       "".format(liAccessId)
-                      )
-
-                self.execute(sql)
-                row = self.cursor.fetchone() #KeyError exception could be raised here
-                doorId = row['doorId']       #Me parece que es TypeError y no KeyError
-                personId = row['personId']
-        
+            elif resStateId == TO_DELETE:
                 sql = ("DELETE FROM LimitedAccess WHERE id = {}"
                        "".format(liAccessId)
                       )
                 self.execute(sql)
-                self.connection.commit()
 
 
                 #Once we delete a limited access, we should verify if there is another
@@ -2625,24 +3055,43 @@ class DataBase(object):
                           "".format(doorId, personId)
                          )
                    self.execute(sql)
-                   self.connection.commit()
+                   self.execute("UNLOCK TABLES")
+                   return
 
-            elif resState == COMMITTED:
+            elif resStateId == COMMITTED:
                 self.logger.info("Limited access already committed.")
+                self.execute("UNLOCK TABLES")
+                return
 
             else:
                 self.logger.error("Invalid state detected in Limited Access table.")
+                self.execute("UNLOCK TABLES")
                 raise AccessError('Error committing this limited access.')
 
 
+            #If there is no more limited accesses in a state different than COMMITTED,
+            #the access entry should be changed to COMMITTED.
+            sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE doorId = {} AND "
+                   "personId = {} AND resStateId != {}"
+                   "".format(doorId, personId, COMMITTED)
+                  )
+            self.execute(sql)
+            notCommitted = self.cursor.fetchone()['COUNT(*)']
+
+            if not notCommitted:
+                sql = ("UPDATE Access SET resStateId = {} WHERE doorId = {} "
+                       "AND personId = {}".format(COMMITTED, doorId, personId)
+                      )
+                self.execute(sql)
+
+            self.execute("UNLOCK TABLES")
 
         except TypeError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug('Error fetching a limited access.')
             self.logger.warning('The limited access to commit is not in data base.')
-#        except KeyError:
-#            self.logger.debug('Error fetching a limited access.')
-#            self.logger.warning('Error committing a limited access.')
         except pymysql.err.IntegrityError as integrityError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
             self.logger.warning('Error committing a limited access.')
         except pymysql.err.InternalError as internalError:
@@ -2655,7 +3104,7 @@ class DataBase(object):
 
 if __name__ == "__main__": 
     print("Testing Database")
-    dataBase = DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+    dataBase = DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, None)  #Passing None to pass something
 
     sql = ("SELECT doorId FROM Access WHERE personId = 2 AND allWeek = 0")
     dataBase.execute(sql)

@@ -1,4 +1,4 @@
-FROM python:3.6.2-alpine3.6
+FROM python:3-alpine
 
 # Install Flask and PyMySQL
 RUN \
@@ -10,3 +10,4 @@ pip install PyMySQL
 # - 7979: controller connection port
 # - 5000: REST API
 EXPOSE 7979 5000
+CMD ["python", "-u", "/opt/dobie-server/main.py"]

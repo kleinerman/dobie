@@ -46,6 +46,13 @@ class BackEndSrvr(object):
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
+
+        self.origSigIntHandler = signal.getsignal(signal.SIGINT)
+
+        #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
+        signal.signal(signal.SIGTERM, self.finishHandler)
+        signal.signal(signal.SIGINT, self.finishHandler)
+
         #Creating the Message Receiver Thread
         self.msgReceiver = msgreceiver.MsgReceiver(self.exitFlag)
 
@@ -57,7 +64,7 @@ class BackEndSrvr(object):
                                        self.crudReSndr.netToCrudReSndr)
 
         #Creating CRUD Manager (This will run in main thread)
-        self.crudMngr = crud.CrudMngr()
+        self.crudMngr = crud.CrudMngr(self.exitFlag)
         
         #Creating and setting the ctrllermsger for crudMngr
         crudCtrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
@@ -68,11 +75,11 @@ class BackEndSrvr(object):
         self.crudReSndr.ctrllerMsger = crudReSndrCtrllerMsger
 
 
-        self.origSigIntHandler = signal.getsignal(signal.SIGINT)
+        #self.origSigIntHandler = signal.getsignal(signal.SIGINT)
 
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
-        signal.signal(signal.SIGTERM, self.finishHandler)
-        signal.signal(signal.SIGINT, self.finishHandler)
+        #signal.signal(signal.SIGTERM, self.finishHandler)
+        #signal.signal(signal.SIGINT, self.finishHandler)
 
         #By default our exit code will be success
         self.exitCode = 0
@@ -107,9 +114,22 @@ class BackEndSrvr(object):
         self.netMngr.start()
 
         #Starting "CRUD Manager" It will run in main thread
-        self.crudMngr.run()
 
-        
+        #In the common situation, the main thread is blocked in the execution
+        #of werkzeug. On that situation if a SIGTERM signal arrives (Ctrl + C
+        #or docker stop backend) seems that Werkzeug or Flask framework handle
+        #the "KeyboardInterrupt" exception and the main thread is able to finish
+        #the execution joining the rest of the threads.
+        #When the backend starts without connection with database, the main thread
+        #freezes in the connection to database and the Werkzeug server doesn't
+        #reach to execute.
+        #On this situation, when the SIGTERM arrives "KeyboardInterrupt" should be
+        #handled by us. The only thing we have to do on this situation is to allow
+        #it join the rest of the threads and to finish.
+        try:
+            self.crudMngr.run()
+        except KeyboardInterrupt:
+            pass
 
         for thread in threading.enumerate():
             if thread is not threading.currentThread():
