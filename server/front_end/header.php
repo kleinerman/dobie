@@ -144,10 +144,10 @@ ob_start('ob_gzhandler');
 <a href="access"><i class="fa fa-handshake-o fa-fw"></i> <?print_text($lang,"Accesses","Accesos");?><span class="fa arrow"></span></a>
 <ul class="nav nav-second-level">
 <li>
-<a href="accesses-person"><?print_text($lang,"Person -> Door","Persona -> Puerta");?></a>
+<a href="accesses-person"><?print_text($lang,"Person","Persona");?> <span class="fa fa-long-arrow-right"></span> <?print_text($lang,"Door","Puerta");?></a>
 </li>
 <li>
-<a href="accesses-door"><?print_text($lang,"Door -> Person","Puerta -> Persona");?></a>
+<a href="accesses-door"><?print_text($lang,"Door","Puerta");?> <span class="fa fa-long-arrow-right"></span> <?print_text($lang,"Person","Persona");?></a>
 </li>
 </ul>
 </li>
