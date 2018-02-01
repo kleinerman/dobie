@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  nginx:
+    container_name: webserver
+    build:
+      context: webserver
+    ports:
+      - "80:80"
+    volumes:
+      - ../front_end:/site
+    links:
+      - php
+    depends_on:
+      - php
+
+  php:
+    image: php:fpm
+    container_name: php
+    volumes:
+      - ../front_end:/site
+

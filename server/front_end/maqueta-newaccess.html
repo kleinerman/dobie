@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Dobie</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="keywords" content="dobie, access, doors">
+<meta name="description" content="Dobie">
+<meta name="robots" content="all">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="Dobie">
+<meta property="og:description" content="Dobie">
+<meta property="og:type" content="website">
+<meta property="og:url" content="">
+<meta property="og:image" content="">
+<meta property="og:site_name" content="Dobie">
+
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="manifest" href="manifest.json">
+<link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+<meta name="theme-color" content="#ffffff">
+
+<link href="dist/css/bootstrap.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
+<link href="dist/css/font-awesome.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
+<link href="dist/css/jquery-ui.css" type="text/css" rel="stylesheet" property='stylesheet'>
+<link href="dist/css/bootstrap-clockpicker.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
+<!-- Custom CSS -->
+<link href="dist/css/sb-admin-2.css" rel="stylesheet" type='text/css'>
+<!-- More Custom CSS -->
+<link href='dist/css/custom.css' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<div id="wrapper">
+
+<!--END HEADER - START BODY-->
+
+<div class="row">
+<!-- /.col-lg-12 -->
+<div class="col-lg-12">
+<h1 class="page-header">New Access</h1>
+</div>
+<!-- /.col-lg-12 -->
+</div>
+
+<div class="row">
+<!-- left column start -->
+<div class="col-lg-12 center">
+<br>
+
+<div class="row">
+
+<div class="col-lg-3">
+
+<div class="select-container">
+<div class="select-container-title">Zone</div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="zones-select">
+<select id="zones-select" class="select-options form-control" name="zones-select" multiple>
+<option value="1">Subsuelo Norte</option>
+<option value="2">Playa Este</option>
+<option value="3">Terrazas</option>
+<option value="4">Primer Piso</option>
+</select>
+</div>
+</div>
+
+<br><br>
+
+<div class="select-container">
+<div class="select-container-title">Passage</div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="passages-select">
+<select id="passages-select" class="select-options form-control" name="passages-select" multiple>
+<option value="">All</option>
+<option value="1">Barrera de playa</option>
+<option value="2">Barrera Óptica</option>
+<option value="3">Portón Subsuelo</option>
+</select>
+</div>
+</div>
+
+</div>
+
+<div class="col-lg-9 center">
+<div class="select-container-title">Schedule</div>
+<div class="schedule-container">
+<form>
+<table id="schedule-table" class="table-condensed table-responsive left">
+<tr><th>Day</th><th>Time interval</th><th class="center">Incoming</th><th class="center">Outgoing</th><th class="center">Both</th></tr>
+<tr><td><label><input type="checkbox" name="days" value="" checked> All</label></td>
+<td>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="From"><input type="text" class="form-control" value="13:14" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="Until"><input type="text" class="form-control" value="13:14" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+</td><td class="center"><input type="radio" name="way0" value="1" checked>
+</td><td class="center"><input type="radio" name="way0" value="2">
+</td><td class="center"><input type="radio" name="way0" value="3">
+</td>
+</tr>
+
+<tr><td><label><input type="checkbox" name="days" value="1" checked> Monday</label></td>
+<td>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="From"><input type="text" class="form-control" value="13:14" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="Until"><input type="text" class="form-control" value="13:14" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+</td><td class="center"><input type="radio" name="way1" value="1">
+</td><td class="center"><input type="radio" name="way1" value="2">
+</td><td class="center"><input type="radio" name="way1" value="3">
+</td>
+</tr>
+
+<tr><td><label><input type="checkbox" name="days" value="2" checked> Tuesday</label></td>
+<td>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="From"><input type="text" class="form-control" value="13:14" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="Until"><input type="text" class="form-control" value="13:14" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+</td><td class="center"><input type="radio" name="way2" value="1">
+</td><td class="center"><input type="radio" name="way2" value="2">
+</td><td class="center"><input type="radio" name="way2" value="3">
+</td>
+</tr>
+
+<tr><td><label><input type="checkbox" name="days" value="3" checked> Wednesday</label></td>
+<td>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="From"><input type="text" class="form-control" value="13:14" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="Until"><input type="text" class="form-control" value="13:14" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+</td><td class="center"><input type="radio" name="way3" value="1">
+</td><td class="center"><input type="radio" name="way3" value="2">
+</td><td class="center"><input type="radio" name="way3" value="3">
+</td>
+</tr>
+
+<tr><td><label><input type="checkbox" name="days" value="4" checked> Thursday</label></td>
+<td>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="From"><input type="text" class="form-control" value="13:14" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="Until"><input type="text" class="form-control" value="13:14" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+</td><td class="center"><input type="radio" name="way4" value="1">
+</td><td class="center"><input type="radio" name="way4" value="2">
+</td><td class="center"><input type="radio" name="way4" value="3">
+</td>
+</tr>
+
+<tr><td><label><input type="checkbox" name="days" value="5" checked> Friday</label></td>
+<td>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="From"><input type="text" class="form-control" value="13:14" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="Until"><input type="text" class="form-control" value="13:14" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+</td><td class="center"><input type="radio" name="way5" value="1">
+</td><td class="center"><input type="radio" name="way5" value="2">
+</td><td class="center"><input type="radio" name="way5" value="3">
+</td>
+</tr>
+
+<tr><td><label><input type="checkbox" name="days" value="6" checked> Saturday</label></td>
+<td>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="From"><input type="text" class="form-control" value="13:14" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="Until"><input type="text" class="form-control" value="13:14" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+</td><td class="center"><input type="radio" name="way6" value="1">
+</td><td class="center"><input type="radio" name="way6" value="2">
+</td><td class="center"><input type="radio" name="way6" value="3">
+</td>
+</tr>
+
+<tr><td><label><input type="checkbox" name="days" value="7" checked> Sunday</label></td>
+<td>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="From"><input type="text" class="form-control" value="13:14" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" data-toggle="tooltip" title="Until"><input type="text" class="form-control" value="13:14" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+</td><td class="center"><input type="radio" name="way7" value="1">
+</td><td class="center"><input type="radio" name="way7" value="2">
+</td><td class="center"><input type="radio" name="way7" value="3">
+</td>
+</tr>
+</table>
+<br>
+
+<div class="left">
+Expiration Date: <label><input type="radio" name="expiration" value="0" checked> No</label> <label><input type="radio" name="expiration" value="1"> Yes</label>  
+</div>
+
+<div class="left">
+<input type="text" class="form-control center" name="expiration_date" id="expiration_date" value="2017-11-17">
+
+<br><br>
+<button class="btn btn-success" type="submit">Save</button>
+</div>
+
+</form>
+</div>
+</div>
+</div>
+</div>
+
+<br><br><br>
+<!--END BODY -->
+</div>
+<!-- /#page-wrapper -->
+</div>
+<!-- /#wrapper -->
+
+<script type="text/javascript" src="dist/js/jquery.min.js"></script>
+<script type="text/javascript" src="dist/js/jquery-ui.js"></script>
+<script type="text/javascript" src="dist/js/bootstrap.min.js"></script>
+<!-- Metis Menu Plugin JavaScript -->
+<script type="text/javascript" src="bower_components/metisMenu/dist/metisMenu.min.js"></script>
+<!-- Custom Theme JavaScript -->
+<script type="text/javascript" src="dist/js/bootstrap-clockpicker.min.js"></script>
+<script type="text/javascript" src="dist/js/sb-admin-2.js"></script>
+<script type="text/javascript" src="lib/jslib.js"></script>
+<script type="text/javascript">
+// tooltip demo
+$('body').tooltip({
+selector: "[data-toggle=tooltip]",
+container: "body"
+})
+</script>
+
+<script type="text/javascript">
+$(".data-filter").keyup(function(){
+	var options=$("#"+$(this).data("filter") + " option");
+	var filterValue=$(this).val().toLowerCase();
+	options.each(function(){
+		if($(this).text().toLowerCase().includes(filterValue)) $(this).show();
+		else $(this).hide();
+	})
+});
+
+$(".data-filter-table").keyup(function(){
+	var rows=$("#"+$(this).data("filter") + " tr");
+	var filterValue=$(this).val().toLowerCase();
+	rows.each(function(){
+		if($(this).find("td").text().toLowerCase().includes(filterValue)) $(this).show();
+		else $(this).hide();
+	})
+	//show header row
+	$("#"+$(this).data("filter") + " tr:first-child").show();
+});
+
+//expiration date
+$("input[name=expiration]").change(function(){
+	if($(this).prop("checked") && $(this).val()==1) {
+		$("#expiration_date").fadeIn();
+	} else $("#expiration_date").fadeOut();
+});
+
+//initial show/hide
+if($("input[name=expiration]:checked").val()!=0) $("#expiration_date").fadeIn();
+</script>
+
+<script type="text/javascript">
+$('.clockpicker').clockpicker();
+
+//init date picker
+$(function(){
+	$("#expiration_date").datepicker({dateFormat: "yy-mm-dd"});
+});
+
+$("input[name=days]").click(function(){
+	if($(this).val()==""){
+		//if All button
+		if($(this).prop("checked")) $("input[name=days]").prop("checked",true);
+		else $("input[name=days]").prop("checked",false);
+	} else {
+		//rest of buttons
+		$("input[name=days]:first").prop("checked",false);
+	}
+});
+
+</script> 
+
+
+<style>
+.select-container{
+	width:250px;
+	display:inline-block;
+	margin-right:50px;
+}
+
+.select-container-title{
+	font-size:20px;
+	font-weight:bold;
+	text-align:left
+}
+
+.select-options{
+	height:200px !important;
+}
+
+.select-container-footer{
+	text-align:right;
+	margin-top:10px;
+}
+
+.pendingrow{
+	background:#ffa;
+}
+
+.failrow{
+	background:#faa;
+}
+
+
+.table-container{
+	display:grid;
+	margin:0px auto;
+	max-height:600px;
+	overflow:auto;
+}
+
+.clockpicker{
+	display:inline-table;
+	width:100px;
+}
+
+#expiration_date{
+	display:none;
+	width: 100px;
+}
+
+#schedule-table{
+	border: 1px solid #ccc;
+	width: 100%;
+}
+</style>
+
+</body>
+</html>

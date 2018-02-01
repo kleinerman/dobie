@@ -60,12 +60,24 @@ class CrudMngr(genmngr.GenericMngr):
     Through a RESTful API, this clase manages creations, deletions and modifications in
     the database.
     '''
-    def __init__(self):
+
+    #Although this is not a typical thread because it is the "mainThread", it has
+    #a constructor that receives the "exitFlag" because when somebody send a REST
+    #query, a new thread is created by the werkzeug server with the name "thread-N"
+    #and with the same attributes that the "mainThread". When there is no connection
+    #to data base, this thread (thread-N) freezes trying to connect the data base.
+    #If in that situation a SIGTERM arrives, the "exitflag" clonned by the "mainThread",
+    #allows it to finish as the rest of the threads.
+    def __init__(self, exitFlag):
+
+        super().__init__('Main', exitFlag)
 
         #Database object to access DB
-        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE)
+        self.dataBase = None
 
         self.ctrllerMsger = None
+
+        self.exitFlag = exitFlag
 
 
     #---------------------------------------------------------------------------#
@@ -74,6 +86,11 @@ class CrudMngr(genmngr.GenericMngr):
         '''
         Launch the Flask server and wait for REST request
         '''
+        #Maybe this connection to database could stay in the constructor, but
+        #just to be sure it was put here because I don't know what will happend with
+        #the clonned threads created by werkzeug server when REST messages arrives
+        #and there is no connection to database.
+        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self)
 
         app = Flask(__name__)
         auth = HTTPBasicAuth()
@@ -543,7 +560,7 @@ class CrudMngr(genmngr.GenericMngr):
                     zones = self.dataBase.getZones()
                     for zone in zones:
                         zone['uri'] = url_for('Zone', zoneId=zone['id'], _external=True)
-                        zone.pop('id')
+                        #zone.pop('id')
                     return jsonify(zones)
 
                 ## For POST method
@@ -648,115 +665,133 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-#----------------------------------VisitorsDoors------------------------------------
+#----------------------------------VisitDoorGroup------------------------------------
 
-        visitorsDoorsNeedKeys = ('name',)
+        visitDoorGroupNeedKeys = ('name',)
 
-        @app.route('/api/v1.0/visitorsdoors', methods=['POST', 'GET'])
+        @app.route('/api/v1.0/visitdoorgroup', methods=['POST', 'GET'])
         @auth.login_required
-        def visitorsDoorss():
+        def visitDoorGroups():
             ''' 
-            Add a new Visitors Doors into the database.
+            Add a new Visit Door Group into the database.
             '''     
             try:    
                 ## For GET method
                 if request.method == 'GET':
-                    visitorsDoorss = self.dataBase.getVisitorsDoorss()
-                    for visitorsDoors in visitorsDoorss:
-                        visitorsDoors['uri'] = url_for('visitorsDoors', visitorsDoorsId=visitorsDoors['id'], _external=True)
-                        visitorsDoors.pop('id')
-                    return jsonify(visitorsDoorss)
+                    visitDoorGroups = self.dataBase.getVisitDoorGroups()
+                    for visitDoorGroup in visitDoorGroups:
+                        visitDoorGroup['uri'] = url_for('visitDoorGroup', visitDoorGroupId=visitDoorGroup['id'], _external=True)
+                        visitDoorGroup.pop('id')
+                    return jsonify(visitDoorGroups)
                 ## For POST method
                 elif request.method == 'POST':
-                    visitorsDoors = {}
-                    for param in visitorsDoorsNeedKeys:
-                        visitorsDoors[param] = request.json[param]
-                    visitorsDoorsId = self.dataBase.addVisitorsDoors(visitorsDoors)
-                    uri = url_for('visitorsDoors', visitorsDoorsId=visitorsDoorsId, _external=True)
-                    return jsonify({'status': 'OK', 'message': 'Visitors Door added', 'code': CREATED, 'uri': uri}), CREATED
+                    visitDoorGroup = {}
+                    for param in visitDoorGroupNeedKeys:
+                        visitDoorGroup[param] = request.json[param]
+                    visitDoorGroupId = self.dataBase.addVisitDoorGroup(visitDoorGroup)
+                    uri = url_for('visitDoorGroup', visitDoorGroupId=visitDoorGroupId, _external=True)
+                    return jsonify({'status': 'OK', 'message': 'Visit Door Group added', 'code': CREATED, 'uri': uri}), CREATED
 
-            except database.VisitorsDoorsError as visitorsDoorsError:
-                raise ConflictError(str(visitorsDoorsError))
+            except database.VisitDoorGroupError as visitDoorGroupError:
+                raise ConflictError(str(visitDoorGroupError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
-                raise BadRequest('Invalid request. Required: {}'.format(', '.join(visitorsDoorsNeedKeys)))
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(visitDoorGroupNeedKeys)))
 
 
 
 
-        @app.route('/api/v1.0/visitorsdoors/<int:visitorsDoorsId>', methods=['GET', 'PUT', 'DELETE'])
+        @app.route('/api/v1.0/visitdoorgroup/<int:visitDoorGroupId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
-        def visitorsDoors(visitorsDoorsId):
+        def visitDoorGroup(visitDoorGroupId):
             '''
-            Update or delete a Visitors Doors in the database.
+            Retrieve update or delete a Visit Door Group into the database.
             '''
             try:
-
     
-                ## For GET method
                 if request.method == 'GET':
-                    doors = self.dataBase.getDoors(visitorsDoorsId=visitorsDoorsId)
-
-                    for door in doors:
-                        door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
-                        door.pop('id')
-                    return jsonify(doors)
-
+                    visitDoorGroup = self.dataBase.getVisitDoorGroup(visitDoorGroupId)
+                    visitDoorGroup['uri'] = request.url
+                    return jsonify(visitDoorGroup)
 
                 elif request.method == 'PUT':
-                    visitorsDoors = {}
-                    visitorsDoors['id'] = visitorsDoorsId
-                    for param in visitorsDoorsNeedKeys:
-                        visitorsDoors[param] = request.json[param]
-                    self.dataBase.updVisitorsDoors(visitorsDoors)
-                    return jsonify({'status': 'OK', 'message': 'Visitors Doors updated'}), OK
+                    visitDoorGroup = {}
+                    visitDoorGroup['id'] = visitDoorGroupId
+                    for param in visitDoorGroupNeedKeys:
+                        visitDoorGroup[param] = request.json[param]
+                    self.dataBase.updVisitDoorGroup(visitDoorGroup)
+                    return jsonify({'status': 'OK', 'message': 'Visit Door Group updated'}), OK
 
                 elif request.method == 'DELETE':
-                    self.dataBase.delVisitorsDoors(visitorsDoorsId)
-                    return jsonify({'status': 'OK', 'message': 'Visitors Doors deleted'}), OK
+                    self.dataBase.delVisitDoorGroup(visitDoorGroupId)
+                    return jsonify({'status': 'OK', 'message': 'Visit Door Group deleted'}), OK
 
-            except database.VisitorsDoorsNotFound as visitorsDoorsNotFound:
-                raise NotFound(str(visitorsDoorsNotFound))
-            except database.VisitorsDoorsError as visitorsDoorsError:
-                raise ConflictError(str(visitorsDoorsError))
+            except database.VisitDoorGroupNotFound as visitDoorGroupNotFound:
+                raise NotFound(str(visitDoorGroupNotFound))
+            except database.VisitDoorGroupError as visitDoorGroupError:
+                raise ConflictError(str(visitDoorGroupError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitorsDoorsNeedKeys)))
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitDoorGroupNeedKeys)))
 
 
 
-
-
-
-
-
-
-        @app.route('/api/v1.0/visitorsdoors/<int:visitorsDoorsId>/door/<int:doorId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/visitdoorgroup/<int:visitDoorGroupId>/door', methods=['GET',])
         @auth.login_required
-        def doorInVisitorsDoors(visitorsDoorsId, doorId):
+        def visitDoorGroupDoor(visitDoorGroupId):
+            '''
+            Update or delete a Visit Door Group into the database.
+            '''
+            try:
+                doors = self.dataBase.getDoors(visitDoorGroupId=visitDoorGroupId)
+
+                for door in doors:
+                    door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
+                    #door.pop('id')
+                return jsonify(doors)
+
+            except database.VisitDoorGroupNotFound as visitDoorGroupNotFound:
+                raise NotFound(str(visitDoorGroupNotFound))
+            except database.VisitDoorGroupError as visitDoorGroupError:
+                raise ConflictError(str(visitDoorGroupError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(visitDoorGroupNeedKeys)))
+
+
+
+
+
+        @app.route('/api/v1.0/visitdoorgroup/<int:visitDoorGroupId>/door/<int:doorId>', methods=['PUT', 'DELETE'])
+        @auth.login_required
+        def doorInVisitDoorGroup(visitDoorGroupId, doorId):
             ''' 
-            Add a new Visitors Doors into the database.
+            Add or delete a Door into Visit Door Group.
             '''
             try:
                 if request.method == 'PUT':
-                    self.dataBase.addDoorToVisitorsDoors(visitorsDoorsId, doorId)
-                    return jsonify({'status': 'OK', 'message': 'Door added to Visitors Doors'}), OK
+                    self.dataBase.addDoorToVisitDoorGroup(visitDoorGroupId, doorId)
+                    return jsonify({'status': 'OK', 'message': 'Door added to Visit Door Group'}), OK
                 elif request.method == 'DELETE':
-                    self.dataBase.delDoorFromVisitorsDoors(visitorsDoorsId, doorId)
-                    return jsonify({'status': 'OK', 'message': 'Door deleted from Visitors Doors'}), OK
+                    self.dataBase.delDoorFromVisitDoorGroup(visitDoorGroupId, doorId)
+                    return jsonify({'status': 'OK', 'message': 'Door deleted from Visit Door Group'}), OK
 
-            except database.VisitorsDoorsError as visitorsDoorsError:
-                raise ConflictError(str(visitorsDoorsError))
-            except database.VisitorsDoorsNotFound as visitorsDoorsNotFound:
-                raise NotFound(str(visitorsDoorsNotFound))
+            except database.VisitDoorGroupError as visitDoorGroupError:
+                raise ConflictError(str(visitDoorGroupError))
+            except database.VisitDoorGroupNotFound as visitDoorGroupNotFound:
+                raise NotFound(str(visitDoorGroupNotFound))
 
 
             except TypeError:
@@ -881,10 +916,13 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify(accesses)
 
 
-            except database.PersonNotFound as personNotFound:
-                raise NotFound(str(personNotFound))
-            except database.PersonError as personError:
-                raise ConflictError(str(personError))
+
+            except (database.AccessNotFound, database.PersonNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
+
+            except database.AccessError as accessError:
+                raise ConflictError(str(accessError))
+
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -999,7 +1037,7 @@ class CrudMngr(genmngr.GenericMngr):
 #--------------------------------------Door------------------------------------------
 
 
-        doorNeedKeys = ('description', 'doorNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId')
+        doorNeedKeys = ('name', 'doorNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId')
 
         @app.route('/api/v1.0/door', methods=['POST'])
         @auth.login_required
@@ -1015,7 +1053,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Door dictionary modified for the controller database (same server door id)
                 door['id'] = doorId
-                door.pop('description')
+                door.pop('name')
                 door.pop('zoneId')
                 door.pop('controllerId')
                 # Get the controller mac address
@@ -1059,7 +1097,7 @@ class CrudMngr(genmngr.GenericMngr):
                     for param in doorNeedKeys:
                         door[param] = request.json[param]
                     self.dataBase.updDoor(door)
-                    door.pop('description')
+                    door.pop('name')
                     door.pop('zoneId')
                     door.pop('controllerId')
                     ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
@@ -1113,16 +1151,17 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify(accesses)
 
 
-            except database.PersonNotFound as personNotFound:
-                raise NotFound(str(personNotFound))
-            except database.PersonError as personError:
-                raise ConflictError(str(personError))
+            except (database.AccessNotFound, database.PersonNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
+
+            except database.AccessError as accessError:
+                raise ConflictError(str(accessError))
+
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-
 
 
 
@@ -1194,7 +1233,7 @@ class CrudMngr(genmngr.GenericMngr):
 
         updAccessNeedKeys = ('iSide', 'oSide', 'startTime', 'endTime', 'expireDate')
 
-        @app.route('/api/v1.0/access/<int:accessId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/access/<int:accessId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
         def modAccess(accessId):
             '''
@@ -1202,7 +1241,20 @@ class CrudMngr(genmngr.GenericMngr):
             the appropriate controller.
             '''
             try:
-                if request.method == 'PUT':
+                if request.method == 'GET':
+                    access = self.dataBase.getAccess(accessId)
+                    try:
+                        for liAccess in access['liAccesses']:
+                            liAccess['uri'] = url_for('modLiAccess', liAccessId=liAccess['id'], _external=True)
+                    except KeyError:
+                        #This exception will happen when the access is allWeek access. In this situation
+                        #nothing should be done.
+                        pass
+
+                    access['uri'] = request.url
+                    return jsonify(access)
+
+                elif request.method == 'PUT':
                     # Create a clean access dictionary with only required access params,
                     # removing unnecessary parameters if the client send them.
                     # Also a KeyError wil be raised if the client misses any parameter.
@@ -1225,12 +1277,14 @@ class CrudMngr(genmngr.GenericMngr):
                     self.ctrllerMsger.delAccess(ctrllerMac, accessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
-            except database.DoorNotFound as doorNotFound:
-                raise NotFound(str(doorNotFound))
-            except database.AccessNotFound as accessNotFound:
-                raise NotFound(str(accessNotFound))
+
+
+            except (database.AccessNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
+
             except database.AccessError as accessError:
                 raise ConflictError(str(accessError))
+
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -1434,8 +1488,39 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+#--------------------------------------Visitors------------------------------------------
+
+
+        @app.route('/api/v1.0/visitor', methods=['GET'])
+        @auth.login_required
+        def visitors():
+            '''
+            Returns visitors. This resource receives arguments in the URL that 
+            parameterize the list of visitors returned.
+            '''
+            try:
+
+                visitedOrgId = request.args.get('visitedOrgId')
+                visitDoorGroupId = request.args.get('visitDoorGroupId')
+                cardNumber = request.args.get('cardNumber')
+
+                visitors = self.dataBase.getVisitors(visitedOrgId, visitDoorGroupId, cardNumber)
+                return jsonify(visitors)
+
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
+            except database.PersonError as personError:
+                raise ConflictError(str(personError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
 #----------------------------------------Main--------------------------------------------
 
-
+        self.logger.info('Starting Werkzeug to listen for REST methods..') 
         app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
 

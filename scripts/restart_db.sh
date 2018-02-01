@@ -2,5 +2,5 @@
 
 docker container stop backend
 cd ../server/scripts
-./db_create_drop.sh -r 172.18.0.2
+./db_create_drop.sh -r
 docker container start backend
