@@ -153,7 +153,10 @@ class DataBase(object):
         else:
             side = 'NULL'
 
-        allowed = int(event['allowed'])
+        if event['allowed']:
+            allowed = int(event['allowed'])
+        else:
+            allowed = 'NULL'
 
         if event['denialCauseId']:
             denialCauseId = event['denialCauseId']
@@ -496,14 +499,39 @@ class DataBase(object):
         Then all the persons who has no access to any door are also deleted manually.
         '''
         try:
+
+            sql = "SELECT allWeek, doorId, personId FROM Access WHERE id = {}".format(access['id'])
+            self.cursor.execute(sql)
+            row = self.cursor.fetchone()
+            allWeek = row[0]
+            #The following fields will be used when deleting an entire Limited Access.
+            doorId = row[1]
+            personId = row[2]
+
+            #When the access is a Limited Access, all the entries in LimitedAccess should be deleted too.
+            if not allWeek:
+                sql = "DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}".format(doorId, personId)
+                self.cursor.execute(sql)
+
             sql = "DELETE FROM Access WHERE id = {}".format(access['id'])
             self.cursor.execute(sql)
 
+            #Deleting all persons who have no access to any door.
             sql = ("DELETE FROM Person WHERE id NOT IN "
                    "(SELECT DISTINCT personId FROM Access) AND id != 1"
                   )
             self.cursor.execute(sql)
             #self.connection.commit()
+
+
+        except TypeError:
+            #This exception can happen when the server asks the controller
+            #to delete an Access that doesn't exists. On this situation,
+            #the controller should answer to the server with OK to avoid
+            #the server resend this DELETE message.
+            #For this reason, on this situation an exception is not thrown.
+            self.logger.warning('Can not find a Access with this id.')
+            #raise IntegrityError('Integrity error deleting an Access.')
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -669,9 +697,16 @@ class DataBase(object):
                 self.cursor.execute(sql)
                 #self.connection.commit()
 
+
+
         except TypeError:
-            self.logger.debug('Can not find a Limited Access with this id.')
-            raise IntegrityError('Integrity error deleting a Limited Access.')
+            #This exception can happen when the server asks the controller
+            #to delete an Access that doesn't exists. On this situation,
+            #the controller should answer to the server with OK to avoid
+            #the server resend this DELETE message.
+            #For this reason, on this situation an exception is not thrown.
+            self.logger.warning('Can not find a Limited Access with this id.')
+            #raise IntegrityError('Integrity error deleting a Limited Access.')
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
