@@ -681,7 +681,6 @@ class CrudMngr(genmngr.GenericMngr):
                     visitDoorGroups = self.dataBase.getVisitDoorGroups()
                     for visitDoorGroup in visitDoorGroups:
                         visitDoorGroup['uri'] = url_for('visitDoorGroup', visitDoorGroupId=visitDoorGroup['id'], _external=True)
-                        visitDoorGroup.pop('id')
                     return jsonify(visitDoorGroups)
                 ## For POST method
                 elif request.method == 'POST':
