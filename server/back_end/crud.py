@@ -1488,6 +1488,37 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+#--------------------------------------Visitors------------------------------------------
+
+
+        @app.route('/api/v1.0/visitor', methods=['GET'])
+        @auth.login_required
+        def visitors():
+            '''
+            Returns visitors. This resource receives arguments in the URL that 
+            parameterize the list of visitors returned.
+            '''
+            try:
+
+                visitedOrgId = request.args.get('visitedOrgId')
+                visitDoorGroupId = request.args.get('visitDoorGroupId')
+                cardNumber = request.args.get('cardNumber')
+
+                visitors = self.dataBase.getVisitors(visitedOrgId, visitDoorGroupId, cardNumber)
+                return jsonify(visitors)
+
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
+            except database.PersonError as personError:
+                raise ConflictError(str(personError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
 #----------------------------------------Main--------------------------------------------
 
         self.logger.info('Starting Werkzeug to listen for REST methods..') 
