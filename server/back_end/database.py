@@ -441,14 +441,23 @@ class DataBase(object):
             self.execute(sql)
             events = self.cursor.fetchall()
 
+
+
+            #Converting all datetime fields into string because if not doing this, "jsonify"
+            #method converts them to a format not desired like "Wed, 13 Sep 2017 17:50:00 GMT"
+            #The "GMT" at the end was causing the browser converts it to GMT time.
+            for event in events:
+                event['dateTime'] = event['dateTime'].strftime("%Y-%m-%d %H:%M")
+
+            return events, totalEvtsCount
+
+
         except pymysql.err.ProgrammingError as programmingError:
             #This exception can happen when startEvtSql < 0 or evtQtty is < 0
             #This exception is converted to BadRequest in crud.py module
             #However this would never happen since both parametters are checked 
             #in the first part of the method
             raise EventError
-
-        return events, totalEvtsCount
 
         
 
@@ -2373,7 +2382,6 @@ class DataBase(object):
         '''
 
         try:
-
             sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
             self.execute(sql)
 
@@ -2421,6 +2429,7 @@ class DataBase(object):
             self.logger.debug(integrityError)
             raise AccessError('Can not add this access.')
         except pymysql.err.InternalError as internalError:
+            self.execute("UNLOCK TABLES")
             self.logger.debug(internalError)
             raise AccessError('Can not add this access.')
 
