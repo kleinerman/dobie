@@ -89,7 +89,7 @@ include("header.php");
 <div class="select-container-body left">
 <br>
 From:<br>
-<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="From Date"><input type="text" class="form-control input_date center" id="startDate" value="<?=date("Y-m-d",mktime(0,0,0)-(60*60*24))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="From Date"><input type="text" class="form-control input_date center" id="startDate" value="<?=date("Y-m-d",mktime(0,0,0)-(60*60*24*7))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
 
 <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" id="startTime" name="startTime"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 
@@ -195,6 +195,10 @@ Until:<br>
 
 #legend-row{
 	padding: 40px;
+}
+
+#events-table{
+	width:100%;
 }
 </style>
 
