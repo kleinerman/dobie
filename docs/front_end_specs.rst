@@ -2524,12 +2524,53 @@ An specific visitor could be retrieved using his card number. In this case, the 
 
 In any case, from the list of retrieved visitors, they could be selected, and pressing the remove button a DELETE method should be sent to the server in the same way of deleting a person.
 
+|
 
 Add a visitor
 +++++++++++++
 
+
 When the **Add Visitor** button is pressed, the following popup should appear:
+
+|
 
 .. image:: images_front_end_specs/add_visitor.png
 
-The visitor should be added in the same way a person is added in section: `Add Person`_
+The visitor should be added in the same way a person is added in section: `Add Person`_ of section Persons with the only difference that the field **orgId** should be always equal to 1 since all visitors belong to organization "Visitors" and **visitedOrgId** should have the ID of the organization the visitor is going to visit.
+
+
+
+The following REST method should be sent to the server:
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/person
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Ruben Juearez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 1, "visitedOrgId": 4}
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 121
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 13 Jul 2017 13:40:56 GMT
+
+  {
+    "code": 201, 
+    "message": "Person added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.3:5000/api/v1.0/person/9"
+  }
+
