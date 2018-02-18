@@ -2531,3 +2531,5 @@ Add a visitor
 When the **Add Visitor** button is pressed, the following popup should appear:
 
 .. image:: images_front_end_specs/add_visitor.png
+
+The visitor should be added in the same way a person is added in section: `Add Person`_
