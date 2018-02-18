@@ -1934,18 +1934,30 @@ To get from the server the current list of Visit Door Group, the following REST 
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 220
-  Server: Werkzeug/0.13 Python/3.6.2
-  Date: Tue, 26 Dec 2017 20:04:20 GMT
+  Content-Length: 461
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 18 Feb 2018 14:38:15 GMT
   
   [
     {
-      "name": "Molinetes Torre A", 
+      "id": 1, 
+      "name": "Ingreso Este", 
       "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1"
     }, 
     {
-      "name": "Puertas Front Torre B", 
+      "id": 2, 
+      "name": "Ingreso Oeste", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/2"
+    }, 
+    {
+      "id": 3, 
+      "name": "Ingreso Norte", 
       "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
+    }, 
+    {
+      "id": 5, 
+      "name": "Molinetes", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
     }
   ]
 
@@ -1975,7 +1987,19 @@ First of all, a name should be assigned to it. This will be done sending a POST 
 
 .. code-block::
 
-  **Method:** POST
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 139
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 18 Feb 2018 14:34:46 GMT
+  
+  {
+    "code": 201, 
+    "message": "Visit Door Group added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
+  }
+
 
 **URI:**
 
