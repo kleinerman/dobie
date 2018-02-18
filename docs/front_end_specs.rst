@@ -2523,3 +2523,11 @@ An specific visitor could be retrieved using his card number. In this case, the 
   ]
 
 In any case, from the list of retrieved visitors, they could be selected, and pressing the remove button a DELETE method should be sent to the server in the same way of deleting a person.
+
+
+Add a visitor
++++++++++++++
+
+When the **Add Visitor** button is pressed, the following popup should appear:
+
+.. image:: images_front_end_specs/add_visitor.png
