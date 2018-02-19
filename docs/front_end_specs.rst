@@ -2094,7 +2094,8 @@ Get one Visit Door Group
   }
 
 
-To get all the doors from a Visit Door Group the following method should be sent to the server:
+Get the doors from a Visit Door Group
++++++++++++++++++++++++++++++++++++++
 
 **Method:** GET
 
@@ -2160,7 +2161,7 @@ To get all the doors from a Visit Door Group the following method should be sent
 Modify a Visit Door Group Name
 ++++++++++++++++++++++++++++++
 
-To modify the name of the Visit Door Group the followin method should be sent to the server:
+To modify the name of the Visit Door Group the following method should be sent to the server:
 
 
 **Method:** PUT
@@ -2224,10 +2225,10 @@ To remove doors from a Visit Door Group the following method should be sent to t
     "status": "OK"
   }
   
-  
+
 Remove an entire Vist Door Group and all its doors
 ++++++++++++++++++++++++++++++++++++++++++++++++++
-  
+ 
 **Method:** DELETE
 
 **URI:**
@@ -2572,5 +2573,14 @@ The following REST method should be sent to the server:
     "message": "Person added", 
     "status": "OK", 
     "uri": "http://172.18.0.3:5000/api/v1.0/person/9"
+
   }
+
+
+| Visiting organization combobox should show all the organizations. The **visitedOrgId** field of visitor's JSON should be the ID of the organization selected in this combobox. To get all the organizations, see `Get Organizations`_
+| To fill the combobox **Visit Door Group**, all Visit Door Groups should be retrieved. To do it, see `Get Visit Door Groups`_.
+| All the doors of the selected Visit Door Group should be retrieved. To do it, see `Get the doors from a Visit Door Group`_.
+| Once we have all the doors, an **All Week Access** should be created for the visitor in each door of the group. The expiration date of the access should be the expiration selected in the pop up. By default it should expires at 23:59 of the current day.
+| To give access see: `Add All Week Access`_
+
 
