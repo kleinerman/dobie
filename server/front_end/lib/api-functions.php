@@ -177,50 +177,6 @@ function get_access($user,$pass,$id){
 	else return $response->data;
 }
 
-function get_door($user,$pass,$id){
-	global $config;
-	$response=send_request($config->api_fullpath."door/$id",$user,$pass);
-	if($response->response_status != "200") return false;
-	else return $response->data;
-}
-
-function get_zones($user,$pass){
-	global $config;
-	$response=send_request($config->api_fullpath."zone",$user,$pass);
-	if($response->response_status != "200") return false;
-	else {
-		for($i=0;$i<count($response->data);$i++){
-			if(!isset($response->data[$i]->id)) {
-				$uri_parts=explode("/",$response->data[$i]->uri);
-				$response->data[$i]->id = end($uri_parts);
-			}
-		}
-		return $response->data;
-	}
-}
-
-function get_zone($user,$pass,$id){
-	global $config;
-	$response=send_request($config->api_fullpath."zone/$id",$user,$pass);
-	if($response->response_status != "200") return false;
-	else return $response->data;
-}
-
-//get doors in a zone
-function get_doors($user,$pass,$id){
-	global $config;
-	$response=send_request($config->api_fullpath."zone/$id/door",$user,$pass);
-	if($response->response_status != "200") return false;
-	else {
-		for($i=0;$i<count($response->data);$i++){
-			if(!isset($response->data[$i]->name)) {
-				$response->data[$i]->name = $response->data[$i]->description;
-			}
-		}
-		return $response->data;
-	}
-}
-
 function delete_access($user,$pass,$id,$is_allweek){
 	global $config;
 	if($is_allweek) $endpoint="access";
@@ -532,6 +488,7 @@ function add_access_liaccess_organization_zone($user,$pass,$zoneid,$orgid,$weekd
 
 
 //Events
+
 function get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$side="",$fromdate="",$fromtime="",$untildate="",$untiltime="",$startevt=1,$q=15){
 	global $config;
 	$querystring="";
@@ -549,6 +506,260 @@ function get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$si
 	return $response;
 }
 
+
+//Zones
+
+function get_zones($user,$pass){
+	global $config;
+	$response=send_request($config->api_fullpath."zone",$user,$pass);
+	if($response->response_status != "200") return false;
+	else {
+		for($i=0;$i<count($response->data);$i++){
+			if(!isset($response->data[$i]->id)) {
+				$uri_parts=explode("/",$response->data[$i]->uri);
+				$response->data[$i]->id = end($uri_parts);
+			}
+		}
+		return $response->data;
+	}
+}
+/*
+function get_zones($user,$pass){
+	global $config;
+	$response=send_request($config->api_fullpath."zone",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+*/
+
+// get single zone
+function get_zone($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."zone/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function set_zone($user,$pass,$id,$name){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->name= $name;
+	$response=send_request($config->api_fullpath."zone/$id",$user,$pass,"put",json_encode($payload_obj));
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function add_zone($user,$pass,$name){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->name= $name;
+	$response=send_request($config->api_fullpath."zone",$user,$pass,"post",json_encode($payload_obj));
+	if($response->response_status != "201") return false;
+	else return $response->data;
+}
+
+function delete_zone($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."zone/$id",$user,$pass,"delete");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+
+//Doors
+
+//get doors in a zone
+function get_doors($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."zone/$id/door",$user,$pass);
+	if($response->response_status != "200") return false;
+	else {
+		for($i=0;$i<count($response->data);$i++){
+			if(!isset($response->data[$i]->name)) {
+				$response->data[$i]->name = $response->data[$i]->description;
+			}
+		}
+		return $response->data;
+	}
+}
+
+/*function get_doors($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."zone/$id/door",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}*/
+
+function get_door($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."door/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//TODO: name, doorNum, controllerId, rlseTime, bzzrTime, alrmTime, zoneId
+function add_door($user,$pass,$zoneid,$name){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->zoneId= $zoneid;
+	$payload_obj->name= $name;
+	$response=send_request($config->api_fullpath."door",$user,$pass,"post",json_encode($payload_obj));
+	//if($response->response_status != "201") return false;
+	//else return $response->data;
+	return $response;
+}
+
+function set_door($user,$pass,$id,$zoneid,$name){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->zoneId= $zoneid;
+	$payload_obj->name= $name;
+	$response=send_request($config->api_fullpath."door/$id",$user,$pass,"put",json_encode($payload_obj));
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function delete_door($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."door/$id",$user,$pass,"delete");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+
+//Visit door groups
+
+function get_visit_door_groups($user,$pass){
+	global $config;
+	$response=send_request($config->api_fullpath."visitdoorgroup",$user,$pass);
+	if($response->response_status != "200") return false;
+	else {
+		for($i=0;$i<count($response->data);$i++){
+			if(!isset($response->data[$i]->id)) {
+				$uri_parts=explode("/",$response->data[$i]->uri);
+				$response->data[$i]->id = end($uri_parts);
+			}
+		}
+		return $response->data;
+	}
+}
+
+// get single visit door group
+function get_visit_door_group($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."visitdoorgroup/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function add_visit_door_group($user,$pass,$name,$doorids){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->name= $name;
+	$response=send_request($config->api_fullpath."visitdoorgroup",$user,$pass,"post",json_encode($payload_obj));
+
+	if($response->response_status != "201") return false;
+	else {
+		//add doors
+		//get group id
+		if(!isset($response->data->id)){
+			$uri_parts=explode("/",$response->data->uri);
+			$response->data->id = intval(end($uri_parts));
+		}
+		if(is_numeric($response->data->id)){
+			//explode and build the sent door ids array
+			$sent_doors_arr=explode("|",$doorids);
+			foreach($sent_doors_arr as $sent_door_id){
+				$response2=add_door_visit_door_group($user,$pass,$response->data->id,$sent_door_id);
+			}
+		}
+		return $response->data;
+	}
+}
+
+//add a door to an existing visit door group
+function add_door_visit_door_group($user,$pass,$id,$doorid){
+	global $config;
+	$response=send_request($config->api_fullpath."visitdoorgroup/$id/door/$doorid",$user,$pass,"put");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+// get doors from visit door group
+function get_visit_door_group_doors($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."visitdoorgroup/$id/door",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//edit group name
+function set_visit_door_group($user,$pass,$id,$name,$doorids){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->name= $name;
+	$response=send_request($config->api_fullpath."visitdoorgroup/$id",$user,$pass,"put",json_encode($payload_obj));
+
+	//explode and build the sent door ids array
+	$sent_doors_arr=explode("|",$doorids);
+
+	//get the current group door ids
+	$response2=get_visit_door_group_doors($user,$pass,$id);
+
+	if(($response2 !==false) and is_array($response2)){
+		$current_doors_arr=array();
+		//build array of all current ids
+		foreach($response2 as $obj) $current_doors_arr[]=$obj->id;
+
+		//foreach sent ids, check if they are or not already part of the group
+		foreach($sent_doors_arr as $sent_door_id){
+			if(!in_array($sent_door_id,$current_doors_arr)){
+				//if not in current > ADD
+				add_door_visit_door_group($user,$pass,$id,$sent_door_id);
+			} //else if in current > SKIP
+		}
+		//foreach current id
+		foreach($current_doors_arr as $current_door_id){
+			//if not in sent > DELETE
+			if(!in_array($current_door_id,$sent_doors_arr)){
+				delete_door_visit_door_group($user,$pass,$id,$current_door_id);
+			} //else SKIP > leave existing
+		}
+	}
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//remove door from visit door group
+function delete_door_visit_door_group($user,$pass,$id,$doorid){
+	global $config;
+	$response=send_request($config->api_fullpath."visitdoorgroup/$id/door/$doorid",$user,$pass,"delete");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//delete group
+function delete_visit_door_group($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."visitdoorgroup/$id",$user,$pass,"delete");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+
+//Visitors
+
+function get_visitors($user,$pass,$visitdoorgroupid="",$orgid="",$cardnum=""){
+	global $config;
+	$querystring="";
+	if($visitdoorgroupid!="") $querystring.="visitDoorGroupId=".$visitdoorgroupid;
+	if($orgid!="") $querystring.="&visitedOrgId=".$orgid;
+	if($cardnum!="") $querystring.="&cardNumber=".$cardnum;
+
+	$response=send_request($config->api_fullpath."visitor?$querystring",$user,$pass);
+	return $response;
+}
+
 if($DEBUG){
 	//$res=get_organizations("admin","admin");
 	//$res=do_auth("admin","admin");
@@ -560,6 +771,7 @@ if($DEBUG){
 //	$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
 //	$res=get_doors("admin","admin",1);
+	//$res=get_door("admin","admin",5);
 	//$res=add_access_allweek("admin","admin",3,1,1,1,"08:00:00","18:00:00","9999-12-31 00:00");
 	//$res=edit_access_allweek("admin","admin",19,0,1,"08:00:00","18:00:00","9999-12-31 00:00");
 	//$res=delete_access("admin","admin",1,1);
@@ -574,7 +786,13 @@ if($DEBUG){
 //	add_access_allweek($user,$pass,$doorid,$personid,$iside,$oside,$starttime,$endtime,$expiredate){
 //	edit_access_allweek($user,$pass,$id,$iside,$oside,$starttime,$endtime,$expiredate){
 //	$res=add_access_allweek("admin","admin",1,3,1,1,"09:00","13:00","9999-12-31");
-	$res=get_events("admin","admin","","","","","","2017-01-16","00:00","2018-08-16","00:00");
+	//$res=get_events("admin","admin","","","","","","2017-01-16","00:00","2018-08-16","00:00");
+	//$res=get_visit_door_groups("admin","admin");
+	//$res=get_visit_door_group("admin","admin",1);
+	//$res=set_visit_door_group("admin","admin",9,"Door Group 9","5|6");
+	$res=get_visit_door_group_doors("admin","admin",9);
+	//$res=add_visit_door_group("admin","admin","Door Group 9","3|5");
+	//$res=delete_visit_door_group("admin","admin",4);
 	echo "<pre>";
 	var_dump($res);
 }

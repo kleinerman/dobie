@@ -115,10 +115,10 @@ ob_start('ob_gzhandler');
 <a href="#"><i class="fa fa-male fa-fw"></i> <?print_text($lang,"Visitors","Visitas");?><span class="fa arrow"></span></a>
 <ul class="nav nav-second-level">
 <li>
-<a href="#"><?print_text($lang,"Report 1","Reporte 1");?></a>
+<a href="visit-door-groups"><?print_text($lang,"Visit Door Groups","Grupos de Puertas de Visitas");?></a>
 </li>
 <li>
-<a href="#"><?print_text($lang,"Report 2","Reporte 2");?></a>
+<a href="visitors"><?print_text($lang,"Manage Visitors","Administrar Visitas");?></a>
 </li>
 </ul>
 </li>
@@ -136,9 +136,6 @@ ob_start('ob_gzhandler');
 </li>
 <li>
 <a href="doors"><i class="fa fa-building-o fa-fw"></i> <?print_text($lang,"Doors","Puertas");?></a>
-</li>
-<li>
-<a href="door-groups"><i class="fa fa-building fa-fw"></i> <?print_text($lang,"Door Groups","Grupos de Puertas");?></a>
 </li>
 <li>
 <a href="access"><i class="fa fa-handshake-o fa-fw"></i> <?print_text($lang,"Accesses","Accesos");?><span class="fa arrow"></span></a>
