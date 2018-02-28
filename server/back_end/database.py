@@ -1525,7 +1525,7 @@ class DataBase(object):
             door = localCursor.fetchone()
 
             while door:
-                #Removing the resStateId as this field should not be sent to the controller
+                #Removing fields that should not be sent to the controller
                 door.pop('resStateId')
                 yield door
                 door = localCursor.fetchone()
@@ -1544,10 +1544,10 @@ class DataBase(object):
         '''
 
         sql = ("INSERT INTO Door(doorNum, name, controllerId, rlseTime, bzzrTime, "
-               "alrmTime, zoneId, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {})"
+               "alrmTime, zoneId, isVisitExit, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {}, {})"
                "".format(door['doorNum'], door['name'], door['controllerId'], 
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'], 
-                         door['zoneId'], TO_ADD)
+                         door['zoneId'], door['isVisitExit'], TO_ADD)
               )
 
 
@@ -1634,10 +1634,11 @@ class DataBase(object):
         '''
 
         sql = ("UPDATE Door SET doorNum = {}, name = '{}', controllerId = {}, rlseTime = {}, "
-               "bzzrTime = {}, alrmTime = {}, zoneId = {}, resStateId = {} WHERE id = {}"
+               "bzzrTime = {}, alrmTime = {}, zoneId = {}, isVisitExit = {}, resStateId = {} "
+               "WHERE id = {}"
                "".format(door['doorNum'], door['name'], door['controllerId'],
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'],
-                         door['zoneId'], TO_UPDATE, door['id'])
+                         door['zoneId'], door['isVisitExit'], TO_UPDATE, door['id'])
               )
 
         try:

@@ -76,7 +76,6 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,"Organization could not be deleted");
 			}
 		break;
-
 		case "get_persons":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
@@ -184,53 +183,6 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 					//return records
 					array_push($ret,1,$access_rec);
 				} else array_push($ret,0,"No accesses found");
-			}
-		break;
-		case "get_door":
-			if(!$islogged) array_push($ret,0,"Action needs authentication");
-			else {
-				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
-				//get records
-				$door_rec = get_door($logged->name, $logged->pw,$id);
-				if($door_rec){
-					//return records
-					array_push($ret,1,$door_rec);
-				} else array_push($ret,0,"Door could not be retrieved");
-			}
-		break;
-		case "get_zones":
-			if(!$islogged) array_push($ret,0,"Action needs authentication");
-			else {
-				//get record
-				$zones_rec = get_zones($logged->name, $logged->pw);
-				if($zones_rec){
-					//return record
-					array_push($ret,1,$zones_rec);
-				} else array_push($ret,0,"Zones could not be retrieved");
-			}
-		break;
-		case "get_zone":
-			if(!$islogged) array_push($ret,0,"Action needs authentication");
-			else {
-				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
-				//get records
-				$zone_rec = get_zone($logged->name, $logged->pw,$id);
-				if($zone_rec){
-					//return records
-					array_push($ret,1,$zone_rec);
-				} else array_push($ret,0,"Zone could not be retrieved");
-			}
-		break;
-		case "get_doors":
-			if(!$islogged) array_push($ret,0,"Action needs authentication");
-			else {
-				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
-				//get records
-				$doors_rec = get_doors($logged->name, $logged->pw,$id);
-				if($doors_rec){
-					//return records
-					array_push($ret,1,$doors_rec);
-				} else array_push($ret,0,"No doors found");
 			}
 		break;
 		case "add_access_allweek":
@@ -425,7 +377,6 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				array_push($ret,1,"Accesses added to all doors in zone");
 			}
 		break;
-
 		case "get_events":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
@@ -447,7 +398,254 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,$events_rec->data->message);
 			}
 		break;
-		
+/*		
+		case "get_door":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				//get records
+				$door_rec = get_door($logged->name, $logged->pw,$id);
+				if($door_rec){
+					//return records
+					array_push($ret,1,$door_rec);
+				} else array_push($ret,0,"Door could not be retrieved");
+			}
+		break;
+		case "get_zone":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				//get records
+				$zone_rec = get_zone($logged->name, $logged->pw,$id);
+				if($zone_rec){
+					//return records
+					array_push($ret,1,$zone_rec);
+				} else array_push($ret,0,"Zone could not be retrieved");
+			}
+		break;
+
+*/
+		case "get_zone":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$zone_id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($zone_id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$zone_rec = get_zone($logged->name, $logged->pw,$zone_id);
+					if($zone_rec) array_push($ret,1,$zone_rec);
+					else array_push($ret,0,"Zone could not be retrieved");
+				}
+			}
+		break;
+		case "get_zones":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				//get record
+				$zones_rec = get_zones($logged->name, $logged->pw);
+				if($zones_rec){
+					//return record
+					array_push($ret,1,$zones_rec);
+				} else array_push($ret,0,"Zones could not be retrieved");
+			}
+		break;
+		case "edit_zone":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+				//empty name can be considered as a valid scenario
+	    			else {
+					$zones_rec = set_zone($logged->name, $logged->pw,$id, $name);
+					if($zones_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Zone could not be updated");
+				}
+			}
+		break;
+		case "add_zone":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+
+				$zones_rec = add_zone($logged->name, $logged->pw, $name);
+				if($zones_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Zone could not be added");
+			}
+		break;
+		case "delete_zone":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$zones_rec = delete_zone($logged->name,$logged->pw, $id);
+				if($zones_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Zone could not be deleted");
+			}
+		break;
+		case "get_door":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$doors_rec = get_door($logged->name, $logged->pw,$id);
+					if($doors_rec) array_push($ret,1,$doors_rec);
+					else array_push($ret,0,"Door could not be retrieved");
+				}
+			}
+		break;
+		case "get_doors":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				//get record
+				$doors_rec = get_doors($logged->name, $logged->pw,$id);
+				if($doors_rec) array_push($ret,1,$doors_rec);
+				else array_push($ret,0,"Doors not found");
+			}
+		break;
+		case "add_door":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$zoneid = isset($_POST['zoneid']) ? $_POST['zoneid'] : "";
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+
+				$doors_rec = add_door($logged->name, $logged->pw, $zoneid, $name);
+				//if($doors_rec) array_push($ret,1,"Information saved successfully!");
+				//else array_push($ret,0,"Door could not be added");
+				if($doors_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,$doors_rec->data->message);
+			}
+		break;
+		case "edit_door":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				$zoneid = isset($_POST['zoneid']) ? $_POST['zoneid'] : "";
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+	    			else {
+					$doors_rec = set_door($logged->name, $logged->pw,$id, $zoneid, $name);
+
+					if($doors_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Door could not be updated");
+				}
+			}
+		break;
+		case "delete_door":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$doors_rec = delete_door($logged->name,$logged->pw, $id);
+
+				if($doors_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Door could not be deleted");
+			}
+		break;
+
+		case "get_visit_door_groups":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				//get record
+				$vdg_rec = get_visit_door_groups($logged->name, $logged->pw);
+				if($vdg_rec){
+					//return record
+					array_push($ret,1,$vdg_rec);
+				} else array_push($ret,0,"Visit door groups not found");
+			}
+		break;
+		case "get_visit_door_group":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$vdg_id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($vdg_id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$vdg_rec = get_visit_door_group($logged->name, $logged->pw,$vdg_id);
+					if($vdg_rec){
+						//return record
+						array_push($ret,1,$vdg_rec);
+					} else array_push($ret,0,"Visit door group could not be retrieved");
+				}
+			}
+		break;
+		case "edit_visit_door_group":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$doorids = (isset($_POST['doorids'])) ? $_POST['doorids'] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+				//empty name can be considered as a valid scenario
+	    			else {
+					$vdg_rec = set_visit_door_group($logged->name, $logged->pw, $id, $name,$doorids);
+
+					if($vdg_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Visit door group could not be updated");
+				}
+			}
+		break;
+		case "add_visit_door_group":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$doorids = (isset($_POST['doorids'])) ? $_POST['doorids'] : "";
+
+				$vdg_rec = add_visit_door_group($logged->name, $logged->pw, $name, $doorids);
+				if($vdg_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Visit door group could not be added");
+			}
+		break;
+		case "delete_visit_door_group":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$vdg_rec = delete_visit_door_group($logged->name,$logged->pw, $id);
+
+				if($vdg_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Visit door group could not be deleted");
+			}
+		break;
+		case "get_visit_door_group_doors":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$vdg_id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($vdg_id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$vdg_rec = get_visit_door_group_doors($logged->name, $logged->pw,$vdg_id);
+					if($vdg_rec){
+						//return record
+						array_push($ret,1,$vdg_rec);
+					} else array_push($ret,0,"Visit door group doors could not be retrieved");
+				}
+			}
+		break;
+
+		case "get_visitors":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$visitdoorgroupid = (isset($_POST['visitdoorgroupid']) and is_numeric($_POST['visitdoorgroupid'])) ? intval($_POST['visitdoorgroupid']) : "";
+				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? intval($_POST['orgid']) : "";
+				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
+
+				$visitors_rec=get_visitors($logged->name, $logged->pw, $visitdoorgroupid, $orgid, $cardnum);
+
+				if($visitors_rec and $visitors_rec->response_status==200) array_push($ret,1,$visitors_rec->data);
+				else array_push($ret,0,$visitors_rec->data->message);
+			}
+		break;
 		default:
 			array_push($ret,0,"Operation not defined"); //send out error
 		break;
