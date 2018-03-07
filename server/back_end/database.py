@@ -332,6 +332,46 @@ class DataBase(object):
 
 
 
+    def isValidVisitExit(self, event):
+        '''
+        Receieve an event as argument
+        If this event correspond to a visitor exiting through a valid
+        visit door exit, this method, returns True, if not, it returns False
+        '''
+
+        doorId = event['doorId']
+        personId = event['personId']
+
+        #There are events with personId = None. I think there aren't yet
+        #events with doorId = None but just in case.
+        if doorId == None or personId == None:
+            return False
+
+        #To know if it is a valid visit exit, to clear the visitor from the system,
+        #the Visitor (Person), has to have access on the door he is exiting and also
+        #the door has to have the visitExit field = True
+        sql = ("SELECT COUNT(*) from Access JOIN Door ON (Access.doorId = Door.id) "
+               "JOIN Person ON (Access.personId = Person.id) "
+               "WHERE Person.visitedOrgId IS NOT NULL "
+               "AND Door.isVisitExit = True AND Door.id = {} AND Person.id = {}"
+               "".format(doorId, personId)
+              )
+
+        try:
+            self.execute(sql)
+            validVisitExit = self.cursor.fetchone()
+            return validVisitExit
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            self.logger.warning("Error trying to validate a Visit Exit")
+            return False
+
+
+
+
+
+
     def saveEvents(self, events):
         '''
         It receives a list of events and saves them in the database
@@ -1145,6 +1185,12 @@ class DataBase(object):
 
     def getVisitors(self, visitedOrgId, visitDoorGroupId, cardNumber):
         '''
+        Returns a list with all visitors in the system.
+        It receive as arguments the ID of the organization the visitor is visiting,
+        the Visit Door Group used by the visitor to enter the building or the card
+        number of the visit.
+        Using the last argument, the previous ones has no sense to be different of None.
+        Any of the arguments could be None
         '''
 
         if visitedOrgId:
@@ -1159,15 +1205,23 @@ class DataBase(object):
         else:
             visitDoorGroupFilter = ''
 
-
         if cardNumber:
             cardNumberFilter = " AND Person.cardNumber = {}".format(cardNumber)
         else:
             cardNumberFilter = ''
 
-
-        sql = ("SELECT Person.* FROM Person JOIN Access ON "
-               "(Person.id = Access.personId) JOIN VisitDoorGroupDoor "
+        #Using LEFT JOIN between Person table and Access table, because for any
+        #strange reason the visitor has not access to the doors in the visit
+        #door group. (It should never happen). If not using LEFT JOIN, no visitors
+        #will be retrieved.
+        #Using LEFT JOIN between Access and VisitDoorGroupDoor because in a
+        #strange situation, the Visit Door Group could be removed after the visitor
+        #enter the building and no visitors will be retrieved, also if using
+        #visitDoorGroupId = None
+        #Using DISTINCT to avoid having duplicates entries of visitors because the
+        #same Visitor normally has access to more than one door (all the Visit Door Group)
+        sql = ("SELECT DISTINCT Person.* FROM Person LEFT JOIN Access ON "
+               "(Person.id = Access.personId) LEFT JOIN VisitDoorGroupDoor "
                "ON (Access.doorId = VisitDoorGroupDoor.doorId) "
                "WHERE {}{}{}"
                "".format(visitedOrgFilter, visitDoorGroupFilter, cardNumberFilter)
