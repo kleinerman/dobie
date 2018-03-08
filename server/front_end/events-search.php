@@ -96,7 +96,7 @@ From:<br>
 <br><br>
 
 Until:<br>
-<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="Until Date"><input type="text" class="form-control input_date center" id="endDate" value="<?=date("Y-m-d",mktime(0,0,0))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="Until Date"><input type="text" class="form-control input_date center" id="endDate" value="<?=date("Y-m-d",mktime(0,0,0)+(60*60*24))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
 
 <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" id="endTime"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 
@@ -176,7 +176,7 @@ Until:<br>
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-edit-label">&nbsp;</h4>
+<h4 class="modal-title" id="modal-error-label">&nbsp;</h4>
 </div>
 <div class="modal-body center">
 </div>
@@ -295,7 +295,7 @@ function populateEventList(startEvt,evtsQtty){
 			url: "process",
 			data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + evtsQtty,
 			beforeSend: function(){$("#results-container-inner,#legend-row").hide();$("#pagination-container").html(""); $(".throbber-container").fadeIn();},
-			complete: function(resp){console.log(resp);$(".throbber-container").hide(); $("#results-container-inner").fadeIn()},
+			complete: function(resp){/*console.log(resp);*/$(".throbber-container").hide(); $("#results-container-inner").fadeIn()},
 			success: function(resp){
 				if(resp[0]=='1'){
 					//populate event table

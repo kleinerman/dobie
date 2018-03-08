@@ -80,11 +80,13 @@ class CrudReSndr(genmngr.GenericMngr):
                         door.pop('name')
                         door.pop('controllerId')
                         door.pop('zoneId')
+                        door.pop('isVisitExit')
                         self.ctrllerMsger.addDoor(ctrllerMac, door)
                     for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_UPDATE):
                         door.pop('name')
                         door.pop('controllerId')
                         door.pop('zoneId')
+                        door.pop('isVisitExit')
                         self.ctrllerMsger.updDoor(ctrllerMac, door)
                     for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_DELETE):
                         self.ctrllerMsger.delDoor(ctrllerMac, door['id'])

@@ -681,7 +681,6 @@ class CrudMngr(genmngr.GenericMngr):
                     visitDoorGroups = self.dataBase.getVisitDoorGroups()
                     for visitDoorGroup in visitDoorGroups:
                         visitDoorGroup['uri'] = url_for('visitDoorGroup', visitDoorGroupId=visitDoorGroup['id'], _external=True)
-                        visitDoorGroup.pop('id')
                     return jsonify(visitDoorGroups)
                 ## For POST method
                 elif request.method == 'POST':
@@ -1037,7 +1036,7 @@ class CrudMngr(genmngr.GenericMngr):
 #--------------------------------------Door------------------------------------------
 
 
-        doorNeedKeys = ('name', 'doorNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId')
+        doorNeedKeys = ('name', 'doorNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId', 'isVisitExit')
 
         @app.route('/api/v1.0/door', methods=['POST'])
         @auth.login_required
@@ -1049,13 +1048,15 @@ class CrudMngr(genmngr.GenericMngr):
                 door = {}
                 for param in doorNeedKeys:
                     door[param] = request.json[param]
+
                 doorId = self.dataBase.addDoor(door)
 
                 # Door dictionary modified for the controller database (same server door id)
                 door['id'] = doorId
                 door.pop('name')
-                door.pop('zoneId')
                 door.pop('controllerId')
+                door.pop('zoneId')
+                door.pop('isVisitExit')
                 # Get the controller mac address
                 ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
                 self.ctrllerMsger.addDoor(ctrllerMac, door)
@@ -1098,8 +1099,9 @@ class CrudMngr(genmngr.GenericMngr):
                         door[param] = request.json[param]
                     self.dataBase.updDoor(door)
                     door.pop('name')
-                    door.pop('zoneId')
                     door.pop('controllerId')
+                    door.pop('zoneId')
+                    door.pop('isVisitExit')
                     ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
                     self.ctrllerMsger.updDoor(ctrllerMac, door)
 
