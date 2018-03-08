@@ -77,7 +77,7 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2">Card Number:</label>
  <div class="col-sm-10">
-      <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646" maxlength="10">
+      <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646">
  </div>
 </div>
 
@@ -118,7 +118,7 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2">Card Number:</label>
  <div class="col-sm-10">
-      <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646" maxlength="10">
+      <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646">
  </div>
 </div>
 
@@ -156,7 +156,7 @@ Are you sure?
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-edit-label">&nbsp;</h4>
+<h4 class="modal-title" id="modal-error-label">&nbsp;</h4>
 </div>
 <div class="modal-body center">
 </div>

@@ -74,6 +74,9 @@ class BackEndSrvr(object):
         crudReSndrCtrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
         self.crudReSndr.ctrllerMsger = crudReSndrCtrllerMsger
 
+        #Creating and setting the ctrllermsger for msgReceiver
+        msgReceiverCtrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
+        self.msgReceiver.ctrllerMsger = msgReceiverCtrllerMsger
 
         #self.origSigIntHandler = signal.getsignal(signal.SIGINT)
 

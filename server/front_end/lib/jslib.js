@@ -54,45 +54,50 @@ function updateButtons(objId){
 }
 
 //populateSelect
-function populateList(selectId,entity,id=0){
+function populateList(selectId,entity,id=0,actionstr=""){
 
-	if(id!=0) var extraActionStr="&id="+id;
-	else var extraActionStr="";
+	if(actionstr!=""){
+		var completeActionStr=actionstr;
+	} else {
+		if(id!=0) var extraActionStr="&id="+id;
+		else var extraActionStr="";
+		completeActionStr = "action=get_"+entity + extraActionStr;
+	}
 
 	$.ajax({
-	type: "POST",
-	url: "process",
-	data: "action=get_"+entity + extraActionStr,
-	success: function(resp){
-		$("#"+selectId).empty();
-		var qValidItems=0;
-		if(resp[0]=='1'){
-			var values = resp[1];
-			var itemClass="";
-			values.forEach(function(item,index){
-				if(item.resStateId!=5){
-					itemClass="";
-					if(item.resStateId==1) itemClass=" class='toadd' disabled ";
-					else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
-					else if(item.resStateId==4) itemClass=" class='todel' disabled ";
-					$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
-					qValidItems++;
-				}
-			});
-		} else {
-			//show error option
-			$("#"+selectId).append("<option value='' disabled>"+ resp[1] +"</option>");
-		}
-		//toggle visibility of -all button if exists
-		if($("#"+selectId+"-all").length>0){
-				//if more than one valid option > show
-			if(qValidItems>1) $("#"+selectId+"-all").show();
-			else $("#"+selectId+"-all").hide();
-		}
-	},
-	failure: function(){
-			//show error option
-			$("#"+selectId).append("<option value=''>Operation failed, please try again</option>");
+		type: "POST",
+		url: "process",
+		data: completeActionStr,
+		success: function(resp){
+			$("#"+selectId).empty();
+			var qValidItems=0;
+			if(resp[0]=='1'){
+				var values = resp[1];
+				var itemClass="";
+				values.forEach(function(item,index){
+					if(item.resStateId!=5){
+						itemClass="";
+						if(item.resStateId==1) itemClass=" class='toadd' disabled ";
+						else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
+						else if(item.resStateId==4) itemClass=" class='todel' disabled ";
+						$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
+						qValidItems++;
+					}
+				});
+			} else {
+				//show error option
+				$("#"+selectId).append("<option value='' disabled>"+ resp[1] +"</option>");
+			}
+			//toggle visibility of -all button if exists
+			if($("#"+selectId+"-all").length>0){
+					//if more than one valid option > show
+				if(qValidItems>1) $("#"+selectId+"-all").show();
+				else $("#"+selectId+"-all").hide();
+			}
+		},
+		failure: function(){
+				//show error option
+				$("#"+selectId).append("<option value=''>Operation failed, please try again</option>");
 		}
 	});
 }
