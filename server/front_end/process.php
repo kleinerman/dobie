@@ -646,6 +646,23 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,$visitors_rec->data->message);
 			}
 		break;
+		case "add_visit":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
+				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
+				$orgid = isset($_POST['orgid']) ? $_POST['orgid'] : "";
+				$expirationdate = isset($_POST['expirationdate']) ? $_POST['expirationdate'] : "";
+				$expirationhour = isset($_POST['expirationhour']) ? $_POST['expirationhour'] : "23:59";
+				$doorgroupids = isset($_POST['doorgroupids']) ? $_POST['doorgroupids'] : "";
+
+				$visit_rec = add_visit($logged->name, $logged->pw, $name, $idnum, $cardnum, $orgid, $expirationdate, $expirationhour, $doorgroupids);
+
+				if($visit_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,$visit_rec->data->message);
+			}
+		break;
 		default:
 			array_push($ret,0,"Operation not defined"); //send out error
 		break;

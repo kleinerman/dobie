@@ -118,14 +118,14 @@ function get_person($user,$pass,$id){
 	else return $response->data;
 }
 
-function add_person($user,$pass,$orgid,$name,$idnum,$cardnum){
+function add_person($user,$pass,$orgid,$name,$idnum,$cardnum,$visitedorgid=null){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->orgId= $orgid;
 	$payload_obj->name= $name;
 	$payload_obj->identNumber= $idnum;
 	$payload_obj->cardNumber= $cardnum;
-	$payload_obj->visitedOrgId= null;
+	$payload_obj->visitedOrgId= $visitedorgid;
 	$response=send_request($config->api_fullpath."person",$user,$pass,"post",json_encode($payload_obj));
 	//if($response->response_status != "201") return false;
 	//else return $response->data;
@@ -757,6 +757,42 @@ function get_visitors($user,$pass,$visitdoorgroupid="",$orgid="",$cardnum=""){
 	if($cardnum!="") $querystring.="&cardNumber=".$cardnum;
 
 	$response=send_request($config->api_fullpath."visitor?$querystring",$user,$pass);
+	//$response=send_request($config->api_fullpath."visitor",$user,$pass);
+	//echo $config->api_fullpath."visitor";
+	return $response;
+}
+
+function add_visit($user,$pass,$name,$idnum,$cardnum,$orgid,$expirationdate,$expirationhour,$doorgroupids_str=""){
+	//add user
+	$response = add_person($user,$pass,1,$name,$idnum,$cardnum,$orgid);
+//var_dump($response);
+	if($response->response_status == "201"){
+		//get created person id
+		if(isset($response->data->id)) $personid = $response->data->id;
+		else {
+			//if not in response, create from uri
+			$uri_parts=explode("/",$response->data->uri);
+			$personid = end($uri_parts);
+		}
+//var_dump($personid);
+		$doorgroupids=explode("|",$doorgroupids_str);
+//var_dump($doorgroupids);
+		foreach($doorgroupids as $doorgroupid){
+//echo "entro<br>";
+			//get door group doors
+			$door_group_doors=get_visit_door_group_doors($user,$pass,$doorgroupid);
+//var_dump($door_group_doors);
+			if($door_group_doors){
+				//for each door id, add allweek access
+				foreach($door_group_doors as $door){
+					//only iside access, NO oside
+					$response2 = add_access_allweek($user,$pass,$door->id,$personid,1,0,"00:00",$expirationhour,$expirationdate);
+//echo "entro<br>";
+//var_dump($response2);
+				}
+			} //else no accesses for that door group
+		}
+	}
 	return $response;
 }
 
@@ -764,10 +800,10 @@ if($DEBUG){
 	//$res=get_organizations("admin","admin");
 	//$res=do_auth("admin","admin");
 	//$res=get_organizations("admin","admin",2);
-	//$res=get_person_accesses("admin","admin",3);
+	$res=get_person_accesses("admin","admin",18);
 //	$res=get_access("admin","admin",44);
 	//$res=add_person("admin","admin","7","Ricky Martin","",123132);
-//	$res=get_door_accesses("admin","admin",3);
+	//$res=get_door_accesses("admin","admin",5);
 //	$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
 //	$res=get_doors("admin","admin",1);
@@ -790,9 +826,15 @@ if($DEBUG){
 	//$res=get_visit_door_groups("admin","admin");
 	//$res=get_visit_door_group("admin","admin",1);
 	//$res=set_visit_door_group("admin","admin",9,"Door Group 9","5|6");
-	$res=get_visit_door_group_doors("admin","admin",9);
+//	$res=get_visit_door_group_doors("admin","admin",9);
 	//$res=add_visit_door_group("admin","admin","Door Group 9","3|5");
 	//$res=delete_visit_door_group("admin","admin",4);
+	//$res=get_persons("admin","admin",1);
+	//$res=get_person("admin","admin",18);
+//	$res=get_visitors("admin","admin");
+	//$res=get_person_accesses("admin","admin",9);
+//	$res=add_visit("admin","admin","fasdfasdf",212121,33334,2,"2018-03-02","23:59","1");
+
 	echo "<pre>";
 	var_dump($res);
 }
