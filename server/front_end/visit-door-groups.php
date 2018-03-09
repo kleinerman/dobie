@@ -140,7 +140,7 @@ Are you sure?
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-edit-label">&nbsp;</h4>
+<h4 class="modal-title" id="modal-error-label">&nbsp;</h4>
 </div>
 <div class="modal-body center">
 </div>
@@ -329,7 +329,8 @@ function resetForm(){
 	$("#doors-group-current-select").empty();
 	//clear group id value if edit
 	editId=0;
-	
+	//modal title
+	$("#modal-new-label").text("New Visitor Group");
 }
 
 //fetch info for new
@@ -355,6 +356,8 @@ $('#visit-door-groups-select-edit').click(function (event){
 				var values = resp[1];
 				editId=values.id;
 				$('#visit-door-groups-new-name').val(values.name);
+				//modal title
+				$("#modal-new-label").text("Edit Visitor Group");
 				//fetch group doors
 				$.ajax({
 					type: "POST",
