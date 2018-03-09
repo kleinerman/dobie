@@ -101,6 +101,20 @@ class VisitDoorGroupNotFound(VisitDoorGroupError):
     pass
 
 
+class CtrllerModelError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class CtrllerModelNotFound(CtrllerModelError):
+    '''
+    '''
+    pass
 
 
 class ControllerError(Exception):
@@ -1244,6 +1258,27 @@ class DataBase(object):
     
 
 
+#--------------------------------Controller Model------------------------------------
+
+    def getCtrllerModels(self):
+        '''
+        Return a list with all Controller Models availables in the system
+        '''
+        try:
+            sql = ('SELECT * FROM CtrllerModel')
+            self.execute(sql)
+            ctrllerModels = self.cursor.fetchall()
+            return ctrllerModels
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise CtrllerModelError('Can not get Controller Models')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise CtrllerModelError('Can not get Controller Models')
+
+
 
 #----------------------------------Controller----------------------------------------
 
@@ -1254,9 +1289,10 @@ class DataBase(object):
         It returns the id of the added controller.
         '''
 
-        sql = ("INSERT INTO Controller(ctrllerModelId, macAddress) "
-               "VALUES({}, '{}')"
-               "".format(controller['ctrllerModelId'], controller['macAddress'])
+        sql = ("INSERT INTO Controller(name, ctrllerModelId, macAddress) "
+               "VALUES('{}', {}, '{}')"
+               "".format(controller['name'], controller['ctrllerModelId'], 
+                         controller['macAddress'])
               )
 
         try:
@@ -1301,10 +1337,10 @@ class DataBase(object):
         Receive a dictionary with controller parametters and update it in DB
         '''
 
-        sql = ("UPDATE Controller SET ctrllerModelId = {}, macAddress = '{}' "
-               "WHERE id = {}"
-               "".format(controller['ctrllerModelId'], controller['macAddress'], 
-                         controller['id'])
+        sql = ("UPDATE Controller SET name = '{}', ctrllerModelId = {}, "
+               "macAddress = '{}' WHERE id = {}"
+               "".format(controller['name'], controller['ctrllerModelId'], 
+                         controller['macAddress'], controller['id'])
               )
 
         try:
