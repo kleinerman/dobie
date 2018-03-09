@@ -93,6 +93,7 @@ CREATE TABLE `Door` (
     `bzzrTime` integer NOT NULL,
     `alrmTime` integer NOT NULL,
     `zoneId` integer NOT NULL,
+    `isVisitExit` boolean NOT NULL,
     `resStateId` integer NOT NULL,
     CONSTRAINT `fk_Door_Controller` FOREIGN KEY (`controllerId`) REFERENCES `Controller` (`id`),
     CONSTRAINT `fk_Door_Zone` FOREIGN KEY (`zoneId`) REFERENCES `Zone` (`id`),
