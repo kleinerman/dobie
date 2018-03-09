@@ -932,12 +932,38 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+#------------------------------------ControllerModel--------------------------------------
+
+
+        @app.route('/api/v1.0/controllermodel', methods=['GET'])
+        @auth.login_required
+        def controllermodel():
+            '''
+            GET: Return a list with all controller models in the system
+            '''
+            try:
+                ## For GET method
+                ctrllerModels = self.dataBase.getCtrllerModels()
+                return jsonify(ctrllerModels)
+
+            except database.CtrllerModelNotFound as ctrllerModelNotFound:
+                raise NotFound(str(ctrllerModelNotFound))
+            except database.CtrllerModelError as ctrllerModelError:
+                raise ConflictError(str(ctrllerModelError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
 
 
 
 #--------------------------------------Controller------------------------------------------
 
-        ctrllerNeedKeys = ('ctrllerModelId', 'macAddress')
+        ctrllerNeedKeys = ('name', 'ctrllerModelId', 'macAddress')
 
         @app.route('/api/v1.0/controller', methods=['POST'])
         @auth.login_required
