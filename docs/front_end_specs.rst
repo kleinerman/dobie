@@ -2584,3 +2584,72 @@ The following REST method should be sent to the server:
 | To give access see: `Add All Week Access`_
 
 
+Controllers
+-----------
+
+This screen is used to add, edit or delete the controllers in the system:
+
+.. image:: images_front_end_specs/controller.png
+
+
+Add Controller
+~~~~~~~~~~~~~~
+
+When the **new** button is pressed the right window of the above screen will appear. On this window the user should set a name for the controller, the model of the controller and the MAC address of the wired interfaz of the controller.
+
+To get all the models available in the system, the following method should be sent:
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/controllermodel
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 457
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 11 Mar 2018 22:01:10 GMT
+  
+  [
+    {
+      "id": 1, 
+      "integratedSbc": "Raspberry PI 3", 
+      "name": "Dobie-RPI3-333", 
+      "numOfDoors": 3
+    }, 
+    {
+      "id": 2, 
+      "integratedSbc": "Raspberry PI 2", 
+      "name": "Dobie-RPI2-424", 
+      "numOfDoors": 4
+    }, 
+    {
+      "id": 3, 
+      "integratedSbc": "Raspberry PI", 
+      "name": "Dobie-RPI1-333", 
+      "numOfDoors": 3
+    }, 
+    {
+      "id": 4, 
+      "integratedSbc": "BeagleBone", 
+      "name": "Dobie-BBONE-444", 
+      "numOfDoors": 4
+    }
+  ]
+
+
+With all the above information, to add the new controller to the system, the folliwng method should be sent:
+
+
+
+
+
