@@ -57,17 +57,17 @@ CREATE UNIQUE INDEX identNumberIndex ON Person (identNumber)
 CREATE TABLE `CtrllerModel` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL,
-    `boardModel` varchar(40) NOT NULL,
-    `doorsQuant` integer NOT NULL
+    `integratedSbc` varchar(40) NOT NULL,
+    `numOfDoors` integer NOT NULL
 )
 ;
 
 
 CREATE TABLE `Controller` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `name` varchar(40) NOT NULL,
     `ctrllerModelId` integer NOT NULL,
     `macAddress` varchar(12) NOT NULL,
-    `ipAddress` varchar(39),
     CONSTRAINT `fk_Controller_CtrllerModel` FOREIGN KEY (`ctrllerModelId`) REFERENCES `CtrllerModel` (`id`)
 )
 ;
