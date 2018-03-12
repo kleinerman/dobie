@@ -965,19 +965,28 @@ class CrudMngr(genmngr.GenericMngr):
 
         ctrllerNeedKeys = ('name', 'ctrllerModelId', 'macAddress')
 
-        @app.route('/api/v1.0/controller', methods=['POST'])
+        @app.route('/api/v1.0/controller', methods=['POST', 'GET'])
         @auth.login_required
-        def addController():
+        def Controllers():
             '''
             Add a new Controller into the database.
             '''
             try:
-                controller = {}
-                for param in ctrllerNeedKeys:
-                    controller[param] = request.json[param]
-                controllerId = self.dataBase.addController(controller)
-                uri = url_for('modController', controllerId=controllerId, _external=True)
-                return jsonify({'status': 'OK', 'message': 'Controller added', 'code': CREATED, 'uri': uri}), CREATED
+                if request.method == 'GET':
+                    controllers = self.dataBase.getControllers()
+
+                    for controller in controllers:
+                        controller['uri'] = url_for('Controller', controllerId=controller['id'], _external=True)
+                    return jsonify(controllers)
+
+                elif request.method == 'POST':
+
+                    controller = {}
+                    for param in ctrllerNeedKeys:
+                        controller[param] = request.json[param]
+                    controllerId = self.dataBase.addController(controller)
+                    uri = url_for('Controller', controllerId=controllerId, _external=True)
+                    return jsonify({'status': 'OK', 'message': 'Controller added', 'code': CREATED, 'uri': uri}), CREATED
 
             except database.ControllerError as controllerError:
                 raise ConflictError(str(controllerError))
@@ -991,14 +1000,21 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/controller/<int:controllerId>', methods=['PUT', 'DELETE'])
+
+
+        @app.route('/api/v1.0/controller/<int:controllerId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
-        def modController(controllerId):
+        def Controller(controllerId):
             '''
             Update or delete a Controller in the database.
             '''
             try:
-                if request.method == 'PUT':
+                if request.method == 'GET':
+                    controller = self.dataBase.getController(controllerId)
+                    controller['uri'] = request.url
+                    return jsonify(controller)
+
+                elif request.method == 'PUT':
                     controller = {}
                     controller['id'] = controllerId
                     for param in ctrllerNeedKeys:
@@ -1021,6 +1037,7 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
             except KeyError:
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
+
 
 
 
