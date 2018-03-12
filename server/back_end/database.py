@@ -101,6 +101,20 @@ class VisitDoorGroupNotFound(VisitDoorGroupError):
     pass
 
 
+class CtrllerModelError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class CtrllerModelNotFound(CtrllerModelError):
+    '''
+    '''
+    pass
 
 
 class ControllerError(Exception):
@@ -1244,8 +1258,75 @@ class DataBase(object):
     
 
 
+#--------------------------------Controller Model------------------------------------
+
+    def getCtrllerModels(self):
+        '''
+        Return a list with all Controller Models availables in the system
+        '''
+        try:
+            sql = ('SELECT * FROM CtrllerModel')
+            self.execute(sql)
+            ctrllerModels = self.cursor.fetchall()
+            return ctrllerModels
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise CtrllerModelError('Can not get Controller Models')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise CtrllerModelError('Can not get Controller Models')
+
+
 
 #----------------------------------Controller----------------------------------------
+
+
+
+    def getControllers(self):
+        '''
+        Return a list with all controllers
+        '''
+        try:
+            sql = ('SELECT * FROM Controller')
+            self.execute(sql)
+            controllers = self.cursor.fetchall()
+            return controllers
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise ControllerError('Can not get controllers')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not get controllers')
+
+
+
+
+    def getController(self, controllerId):
+        '''
+        Return a dictionary with all the parametters of the controller
+        receiving the ID of the controller
+        '''
+        try:
+            sql = ('SELECT * FROM Controller WHERE id = {}'.format(controllerId))
+            self.execute(sql)
+            controller = self.cursor.fetchone()
+            if not controller:
+                raise ControllerNotFound('Controller not found')
+            return controller
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise ControllerError('Can not get specified controller')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not get specified controller')
+
+
 
 
     def addController(self, controller):
@@ -1254,9 +1335,10 @@ class DataBase(object):
         It returns the id of the added controller.
         '''
 
-        sql = ("INSERT INTO Controller(ctrllerModelId, macAddress) "
-               "VALUES({}, '{}')"
-               "".format(controller['ctrllerModelId'], controller['macAddress'])
+        sql = ("INSERT INTO Controller(name, ctrllerModelId, macAddress) "
+               "VALUES('{}', {}, '{}')"
+               "".format(controller['name'], controller['ctrllerModelId'], 
+                         controller['macAddress'])
               )
 
         try:
@@ -1301,10 +1383,10 @@ class DataBase(object):
         Receive a dictionary with controller parametters and update it in DB
         '''
 
-        sql = ("UPDATE Controller SET ctrllerModelId = {}, macAddress = '{}' "
-               "WHERE id = {}"
-               "".format(controller['ctrllerModelId'], controller['macAddress'], 
-                         controller['id'])
+        sql = ("UPDATE Controller SET name = '{}', ctrllerModelId = {}, "
+               "macAddress = '{}' WHERE id = {}"
+               "".format(controller['name'], controller['ctrllerModelId'], 
+                         controller['macAddress'], controller['id'])
               )
 
         try:
