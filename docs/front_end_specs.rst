@@ -2650,6 +2650,144 @@ To get all the models available in the system, the following method should be se
 With all the above information, to add the new controller to the system, the folliwng method should be sent:
 
 
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/controller
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Controladora 1", "ctrllerModelId": 1, "macAddress": "b827eba30655"}
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 129
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 14:17:34 GMT
+  
+  {
+    "code": 201, 
+    "message": "Controller added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.5:5000/api/v1.0/controller/1"
+  }
 
 
+Edit a controller
+~~~~~~~~~~~~~~~~~
 
+In the same way a controller is added, it can be edited using the PUT method:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/controller/1
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Panel Subsuelo 1", "ctrllerModelId": 2, "macAddress": "b827eba30657"}
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 57
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 14:21:29 GMT
+  
+  {
+    "message": "Controller updated", 
+    "status": "OK"
+  }
+
+
+Delete a Controller
+~~~~~~~~~~~~~~~~~~~
+
+When “Delete” button is pressed a pop-up will appear asking if the user is sure of this operation.
+
+The following REST method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/controller/1
+
+If the controller was deleted successfully, the server will answer with the following response:
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 57
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 14:57:33 GMT
+  
+  {
+    "message": "Controller deleted", 
+    "status": "OK"
+  }
+
+
+Get Controllers
+~~~~~~~~~~~~~~~~~
+
+To get from the server the current list of controllers, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/controller
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 348
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 15:39:17 GMT
+  
+  [
+    {
+      "ctrllerModelId": 1, 
+      "id": 1, 
+      "macAddress": "b827eba30655", 
+      "name": "Controladora 1", 
+      "uri": "http://localhost:5000/api/v1.0/controller/1"
+    }, 
+    {
+      "ctrllerModelId": 1, 
+      "id": 2, 
+      "macAddress": "b827eb277791", 
+      "name": "Controladora 2", 
+      "uri": "http://localhost:5000/api/v1.0/controller/2"
+    }
+  ]
