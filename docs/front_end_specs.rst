@@ -2592,6 +2592,80 @@ This screen is used to add, edit or delete the controllers in the system:
 .. image:: images_front_end_specs/controller.png
 
 
+Get Controllers
+~~~~~~~~~~~~~~~~~
+
+To get from the server the current list of controllers, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/controller
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 348
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 15:39:17 GMT
+  
+  [
+    {
+      "ctrllerModelId": 1, 
+      "id": 1, 
+      "macAddress": "b827eba30655", 
+      "name": "Controladora 1", 
+      "uri": "http://localhost:5000/api/v1.0/controller/1"
+    }, 
+    {
+      "ctrllerModelId": 1, 
+      "id": 2, 
+      "macAddress": "b827eb277791", 
+      "name": "Controladora 2", 
+      "uri": "http://localhost:5000/api/v1.0/controller/2"
+    }
+  ]
+
+
+
+Get one controller
+~~~~~~~~~~~~~~~~~~
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/controller/2
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 157
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 19:03:33 GMT
+  
+  {
+    "ctrllerModelId": 1, 
+    "id": 2, 
+    "macAddress": "b827eb277791", 
+    "name": "Controladora 2", 
+    "uri": "http://localhost:5000/api/v1.0/controller/2"
+  }
+
+
+
 Add Controller
 ~~~~~~~~~~~~~~
 
@@ -2752,42 +2826,5 @@ If the controller was deleted successfully, the server will answer with the foll
   }
 
 
-Get Controllers
-~~~~~~~~~~~~~~~~~
 
-To get from the server the current list of controllers, the following REST method should be sent:
 
-**Method:** GET
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.3:5000/api/v1.0/controller
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 348
-  Server: Werkzeug/0.14.1 Python/3.6.4
-  Date: Mon, 12 Mar 2018 15:39:17 GMT
-  
-  [
-    {
-      "ctrllerModelId": 1, 
-      "id": 1, 
-      "macAddress": "b827eba30655", 
-      "name": "Controladora 1", 
-      "uri": "http://localhost:5000/api/v1.0/controller/1"
-    }, 
-    {
-      "ctrllerModelId": 1, 
-      "id": 2, 
-      "macAddress": "b827eb277791", 
-      "name": "Controladora 2", 
-      "uri": "http://localhost:5000/api/v1.0/controller/2"
-    }
-  ]
