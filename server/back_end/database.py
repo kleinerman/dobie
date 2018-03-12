@@ -1283,6 +1283,52 @@ class DataBase(object):
 #----------------------------------Controller----------------------------------------
 
 
+
+    def getControllers(self):
+        '''
+        Return a list with all controllers
+        '''
+        try:
+            sql = ('SELECT * FROM Controller')
+            self.execute(sql)
+            controllers = self.cursor.fetchall()
+            return controllers
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise ControllerError('Can not get controllers')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not get controllers')
+
+
+
+
+    def getController(self, controllerId):
+        '''
+        Return a dictionary with all the parametters of the controller
+        receiving the ID of the controller
+        '''
+        try:
+            sql = ('SELECT * FROM Controller WHERE id = {}'.format(controllerId))
+            self.execute(sql)
+            controller = self.cursor.fetchone()
+            if not controller:
+                raise ControllerNotFound('Controller not found')
+            return controller
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise ControllerError('Can not get specified controller')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not get specified controller')
+
+
+
+
     def addController(self, controller):
         '''
         Receive a dictionary with controller parametters and save it in DB
