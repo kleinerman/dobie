@@ -1934,18 +1934,30 @@ To get from the server the current list of Visit Door Group, the following REST 
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 220
-  Server: Werkzeug/0.13 Python/3.6.2
-  Date: Tue, 26 Dec 2017 20:04:20 GMT
+  Content-Length: 461
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 18 Feb 2018 14:38:15 GMT
   
   [
     {
-      "name": "Molinetes Torre A", 
+      "id": 1, 
+      "name": "Ingreso Este", 
       "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1"
     }, 
     {
-      "name": "Puertas Front Torre B", 
+      "id": 2, 
+      "name": "Ingreso Oeste", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/2"
+    }, 
+    {
+      "id": 3, 
+      "name": "Ingreso Norte", 
       "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
+    }, 
+    {
+      "id": 5, 
+      "name": "Molinetes", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
     }
   ]
 
@@ -1975,7 +1987,19 @@ First of all, a name should be assigned to it. This will be done sending a POST 
 
 .. code-block::
 
-  **Method:** POST
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 139
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 18 Feb 2018 14:34:46 GMT
+  
+  {
+    "code": 201, 
+    "message": "Visit Door Group added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
+  }
+
 
 **URI:**
 
@@ -2070,7 +2094,8 @@ Get one Visit Door Group
   }
 
 
-To get all the doors from a Visit Door Group the following method should be sent to the server:
+Get the doors from a Visit Door Group
++++++++++++++++++++++++++++++++++++++
 
 **Method:** GET
 
@@ -2136,7 +2161,7 @@ To get all the doors from a Visit Door Group the following method should be sent
 Modify a Visit Door Group Name
 ++++++++++++++++++++++++++++++
 
-To modify the name of the Visit Door Group the followin method should be sent to the server:
+To modify the name of the Visit Door Group the following method should be sent to the server:
 
 
 **Method:** PUT
@@ -2200,10 +2225,10 @@ To remove doors from a Visit Door Group the following method should be sent to t
     "status": "OK"
   }
   
-  
+
 Remove an entire Vist Door Group and all its doors
 ++++++++++++++++++++++++++++++++++++++++++++++++++
-  
+ 
 **Method:** DELETE
 
 **URI:**
@@ -2499,3 +2524,307 @@ An specific visitor could be retrieved using his card number. In this case, the 
   ]
 
 In any case, from the list of retrieved visitors, they could be selected, and pressing the remove button a DELETE method should be sent to the server in the same way of deleting a person.
+
+|
+
+Add a visitor
++++++++++++++
+
+
+When the **Add Visitor** button is pressed, the following popup should appear:
+
+|
+
+.. image:: images_front_end_specs/add_visitor.png
+
+The visitor should be added in the same way a person is added in section: `Add Person`_ of section Persons with the only difference that the field **orgId** should be always equal to 1 since all visitors belong to organization "Visitors" and **visitedOrgId** should have the ID of the organization the visitor is going to visit.
+
+
+
+The following REST method should be sent to the server:
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/person
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Ruben Juearez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 1, "visitedOrgId": 4}
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 121
+  Server: Werkzeug/0.12.1 Python/3.6.0
+  Date: Thu, 13 Jul 2017 13:40:56 GMT
+
+  {
+    "code": 201, 
+    "message": "Person added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.3:5000/api/v1.0/person/9"
+
+  }
+
+
+| Visiting organization combobox should show all the organizations. The **visitedOrgId** field of visitor's JSON should be the ID of the organization selected in this combobox. To get all the organizations, see `Get Organizations`_
+| To fill the combobox **Visit Door Group**, all Visit Door Groups should be retrieved. To do it, see `Get Visit Door Groups`_.
+| All the doors of the selected Visit Door Group should be retrieved. To do it, see `Get the doors from a Visit Door Group`_.
+| Once we have all the doors, an **All Week Access** should be created for the visitor in each door of the group. The expiration date of the access should be the expiration selected in the pop up. By default it should expires at 23:59 of the current day.
+| To give access see: `Add All Week Access`_
+
+
+Controllers
+-----------
+
+This screen is used to add, edit or delete the controllers in the system:
+
+.. image:: images_front_end_specs/controller.png
+
+
+Get Controllers
+~~~~~~~~~~~~~~~~~
+
+To get from the server the current list of controllers, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/controller
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 348
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 15:39:17 GMT
+  
+  [
+    {
+      "ctrllerModelId": 1, 
+      "id": 1, 
+      "macAddress": "b827eba30655", 
+      "name": "Controladora 1", 
+      "uri": "http://localhost:5000/api/v1.0/controller/1"
+    }, 
+    {
+      "ctrllerModelId": 1, 
+      "id": 2, 
+      "macAddress": "b827eb277791", 
+      "name": "Controladora 2", 
+      "uri": "http://localhost:5000/api/v1.0/controller/2"
+    }
+  ]
+
+
+
+Get one controller
+~~~~~~~~~~~~~~~~~~
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/controller/2
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 157
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 19:03:33 GMT
+  
+  {
+    "ctrllerModelId": 1, 
+    "id": 2, 
+    "macAddress": "b827eb277791", 
+    "name": "Controladora 2", 
+    "uri": "http://localhost:5000/api/v1.0/controller/2"
+  }
+
+
+
+Add Controller
+~~~~~~~~~~~~~~
+
+When the **new** button is pressed the right window of the above screen will appear. On this window the user should set a name for the controller, the model of the controller and the MAC address of the wired interfaz of the controller.
+
+To get all the models available in the system, the following method should be sent:
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/controllermodel
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 457
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 11 Mar 2018 22:01:10 GMT
+  
+  [
+    {
+      "id": 1, 
+      "integratedSbc": "Raspberry PI 3", 
+      "name": "Dobie-RPI3-333", 
+      "numOfDoors": 3
+    }, 
+    {
+      "id": 2, 
+      "integratedSbc": "Raspberry PI 2", 
+      "name": "Dobie-RPI2-424", 
+      "numOfDoors": 4
+    }, 
+    {
+      "id": 3, 
+      "integratedSbc": "Raspberry PI", 
+      "name": "Dobie-RPI1-333", 
+      "numOfDoors": 3
+    }, 
+    {
+      "id": 4, 
+      "integratedSbc": "BeagleBone", 
+      "name": "Dobie-BBONE-444", 
+      "numOfDoors": 4
+    }
+  ]
+
+
+With all the above information, to add the new controller to the system, the folliwng method should be sent:
+
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/controller
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Controladora 1", "ctrllerModelId": 1, "macAddress": "b827eba30655"}
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 129
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 14:17:34 GMT
+  
+  {
+    "code": 201, 
+    "message": "Controller added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.5:5000/api/v1.0/controller/1"
+  }
+
+
+Edit a controller
+~~~~~~~~~~~~~~~~~
+
+In the same way a controller is added, it can be edited using the PUT method:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/controller/1
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Panel Subsuelo 1", "ctrllerModelId": 2, "macAddress": "b827eba30657"}
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 57
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 14:21:29 GMT
+  
+  {
+    "message": "Controller updated", 
+    "status": "OK"
+  }
+
+
+Delete a Controller
+~~~~~~~~~~~~~~~~~~~
+
+When “Delete” button is pressed a pop-up will appear asking if the user is sure of this operation.
+
+The following REST method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/controller/1
+
+If the controller was deleted successfully, the server will answer with the following response:
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 57
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 14:57:33 GMT
+  
+  {
+    "message": "Controller deleted", 
+    "status": "OK"
+  }
+
+
+
+
