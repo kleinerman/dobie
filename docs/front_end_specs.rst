@@ -3150,6 +3150,8 @@ The doors in state: "Deleted" should not be shown and the other states should be
 Add Door
 ~~~~~~~~
 
+When adding a new door, a controller should be selected from Controller combobox. To get all the controllers see `Get Controllers`_
+
 When “New” button is pressed the following REST method should be sent to the server:
 
 **Method:** POST
@@ -3179,9 +3181,7 @@ When “New” button is pressed the following REST method should be sent to the
 
   {
     "code": 201, 
-    "message": "Person added", 
-    "status": "OK", 
-    "uri": "http://172.18.0.3:5000/api/v1.0/person/9"
+
   }
 
 
@@ -3199,16 +3199,13 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
   Date: Thu, 13 Jul 2017 18:46:52 GMT
   
   {
-    "code": 409, 
-    "error": "The request could not be completed due to a conflict with the current state of the target resource", 
-    "message": "Can't add this person. Card number or Identification number already exists.", 
-    "status": "conflict"
+
   }
 
 
 
-Get one Person
-~~~~~~~~~~~~~~
+Get one Door
+~~~~~~~~~~~~
 
 **Method:** GET
 
@@ -3216,7 +3213,7 @@ Get one Person
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/person/2
+  http://172.18.0.3:5000/api/v1.0/door/2
 
  
 **Response:**
@@ -3230,20 +3227,16 @@ Get one Person
   Date: Thu, 26 Oct 2017 15:08:39 GMT
   
   {
-    "cardNumber": 5326224, 
-    "id": 2, 
-    "name": "Carlos Alvarez", 
-    "uri": "http://172.18.0.3:5000/api/v1.0/person/2"
+   
   }
 
 
 
-Edit a Person
-~~~~~~~~~~~~~
+Edit a Door
+~~~~~~~~~~~
 
 When “Edit” button is pressed the following pop-up will appear:
 
-.. image:: images_front_end_specs/upd_person.png
 
 The following REST method should be sent to the server:
 
@@ -3253,7 +3246,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/person/7
+  http://172.18.0.3:5000/api/v1.0/door/7
 
 **JSON**
 
@@ -3302,8 +3295,8 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
 
 
 
-Delete Person
-~~~~~~~~~~~~~
+Delete Door
+~~~~~~~~~~~
 
 When “Delete” button is pressed a pop-up will appear asking if the user is sure of this operation.
 
@@ -3315,7 +3308,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/person/7
+  http://172.18.0.3:5000/api/v1.0/door/7
 
 If the person was deleted successfully, the server will answer with the following response:
 
@@ -3335,7 +3328,7 @@ If the person was deleted successfully, the server will answer with the followin
     "status": "OK"
   }
   
-If the person is not present in the system, the following message will be received:
+If the door is not present in the system, the following message will be received:
 
 **Response:**
 
