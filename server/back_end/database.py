@@ -1316,7 +1316,42 @@ class DataBase(object):
             controller = self.cursor.fetchone()
             if not controller:
                 raise ControllerNotFound('Controller not found')
+
+            #Creating a list with all the doors that this controller can
+            #handle. For example if this model of controller can handle
+            #3 doors the list will be totalDoors = [1, 2, 3]
+            sql = ("SELECT numOfDoors FROM Controller JOIN CtrllerModel "
+                   "ON (Controller.ctrllerModelId = CtrllerModel.id) "
+                   "WHERE Controller.id = {}".format(controllerId)
+                  )
+            self.execute(sql)      
+            numOfDoors = self.cursor.fetchone()['numOfDoors']
+            totalDoors = list(range(1, numOfDoors+1))
+    
+            #Creating a list all the used doors of this contoller
+            #For example if the door 1 and 3 of the controller was used
+            #the list will be usedDoors = [1, 3]
+            sql = ("SELECT doorNum FROM Door WHERE controllerId = {}"
+                   "".format(controllerId)
+                  )
+            self.execute(sql)
+            usedDoors = self.cursor.fetchall()
+            usedDoors = [usedDoor['doorNum'] for usedDoor in usedDoors]
+            
+            #Creating a list with the availables doors in the controller
+            #(the doors not used). Whit the above examples, it will be
+            #availDoors = [2]
+            availDoors = [door for door in totalDoors if door not in usedDoors]
+
+            #Adding the avialDoors list to the controller dictionary
+            controller['availDoors'] = availDoors
+
             return controller
+
+
+        except TypeError:
+            self.logger.debug('TypeError fetching "numOfDoors" or "usedDoors"')
+            raise ControllerError('Can not get specified controller')
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
