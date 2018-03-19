@@ -3142,17 +3142,54 @@ To get all posible state the following method should be sent to the server:
       "description": "Deleted", 
       "id": 5
     }
-  ]
+ ]
 
-The doors in state: "Deleted" should not be shown and the other states should be shown in a different color. 
 
  
 Add Door
 ~~~~~~~~
 
-When adding a new door, a controller should be selected from Controller combobox. To get all the controllers see `Get Controllers`_
+| When adding a new door, a controller should be selected from Controller combobox. To get all the controllers see `Get Controllers`_.
+| Once the controller is selected, the door number combobox should be filled with the doors availables in the selected controller. To get the doors availables in this controller, a GET method should be sent to the server with the ID of this controller.
 
-When “New” button is pressed the following REST method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://localhost:5000/api/v1.0/controller/2
+
+
+**Response:**
+
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 195
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 19 Mar 2018 14:33:02 GMT
+  
+  {
+    "availDoors": [
+      2, 
+      3
+    ], 
+    "ctrllerModelId": 1, 
+    "id": 2, 
+    "macAddress": "b827eb277791", 
+    "name": "Controladora 2", 
+    "uri": "http://localhost:5000/api/v1.0/controller/2"
+  }
+  
+
+| The **availDoors** field has a list with the door number slots availables in the controller.
+| Once selected, the **door number** from the ``availDoors`` list, the **release time**, the **buzzer time**, the **alarm timeout** and **visit exit**, the following POST method should be sent to the server: 
+
+
 
 **Method:** POST
 
@@ -3175,18 +3212,20 @@ When “New” button is pressed the following REST method should be sent to the
 
   HTTP/1.0 201 CREATED
   Content-Type: application/json
-  Content-Length: 121
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 13 Jul 2017 13:40:56 GMT
-
+  Content-Length: 118
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 19 Mar 2018 15:25:28 GMT
+  
   {
     "code": 201, 
-
+    "message": "Door added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.5:5000/api/v1.0/door/13"
   }
 
 
+If **doorNum** is in use, the following response will arrive:
 
-If "cardNumber" or "identNumber" is in use, the following response will arrive:
 
 **Response:**
 
@@ -3194,13 +3233,17 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
 
   HTTP/1.0 409 CONFLICT
   Content-Type: application/json
-  Content-Length: 250
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 13 Jul 2017 18:46:52 GMT
+  Content-Length: 196
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 19 Mar 2018 15:30:41 GMT
   
   {
-
+    "code": 409, 
+    "error": "The request could not be completed due to a conflict with the current state of the target resource", 
+    "message": "Can not add this door", 
+    "status": "conflict"
   }
+
 
 
 
@@ -3213,22 +3256,35 @@ Get one Door
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/door/2
+  http://172.18.0.3:5000/api/v1.0/door/7
 
- 
+
+
 **Response:**
 
 .. code-block::
 
+
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 119
-  Server: Werkzeug/0.12.2 Python/3.6.2
-  Date: Thu, 26 Oct 2017 15:08:39 GMT
+  Content-Length: 246
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 19 Mar 2018 15:40:41 GMT
   
   {
-   
+    "alrmTime": 10, 
+    "bzzrTime": 3, 
+    "controllerId": 2, 
+    "doorNum": 2, 
+    "id": 17, 
+    "isVisitExit": 1, 
+    "name": "Entrada 1era", 
+    "resStateId": 4, 
+    "rlseTime": 7, 
+    "uri": "http://172.18.0.5:5000/api/v1.0/door/7", 
+    "zoneId": 2
   }
+
 
 
 
