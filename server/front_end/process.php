@@ -663,6 +663,94 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,$visit_rec->data->message);
 			}
 		break;
+
+		case "get_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$controller_id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($controller_id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$controller_rec = get_controller($logged->name, $logged->pw,$controller_id);
+					if($controller_rec){
+						//return record
+						array_push($ret,1,$controller_rec);
+					} else array_push($ret,0,"Controller could not be retrieved");
+				}
+			}
+		break;
+		case "get_controllers":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				//get record
+				$controllers_rec = get_controllers($logged->name, $logged->pw);
+				if($controllers_rec){
+					//return record
+					array_push($ret,1,$controllers_rec);
+				} else array_push($ret,0,"Controllers not found");
+			}
+		break;
+		case "get_controller_models":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				//get record
+				$controllers_rec = get_controller_models($logged->name, $logged->pw);
+				if($controllers_rec){
+					//return record
+					array_push($ret,1,$controllers_rec);
+				} else array_push($ret,0,"Controller models not found");
+			}
+		break;
+		case "edit_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$model_id = isset($_POST['model_id']) ? $_POST['model_id'] : "";
+				$mac = isset($_POST['mac']) ? $_POST['mac'] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+				else if($name=="") array_push($ret,0,"Name not set");
+				else if(!is_numeric($model_id)) array_push($ret,0,"Invalid model ID sent");
+				else if($mac=="") array_push($ret,0,"MAC not set");
+	    			else {
+					$controllers_rec = set_controller($logged->name, $logged->pw,$id, $name,$model_id,$mac);
+
+					if($controllers_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Controller could not be updated");
+				}
+			}
+		break;
+		case "add_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$model_id = isset($_POST['model_id']) ? $_POST['model_id'] : "";
+				$mac = isset($_POST['mac']) ? $_POST['mac'] : "";
+
+				if($name=="") array_push($ret,0,"Name not set");
+				else if(!is_numeric($model_id)) array_push($ret,0,"Invalid model ID sent");
+				else if($mac=="") array_push($ret,0,"MAC not set");
+	    			else {
+					$controllers_rec = add_controller($logged->name, $logged->pw, $name, $model_id, $mac);
+					if($controllers_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Controller could not be added");
+				}
+			}
+		break;
+		case "delete_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$controllers_rec = delete_controller($logged->name,$logged->pw, $id);
+
+				if($controllers_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Controller could not be deleted");
+			}
+		break;
+		
 		default:
 			array_push($ret,0,"Operation not defined"); //send out error
 		break;

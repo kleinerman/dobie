@@ -35,7 +35,7 @@ include("header.php");
 </div>
 <div class="select-container-footer">
 <button id="doors-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">New</button>
-<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled>Edit</button>
+<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-add" disabled>Edit</button>
 <button id="doors-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button>
 </div>
 </form>
@@ -72,34 +72,6 @@ include("footer.php");
 </div>
 <div class="modal-footer">
 <button class="btn btn-success" id="door-new-submit">Save</button>
-</div>
-</form>
-</div>
-</div>
-<!-- /.modal -->
-</div>
-
-<!-- Edit modal -->
-<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="modal-edit-label" aria-hidden="true">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header">
-<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-edit-label">Edit Door</h4>
-</div>
-<form class="form-horizontal" id="door-edit-form" action="#">
-<div class="modal-body">
-
-<div class="form-group">
- <label class="control-label col-sm-2">Name:</label>
- <div class="col-sm-10">
-      <input type="text" class="form-control" id="door-edit-name" name="name" value="" maxlength="64" required>
-      <input type="hidden" id="door-edit-id" name="id" value="">
- </div>
-</div>
-</div>
-<div class="modal-footer">
-<button class="btn btn-success" id="door-edit-submit">Save</button>
 </div>
 </form>
 </div>
@@ -144,6 +116,8 @@ Are you sure?
 <script type="text/javascript">
 //init filters
 setFilterAction();
+//init vars
+var editId=0;
 
 var zoneId;
 
@@ -199,46 +173,11 @@ $("#door-new-form").submit(function(){
 			type: "POST",
 			url: "process",
 			data: "action=add_door&zoneid=" + zoneId +"&name=" + doorName,
+			//data: "action=edit_door&id=" + doorId+"&zoneid=" + zoneId + "&name=" + doorName,
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
 					$("#modal-new").modal("hide");
-					//repopulate select box
-					populateList("doors-select","doors",zoneId);
-				} else {
-					//show modal error
-					$('#modal-error .modal-body').text(resp[1]);
-					$("#modal-error").modal("show");
-				}
-			},
-			failure: function(){
-				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
-				$("#modal-error").modal("show");
-			}
-		});
-	} else {
-		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
-		$("#modal-error").modal("show");
-	}
-	return false;
-});
-
-//edit action
-$("#door-edit-form").submit(function(){
-	var doorId = $("#door-edit-id").val();
-	var doorName = $("#door-edit-name").val();
-
-	if(!isNaN(doorId) && doorName!="" && doorName!='undefined'){
-		$.ajax({
-			type: "POST",
-			url: "process",
-			data: "action=edit_door&id=" + doorId+"&zoneid=" + zoneId + "&name=" + doorName,
-			success: function(resp){
-				if(resp[0]=='1'){
-					//close modal
-					$("#modal-edit").modal("hide");
 					//repopulate select box
 					populateList("doors-select","doors",zoneId);
 				} else {

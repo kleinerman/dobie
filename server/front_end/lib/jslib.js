@@ -54,7 +54,7 @@ function updateButtons(objId){
 }
 
 //populateSelect
-function populateList(selectId,entity,id=0,actionstr=""){
+function populateList(selectId,entity,id=0,actionstr="",hlvalue=""){
 
 	if(actionstr!=""){
 		var completeActionStr=actionstr;
@@ -80,6 +80,7 @@ function populateList(selectId,entity,id=0,actionstr=""){
 						if(item.resStateId==1) itemClass=" class='toadd' disabled ";
 						else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
 						else if(item.resStateId==4) itemClass=" class='todel' disabled ";
+					        if(hlvalue!="" && item.id==hlvalue) itemClass +=" selected";
 						$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
 						qValidItems++;
 					}
