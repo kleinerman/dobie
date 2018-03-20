@@ -765,7 +765,7 @@ function get_visitors($user,$pass,$visitdoorgroupid="",$orgid="",$cardnum=""){
 function add_visit($user,$pass,$name,$idnum,$cardnum,$orgid,$expirationdate,$expirationhour,$doorgroupids_str=""){
 	//add user
 	$response = add_person($user,$pass,1,$name,$idnum,$cardnum,$orgid);
-//var_dump($response);
+
 	if($response->response_status == "201"){
 		//get created person id
 		if(isset($response->data->id)) $personid = $response->data->id;
@@ -774,21 +774,17 @@ function add_visit($user,$pass,$name,$idnum,$cardnum,$orgid,$expirationdate,$exp
 			$uri_parts=explode("/",$response->data->uri);
 			$personid = end($uri_parts);
 		}
-//var_dump($personid);
+
 		$doorgroupids=explode("|",$doorgroupids_str);
-//var_dump($doorgroupids);
+
 		foreach($doorgroupids as $doorgroupid){
-//echo "entro<br>";
 			//get door group doors
 			$door_group_doors=get_visit_door_group_doors($user,$pass,$doorgroupid);
-//var_dump($door_group_doors);
 			if($door_group_doors){
 				//for each door id, add allweek access
 				foreach($door_group_doors as $door){
 					//only iside access, NO oside
 					$response2 = add_access_allweek($user,$pass,$door->id,$personid,1,0,"00:00",$expirationhour,$expirationdate);
-//echo "entro<br>";
-//var_dump($response2);
 				}
 			} //else no accesses for that door group
 		}
@@ -796,11 +792,66 @@ function add_visit($user,$pass,$name,$idnum,$cardnum,$orgid,$expirationdate,$exp
 	return $response;
 }
 
+//Controllers
+
+// get controllers
+function get_controllers($user,$pass){
+	global $config;
+	$response=send_request($config->api_fullpath."controller",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+// get single controller
+function get_controller($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."controller/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+// get controller models
+function get_controller_models($user,$pass){
+	global $config;
+	$response=send_request($config->api_fullpath."controllermodel",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function set_controller($user,$pass,$id,$name,$model_id,$mac){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->name= $name;
+	$payload_obj->ctrllerModelId= $model_id;
+	$payload_obj->macAddress= $mac;
+	$response=send_request($config->api_fullpath."controller/$id",$user,$pass,"put",json_encode($payload_obj));
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function add_controller($user,$pass,$name,$model_id,$mac){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->name= $name;
+	$payload_obj->ctrllerModelId= $model_id;
+	$payload_obj->macAddress= $mac;
+	$response=send_request($config->api_fullpath."controller",$user,$pass,"post",json_encode($payload_obj));
+	if($response->response_status != "201") return false;
+	else return $response->data;
+}
+
+function delete_controller($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."controller/$id",$user,$pass,"delete");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
 if($DEBUG){
 	//$res=get_organizations("admin","admin");
 	//$res=do_auth("admin","admin");
 	//$res=get_organizations("admin","admin",2);
-	$res=get_person_accesses("admin","admin",18);
+	//$res=get_person_accesses("admin","admin",18);
 //	$res=get_access("admin","admin",44);
 	//$res=add_person("admin","admin","7","Ricky Martin","",123132);
 	//$res=get_door_accesses("admin","admin",5);
@@ -834,6 +885,8 @@ if($DEBUG){
 //	$res=get_visitors("admin","admin");
 	//$res=get_person_accesses("admin","admin",9);
 //	$res=add_visit("admin","admin","fasdfasdf",212121,33334,2,"2018-03-02","23:59","1");
+	$res=get_controllers("admin","admin");
+	//$res=get_controller_models("admin","admin");
 
 	echo "<pre>";
 	var_dump($res);
