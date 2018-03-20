@@ -3291,10 +3291,7 @@ Get one Door
 Edit a Door
 ~~~~~~~~~~~
 
-When “Edit” button is pressed the following pop-up will appear:
-
-
-The following REST method should be sent to the server:
+When **edit** button is pressed the following REST method should be sent to the server:
 
 **Method:** PUT
 
@@ -3308,7 +3305,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Lucas Suarez", "identNumber": "23063146", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  {"name": "Entrance One", "doorNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
   
   
   
@@ -3319,17 +3316,17 @@ The following REST method should be sent to the server:
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 53
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 13 Jul 2017 18:57:29 GMT
-
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Tue, 20 Mar 2018 15:06:13 GMT
+  
   {
-    "message": "Person updated.", 
+    "message": "Door updated", 
     "status": "OK"
   }
+ 
 
-
-If "cardNumber" or "identNumber" is in use, the following response will arrive:
+If **doorNum** is in use, the following response will arrive
 
 
 **Response:**
@@ -3338,25 +3335,24 @@ If "cardNumber" or "identNumber" is in use, the following response will arrive:
 
   HTTP/1.0 409 CONFLICT
   Content-Type: application/json
-  Content-Length: 253
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 13 Jul 2017 18:54:53 GMT
+  Content-Length: 199
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Tue, 20 Mar 2018 15:09:56 GMT
   
   {
     "code": 409, 
     "error": "The request could not be completed due to a conflict with the current state of the target resource", 
-    "message": "Can't update this person. Card number or Identification number already exists.", 
+    "message": "Can not update this door", 
     "status": "conflict"
   }
+  
 
 
 
 Delete Door
 ~~~~~~~~~~~
 
-When “Delete” button is pressed a pop-up will appear asking if the user is sure of this operation.
-
-The following REST method should be sent to the server:
+When **Delete** button is pressed the following REST method should be sent to the server:
 
 **Method:** DELETE
 
@@ -3364,46 +3360,23 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  http://172.18.0.3:5000/api/v1.0/door/7
+  http://172.18.0.3:5000/api/v1.0/door/13
 
-If the person was deleted successfully, the server will answer with the following response:
 
 **Response:**
 
 .. code-block::
 
-  Response:
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 53
-  Server: Werkzeug/0.11.9 Python/3.5.1
-  Date: Wed, 08 Mar 2017 15:12:55 GMT
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Tue, 20 Mar 2018 15:11:57 GMT
   
   {
-    "message": "Person deleted", 
+    "message": "Door deleted", 
     "status": "OK"
   }
   
-If the door is not present in the system, the following message will be received:
-
-**Response:**
-
-.. code-block::
-  
-  HTTP/1.0 404 NOT FOUND
-  Content-Type: application/json
-  Content-Length: 107
-  Server: Werkzeug/0.12.2 Python/3.6.0
-  Date: Mon, 17 Jul 2017 00:09:43 GMT
-  
-  {
-   "code": 404, 
-    "error": "request not found", 
-    "message": "Person not found", 
-    "status": "error"
-  }
-
-A pop up should inform the success or unsuccess of the operation
-
 
 
