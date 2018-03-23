@@ -398,33 +398,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,$events_rec->data->message);
 			}
 		break;
-/*		
-		case "get_door":
-			if(!$islogged) array_push($ret,0,"Action needs authentication");
-			else {
-				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
-				//get records
-				$door_rec = get_door($logged->name, $logged->pw,$id);
-				if($door_rec){
-					//return records
-					array_push($ret,1,$door_rec);
-				} else array_push($ret,0,"Door could not be retrieved");
-			}
-		break;
-		case "get_zone":
-			if(!$islogged) array_push($ret,0,"Action needs authentication");
-			else {
-				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
-				//get records
-				$zone_rec = get_zone($logged->name, $logged->pw,$id);
-				if($zone_rec){
-					//return records
-					array_push($ret,1,$zone_rec);
-				} else array_push($ret,0,"Zone could not be retrieved");
-			}
-		break;
 
-*/
 		case "get_zone":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
@@ -514,8 +488,14 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 			else {
 				$zoneid = isset($_POST['zoneid']) ? $_POST['zoneid'] : "";
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$controllerid = isset($_POST['controllerid']) ? $_POST['controllerid'] : "";
+				$doornum = isset($_POST['doornum']) ? $_POST['doornum'] : "";
+				$isvisitexit = isset($_POST['isvisitexit']) ? $_POST['isvisitexit'] : "";
+				$rlsetime = isset($_POST['rlsetime']) ? $_POST['rlsetime'] : "";
+				$bzzrtime = isset($_POST['bzzrtime']) ? $_POST['bzzrtime'] : "";
+				$alrmtime = isset($_POST['alrmtime']) ? $_POST['alrmtime'] : "";
 
-				$doors_rec = add_door($logged->name, $logged->pw, $zoneid, $name);
+				$doors_rec = add_door($logged->name, $logged->pw, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime);
 				//if($doors_rec) array_push($ret,1,"Information saved successfully!");
 				//else array_push($ret,0,"Door could not be added");
 				if($doors_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
@@ -528,10 +508,16 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
 				$zoneid = isset($_POST['zoneid']) ? $_POST['zoneid'] : "";
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$controllerid = isset($_POST['controllerid']) ? $_POST['controllerid'] : "";
+				$doornum = isset($_POST['doornum']) ? $_POST['doornum'] : "";
+				$isvisitexit = isset($_POST['isvisitexit']) ? $_POST['isvisitexit'] : "";
+				$rlsetime = isset($_POST['rlsetime']) ? $_POST['rlsetime'] : "";
+				$bzzrtime = isset($_POST['bzzrtime']) ? $_POST['bzzrtime'] : "";
+				$alrmtime = isset($_POST['alrmtime']) ? $_POST['alrmtime'] : "";
 
 				if($id=="") array_push($ret,0,"Invalid values sent");
 	    			else {
-					$doors_rec = set_door($logged->name, $logged->pw,$id, $zoneid, $name);
+					$doors_rec = set_door($logged->name, $logged->pw, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime);
 
 					if($doors_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"Door could not be updated");
