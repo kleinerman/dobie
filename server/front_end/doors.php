@@ -158,12 +158,6 @@ Are you sure?
 <!-- /.modal -->
 </div>
 
-<style>
-.modal-wide-mid{
-	width: 668px;
-}
-</style>
-
 <script type="text/javascript">
 //init filters
 setFilterAction();
