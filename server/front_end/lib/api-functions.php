@@ -235,37 +235,6 @@ function add_access_liaccess($user,$pass,$doorid,$personid,$weekday,$iside,$osid
 
 function edit_access_liaccess($user,$pass,$doorid,$personid,$id,$days_payload,$expiredate){
 	global $config;
-/*	VERSION WITH DELETE ALL > ADD ALL
-//make a delete access first
-	$response=delete_access($user,$pass,$id,1); //parameter allWeek as true for deleting all liaccess accesses
-	sleep(1);// delay added so delete can impact on the database
-	if($response->response_status == "200"){
-		$payload_obj = new stdClass();
-		//add fixed values
-		$payload_obj->doorId = $doorid;
-		$payload_obj->personId = $personid;
-		$payload_obj->expireDate = $expiredate;
-		//then for each days_payload, make an add liaccess
-		//explode days liaccesses in a | separated string
-		$days_payload_arr=explode("|",$days_payload);
-		foreach($days_payload_arr as $day_payload){
-			//decode each day payload
-			$day_payload_decoded=json_decode($day_payload);
-			//copy values to new access object
-			$payload_obj->weekDay = $day_payload_decoded->weekDay;
-			$payload_obj->iSide = $day_payload_decoded->iSide;
-			$payload_obj->oSide = $day_payload_decoded->oSide;
-			$payload_obj->startTime = $day_payload_decoded->startTime;
-			$payload_obj->endTime = $day_payload_decoded->endTime;
-			//send an add request for liaccess day
-			$response_inner=send_request($config->api_fullpath."liaccess",$user,$pass,"post",json_encode($payload_obj));
-			if($response_inner->response_status != "201") $response=$response_inner;
-			//var_dump($response_inner);
-		
-}
-	}
-	return $response;
-*/
 
 	//get current liaccess
 	$response = get_access($user,$pass,$id);
@@ -583,13 +552,6 @@ function get_doors($user,$pass,$id){
 	}
 }
 
-/*function get_doors($user,$pass,$id){
-	global $config;
-	$response=send_request($config->api_fullpath."zone/$id/door",$user,$pass);
-	if($response->response_status != "200") return false;
-	else return $response->data;
-}*/
-
 function get_door($user,$pass,$id){
 	global $config;
 	$response=send_request($config->api_fullpath."door/$id",$user,$pass);
@@ -597,23 +559,34 @@ function get_door($user,$pass,$id){
 	else return $response->data;
 }
 
-//TODO: name, doorNum, controllerId, rlseTime, bzzrTime, alrmTime, zoneId
-function add_door($user,$pass,$zoneid,$name){
+function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->zoneId= $zoneid;
 	$payload_obj->name= $name;
+	$payload_obj->controllerId= $controllerid;
+	$payload_obj->doorNum= $doornum;
+	$payload_obj->isVisitExit= $isvisitexit;
+	$payload_obj->rlseTime= $rlsetime;
+	$payload_obj->bzzrTime= $bzzrtime;
+	$payload_obj->alrmTime= $alrmtime;
 	$response=send_request($config->api_fullpath."door",$user,$pass,"post",json_encode($payload_obj));
 	//if($response->response_status != "201") return false;
 	//else return $response->data;
 	return $response;
 }
 
-function set_door($user,$pass,$id,$zoneid,$name){
+function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->zoneId= $zoneid;
 	$payload_obj->name= $name;
+	$payload_obj->controllerId= $controllerid;
+	$payload_obj->doorNum= $doornum;
+	$payload_obj->isVisitExit= $isvisitexit;
+	$payload_obj->rlseTime= $rlsetime;
+	$payload_obj->bzzrTime= $bzzrtime;
+	$payload_obj->alrmTime= $alrmtime;
 	$response=send_request($config->api_fullpath."door/$id",$user,$pass,"put",json_encode($payload_obj));
 	if($response->response_status != "200") return false;
 	else return $response->data;
@@ -885,7 +858,8 @@ if($DEBUG){
 //	$res=get_visitors("admin","admin");
 	//$res=get_person_accesses("admin","admin",9);
 //	$res=add_visit("admin","admin","fasdfasdf",212121,33334,2,"2018-03-02","23:59","1");
-	$res=get_controllers("admin","admin");
+	//$res=get_controllers("admin","admin");
+	$res=get_controller("admin","admin",3);
 	//$res=get_controller_models("admin","admin");
 
 	echo "<pre>";
