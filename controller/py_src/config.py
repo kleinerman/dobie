@@ -15,8 +15,10 @@ WIRED_IFACE_NAME = 'eth0'
 
 LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'
 
+IOFACE_LOGGING_FILE ='/opt/dobie/controller/py_src/ioifaceout.log'
+
 #SERVER_IP = '192.168.1.79'
-SERVER_IP = '192.168.1.79'
+SERVER_IP = '10.10.7.79'
 SERVER_PORT = 7979
 
 EXIT_CHECK_TIME = 2
