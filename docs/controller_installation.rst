@@ -120,6 +120,12 @@ Install **make** package to be able to compile ioiface:
 
   # pacman -S make
   
+Install **wiringpi** package. It is needed by **ioIface** program to set the gpios:
+
+.. code-block::
+
+  # pacman -S wiringpi
+  
 Install **git** to clone dobie repository
 
 .. code-block::
