@@ -53,6 +53,10 @@ body{
 	width:70px;
 }
 
+.smaller_input{
+	width:40px;
+}
+
 iframe,a img{
 	border:0px;
 }
