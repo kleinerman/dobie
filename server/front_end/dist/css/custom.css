@@ -238,6 +238,10 @@ label,input[type=checkbox],input[type=radio]{
     overflow-y: scroll;
 }
 
+.modal-wide-mid{
+	width: 668px;
+}
+
 .clockpicker, .input_date_container{
 	display:inline-table;
 	width:100px;
