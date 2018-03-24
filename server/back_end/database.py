@@ -373,7 +373,7 @@ class DataBase(object):
 
         try:
             self.execute(sql)
-            validVisitExit = self.cursor.fetchone()
+            validVisitExit = self.cursor.fetchone()['COUNT(*)']
             return validVisitExit
 
         except pymysql.err.InternalError as internalError:
