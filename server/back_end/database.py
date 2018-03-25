@@ -2082,10 +2082,12 @@ class DataBase(object):
 
         try:
             #Determines the pendig operation of that person on that controller
-            sql = "SELECT resStateId FROM Person WHERE id = {}".format(personId)
+            sql = "SELECT name, resStateId FROM Person WHERE id = {}".format(personId)
 
             self.execute(sql)
-            resState = self.cursor.fetchone()['resStateId']
+            row = self.cursor.fetchone()
+            personName = row['name']
+            resState = row['resStateId']
 
             if resState == TO_DELETE:
 
@@ -2130,7 +2132,11 @@ class DataBase(object):
                 pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
                 if not pendCtrllersToDel:
                     #sql = "DELETE FROM Person WHERE id = {}".format(personId)
-                    sql = "UPDATE Person SET resStateId = {} WHERE id = {}".format(DELETED, personId)
+                    personRenamed = "{} (DELETED)".format(personName) 
+                    sql = ("UPDATE Person SET name = '{}', identNumber = NULL, "
+                           "cardNumber = NULL, resStateId = {}, cardNumber = NULL "
+                           "WHERE id = {}".format(personRenamed, DELETED, personId)
+                          )
                     self.execute(sql)
 
                 self.delOrgIfNeed(personId)
