@@ -161,7 +161,9 @@ Inside ``/opt/dobie/controller/py_src/`` directory, edit ``config.py`` and point
   
   DB_FILE = '/opt/dobie/controller/py_src/access.db'
   
-  LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'  
+  LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'
+  
+  IOFACE_LOGGING_FILE ='/opt/dobie/controller/py_src/ioifaceout.log'
    
   
 
