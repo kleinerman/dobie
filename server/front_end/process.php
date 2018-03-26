@@ -398,33 +398,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,$events_rec->data->message);
 			}
 		break;
-/*		
-		case "get_door":
-			if(!$islogged) array_push($ret,0,"Action needs authentication");
-			else {
-				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
-				//get records
-				$door_rec = get_door($logged->name, $logged->pw,$id);
-				if($door_rec){
-					//return records
-					array_push($ret,1,$door_rec);
-				} else array_push($ret,0,"Door could not be retrieved");
-			}
-		break;
-		case "get_zone":
-			if(!$islogged) array_push($ret,0,"Action needs authentication");
-			else {
-				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
-				//get records
-				$zone_rec = get_zone($logged->name, $logged->pw,$id);
-				if($zone_rec){
-					//return records
-					array_push($ret,1,$zone_rec);
-				} else array_push($ret,0,"Zone could not be retrieved");
-			}
-		break;
 
-*/
 		case "get_zone":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
@@ -514,8 +488,14 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 			else {
 				$zoneid = isset($_POST['zoneid']) ? $_POST['zoneid'] : "";
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$controllerid = isset($_POST['controllerid']) ? $_POST['controllerid'] : "";
+				$doornum = isset($_POST['doornum']) ? $_POST['doornum'] : "";
+				$isvisitexit = isset($_POST['isvisitexit']) ? $_POST['isvisitexit'] : "";
+				$rlsetime = isset($_POST['rlsetime']) ? $_POST['rlsetime'] : "";
+				$bzzrtime = isset($_POST['bzzrtime']) ? $_POST['bzzrtime'] : "";
+				$alrmtime = isset($_POST['alrmtime']) ? $_POST['alrmtime'] : "";
 
-				$doors_rec = add_door($logged->name, $logged->pw, $zoneid, $name);
+				$doors_rec = add_door($logged->name, $logged->pw, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime);
 				//if($doors_rec) array_push($ret,1,"Information saved successfully!");
 				//else array_push($ret,0,"Door could not be added");
 				if($doors_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
@@ -528,10 +508,16 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
 				$zoneid = isset($_POST['zoneid']) ? $_POST['zoneid'] : "";
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$controllerid = isset($_POST['controllerid']) ? $_POST['controllerid'] : "";
+				$doornum = isset($_POST['doornum']) ? $_POST['doornum'] : "";
+				$isvisitexit = isset($_POST['isvisitexit']) ? $_POST['isvisitexit'] : "";
+				$rlsetime = isset($_POST['rlsetime']) ? $_POST['rlsetime'] : "";
+				$bzzrtime = isset($_POST['bzzrtime']) ? $_POST['bzzrtime'] : "";
+				$alrmtime = isset($_POST['alrmtime']) ? $_POST['alrmtime'] : "";
 
 				if($id=="") array_push($ret,0,"Invalid values sent");
 	    			else {
-					$doors_rec = set_door($logged->name, $logged->pw,$id, $zoneid, $name);
+					$doors_rec = set_door($logged->name, $logged->pw, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime);
 
 					if($doors_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"Door could not be updated");
@@ -663,6 +649,94 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,$visit_rec->data->message);
 			}
 		break;
+
+		case "get_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$controller_id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($controller_id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$controller_rec = get_controller($logged->name, $logged->pw,$controller_id);
+					if($controller_rec){
+						//return record
+						array_push($ret,1,$controller_rec);
+					} else array_push($ret,0,"Controller could not be retrieved");
+				}
+			}
+		break;
+		case "get_controllers":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				//get record
+				$controllers_rec = get_controllers($logged->name, $logged->pw);
+				if($controllers_rec){
+					//return record
+					array_push($ret,1,$controllers_rec);
+				} else array_push($ret,0,"Controllers not found");
+			}
+		break;
+		case "get_controller_models":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				//get record
+				$controllers_rec = get_controller_models($logged->name, $logged->pw);
+				if($controllers_rec){
+					//return record
+					array_push($ret,1,$controllers_rec);
+				} else array_push($ret,0,"Controller models not found");
+			}
+		break;
+		case "edit_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$model_id = isset($_POST['model_id']) ? $_POST['model_id'] : "";
+				$mac = isset($_POST['mac']) ? $_POST['mac'] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+				else if($name=="") array_push($ret,0,"Name not set");
+				else if(!is_numeric($model_id)) array_push($ret,0,"Invalid model ID sent");
+				else if($mac=="") array_push($ret,0,"MAC not set");
+	    			else {
+					$controllers_rec = set_controller($logged->name, $logged->pw,$id, $name,$model_id,$mac);
+
+					if($controllers_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Controller could not be updated");
+				}
+			}
+		break;
+		case "add_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$model_id = isset($_POST['model_id']) ? $_POST['model_id'] : "";
+				$mac = isset($_POST['mac']) ? $_POST['mac'] : "";
+
+				if($name=="") array_push($ret,0,"Name not set");
+				else if(!is_numeric($model_id)) array_push($ret,0,"Invalid model ID sent");
+				else if($mac=="") array_push($ret,0,"MAC not set");
+	    			else {
+					$controllers_rec = add_controller($logged->name, $logged->pw, $name, $model_id, $mac);
+					if($controllers_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Controller could not be added");
+				}
+			}
+		break;
+		case "delete_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$controllers_rec = delete_controller($logged->name,$logged->pw, $id);
+
+				if($controllers_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Controller could not be deleted");
+			}
+		break;
+		
 		default:
 			array_push($ret,0,"Operation not defined"); //send out error
 		break;

@@ -35,7 +35,7 @@ include("header.php");
 </div>
 <div class="select-container-footer">
 <button id="doors-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">New</button>
-<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled>Edit</button>
+<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled>Edit</button>
 <button id="doors-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button>
 </div>
 </form>
@@ -53,7 +53,7 @@ include("footer.php");
 <!-- MODALS -->
 <!-- create modal -->
 <div class="modal fade" id="modal-new" tabindex="-1" role="dialog" aria-labelledby="modal-new-label" aria-hidden="true">
-<div class="modal-dialog">
+<div class="modal-dialog modal-wide-mid">
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -69,37 +69,54 @@ include("footer.php");
  </div>
 </div>
 
+<div class="form-group">
+<div class="col-sm-5">
+<div class="select-container">
+<div class="select-container-title">Controller</div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="controllers-select">
+<select id="controllers-select" class="select-options select-options-small form-control" name="controllers-select" size="2" required></select>
+</div>
+<div class="select-container-footer">
+&nbsp;
+</div>
+</div>
+</div>
+
+<div class="col-sm-3">
+<div class="select-container" style="width:130px !important">
+<div class="select-container-title">Door Number</div>
+<div class="select-container-body">
+<select id="door-number-select" class="small_input form-control" name="door-number-select" size="3" required>
+<option value="0" disabled>None
+</select>
+</div>
+<div class="select-container-footer">
+<div class="left">
+<label><input type="checkbox" name="door-visit-exit" id="door-visit-exit"> Visit Exit</label>
+</div>
+</div>
+</div>
+</div>
+
+<div class="col-sm-4">
+<div class="select-container">
+<div class="select-container-title">Times</div>
+<div class="select-container-body">
+Release Time (s) <input class="smaller_input" type="number" name="door-release-t" id="door-release-t" max="99" min="0" value="7" required>
+<br><br>
+Buzzer Time (s) <input class="smaller_input" type="number" name="door-buzzer-t" id="door-buzzer-t" max="99" min="0" value="2" required>
+<br><br>
+Alarm Timeout (s) <input class="smaller_input" type="number" name="door-alarm-t" id="door-alarm-t" max="99" min="0" value="60" required>
+</div>
+</div>
+</div>
+
+</div>
+
 </div>
 <div class="modal-footer">
 <button class="btn btn-success" id="door-new-submit">Save</button>
-</div>
-</form>
-</div>
-</div>
-<!-- /.modal -->
-</div>
-
-<!-- Edit modal -->
-<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="modal-edit-label" aria-hidden="true">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header">
-<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-edit-label">Edit Door</h4>
-</div>
-<form class="form-horizontal" id="door-edit-form" action="#">
-<div class="modal-body">
-
-<div class="form-group">
- <label class="control-label col-sm-2">Name:</label>
- <div class="col-sm-10">
-      <input type="text" class="form-control" id="door-edit-name" name="name" value="" maxlength="64" required>
-      <input type="hidden" id="door-edit-id" name="id" value="">
- </div>
-</div>
-</div>
-<div class="modal-footer">
-<button class="btn btn-success" id="door-edit-submit">Save</button>
 </div>
 </form>
 </div>
@@ -112,6 +129,7 @@ include("footer.php");
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
+Deleting this door will remove all events that belong to it.<br>
 Are you sure?
 </div>
 <div class="modal-footer center">
@@ -140,16 +158,19 @@ Are you sure?
 <!-- /.modal -->
 </div>
 
-
 <script type="text/javascript">
 //init filters
 setFilterAction();
+//init vars
+var editId=0;
+var editDoorNum=0;
 
 var zoneId;
 
 //populate select list
 populateList("zones-select","zones");
 
+//populate doors on zones change
 $("#zones-select").change(function(){
 	zoneId=$("#zones-select").val();
 	if(!isNaN(zoneId) && zoneId!="undefined"){
@@ -162,9 +183,85 @@ $("#zones-select").change(function(){
 	}
 });
 
+//populate doors nums on controller change
+$("#controllers-select").change(function(){
+	controllerId=$("#controllers-select").val();
+	if(!isNaN(controllerId) && controllerId!="undefined"){
+		//populate list with disableds and hl
+		populateListDoorNums("door-number-select",controllerId);
+	}
+});
+
+//fetch info for new
+$('#modal-new').on('show.bs.modal', function (event){
+	//clear all previous values
+	resetForm();
+	//populate select
+	populateList("controllers-select","controllers");
+});
+
+function resetForm(){
+	//group name
+	$("#door-new-name").val("");
+	//empty selects
+	$("#controllers-select").empty();
+	//unselect options in fixed selects
+	$('#door-number-select').empty();
+	$('#door-number-select').append("<option value='0' disabled>None");
+	//clear visit exit
+	$('#door-visit-exit').prop("checked",false);
+	//clear group id value if edit
+	editId=0;
+	editDoorNum=0;
+	//modal title
+	$("#modal-new-label").text("New Door");
+	$('#door-release-t').val(7);
+	$('#door-buzzer-t').val(2);
+	$('#door-alarm-t').val(60);
+}
+
+function populateListDoorNums(selectId,id=0,hlvalue=""){
+	$.ajax({
+		type: "POST",
+		url: "process",
+		data: "action=get_controller&id="+id,
+		success: function(resp){
+			$("#"+selectId).empty();
+			var optionsHtml="";
+			if(resp[0]=='1'){
+				var values = resp[1];
+				//show door nums
+				//show current door numb if edit
+				if(editDoorNum>0 && editControllerId==id){
+					//show hl
+					optionsHtml+="<option value='"+editDoorNum+"' selected>"+editDoorNum;
+				}
+				//show all available door nums
+				values.availDoors.forEach(function(item,index){
+					if(editDoorNum!=item || editControllerId!=id){
+ 						//show as available
+						optionsHtml+="<option value='"+item+"'>"+item;
+					}
+				});
+				//in case none available
+				if(optionsHtml=="") optionsHtml = "<option value='' disabled>None";
+
+				$("#"+selectId).append(optionsHtml);
+			} else {
+				//show error option
+				$("#"+selectId).append("<option value='' disabled>"+ resp[1] +"</option>");
+			}
+		},
+		failure: function(){
+				//show error option
+				$("#"+selectId).append("<option value=''>Operation failed, please try again</option>");
+		}
+	});
+}
+
 //fetch info for edit
-$('#modal-edit').on('show.bs.modal', function (event){
-	// If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+$("#doors-select-edit").click(function(){
+	//clear all previous values
 	var doorId = $("#doors-select").val();
 	$.ajax({
 		type: "POST",
@@ -174,8 +271,24 @@ $('#modal-edit').on('show.bs.modal', function (event){
 			if(resp[0]=='1'){
 				//populate fields with rec info
 				var values = resp[1];
-				$('#door-edit-id').val(doorId);
-				$('#door-edit-name').val(values.name);
+				editId=doorId;
+				editDoorNum=values.doorNum;
+				editControllerId=values.controllerId;
+				$('#door-new-name').val(values.name);
+				//populate controllers hl the correct one
+				populateList("controllers-select","controllers",0,"",values.controllerId);
+				//select correct door number
+				//$('#door-number-select option[value='+values.doorNum+']').prop("selected",true);
+				populateListDoorNums("door-number-select",values.controllerId);
+				//check visit exit
+				if(values.isVisitExit) $('#door-visit-exit').prop("checked",true);
+				else $('#door-visit-exit').prop("checked",false);
+				//modal title
+				$("#modal-new-label").text("Edit Door");
+				//fill time number fields
+				$('#door-release-t').val(values.rlseTime);
+				$('#door-buzzer-t').val(values.bzzrTime);
+				$('#door-alarm-t').val(values.alrmTime);
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
@@ -193,52 +306,25 @@ $('#modal-edit').on('show.bs.modal', function (event){
 //new action
 $("#door-new-form").submit(function(){
 	var doorName = $("#door-new-name").val();
+	var controllerId = $("#controllers-select").val();
+	var doorNumber = $("#door-number-select").val();
+	if(typeof($('#door-visit-exit:checked').val())=="undefined") {var isVisitExit = 0} else {var isVisitExit = 1}
+	var releaseTime = $('#door-release-t').val();
+	var buzzerTime = $('#door-buzzer-t').val();
+	var alrmTime = $('#door-alarm-t').val();
 
-	if(doorName!="" && doorName!='undefined'){
+	if(editId!=0 && !isNaN(editId)) action_str="action=edit_door&id=" + editId + "&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime;
+	else action_str="action=add_door&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime;
+
+	if(doorName!="" && doorName!='undefined' && !isNaN(zoneId) && !isNaN(controllerId) && !isNaN(doorNumber)  && !isNaN(isVisitExit) && !isNaN(releaseTime) && !isNaN(buzzerTime) && !isNaN(alrmTime)){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=add_door&zoneid=" + zoneId +"&name=" + doorName,
+			data: action_str,
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
 					$("#modal-new").modal("hide");
-					//repopulate select box
-					populateList("doors-select","doors",zoneId);
-				} else {
-					//show modal error
-					$('#modal-error .modal-body').text(resp[1]);
-					$("#modal-error").modal("show");
-				}
-			},
-			failure: function(){
-				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
-				$("#modal-error").modal("show");
-			}
-		});
-	} else {
-		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
-		$("#modal-error").modal("show");
-	}
-	return false;
-});
-
-//edit action
-$("#door-edit-form").submit(function(){
-	var doorId = $("#door-edit-id").val();
-	var doorName = $("#door-edit-name").val();
-
-	if(!isNaN(doorId) && doorName!="" && doorName!='undefined'){
-		$.ajax({
-			type: "POST",
-			url: "process",
-			data: "action=edit_door&id=" + doorId+"&zoneid=" + zoneId + "&name=" + doorName,
-			success: function(resp){
-				if(resp[0]=='1'){
-					//close modal
-					$("#modal-edit").modal("hide");
 					//repopulate select box
 					populateList("doors-select","doors",zoneId);
 				} else {
