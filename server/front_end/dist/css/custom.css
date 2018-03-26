@@ -53,6 +53,10 @@ body{
 	width:70px;
 }
 
+.smaller_input{
+	width:40px;
+}
+
 iframe,a img{
 	border:0px;
 }
@@ -232,6 +236,10 @@ label,input[type=checkbox],input[type=radio]{
     /* 100% = dialog height, 120px = header + footer */
     max-height: calc(100% - 60px);
     overflow-y: scroll;
+}
+
+.modal-wide-mid{
+	width: 668px;
 }
 
 .clockpicker, .input_date_container{
