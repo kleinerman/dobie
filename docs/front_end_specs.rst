@@ -2828,3 +2828,555 @@ If the controller was deleted successfully, the server will answer with the foll
 
 
 
+
+
+Zone
+----
+
+This screen is used to “add”, “edit” or “delete” zones in the building.
+For the system, a zone is just a name to group a set of doors.
+
+|
+
+.. image:: images_front_end_specs/zone.png
+
+
+Get Zones
+~~~~~~~~~
+
+To get from the server the current list of zones, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/zone
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 210
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Fri, 16 Mar 2018 19:14:47 GMT
+  
+  [
+    {
+      "id": 1, 
+      "name": "Ingreso Sur", 
+      "uri": "http://localhost:5000/api/v1.0/zone/1"
+    }, 
+    {
+      "id": 2, 
+      "name": "Ingreso Norte", 
+      "uri": "http://localhost:5000/api/v1.0/zone/2"
+    }
+  ]
+  
+
+  
+
+
+Add Zone
+~~~~~~~~
+
+The following REST method should be sent to the server:
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/zone
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Sector Maquinas"}
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 116
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Fri, 16 Mar 2018 19:22:45 GMT
+  
+  {
+    "code": 201, 
+    "message": "Zone added", 
+    "status": "OK", 
+    "uri": "http://localhost:5000/api/v1.0/zone/3"
+  }
+
+
+
+
+Get one zone
+~~~~~~~~~~~~
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/zone/2
+
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 93
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Fri, 16 Mar 2018 19:34:20 GMT
+  
+  {
+    "id": 2, 
+    "name": "Ingreso Norte", 
+    "uri": "http://localhost:5000/api/v1.0/zone/2"
+  }
+
+
+
+Update Zone
+~~~~~~~~~~~
+
+
+The following REST method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/zone/3
+  
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Zona de Equipos"}
+  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Fri, 16 Mar 2018 19:28:24 GMT
+  
+  {
+    "message": "Zone updated", 
+    "status": "OK"
+  }
+
+
+  
+Delete Zone
+~~~~~~~~~~~
+
+When “Delete” button is pressed the following REST method should be sent to the server:
+
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/zone/3
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Fri, 16 Mar 2018 19:30:01 GMT
+  
+  {
+    "message": "Zone deleted", 
+    "status": "OK"
+  }
+  
+
+
+
+
+Doors
+-----
+
+This screen is used to “add”, “edit” or “delete” doors. For any of this actions,
+a zone should be selected first.
+
+.. image:: images_front_end_specs/door.png
+
+To get from server the current list of zones, see `Get Zones`_ section.
+
+Get Doors
+~~~~~~~~~
+
+To get from server the current list of doors in each zone, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/zone/1/door
+  
+  
+**Response:**
+
+.. code-block::
+    
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 754
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Fri, 16 Mar 2018 19:54:32 GMT
+  
+  [
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 1, 
+      "doorNum": 1, 
+      "id": 4, 
+      "isVisitExit": 1, 
+      "name": "Ba\u00f1o 3", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://localhost:5000/api/v1.0/door/4"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 1, 
+      "doorNum": 2, 
+      "id": 5, 
+      "isVisitExit": 0, 
+      "name": "Molinte 5", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://localhost:5000/api/v1.0/door/5"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 1, 
+      "doorNum": 3, 
+      "id": 6, 
+      "isVisitExit": 0, 
+      "name": "Ingreso 2", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://localhost:5000/api/v1.0/door/6"
+    }
+  ]
+
+
+
+    
+**resStateId** is a field that indicates the state of the door into the system
+
+To get all posible state the following method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/resstate
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 272
+  Server: Werkzeug/0.11.9 Python/3.5.1
+  Date: Mon, 27 Mar 2017 20:49:28 GMT
+  
+  [
+    {
+      "description": "To Add", 
+      "id": 1
+    }, 
+    {
+      "description": "To Update", 
+      "id": 2
+    }, 
+    {
+      "description": "Committed", 
+      "id": 3
+    }, 
+    {
+      "description": "To Delete", 
+      "id": 4
+    }, 
+    {
+      "description": "Deleted", 
+      "id": 5
+    }
+ ]
+
+
+ 
+Add Door
+~~~~~~~~
+
+| When adding a new door, a controller should be selected from Controller combobox. To get all the controllers see `Get Controllers`_.
+| Once the controller is selected, the door number combobox should be filled with the doors availables in the selected controller. To get the doors availables in this controller, a GET method should be sent to the server with the ID of this controller.
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://localhost:5000/api/v1.0/controller/2
+
+
+**Response:**
+
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 195
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 19 Mar 2018 14:33:02 GMT
+  
+  {
+    "availDoors": [
+      2, 
+      3
+    ], 
+    "ctrllerModelId": 1, 
+    "id": 2, 
+    "macAddress": "b827eb277791", 
+    "name": "Controladora 2", 
+    "uri": "http://localhost:5000/api/v1.0/controller/2"
+  }
+  
+
+| The **availDoors** field has a list with the door number slots availables in the controller.
+| Once selected, the **door number** from the ``availDoors`` list, the **release time**, the **buzzer time**, the **alarm timeout** and **visit exit**, the following POST method should be sent to the server: 
+
+
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/door
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Entrada 1era", "doorNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 118
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 19 Mar 2018 15:25:28 GMT
+  
+  {
+    "code": 201, 
+    "message": "Door added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.5:5000/api/v1.0/door/13"
+  }
+
+
+If **doorNum** is in use, the following response will arrive:
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 409 CONFLICT
+  Content-Type: application/json
+  Content-Length: 196
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 19 Mar 2018 15:30:41 GMT
+  
+  {
+    "code": 409, 
+    "error": "The request could not be completed due to a conflict with the current state of the target resource", 
+    "message": "Can not add this door", 
+    "status": "conflict"
+  }
+
+
+
+
+Get one Door
+~~~~~~~~~~~~
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/door/7
+
+
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 246
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 19 Mar 2018 15:40:41 GMT
+  
+  {
+    "alrmTime": 10, 
+    "bzzrTime": 3, 
+    "controllerId": 2, 
+    "doorNum": 2, 
+    "id": 17, 
+    "isVisitExit": 1, 
+    "name": "Entrada 1era", 
+    "resStateId": 4, 
+    "rlseTime": 7, 
+    "uri": "http://172.18.0.5:5000/api/v1.0/door/7", 
+    "zoneId": 2
+  }
+
+
+
+
+Edit a Door
+~~~~~~~~~~~
+
+When **edit** button is pressed the following REST method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/door/7
+
+**JSON**
+
+.. code-block::
+
+  {"name": "Entrance One", "doorNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
+  
+  
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Tue, 20 Mar 2018 15:06:13 GMT
+  
+  {
+    "message": "Door updated", 
+    "status": "OK"
+  }
+ 
+
+If **doorNum** is in use, the following response will arrive
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 409 CONFLICT
+  Content-Type: application/json
+  Content-Length: 199
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Tue, 20 Mar 2018 15:09:56 GMT
+  
+  {
+    "code": 409, 
+    "error": "The request could not be completed due to a conflict with the current state of the target resource", 
+    "message": "Can not update this door", 
+    "status": "conflict"
+  }
+  
+
+
+
+Delete Door
+~~~~~~~~~~~
+
+When **Delete** button is pressed the following REST method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/door/13
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Tue, 20 Mar 2018 15:11:57 GMT
+  
+  {
+    "message": "Door deleted", 
+    "status": "OK"
+  }
+  
+
+
