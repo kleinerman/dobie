@@ -125,15 +125,15 @@ cursor.execute('''
         doorId      INTEGER,
         eventTypeId INTEGER,
         dateTime    DATETIME,
-        doorLockId     INTEGER,   
+        doorLockId  INTEGER,   
         personId    INTEGER,
         side        BOOLEAN,
         allowed     BOOLEAN,
         denialCauseId INTEGER,
-        FOREIGN KEY(doorId) REFERENCES Door(id),
+        FOREIGN KEY(doorId) REFERENCES Door(id) ON DELETE CASCADE,
         FOREIGN KEY(eventTypeId) REFERENCES EventType(id),
         FOREIGN KEY(doorLockId) REFERENCES DoorLock(id),
-        FOREIGN KEY(personId) REFERENCES Person(id),
+        FOREIGN KEY(personId) REFERENCES Person(id) ON DELETE CASCADE,
         FOREIGN KEY(denialCauseId) REFERENCES DenialCause(id)
    )
     '''

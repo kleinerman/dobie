@@ -25,6 +25,10 @@ class IoIface(object):
 
         #IoIface Proccess
         self.ioIfaceProc = None
+
+        #IoIface Output
+        self.ioIfaceStdOut = None
+
         
         self.dataBase = dataBase
 
@@ -37,8 +41,9 @@ class IoIface(object):
         Leave self.ioIfaceProc and self.doorsControl with new objects.
         '''
 
-        #In the followng section we generate the arguments to pass to the ioIface external program
-        ioIfaceArgs = ''
+        #In the followng section we put all the arguments to pass to ioIface external
+        #program in a list, including and starting by the name of the program
+        ioIfaceArgs = [IOIFACE_BIN]
 
         gpioNames = self.dataBase.getGpioNames()
         gpiosDoors = self.dataBase.getGpiosDoors()
@@ -47,20 +52,23 @@ class IoIface(object):
             for gpioName in gpioNames:
                 gpioNumber = gpiosDoor[gpioName]
                 if gpioNumber:
-                    ioIfaceArgs += '--{} {} '.format(gpioName, gpioNumber)
+                    ioIfaceArgs.append("--{}".format(gpioName))
+                    ioIfaceArgs.append("{}".format(gpioNumber))
 
 
-        #With the arguments to pass to the ioIface program, it is lauched using Popen
-        #and saving the process object to be able to kill it when a door is added, updated
-        #or deleted.
-        ioIfaceCmd = '{} {}'.format(IOIFACE_BIN, ioIfaceArgs)
+        #The ioIface external program is launched using Popen
+        #and saving the process object.
+        ioIfaceCmd = ' '.join(ioIfaceArgs)
 
         logMsg = 'Starting IO Interface with the following command: {}'.format(ioIfaceCmd)
         self.logger.info(logMsg)
 
-        self.ioIfaceProc = subprocess.Popen(ioIfaceCmd, shell=True, 
-                                            stdout=subprocess.PIPE, 
-                                            stderr=subprocess.STDOUT
+        self.ioIfaceStdOut = open(IOFACE_LOGGING_FILE, 'w')
+
+        self.ioIfaceProc = subprocess.Popen(ioIfaceArgs,
+                                            stdout=self.ioIfaceStdOut, 
+                                            stderr=subprocess.STDOUT,
+                                            bufsize=0
                                            )
 
 
@@ -82,6 +90,8 @@ class IoIface(object):
             #signal again, we do not permit "ioiface" finished in a clean way.
             #self.ioIfaceProc.terminate()
             #Wait until it finish (It does not finish instantly)
+            self.logger.info('Closing IoIface StdOut File.')
+            self.ioIfaceStdOut.close()
             try:
                 self.ioIfaceProc.wait(timeout=IOIFACE_WAIT_FINISH_TIME)
                 self.logger.debug('IO Interface stopped.')
