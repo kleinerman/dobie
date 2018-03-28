@@ -165,7 +165,6 @@ Are you sure?
 <!-- /.modal -->
 </div>
 
-
 <script type="text/javascript">
 //init filters
 setFilterAction();

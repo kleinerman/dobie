@@ -280,3 +280,12 @@ input::-webkit-inner-spin-button {
 	padding:10px;
 	border-radius:5px;
 }
+
+
+#legend-row{
+	padding: 40px;
+}
+
+#events-table{
+	width:100%;
+}

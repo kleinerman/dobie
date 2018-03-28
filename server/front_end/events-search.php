@@ -163,11 +163,8 @@ Until:<br>
 </div>
 
 </div>
-
 </div>
-
 </div>
-
 </div>
 
 <!-- error modal -->
@@ -185,26 +182,7 @@ Until:<br>
 <!-- /.modal -->
 </div>
 
-<style>
-.table-container{
-	display:grid;
-	margin:0px auto;
-	max-height:600px;
-	overflow:auto;
-}
-
-#legend-row{
-	padding: 40px;
-}
-
-#events-table{
-	width:100%;
-}
-</style>
-
-<?
-include("footer.php");
-?>
+<? include("footer.php");?>
 
 <script type="text/javascript">
 //init filters
@@ -390,10 +368,7 @@ function showPagination(data){
 	var max_pages = Math.ceil(data.totalEvtsCount/perpage);
 	//validate page
 	var page = Math.min(Math.max(1,(Math.floor(data.startEvt/perpage))+1),max_pages);
-/*console.log(max_pages);
-console.log(page);
-console.log(data.totalEvtsCount);
-*/
+
 	if(max_pages>1){
 		//define paging margins for printing many pages
 		if(max_pages>30) {
