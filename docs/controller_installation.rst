@@ -128,6 +128,8 @@ Add or uncomment to ``/etc/ssh/sshd_config`` the following:
   
   UseDNS no
 
+Copy your public ssh key to ``/root/.ssh/authorized_keys`` to allow some development scripts login without asking the password.
+To generate the ``/root/.ssh/`` directory with the rights permissons, run ``ssh-keygen`` command
 
 Pacakges to run dobie
 ---------------------
