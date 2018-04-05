@@ -96,6 +96,18 @@ The file should have the following content:
   DNS=10.10.10.54
 
 
+SSH server configuration
+------------------------
+
+Add or uncomment to ``/etc/ssh/sshd_config`` the following:
+
+.. code-block::
+
+  PermitRootLogin yes
+  
+  UseDNS no
+
+
 Pacakges to run dobie
 ---------------------
 
