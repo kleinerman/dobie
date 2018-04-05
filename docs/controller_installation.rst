@@ -25,6 +25,20 @@ Bash completion is very usefull:
 .. code-block::
 
   # pacman -S bash-completion
+  
+Change root password
+
+.. code-block::
+
+  # passwd
+  
+Add the following lines to ``/etc/bash.bashrc``
+
+.. code-block::
+
+  alias ls='ls --color=auto'
+  alias grep='grep --color=auto'
+  alias diff='colordiff'
 
 Add your username:
 
