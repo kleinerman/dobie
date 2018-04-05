@@ -109,6 +109,13 @@ The file should have the following content:
   DNS=10.10.10.53
   DNS=10.10.10.54
 
+Wireless network configuration
+------------------------------
+
+Follow the following guide to configure properly the wifi interface:
+
+https://github.com/kleinerman/dobie/blob/jek_docs/docs/wifi_config_on_rpi3.rst
+
 
 SSH server configuration
 ------------------------
