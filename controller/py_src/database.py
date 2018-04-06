@@ -326,10 +326,10 @@ class DataBase(object):
             #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender Module of
             #the server send a limited access CRUD before the client respond and avoid integrity error.
             #Using REPLACE is not good since it has to DELETE and INSERT always.
-            sql = ("INSERT OR IGNORE INTO Door(id, doorNum, rlseTime, bzzrTime, alrmTime) "
-                   "VALUES({}, {}, {}, {}, {})"
-                   "".format(door['id'], door['doorNum'], door['rlseTime'],
-                             door['bzzrTime'], door['alrmTime'])
+            sql = ("INSERT OR IGNORE INTO Door(id, doorNum, sensorNormState, rlseTime, bzzrTime, alrmTime) "
+                   "VALUES({}, {}, {}, {}, {}, {})"
+                   "".format(door['id'], door['doorNum'], door['sensorNormState'], 
+                             door['rlseTime'], door['bzzrTime'], door['alrmTime'])
                   )
             self.cursor.execute(sql)
             #self.connection.commit()
@@ -354,11 +354,10 @@ class DataBase(object):
         '''
 
         try:
-            sql = ("UPDATE Door SET doorNum = {}, rlseTime = {}, "
-                   "bzzrTime = {}, alrmTime = {} WHERE id = {}"
-                   "".format(door['doorNum'], door['rlseTime'], 
-                             door['bzzrTime'], door['alrmTime'], 
-                             door['id'])
+            sql = ("UPDATE Door SET doorNum = {}, sensorNormState = {}, "
+                   "rlseTime = {}, bzzrTime = {}, alrmTime = {} WHERE id = {}"
+                   "".format(door['doorNum'], door['sensorNormState'], door['rlseTime'], 
+                             door['bzzrTime'], door['alrmTime'], door['id'])
               )
             self.cursor.execute(sql)
             #self.connection.commit()
