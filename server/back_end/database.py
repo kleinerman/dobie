@@ -1714,9 +1714,9 @@ class DataBase(object):
         It returns the id of the added door
         '''
 
-        sql = ("INSERT INTO Door(doorNum, name, controllerId, sensorNormState, rlseTime, bzzrTime, "
+        sql = ("INSERT INTO Door(doorNum, name, controllerId, snsrType, rlseTime, bzzrTime, "
                "alrmTime, zoneId, isVisitExit, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {}, {}, {})"
-               "".format(door['doorNum'], door['name'], door['controllerId'], door['sensorNormState'], 
+               "".format(door['doorNum'], door['name'], door['controllerId'], door['snsrType'], 
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'], 
                          door['zoneId'], door['isVisitExit'], TO_ADD)
               )
@@ -1805,10 +1805,10 @@ class DataBase(object):
         '''
 
         sql = ("UPDATE Door SET doorNum = {}, name = '{}', controllerId = {}, "
-               "sensorNormState = {}, rlseTime = {}, bzzrTime = {}, alrmTime = {}, "
+               "snsrType = {}, rlseTime = {}, bzzrTime = {}, alrmTime = {}, "
                "zoneId = {}, isVisitExit = {}, resStateId = {} WHERE id = {}"
                "".format(door['doorNum'], door['name'], door['controllerId'],
-                         door['sensorNormState'], door['rlseTime'], door['bzzrTime'], 
+                         door['snsrType'], door['rlseTime'], door['bzzrTime'], 
                          door['alrmTime'], door['zoneId'], door['isVisitExit'], 
                          TO_UPDATE, door['id'])
               )
