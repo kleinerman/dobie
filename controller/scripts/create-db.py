@@ -51,12 +51,12 @@ cursor.execute('''
 
 cursor.execute('''
     CREATE TABLE Door (
-        id              INTEGER PRIMARY KEY,
-        doorNum         INTEGER,
-        sensorNormState BOOLEAN,
-        rlseTime        INTEGER,
-        bzzrTime        INTEGER,
-        alrmTime        INTEGER,
+        id        INTEGER PRIMARY KEY,
+        doorNum   INTEGER,
+        snsrType  BOOLEAN,
+        rlseTime  INTEGER,
+        bzzrTime  INTEGER,
+        alrmTime  INTEGER,
         FOREIGN KEY(doorNum) REFERENCES DoorGpios(id) ON DELETE CASCADE
     )
     '''
