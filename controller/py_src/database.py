@@ -303,7 +303,7 @@ class DataBase(object):
         '''
  
         sql = ("SELECT Door.id, Door.doorNum, DoorGpios.rlseOut, DoorGpios.bzzrOut, "
-               "Door.rlseTime, Door.bzzrTime, Door.alrmTime FROM "
+               "Door.snsrType, Door.rlseTime, Door.bzzrTime, Door.alrmTime FROM "
                "DoorGpios JOIN Door ON (DoorGpios.id = Door.doorNum)"
               )
                      
