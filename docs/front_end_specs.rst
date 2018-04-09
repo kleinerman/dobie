@@ -3050,14 +3050,53 @@ To get from server the current list of doors in each zone, the following REST me
 **Response:**
 
 .. code-block::
-    
+
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 754
+  Content-Length: 1624
   Server: Werkzeug/0.14.1 Python/3.6.4
-  Date: Fri, 16 Mar 2018 19:54:32 GMT
+  Date: Mon, 09 Apr 2018 20:21:51 GMT
   
   [
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 1, 
+      "id": 1, 
+      "isVisitExit": 0, 
+      "name": "Molinete 1", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "snsrType": 1, 
+      "uri": "http://localhost:5000/api/v1.0/door/1"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 2, 
+      "id": 2, 
+      "isVisitExit": 0, 
+      "name": "Puerta 2", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "snsrType": 1, 
+      "uri": "http://localhost:5000/api/v1.0/door/2"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 3, 
+      "id": 3, 
+      "isVisitExit": 0, 
+      "name": "Barrera 5", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "snsrType": 1, 
+      "uri": "http://localhost:5000/api/v1.0/door/3"
+    }, 
     {
       "alrmTime": 10, 
       "bzzrTime": 3, 
@@ -3068,6 +3107,7 @@ To get from server the current list of doors in each zone, the following REST me
       "name": "Ba\u00f1o 3", 
       "resStateId": 1, 
       "rlseTime": 7, 
+      "snsrType": 1, 
       "uri": "http://localhost:5000/api/v1.0/door/4"
     }, 
     {
@@ -3080,6 +3120,7 @@ To get from server the current list of doors in each zone, the following REST me
       "name": "Molinte 5", 
       "resStateId": 1, 
       "rlseTime": 7, 
+      "snsrType": 1, 
       "uri": "http://localhost:5000/api/v1.0/door/5"
     }, 
     {
@@ -3092,6 +3133,7 @@ To get from server the current list of doors in each zone, the following REST me
       "name": "Ingreso 2", 
       "resStateId": 1, 
       "rlseTime": 7, 
+      "snsrType": 1, 
       "uri": "http://localhost:5000/api/v1.0/door/6"
     }
   ]
@@ -3187,7 +3229,7 @@ Add Door
   
 
 | The **availDoors** field has a list with the door number slots availables in the controller.
-| Once selected, the **door number** from the ``availDoors`` list, the **release time**, the **buzzer time**, the **alarm timeout** and **visit exit**, the following POST method should be sent to the server: 
+| Once selected, **door number** from ``availDoors`` list, **snsrType**, **release time**, **buzzer time**, **alarm timeout** and **visit exit**, the following POST method should be sent to the server: 
 
 
 
@@ -3202,10 +3244,13 @@ Add Door
 **JSON**
 
 .. code-block::
+  
+  {"name": "Entrada 1era", "doorNum": 2, "controllerId": 2, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}
 
-  {"name": "Entrada 1era", "doorNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
-  
-  
+
+The **snsrType** field should be **0** if the **NO** checkbox is selected. Otherwise, if **NC** checkbox is selected, it should be **1**. Both checkboxes can't be selected at the same time. 
+
+
 **Response:**
 
 .. code-block::
@@ -3220,7 +3265,7 @@ Add Door
     "code": 201, 
     "message": "Door added", 
     "status": "OK", 
-    "uri": "http://172.18.0.5:5000/api/v1.0/door/13"
+    "uri": "http://172.18.0.5:5000/api/v1.0/door/7"
   }
 
 
@@ -3267,25 +3312,26 @@ Get one Door
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 246
+  Content-Length: 260
   Server: Werkzeug/0.14.1 Python/3.6.4
-  Date: Mon, 19 Mar 2018 15:40:41 GMT
+  Date: Mon, 09 Apr 2018 20:30:44 GMT
   
   {
     "alrmTime": 10, 
     "bzzrTime": 3, 
-    "controllerId": 2, 
-    "doorNum": 2, 
-    "id": 17, 
+    "controllerId": 1, 
+    "doorNum": 1, 
+    "id": 4, 
     "isVisitExit": 1, 
-    "name": "Entrada 1era", 
-    "resStateId": 4, 
+    "name": "Entrada 3era", 
+    "resStateId": 1, 
     "rlseTime": 7, 
-    "uri": "http://172.18.0.5:5000/api/v1.0/door/7", 
-    "zoneId": 2
+    "snsrType": 1, 
+    "uri": "http://localhost:5000/api/v1.0/door/4", 
+    "zoneId": 1
   }
-
-
+  
+  
 
 
 Edit a Door
@@ -3305,7 +3351,7 @@ When **edit** button is pressed the following REST method should be sent to the 
 
 .. code-block::
 
-  {"name": "Entrance One", "doorNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
+  {"name": "Entrance One", "doorNum": 2, "controllerId": 2, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
   
   
   
