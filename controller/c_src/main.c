@@ -27,6 +27,18 @@ int main(int argc, char** argv)
     struct buttons_args b_args;
     struct state_args s_args;
 
+
+    /* When the stdout and stderr don't go to a terminal,
+     * the C standard library buffers them. We need to avoid
+     * this behaviour when we launch this program from python
+     * using Popen and we want to redirect the output of this
+     * program to a file
+     */
+    setbuf(stdout, NULL);
+    setbuf(stderr, NULL);
+    //setvbuf(stdout, NULL, _IONBF, 0); //another way of do the above
+    //setvbuf(stderr, NULL, _IONBF, 0); //
+    
     //
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);

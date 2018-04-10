@@ -37,8 +37,8 @@ CREATE TABLE `Organization` (
 CREATE TABLE `Person` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL,
-    `identNumber` varchar(40) NOT NULL,
-    `cardNumber` integer NOT NULL,
+    `identNumber` varchar(40),
+    `cardNumber` integer,
     `orgId` integer,
     `visitedOrgId` integer,
     `resStateId` integer NOT NULL,
