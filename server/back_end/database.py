@@ -1714,9 +1714,9 @@ class DataBase(object):
         It returns the id of the added door
         '''
 
-        sql = ("INSERT INTO Door(doorNum, name, controllerId, rlseTime, bzzrTime, "
-               "alrmTime, zoneId, isVisitExit, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {}, {})"
-               "".format(door['doorNum'], door['name'], door['controllerId'], 
+        sql = ("INSERT INTO Door(doorNum, name, controllerId, snsrType, rlseTime, bzzrTime, "
+               "alrmTime, zoneId, isVisitExit, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {}, {}, {})"
+               "".format(door['doorNum'], door['name'], door['controllerId'], door['snsrType'], 
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'], 
                          door['zoneId'], door['isVisitExit'], TO_ADD)
               )
@@ -1804,12 +1804,13 @@ class DataBase(object):
         Receive a dictionary with door parametters and update it in DB
         '''
 
-        sql = ("UPDATE Door SET doorNum = {}, name = '{}', controllerId = {}, rlseTime = {}, "
-               "bzzrTime = {}, alrmTime = {}, zoneId = {}, isVisitExit = {}, resStateId = {} "
-               "WHERE id = {}"
+        sql = ("UPDATE Door SET doorNum = {}, name = '{}', controllerId = {}, "
+               "snsrType = {}, rlseTime = {}, bzzrTime = {}, alrmTime = {}, "
+               "zoneId = {}, isVisitExit = {}, resStateId = {} WHERE id = {}"
                "".format(door['doorNum'], door['name'], door['controllerId'],
-                         door['rlseTime'], door['bzzrTime'], door['alrmTime'],
-                         door['zoneId'], door['isVisitExit'], TO_UPDATE, door['id'])
+                         door['snsrType'], door['rlseTime'], door['bzzrTime'], 
+                         door['alrmTime'], door['zoneId'], door['isVisitExit'], 
+                         TO_UPDATE, door['id'])
               )
 
         try:
