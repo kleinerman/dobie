@@ -120,6 +120,12 @@ Install **make** package to be able to compile ioiface:
 
   # pacman -S make
   
+Install **wiringpi** package. It is needed by **ioIface** program to set the gpios:
+
+.. code-block::
+
+  # pacman -S wiringpi
+  
 Install **git** to clone dobie repository
 
 .. code-block::
@@ -155,7 +161,9 @@ Inside ``/opt/dobie/controller/py_src/`` directory, edit ``config.py`` and point
   
   DB_FILE = '/opt/dobie/controller/py_src/access.db'
   
-  LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'  
+  LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'
+  
+  IOFACE_LOGGING_FILE ='/opt/dobie/controller/py_src/ioifaceout.log'
    
   
 
