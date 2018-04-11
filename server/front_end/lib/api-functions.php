@@ -559,7 +559,7 @@ function get_door($user,$pass,$id){
 	else return $response->data;
 }
 
-function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime){
+function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime, $snsrtype){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->zoneId= $zoneid;
@@ -570,13 +570,14 @@ function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisi
 	$payload_obj->rlseTime= $rlsetime;
 	$payload_obj->bzzrTime= $bzzrtime;
 	$payload_obj->alrmTime= $alrmtime;
+	$payload_obj->snsrType= $snsrtype;
 	$response=send_request($config->api_fullpath."door",$user,$pass,"post",json_encode($payload_obj));
 	//if($response->response_status != "201") return false;
 	//else return $response->data;
 	return $response;
 }
 
-function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime){
+function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime, $snsrtype){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->zoneId= $zoneid;
@@ -587,6 +588,7 @@ function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $i
 	$payload_obj->rlseTime= $rlsetime;
 	$payload_obj->bzzrTime= $bzzrtime;
 	$payload_obj->alrmTime= $alrmtime;
+	$payload_obj->snsrType= $snsrtype;
 	$response=send_request($config->api_fullpath."door/$id",$user,$pass,"put",json_encode($payload_obj));
 	if($response->response_status != "200") return false;
 	else return $response->data;
@@ -830,7 +832,7 @@ if($DEBUG){
 	//$res=get_door_accesses("admin","admin",5);
 //	$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
-//	$res=get_doors("admin","admin",1);
+	$res=get_doors("admin","admin",1);
 	//$res=get_door("admin","admin",5);
 	//$res=add_access_allweek("admin","admin",3,1,1,1,"08:00:00","18:00:00","9999-12-31 00:00");
 	//$res=edit_access_allweek("admin","admin",19,0,1,"08:00:00","18:00:00","9999-12-31 00:00");
@@ -859,7 +861,7 @@ if($DEBUG){
 	//$res=get_person_accesses("admin","admin",9);
 //	$res=add_visit("admin","admin","fasdfasdf",212121,33334,2,"2018-03-02","23:59","1");
 	//$res=get_controllers("admin","admin");
-	$res=get_controller("admin","admin",3);
+//	$res=get_controller("admin","admin",3);
 	//$res=get_controller_models("admin","admin");
 
 	echo "<pre>";
