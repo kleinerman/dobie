@@ -108,6 +108,10 @@ Release Time (s) <input class="smaller_input" type="number" name="door-release-t
 Buzzer Time (s) <input class="smaller_input" type="number" name="door-buzzer-t" id="door-buzzer-t" max="99" min="0" value="2" required>
 <br><br>
 Alarm Timeout (s) <input class="smaller_input" type="number" name="door-alarm-t" id="door-alarm-t" max="99" min="0" value="60" required>
+<br><br>
+<div class="select-container-title">Door Sensor</div>
+<label><input type="radio" name="door-sensor" value="1"> NC (Normally Closed)</label>
+<label><input type="radio" name="door-sensor" value="0"> NO (Normally Open)</label>
 </div>
 </div>
 </div>
@@ -218,6 +222,7 @@ function resetForm(){
 	$('#door-release-t').val(7);
 	$('#door-buzzer-t').val(2);
 	$('#door-alarm-t').val(60);
+	$("input[name=door-sensor][value=1]").prop("checked",true);
 }
 
 function populateListDoorNums(selectId,id=0,hlvalue=""){
@@ -289,6 +294,7 @@ $("#doors-select-edit").click(function(){
 				$('#door-release-t').val(values.rlseTime);
 				$('#door-buzzer-t').val(values.bzzrTime);
 				$('#door-alarm-t').val(values.alrmTime);
+				$("input[name=door-sensor][value="+values.snsrType+"]").prop("checked",true);
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
@@ -312,11 +318,13 @@ $("#door-new-form").submit(function(){
 	var releaseTime = $('#door-release-t').val();
 	var buzzerTime = $('#door-buzzer-t').val();
 	var alrmTime = $('#door-alarm-t').val();
+	var snsrType = $("input[name=door-sensor]:checked").val();
+	snsrType = (snsrType%2);
 
-	if(editId!=0 && !isNaN(editId)) action_str="action=edit_door&id=" + editId + "&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime;
-	else action_str="action=add_door&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime;
+	if(editId!=0 && !isNaN(editId)) action_str="action=edit_door&id=" + editId + "&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime + "&snsrtype=" + snsrType;
+	else action_str="action=add_door&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime + "&snsrtype=" + snsrType;
 
-	if(doorName!="" && doorName!='undefined' && !isNaN(zoneId) && !isNaN(controllerId) && !isNaN(doorNumber)  && !isNaN(isVisitExit) && !isNaN(releaseTime) && !isNaN(buzzerTime) && !isNaN(alrmTime)){
+	if(doorName!="" && doorName!='undefined' && !isNaN(zoneId) && !isNaN(controllerId) && !isNaN(doorNumber)  && !isNaN(isVisitExit) && !isNaN(releaseTime) && !isNaN(buzzerTime) && !isNaN(alrmTime) && !isNaN(snsrType)){
 		$.ajax({
 			type: "POST",
 			url: "process",
