@@ -132,6 +132,12 @@ setFilterAction();
 //populate select list
 populateList("organizations-select","organizations");
 
+//clear form for new
+$('#modal-new').on('show.bs.modal', function (event){
+	//reset form
+	$('#organization-new-name').val("");
+});
+
 //fetch info for edit
 $('#modal-edit').on('show.bs.modal', function (event){
 	// If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
