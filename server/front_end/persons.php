@@ -186,6 +186,14 @@ $("#organizations-select").change(function(){
 	}
 });
 
+//clear form for new
+$('#modal-new').on('show.bs.modal', function (event){
+	//reset form
+	$('#person-new-name').val("");
+	$('#person-new-idnum').val("");
+	$('#person-new-cardnum').val("");
+});
+
 //fetch info for edit
 $('#modal-edit').on('show.bs.modal', function (event){
 	// If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
