@@ -238,11 +238,11 @@ function edit_access_liaccess($user,$pass,$doorid,$personid,$id,$days_payload,$e
 
 	//get current liaccess
 	$response = get_access($user,$pass,$id);
-	if($response and isset($response->liAccesses) and is_array($response->liAccesses)){
+	if($response){
 
 		//build array key,value with arr[weekday] = obj;
 		$access_current=array();
-		foreach($response->liAccesses as $obj) $access_current[$obj->weekDay]=$obj;
+		if(isset($response->liAccesses)) foreach($response->liAccesses as $obj) $access_current[$obj->weekDay]=$obj;
 
 		//explode and build the sent liaccesses for each weekday
 		$days_payload_arr=explode("|",$days_payload);
@@ -827,12 +827,12 @@ if($DEBUG){
 	//$res=do_auth("admin","admin");
 	//$res=get_organizations("admin","admin",2);
 	//$res=get_person_accesses("admin","admin",18);
-//	$res=get_access("admin","admin",44);
+	$res=get_access("admin","admin",10);
 	//$res=add_person("admin","admin","7","Ricky Martin","",123132);
 	//$res=get_door_accesses("admin","admin",5);
 //	$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
-	$res=get_doors("admin","admin",1);
+//	$res=get_doors("admin","admin",1);
 	//$res=get_door("admin","admin",5);
 	//$res=add_access_allweek("admin","admin",3,1,1,1,"08:00:00","18:00:00","9999-12-31 00:00");
 	//$res=edit_access_allweek("admin","admin",19,0,1,"08:00:00","18:00:00","9999-12-31 00:00");
