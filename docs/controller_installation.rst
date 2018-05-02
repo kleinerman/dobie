@@ -185,6 +185,9 @@ Follow the following guide to configure properly the wifi interface:
 https://github.com/kleinerman/dobie/blob/jek_docs/docs/wifi_config_on_rpi3.rst
 
 
+If adding more than one interface, remember to set just one default gateway.
+
+
 SSH server configuration
 ------------------------
 
