@@ -25,7 +25,14 @@ Bash completion is very usefull:
 .. code-block::
 
   # pacman -S bash-completion
-  
+
+Install **vim** editor:
+
+.. code-block::
+
+  # pacman -S vim
+
+
 Change root password
 
 .. code-block::
@@ -80,13 +87,6 @@ Check everything with
 .. code-block::
 
   #  timedatectl status
-  
-
-Install **vim** editor:
-
-.. code-block::
-
-  # pacman -S vim
   
   
 Wired network configuration
