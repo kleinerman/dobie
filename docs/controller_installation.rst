@@ -66,6 +66,7 @@ To be able to paste text using the medium button of the mouse in a gnome-termina
   "  set mouse=a
   "endif
 
+Set the hostname in ``/etc/hostname`` as ``dobie-cN`` where N is the number of controller just to identify it easy.
 
 
 Change root password
