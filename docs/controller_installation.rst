@@ -127,7 +127,7 @@ Install **sudo** package and add your user to wheel group:
   
 Allow members of group wheel to execute any command without a password:
 
-Uncomment the following line in ``/etc/sudoers``
+Uncomment the following line in ``/etc/sudoers`` running ``# visudo``
 
 .. code-block::
 
@@ -168,7 +168,7 @@ The file should have the following content:
   Name=eth0
 
   [Network]
-  Address=10.10.7.72/24
+  Address=10.10.7.99/24
   Gateway=10.10.7.1
   DNS=10.10.10.53
   DNS=10.10.10.54
