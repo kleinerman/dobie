@@ -255,6 +255,24 @@ If the the master branch doesn't have the latest changes on the controller, fetc
   # git fetch github jek_controller:jek_controller
   # git checkout jek_controller
   
+While we are developing, we need to clone the repository many times. In this case, put the following script in ``/opt/`` replacing the email with the correct one and give execution permissons to it.
+
+.. code-block::
+  
+  #!/bin/bash
+  git clone https://jkleinerman@github.com/kleinerman/dobie.git
+  cd dobie
+  git config --global user.email "PUT HERE THE MAIL"
+  git config --global user.name "Jorge Kleinerman"
+  git config --global core.editor "vim"
+  git remote rename origin github
+  git remote add bitbucket https://jkleinerman@bitbucket.org/kleinerman/dobie.git
+  git fetch github jek_controller:jek_controller
+  git checkout jek_controller
+
+
+
+  
 Inside ``/opt/dobie/controller/c_src/`` directory, run ``make`` to compile the ioiface.
 
 Inside ``/opt/dobie/controller/scripts/`` directory, run ``./create-db.py`` and ``./init-db.py`` to create and init the sqlite database.
