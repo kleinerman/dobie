@@ -54,6 +54,9 @@ To the previous file, add the following:
   set shiftwidth=4
   set expandtab
   set nobackup
+  set noundofile
+  set nowritebackup
+  
   
 To be able to paste text using the medium button of the mouse in a gnome-terminal, edit ``/usr/share/vim/vim80/defaults.vim`` and comment out the following lines:
 
