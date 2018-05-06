@@ -330,3 +330,11 @@ Start the service now
   # systemctl start dobie-c.service
   
 
+Save sd image to clone it another controller
+--------------------------------------------
+
+Once installed and configured all the packages in the sd card, the sd image could be saved in a file with fsarchiver program to restore it in another controller or in the same in case it will damaged.
+To do that, the sd card should be put in a laptop, unmount all the partitions (tipically: ``# umount /dev/sdb1`` and ``# umount /dev/sdb2``) and using ``fsarchiver`` run:
+
+
+
