@@ -340,7 +340,7 @@ To do that, the sd card should be put in a laptop, unmount all the partitions (t
 
   # fsarchiver savefs dobie-sd-image.fsa /dev/sdb1 /dev/sdb2
   
-To restore the image in anohter sd card, first, it would be partitioned in the same way the sd is partiontioned to install the os from the scratch and then run:
+To restore the image in another sd card, first, it would be partitioned in the same way the sd is partitioned to install the os from the scratch and then run:
 
 .. code-block::
 
