@@ -141,25 +141,30 @@ Until:<br>
 </div>
 </div>
 
-<div class="row" id="legend-row" style="display:none">
-<div class="col-sm-4">
+<div class="row" id="legend-row" style="">
+<div class="col-sm-3">
 <h4>Event Type</h4>
-<span class="fa fa-fw fa-bullseye"></span> Access with card<br>
+<span class="fa fa-fw fa-address-card"></span> Identified Access<br>
 <span class="fa fa-fw fa-circle"></span> Access with button<br>
 <span class="fa fa-fw fa-chain-broken"></span> Door remains opened<br>
 <span class="fa fa-fw fa-bolt"></span> Door was forced
 </div>
-<div class="col-sm-4">
-<h4>Triggered by</h4>
+<div class="col-sm-3">
+<h4>Lock</h4>
 <span class="fa fa-fw fa-feed"></span> Card Reader<br>
 <span class="fa fa-fw fa-thumbs-o-up"></span> Fingerprint Reader<br>
 <span class="fa fa-fw fa-circle"></span> Button
 </div>
-<div class="col-sm-4">
-<h4>Reason</h4>
+<div class="col-sm-3">
+<h4>Denial Cause</h4>
 <span class="fa fa-fw fa-ban"></span> No Access<br>
-<span class="fa fa-fw fa-calendar-times-o "></span> Expired Card<br>
+<span class="fa fa-fw fa-calendar-times-o"></span> Expired Card<br>
 <span class="fa fa-fw fa-clock-o"></span> Out of time
+</div>
+<div class="col-sm-3">
+<h4>Direction</h4>
+<span class="fa fa-fw fa-sign-in"></span> Incoming<br>
+<span class="fa fa-fw fa-sign-out"></span> Outgoing<br>
 </div>
 
 </div>
@@ -305,7 +310,7 @@ function populateEventList(startEvt,evtsQtty){
 //outputs html for event table based on received data from api
 function buildEventTable(data){
 	//init headers
-	var ret_string='<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr><th class="center">Type</th><th>Zone</th><th>Door</th><th class="center">Triggered by</th><th class="center">Direction</th><th>Date</th><th>Time</th><th>Organization</th><th>Person</th><th class="center">Allowed</th><th class="center">Reason</th></tr>';
+	var ret_string='<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr><th class="center">Type</th><th>Zone</th><th>Door</th><th class="center">Lock</th><th class="center">Direction</th><th>Date</th><th>Time</th><th>Organization</th><th>Person</th><th class="center">Allowed</th><th class="center">Denial Cause</th></tr>';
 	//console.log(data);
 
 	for(var i=0;i<data.length;i++){
@@ -329,7 +334,7 @@ function get_icon(id,mode){
 		var iconstr="";
 		switch(mode){
 			case "type":
-				if(id==1) iconstr="bullseye";
+				if(id==1) iconstr="address-card";
 				else if(id==2) iconstr="circle";
 				else if(id==3) iconstr="chain-broken";
 				else if(id==4) iconstr="bolt";
