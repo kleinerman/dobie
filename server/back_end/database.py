@@ -467,7 +467,7 @@ class DataBase(object):
                "LEFT JOIN Person ON (Event.personId = Person.id) "
                "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
                "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{} "
-               "LIMIT {},{}"
+               "ORDER BY dateTime DESC LIMIT {},{}"
                "".format(startDateTime, endDateTime, personFilter, orgFilter, 
                          doorFilter, zoneFilter, sideFilter, startEvtSql, evtsQtty)
               )
