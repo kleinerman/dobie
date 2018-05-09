@@ -1138,11 +1138,10 @@ class CrudMngr(genmngr.GenericMngr):
                     # Also a KeyError wil be raised if the client misses any parameter.
                     door = {}
                     door['id'] = doorId
-                    for param in doorNeedKeys:
+                    for param in [key for key in doorNeedKeys if key != 'controllerId']:
                         door[param] = request.json[param]
                     self.dataBase.updDoor(door)
                     door.pop('name')
-                    door.pop('controllerId')
                     door.pop('zoneId')
                     door.pop('isVisitExit')
                     ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
