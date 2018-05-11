@@ -3331,13 +3331,17 @@ Get one Door
     "zoneId": 1
   }
   
-  
 
 
 Edit a Door
 ~~~~~~~~~~~
 
-When **edit** button is pressed the following REST method should be sent to the server:
+When **edit** button is pressed the following window should appear:
+
+.. image:: images_front_end_specs/upd_door.png
+
+
+And the following REST method should be sent to the server:
 
 **Method:** PUT
 
@@ -3351,10 +3355,10 @@ When **edit** button is pressed the following REST method should be sent to the 
 
 .. code-block::
 
-  {"name": "Entrance One", "doorNum": 2, "controllerId": 2, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
+  {"name": "Entrance One", "doorNum": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
   
-  
-  
+Note that this JSON doesn't include the ``controllerId``, since it can't be modified when editing a door.
+
   
 **Response:**
 
