@@ -467,7 +467,7 @@ class DataBase(object):
                "LEFT JOIN Person ON (Event.personId = Person.id) "
                "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
                "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{} "
-               "LIMIT {},{}"
+               "ORDER BY dateTime DESC LIMIT {},{}"
                "".format(startDateTime, endDateTime, personFilter, orgFilter, 
                          doorFilter, zoneFilter, sideFilter, startEvtSql, evtsQtty)
               )
@@ -1284,27 +1284,6 @@ class DataBase(object):
 
 
 
-    def getControllers(self):
-        '''
-        Return a list with all controllers
-        '''
-        try:
-            sql = ('SELECT * FROM Controller')
-            self.execute(sql)
-            controllers = self.cursor.fetchall()
-            return controllers
-
-        except pymysql.err.ProgrammingError as programmingError:
-            self.logger.debug(programmingError)
-            raise ControllerError('Can not get controllers')
-
-        except pymysql.err.InternalError as internalError:
-            self.logger.debug(internalError)
-            raise ControllerError('Can not get controllers')
-
-
-
-
     def getController(self, controllerId):
         '''
         Return a dictionary with all the parametters of the controller
@@ -1360,6 +1339,38 @@ class DataBase(object):
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
             raise ControllerError('Can not get specified controller')
+
+
+
+
+
+    def getControllers(self):
+        '''
+        Return a list with all controllers
+        '''
+        try:
+            sql = ('SELECT id FROM Controller')
+            self.execute(sql)
+            controllerIds = self.cursor.fetchall()
+            controllerIds = [controllerId['id'] for controllerId in controllerIds]
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise ControllerError('Can not get controllers')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not get controllers')
+
+
+
+        controllers = []
+        for controllerId in controllerIds:
+            controllers.append(self.getController(controllerId))
+
+        return controllers
+
+
 
 
 
@@ -1804,13 +1815,12 @@ class DataBase(object):
         Receive a dictionary with door parametters and update it in DB
         '''
 
-        sql = ("UPDATE Door SET doorNum = {}, name = '{}', controllerId = {}, "
-               "snsrType = {}, rlseTime = {}, bzzrTime = {}, alrmTime = {}, "
-               "zoneId = {}, isVisitExit = {}, resStateId = {} WHERE id = {}"
-               "".format(door['doorNum'], door['name'], door['controllerId'],
-                         door['snsrType'], door['rlseTime'], door['bzzrTime'], 
-                         door['alrmTime'], door['zoneId'], door['isVisitExit'], 
-                         TO_UPDATE, door['id'])
+        sql = ("UPDATE Door SET doorNum = {}, name = '{}', snsrType = {}, "
+               "rlseTime = {}, bzzrTime = {}, alrmTime = {}, zoneId = {}, "
+               "isVisitExit = {}, resStateId = {} WHERE id = {}"
+               "".format(door['doorNum'], door['name'], door['snsrType'],
+                         door['rlseTime'], door['bzzrTime'], door['alrmTime'],
+                         door['zoneId'], door['isVisitExit'], TO_UPDATE, door['id'])
               )
 
         try:
