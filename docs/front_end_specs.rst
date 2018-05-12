@@ -2611,19 +2611,24 @@ To get from the server the current list of controllers, the following REST metho
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 348
-  Server: Werkzeug/0.14.1 Python/3.6.4
-  Date: Mon, 12 Mar 2018 15:39:17 GMT
-  
+  Content-Length: 417
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Sat, 12 May 2018 23:09:54 GMT
+
   [
     {
+      "availDoors": [
+        1, 
+        2
+      ], 
       "ctrllerModelId": 1, 
       "id": 1, 
-      "macAddress": "b827eba30655", 
+      "macAddress": "b827eb2c3abd", 
       "name": "Controladora 1", 
       "uri": "http://localhost:5000/api/v1.0/controller/1"
     }, 
     {
+      "availDoors": [], 
       "ctrllerModelId": 1, 
       "id": 2, 
       "macAddress": "b827eb277791", 
