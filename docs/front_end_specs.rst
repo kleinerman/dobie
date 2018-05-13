@@ -3360,7 +3360,7 @@ And the following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Entrance One", "doorNum": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
+  {"name": "Entrance One", "doorNum": 3, "snsrType": 0, "rlseTime": 9, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}
   
 Note that this JSON doesn't include the ``controllerId``, since it can't be modified when editing a door.
 
