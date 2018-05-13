@@ -3196,7 +3196,7 @@ To get all posible state the following method should be sent to the server:
 Add Door
 ~~~~~~~~
 
-| When adding a new door, a controller should be selected from Controller combobox. To get all the controllers see `Get Controllers`_.
+| When adding a new door, a controller should be selected from Controller combobox. To get all the controllers see `Get Controllers`_. If ``availDoors`` list in controller is empty, this controller should be grayed out in the list of controllers and the user shouldn't be able to choose it for the door that is being added.
 | Once the controller is selected, the door number combobox should be filled with the doors availables in the selected controller. To get the doors availables in this controller, a GET method should be sent to the server with the ID of this controller.
 
 
