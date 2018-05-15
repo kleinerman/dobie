@@ -85,10 +85,11 @@ class DataBase(object):
 
         if params:
             personId, allWeek, startTime, endTime, expireDate = params
+            expDateTime = '{} {}'.format(expireDate, endTime)
             nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             nowDate, nowTime = nowDateTime.split()
 
-            if nowDate < expireDate:
+            if nowDateTime < expDateTime:
 
                 if allWeek:
 
