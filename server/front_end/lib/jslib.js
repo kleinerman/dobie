@@ -54,7 +54,7 @@ function updateButtons(objId){
 }
 
 //populateSelect
-function populateList(selectId,entity,id=0,actionstr="",hlvalue=""){
+function populateList(selectId,entity,id=0,actionstr="",hlvalue="",newcontroller=0){
 
 	if(actionstr!=""){
 		var completeActionStr=actionstr;
@@ -81,6 +81,8 @@ function populateList(selectId,entity,id=0,actionstr="",hlvalue=""){
 						else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
 						else if(item.resStateId==4) itemClass=" class='todel' disabled ";
 					        if(hlvalue!="" && item.id==hlvalue) itemClass +=" selected";
+					        //check for disabling controllers without available doors
+					        if(newcontroller && item.availDoors.length==0) itemClass +=" disabled";
 						$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
 						qValidItems++;
 					}
