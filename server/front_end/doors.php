@@ -70,7 +70,7 @@ include("footer.php");
 </div>
 
 <div class="form-group">
-<div class="col-sm-5">
+<div class="col-sm-5" id="controller-select">
 <div class="select-container">
 <div class="select-container-title">Controller</div>
 <div class="select-container-body">
@@ -103,12 +103,13 @@ include("footer.php");
 <div class="select-container">
 <div class="select-container-title">Times</div>
 <div class="select-container-body">
-Release Time (s) <input class="smaller_input" type="number" name="door-release-t" id="door-release-t" max="99" min="0" value="7" required>
-<br><br>
-Buzzer Time (s) <input class="smaller_input" type="number" name="door-buzzer-t" id="door-buzzer-t" max="99" min="0" value="2" required>
-<br><br>
-Alarm Timeout (s) <input class="smaller_input" type="number" name="door-alarm-t" id="door-alarm-t" max="99" min="0" value="60" required>
-<br><br>
+<div class="displaytable table_padding">
+<div class="displayrow"><div class="displaycell left">Release Time (s)</div><div class="displaycell"> <input class="smaller_input" type="number" name="door-release-t" id="door-release-t" max="99" min="0" value="7" required></div></div>
+<div class="displayrow"><div class="displaycell left">Buzzer Time (s)</div><div class="displaycell"><input class="smaller_input" type="number" name="door-buzzer-t" id="door-buzzer-t" max="99" min="0" value="2" required>
+</div></div>
+<div class="displayrow"><div class="displaycell left">Alarm Timeout (s) </div><div class="displaycell"><input class="smaller_input" type="number" name="door-alarm-t" id="door-alarm-t" max="99" min="0" value="60" required>
+</div></div></div>
+<br>
 <div class="select-container-title">Door Sensor</div>
 <label><input type="radio" name="door-sensor" value="1"> NC (Normally Closed)</label>
 <label><input type="radio" name="door-sensor" value="0"> NO (Normally Open)</label>
@@ -200,8 +201,8 @@ $("#controllers-select").change(function(){
 $('#modal-new').on('show.bs.modal', function (event){
 	//clear all previous values
 	resetForm();
-	//populate select
-	populateList("controllers-select","controllers");
+	//populate select 
+	populateList("controllers-select","controllers",0,"","",1);
 });
 
 function resetForm(){
@@ -223,6 +224,7 @@ function resetForm(){
 	$('#door-buzzer-t').val(2);
 	$('#door-alarm-t').val(60);
 	$("input[name=door-sensor][value=1]").prop("checked",true);
+	$("#controller-select").show();
 }
 
 function populateListDoorNums(selectId,id=0,hlvalue=""){
@@ -295,6 +297,8 @@ $("#doors-select-edit").click(function(){
 				$('#door-buzzer-t').val(values.bzzrTime);
 				$('#door-alarm-t').val(values.alrmTime);
 				$("input[name=door-sensor][value="+values.snsrType+"]").prop("checked",true);
+				//hide controller select > door cant be changed from controller (issue #24)
+				$("#controller-select").hide();
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
