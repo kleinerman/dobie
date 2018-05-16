@@ -8,10 +8,11 @@ CREATE TABLE `Role` (
 
 CREATE TABLE `User` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `description` varchar(64) NOT NULL,
     `username` varchar(32) NOT NULL,
     `passwdHash` varchar(128) NOT NULL,
+    `description` varchar(64) NOT NULL,
     `roleId` integer NOT NULL,
+    `active` boolean NOT NULL,
     CONSTRAINT `fk_User_Role` FOREIGN KEY (`roleId`) REFERENCES `Role` (`id`)
 )
 ;
