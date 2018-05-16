@@ -214,7 +214,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        userNeedKeys = ('description', 'username', 'passwd', 'roleId',)
+        userNeedKeys = ('username', 'passwd', 'description', 'roleId', 'active')
 
         @app.route('/api/v1.0/user', methods=['GET', 'POST'])
         @auth.login_required
