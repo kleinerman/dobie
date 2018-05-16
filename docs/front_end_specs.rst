@@ -3343,6 +3343,8 @@ Edit a Door
 
 When **edit** button is pressed the following window should appear:
 
+|
+
 .. image:: images_front_end_specs/upd_door.png
 
 
@@ -3434,4 +3436,65 @@ When **Delete** button is pressed the following REST method should be sent to th
   }
   
 
+
+System Users
+------------
+
+
+The system users section should show the following window:
+
+|
+
+.. image:: images_front_end_specs/system_user.png
+
+
+Get Users
+~~~~~~~~~
+
+To get from server the current list of system users, the following REST method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 443
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Wed, 16 May 2018 19:27:42 GMT
+  
+  [
+    {
+      "active": 1,
+      "description": "Administrator", 
+      "roleId": 1, 
+      "uri": "http://localhost:5000/api/v1.0/user/1", 
+      "username": "admin"
+    }, 
+    {
+      "active": 1,
+      "description": "German Fisanotti", 
+      "roleId": 2, 
+      "uri": "http://localhost:5000/api/v1.0/user/2", 
+      "username": "gfisanotti"
+    }, 
+    {
+      "active": 0,
+      "description": "Mariana Gonzales", 
+      "roleId": 3, 
+      "uri": "http://localhost:5000/api/v1.0/user/4", 
+      "username": "mgonzales"
+    }
+  ]
+
+  
 
