@@ -256,6 +256,24 @@ class DenialCauseNotFound(DenialCauseError):
 
 
 
+class RoleError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class RoleNotFound(RoleError):
+    '''
+    '''
+    pass
+
+
+
+
 
 class DataBase(object):
 
@@ -519,14 +537,27 @@ class DataBase(object):
 
 #-------------------------------------User--------------------------------------------
 
-    def getUser(self, username):
+    def getUser(self, userId=None, username=None,):
         '''
         Return a dictionary with user fields if exists, if not it returns None
         '''
-        try:
+
+        if (userId and username) or (not userId and not username):
+            self.logger.debug("Incorrect arguments calling getUser method.")
+            raise UserError('Can not get User')
+
+        elif userId:
+            sql = "SELECT * from User WHERE id = '{}'".format(userId)
+
+        else:
             sql = "SELECT * from User WHERE username = '{}'".format(username)
+
+        try:
             self.execute(sql)
             user = self.cursor.fetchone()
+
+            if not user:
+                raise UserNotFound("User not found.")
             return user
 
         except pymysql.err.ProgrammingError as programmingError:
@@ -694,7 +725,7 @@ class DataBase(object):
             raise EventTypeError('Can not get Event Types')
 
 
-#----------------------------------DoorLocks------------------------------------------
+#----------------------------------Door Locks---------------------------------------
 
     def getDoorLocks(self):
         '''
@@ -718,7 +749,7 @@ class DataBase(object):
 
 
 
-#----------------------------------Not Reasons------------------------------------------
+#----------------------------------Denial Causes-----------------------------------
 
     def getDenialCauses(self):
         '''
@@ -733,11 +764,36 @@ class DataBase(object):
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise DenialCauseError('Can not get Not Reasons')
+            raise DenialCauseError('Can not get Denial Causes')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise DenialCauseError('Can not get Not Reasons')
+            raise DenialCauseError('Can not get Denial Causes')
+
+
+
+
+
+#----------------------------------Roles------------------------------------------
+
+    def getRoles(self):
+        '''
+        Return a a dictionary with all system user roles
+        '''
+
+        try:
+            sql = ('SELECT * FROM Role')
+            self.execute(sql)
+            roles = self.cursor.fetchall()
+            return roles
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise RoleError('Can not get Roles')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise RoleError('Can not get Roles')
 
 
 
