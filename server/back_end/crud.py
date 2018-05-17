@@ -169,7 +169,7 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             '''
             #Retrieve user parameters from database
-            user = self.dataBase.getUser(username)
+            user = self.dataBase.getUser(username=username)
 
             if user:
 
@@ -257,15 +257,23 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/user/<int:userId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/user/<int:userId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
         def User(userId):
             '''
+            GET: Get an user from database
             PUT: Update a user in database
             DELETE: Delete a user in the database.
             '''
             try:
-                if request.method == 'PUT':
+
+                if request.method == 'GET':
+                    user = self.dataBase.getUser(userId=userId)
+                    user['uri'] = request.url
+                    user.pop('passwdHash')
+                    return jsonify(user)
+
+                elif request.method == 'PUT':
                     user = {}
                     user['id'] = userId
                     for param in userNeedKeys:
@@ -385,6 +393,30 @@ class CrudMngr(genmngr.GenericMngr):
                 raise NotFound(str(denialCauseNotFound))
             except database.DenialCauseError as denialCauseError:
                 raise ConflictError(str(denialCauseError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
+#--------------------------------------Role----------------------------------------------
+        @app.route('/api/v1.0/role', methods=['GET'])
+        def role():
+            '''
+            GET: Return a list with all roles
+            '''
+            try:
+                ## For GET method
+                roles = self.dataBase.getRoles()
+                return jsonify(roles)
+
+
+            except database.RoleNotFound as roleNotFound:
+                raise NotFound(str(roleNotFound))
+            except database.RoleError as roleError:
+                raise ConflictError(str(roleError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
