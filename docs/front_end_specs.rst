@@ -3497,4 +3497,192 @@ To get from server the current list of system users, the following REST method s
   ]
 
   
+**roleId** is a field that indicates the privilegies of the system user in the UI.
 
+To get all possible roles the following method shoud be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/role
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 167
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:03:10 GMT
+  
+  [
+    {
+      "description": "Administrator", 
+      "id": 1
+    }, 
+    {
+      "description": "Operator", 
+      "id": 2
+    }, 
+    {
+      "description": "Viewer", 
+      "id": 3
+    }
+  ]
+
+
+
+Add System User
+~~~~~~~~~~~~~~~
+
+When “New” button is pressed the following pop-up will appear:
+
+.. image:: images_front_end_specs/add_organization.png
+
+The following REST method should be sent to the server:
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user
+  
+**JSON**
+
+.. code-block::
+
+  {"username": "mcantini", "passwd": "p4ssw8rd", "description": "Marcos Cantini", "roleId": 2, "active": 1}
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 116
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:22:03 GMT
+  
+  {
+    "code": 201, 
+    "message": "User added", 
+    "status": "OK", 
+    "uri": "http://localhost:5000/api/v1.0/user/6"
+  }
+
+
+Get one System User
+~~~~~~~~~~~~~~~~~~~
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user/4
+  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 155
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:25:32 GMT
+  
+  {
+    "active": 0, 
+    "description": "Marc Shuar", 
+    "id": 4, 
+    "roleId": 3, 
+    "uri": "http://localhost:5000/api/v1.0/user/4", 
+    "username": "msuarez"
+  }
+  
+
+
+Update System User
+~~~~~~~~~~~~~~~~~~
+
+When “Edit” button is pressed the following window will appear:
+
+.. image:: images_front_end_specs/upd_organization.png
+
+The following REST method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user/4
+  
+  
+**JSON**
+
+.. code-block::
+
+  {"username": "msuarez", "passwd": "p4ssw3rd", "description": "Marc Shuar", "roleId": 3, "active": 0}
+  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:27:34 GMT
+  
+  {
+    "message": "User updated", 
+    "status": "OK"
+  }
+
+
+
+  
+Delete System User
+~~~~~~~~~~~~~~~~~~
+
+When “Delete” button is pressed the following pop-up will appear:
+
+.. image:: images_front_end_specs/del_organization.png
+
+The following REST method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user/4
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:29:30 GMT
+  
+  {
+    "message": "User deleted", 
+    "status": "OK"
+  }
+  
+  
