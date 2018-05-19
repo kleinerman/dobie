@@ -3541,7 +3541,7 @@ Add System User
 
 When “New” button is pressed the following pop-up will appear:
 
-.. image:: images_front_end_specs/add_organization.png
+.. image:: images_front_end_specs/add_system_user.png
 
 The following REST method should be sent to the server:
 
