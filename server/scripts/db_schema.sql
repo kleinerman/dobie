@@ -10,13 +10,14 @@ CREATE TABLE `User` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `username` varchar(32) NOT NULL,
     `passwdHash` varchar(128) NOT NULL,
-    `description` varchar(64) NOT NULL,
+    `fullName` varchar(64) NOT NULL,
     `roleId` integer NOT NULL,
     `active` boolean NOT NULL,
     CONSTRAINT `fk_User_Role` FOREIGN KEY (`roleId`) REFERENCES `Role` (`id`)
 )
 ;
 
+-- To avoid having two equal usernames
 CREATE UNIQUE INDEX usernameIndex ON User (username)
 ;
 
