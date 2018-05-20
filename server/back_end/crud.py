@@ -214,7 +214,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        userNeedKeys = ('username', 'passwd', 'description', 'roleId', 'active')
+        userNeedKeys = ('username', 'passwd', 'fullName', 'roleId', 'active')
 
         @app.route('/api/v1.0/user', methods=['GET', 'POST'])
         @auth.login_required
@@ -230,7 +230,6 @@ class CrudMngr(genmngr.GenericMngr):
                     users = self.dataBase.getUsers()
                     for user in users:
                         user['uri'] = url_for('User', userId=user['id'], _external=True)
-                        user.pop('id')
                         user.pop('passwdHash')
                     return jsonify(users)
 

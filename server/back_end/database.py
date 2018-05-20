@@ -599,9 +599,9 @@ class DataBase(object):
 
         passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
 
-        sql = ("INSERT INTO User(username, passwdHash, description, roleId, active) "
+        sql = ("INSERT INTO User(username, passwdHash, fullName, roleId, active) "
                "VALUES('{}', '{}', '{}', {}, {})"
-               "".format(user['username'], passwdHash, user['description'], user['roleId'], user['active'])
+               "".format(user['username'], passwdHash, user['fullName'], user['roleId'], user['active'])
               )
 
 
@@ -656,8 +656,8 @@ class DataBase(object):
         passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
 
         sql = ("UPDATE User SET username = '{}', passwdHash = '{}', "
-               "description = '{}', roleId = {}, active = {} WHERE id = {}"
-               "".format(user['username'], passwdHash, user['description'], 
+               "fullName = '{}', roleId = {}, active = {} WHERE id = {}"
+               "".format(user['username'], passwdHash, user['fullName'], 
                          user['roleId'], user['active'], user['id'])
               )
 
