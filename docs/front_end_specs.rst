@@ -3618,7 +3618,7 @@ Update System User
 
 When “Edit” button is pressed the following window will appear:
 
-.. image:: images_front_end_specs/upd_organization.png
+.. image:: images_front_end_specs/upd_system_user.png
 
 The following REST method should be sent to the server:
 
@@ -3654,14 +3654,13 @@ The following REST method should be sent to the server:
   }
 
 
+**Note:** If the admin user is being edited (id = 1) the only thing able to modify will be the password. The REST API will restrict the user if trying to modify anything else.
 
   
 Delete System User
 ~~~~~~~~~~~~~~~~~~
 
-When “Delete” button is pressed the following pop-up will appear:
-
-.. image:: images_front_end_specs/del_organization.png
+When “Delete” button is pressed a pop-up will appear to confirm the operation.
 
 The following REST method should be sent to the server:
 
@@ -3688,4 +3687,17 @@ The following REST method should be sent to the server:
     "status": "OK"
   }
   
-  
+
+**Note:** The admin user (id = 1) shouldn't be deleted. The REST API won't allow to do this operation.
+
+
+
+System User Settings
+~~~~~~~~~~~~~~~~~~~~
+
+Each user will be able to change its password and its full name from the setting section.
+
+
+.. image:: images_front_end_specs/system_user_settings.png
+
+
