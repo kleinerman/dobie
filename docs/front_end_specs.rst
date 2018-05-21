@@ -36,12 +36,17 @@ A valid login will answer with:
   Date: Wed, 12 Jul 2017 14:31:05 GMT
   
   {
-    "description": "Administrator", 
+    "fullName": "Administrator", 
     "id": 1, 
     "roleId": 1, 
     "username": "admin"
+    "active": 1
   }
 
+
+| Users with ``roleId = 1`` (Administrator) will be able to access all the sections of the application.
+| Users with ``roleId = 2`` (Operator) will be able to access all the sections except System Users Section.
+| Users with ``roleId = 3`` (Viewer) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
 
 
 An invalid login will answer with:
