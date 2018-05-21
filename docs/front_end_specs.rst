@@ -3475,21 +3475,24 @@ To get from server the current list of system users, the following REST method s
   [
     {
       "active": 1,
-      "description": "Administrator", 
+      "fullName": "Administrator", 
+      "id": 1, 
       "roleId": 1, 
       "uri": "http://localhost:5000/api/v1.0/user/1", 
       "username": "admin"
     }, 
     {
       "active": 1,
-      "description": "German Fisanotti", 
+      "fullName": "German Fisanotti", 
+      "id": 2, 
       "roleId": 2, 
       "uri": "http://localhost:5000/api/v1.0/user/2", 
       "username": "gfisanotti"
     }, 
     {
       "active": 0,
-      "description": "Mariana Gonzales", 
+      "fullName": "Mariana Gonzales", 
+      "id": 4, 
       "roleId": 3, 
       "uri": "http://localhost:5000/api/v1.0/user/4", 
       "username": "mgonzales"
@@ -3557,7 +3560,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"username": "mcantini", "passwd": "p4ssw8rd", "description": "Marcos Cantini", "roleId": 2, "active": 1}
+  {"username": "mcantini", "passwd": "p4ssw8rd", "fullName": "Marcos Cantini", "roleId": 2, "active": 1}
 
 **Response:**
 
@@ -3601,11 +3604,11 @@ Get one System User
   
   {
     "active": 0, 
-    "description": "Marc Shuar", 
+    "fullName": "Marc Shuar", 
     "id": 4, 
     "roleId": 3, 
     "uri": "http://localhost:5000/api/v1.0/user/4", 
-    "username": "msuarez"
+    "username": "mshuar"
   }
   
 
@@ -3632,7 +3635,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"username": "msuarez", "passwd": "p4ssw3rd", "description": "Marc Shuar", "roleId": 3, "active": 0}
+  {"username": "msuarez", "passwd": "p4ssw3rd", "fullName": "Marc Shuar", "roleId": 3, "active": 0}
   
 
 **Response:**
