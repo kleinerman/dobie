@@ -43,10 +43,13 @@ A valid login will answer with:
     "active": 1
   }
 
+If the field `active` is 0, the user shouldn't be able to log into the application and this situation should be informed in a popup with a message: **This user is disabled. Contact the administrator.**
+
 
 | Users with ``roleId = 1`` (Administrator) will be able to access all the sections of the application.
 | Users with ``roleId = 2`` (Operator) will be able to access all the sections except System Users Section.
 | Users with ``roleId = 3`` (Viewer) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
+|
 
 
 An invalid login will answer with:
