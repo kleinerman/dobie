@@ -277,10 +277,20 @@ class CrudMngr(genmngr.GenericMngr):
                     user['id'] = userId
                     for param in userNeedKeys:
                         user[param] = request.json[param]
+
+
+                    if user['id'] == 1 and (user['username'] != 'admin' or
+                       user['fullName'] != 'Administrator' or
+                       user['roleId'] != 1 or
+                       user['active'] != 1):
+                        raise database.UserError
+
                     self.dataBase.updUser(user)
                     return jsonify({'status': 'OK', 'message': 'User updated'}), OK
 
                 elif request.method == 'DELETE':
+                    if userId == 1:
+                        raise database.UserError
                     self.dataBase.delUser(userId)
                     return jsonify({'status': 'OK', 'message': 'User deleted'}), OK
 
