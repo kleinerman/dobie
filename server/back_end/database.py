@@ -478,7 +478,8 @@ class DataBase(object):
         
         sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
                "Door.name AS doorName, Organization.name AS orgName, "
-               "Person.name AS personName, Event.doorLockId, Event.dateTime, "
+               "Person.name AS personName, Person.resStateId AS personDeleted, "
+               "Event.doorLockId, Event.dateTime, "
                "Event.side, Event.allowed, Event.denialCauseId "
                "FROM Event LEFT JOIN Door ON (Event.doorId = Door.id) "
                "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
@@ -514,12 +515,20 @@ class DataBase(object):
             events = self.cursor.fetchall()
 
 
-
-            #Converting all datetime fields into string because if not doing this, "jsonify"
-            #method converts them to a format not desired like "Wed, 13 Sep 2017 17:50:00 GMT"
-            #The "GMT" at the end was causing the browser converts it to GMT time.
+            #Some adaptations before returning the events
             for event in events:
+                #Converting all datetime fields into string because if not doing this, "jsonify"
+                #method converts them to a format not desired like "Wed, 13 Sep 2017 17:50:00 GMT"
+                #The "GMT" at the end was causing the browser converts it to GMT time.
                 event['dateTime'] = event['dateTime'].strftime("%Y-%m-%d %H:%M")
+                
+                #If the person was deleted (resStateId == 5), converting it
+                #to bool True, otherwise converting it to bool False
+                if event['personDeleted'] == 5:
+                    event['personDeleted'] = True
+                else:
+                    event['personDeleted'] = False
+
 
             return events, totalEvtsCount
 
@@ -1988,8 +1997,11 @@ class DataBase(object):
             person['visitedOrgId'] = 'NULL'
 
         sql = ("INSERT INTO Person(name, identNumber, cardNumber, orgId, visitedOrgId, resStateId) "
-               "VALUES('{}', '{}', {}, {}, {}, {})"
-               "".format(person['name'], person['identNumber'], person['cardNumber'], person['orgId'],
+               "VALUES('{}', '{}', {}, {}, {}, {}) ON DUPLICATE KEY UPDATE "
+               "name = '{}', cardNumber = {}, orgId = {}, visitedOrgId = {}, resStateId = {}"
+               "".format(person['name'], person['identNumber'], person['cardNumber'],
+                         person['orgId'], person['visitedOrgId'], COMMITTED,
+                         person['name'], person['cardNumber'], person['orgId'],
                          person['visitedOrgId'], COMMITTED)
               )
 
@@ -2086,8 +2098,14 @@ class DataBase(object):
                               "Marking it as deleted in central DB." 
                              )
                     self.logger.debug(logMsg)
-                    sql = ("UPDATE Person SET resStateId = {} WHERE id = {}"
-                       "".format(DELETED, personId)
+                    #Setting the "cardNumber" = NULL to be able to use this card in
+                    #another future person.
+                    #Leaving the "identNumber" stored. In this way, when a person is
+                    #deleted and readded (typically a frequent visitor), with the 
+                    #ON DUPLICATE KEY UPDATE clause of the "addPerson" method, the 
+                    #same row in the database is used, avoiding duplicate with the same person.
+                    sql = ("UPDATE Person SET cardNumber = NULL, resStateId = {} "
+                           "WHERE id = {}".format(DELETED, personId)
                           )
                     self.execute(sql)
 
@@ -2198,11 +2216,14 @@ class DataBase(object):
                 self.execute(sql)
                 pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
                 if not pendCtrllersToDel:
-                    #sql = "DELETE FROM Person WHERE id = {}".format(personId)
-                    personRenamed = "{} (DELETED)".format(personName) 
-                    sql = ("UPDATE Person SET name = '{}', identNumber = NULL, "
-                           "cardNumber = NULL, resStateId = {}, cardNumber = NULL "
-                           "WHERE id = {}".format(personRenamed, DELETED, personId)
+                    #Setting the "cardNumber" = NULL to be able to use this card in
+                    #another future person.
+                    #Leaving the "identNumber" stored. In this way, when a person is
+                    #deleted and readded (typically a frequent visitor), with the 
+                    #ON DUPLICATE KEY UPDATE clause of the "addPerson" method, the 
+                    #same row in the database is used, avoiding duplicate with the same person.
+                    sql = ("UPDATE Person SET cardNumber = NULL, resStateId = {} "
+                           "WHERE id = {}".format(DELETED, personId)
                           )
                     self.execute(sql)
 

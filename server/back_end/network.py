@@ -334,9 +334,11 @@ class NetMngr(genmngr.GenericMngr):
                     try:
                         recBytes = ctrllerSckt.recv(REC_BYTES)
                         self.logger.debug('Receiving: {}'.format(recBytes))
-                    #The following exception was seen when the NetMngr Thread
+                    #The "ConnectionResetError" exception was seen when the NetMngr Thread
                     #on the controller broken
-                    except ConnectionResetError:
+                    #The "OSError" exception was seen once running in docker environment
+                    #never again
+                    except (ConnectionResetError, OSError):
                         self.logger.warning('Controller lost the connection.')
                         ctrllerSckt.close()
                         continue

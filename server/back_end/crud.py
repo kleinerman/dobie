@@ -11,6 +11,7 @@ import crypt
 from flask import Flask, jsonify, request, abort, url_for, g
 from flask_httpauth import HTTPBasicAuth
 
+from gevent.pywsgi import WSGIServer
 
 import genmngr
 import database
@@ -1606,6 +1607,8 @@ class CrudMngr(genmngr.GenericMngr):
 
 #----------------------------------------Main--------------------------------------------
 
-        self.logger.info('Starting Werkzeug to listen for REST methods..') 
-        app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
+        self.logger.info('Starting WSGI Server to listen for REST methods..') 
+        #app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
 
+        http_server = WSGIServer(('', 5000), app)
+        http_server.serve_forever()
