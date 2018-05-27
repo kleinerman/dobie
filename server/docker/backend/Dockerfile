@@ -2,9 +2,17 @@ FROM python:3-alpine
 
 # Install Flask and PyMySQL
 RUN \
-pip install Flask && \
-pip install Flask-HTTPAuth && \
-pip install PyMySQL
+apk update && apk upgrade && \
+pip install --upgrade pip && \
+pip install --no-cache-dir Flask && \
+pip install --no-cache-dir Flask-HTTPAuth && \
+pip install --no-cache-dir PyMySQL && \
+apk add --no-cache gcc musl-dev && \
+pip install --no-cache-dir gevent && \
+apk del musl-dev gcc && \
+rm -rf /var/cache/apk/* /root/.cache /tmp/*
+
+
 
 # Expose ports:
 # - 7979: controller connection port
