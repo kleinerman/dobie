@@ -1630,6 +1630,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": null, 
         "zoneName": "Ingreso Oficina"
@@ -1643,6 +1644,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": "Datacenter Capitalinas", 
         "personName": "Jorge Kleinerman", 
+        "personDeleted": 0,         
         "doorName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
@@ -1656,6 +1658,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1669,6 +1672,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": "null", 
         "personName": "null", 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": null, 
         "zoneName": "Ingreso Oficina"
@@ -1682,6 +1686,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1695,6 +1700,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1708,6 +1714,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1721,6 +1728,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": "Datacenter Capitalinas", 
         "personName": "Jorge Kleinerman", 
+        "personDeleted": 0, 
         "doorName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
@@ -1732,11 +1740,12 @@ An the tipical response would be:
         "id": 1550, 
         "doorLockId": 1, 
         "denialCauseId": null, 
-        "orgName": "Datacenter Capitalinas", 
-        "personName": "Jorge Kleinerman", 
-        "doorName": "Ingreso F65", 
+        "orgName": "Visitors.", 
+        "personName": "Marcos Suarez", 
+        "personDeleted": 1, 
+        "doorName": "Ingreso 1", 
         "side": 1, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Principal"
       }, 
       {
         "allowed": 1, 
@@ -1747,6 +1756,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1781,6 +1791,7 @@ Each event has the following fields:
 - ``doorName```: Name of the door.
 - ``orgName``: Name of the organization that person belong to. (Could be NULL when person is UNKNOWN)
 - ``personName``: Name of the person. (Could be NULL when person is UNKNOWN)
+- ``personDeleted``: Bool field that indicates if the person was deleted. It is ``null`` when the event doesn't involve a person.
 - ``denialCauseId``: When the access is not allowed, this is the ID of denialCause. (Could be NULL when the access was allowed)
 - ``allowed``: If the access was allowed it will be ``1``, if not, it will ``0``.
 
