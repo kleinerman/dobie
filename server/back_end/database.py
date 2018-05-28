@@ -523,11 +523,13 @@ class DataBase(object):
                 event['dateTime'] = event['dateTime'].strftime("%Y-%m-%d %H:%M")
                 
                 #If the person was deleted (resStateId == 5), converting it
-                #to bool True, otherwise converting it to bool False
-                if event['personDeleted'] == 5:
-                    event['personDeleted'] = 1
-                else:
-                    event['personDeleted'] = 0
+                #to bool 1, otherwise converting it to bool 0.
+                #If not an event involving a person, keep it null
+                if event['personDeleted']:
+                    if event['personDeleted'] == 5:
+                        event['personDeleted'] = 1
+                    else:
+                        event['personDeleted'] = 0
 
 
             return events, totalEvtsCount
