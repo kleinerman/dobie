@@ -525,9 +525,9 @@ class DataBase(object):
                 #If the person was deleted (resStateId == 5), converting it
                 #to bool True, otherwise converting it to bool False
                 if event['personDeleted'] == 5:
-                    event['personDeleted'] = True
+                    event['personDeleted'] = 1
                 else:
-                    event['personDeleted'] = False
+                    event['personDeleted'] = 0
 
 
             return events, totalEvtsCount
