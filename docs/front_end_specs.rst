@@ -36,12 +36,20 @@ A valid login will answer with:
   Date: Wed, 12 Jul 2017 14:31:05 GMT
   
   {
-    "description": "Administrator", 
+    "fullName": "Administrator", 
     "id": 1, 
     "roleId": 1, 
     "username": "admin"
+    "active": 1
   }
 
+If the field ``active`` is ``0``, the user shouldn't be able to log into the application and this situation should be informed in a popup with a message: **This user is disabled. Contact the administrator.**
+
+
+| Users with ``roleId = 1`` (Administrator) will be able to access all the sections of the application.
+| Users with ``roleId = 2`` (Operator) will be able to access all the sections except System Users Section.
+| Users with ``roleId = 3`` (Viewer) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
+|
 
 
 An invalid login will answer with:
@@ -1622,6 +1630,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": null, 
         "zoneName": "Ingreso Oficina"
@@ -1635,6 +1644,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": "Datacenter Capitalinas", 
         "personName": "Jorge Kleinerman", 
+        "personDeleted": 0,         
         "doorName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
@@ -1648,6 +1658,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1661,6 +1672,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": "null", 
         "personName": "null", 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": null, 
         "zoneName": "Ingreso Oficina"
@@ -1674,6 +1686,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1687,6 +1700,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1700,6 +1714,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1713,6 +1728,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": "Datacenter Capitalinas", 
         "personName": "Jorge Kleinerman", 
+        "personDeleted": 0, 
         "doorName": "Ingreso F66", 
         "side": 1, 
         "zoneName": "Ingreso Oficina"
@@ -1724,11 +1740,12 @@ An the tipical response would be:
         "id": 1550, 
         "doorLockId": 1, 
         "denialCauseId": null, 
-        "orgName": "Datacenter Capitalinas", 
-        "personName": "Jorge Kleinerman", 
-        "doorName": "Ingreso F65", 
+        "orgName": "Visitors.", 
+        "personName": "Marcos Suarez", 
+        "personDeleted": 1, 
+        "doorName": "Ingreso 1", 
         "side": 1, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Principal"
       }, 
       {
         "allowed": 1, 
@@ -1739,6 +1756,7 @@ An the tipical response would be:
         "denialCauseId": null, 
         "orgName": null, 
         "personName": null, 
+        "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
         "zoneName": "Ingreso Oficina"
@@ -1773,6 +1791,7 @@ Each event has the following fields:
 - ``doorName```: Name of the door.
 - ``orgName``: Name of the organization that person belong to. (Could be NULL when person is UNKNOWN)
 - ``personName``: Name of the person. (Could be NULL when person is UNKNOWN)
+- ``personDeleted``: Bool field that indicates if the person was deleted. It is ``null`` when the event doesn't involve a person.
 - ``denialCauseId``: When the access is not allowed, this is the ID of denialCause. (Could be NULL when the access was allowed)
 - ``allowed``: If the access was allowed it will be ``1``, if not, it will ``0``.
 
@@ -2611,19 +2630,24 @@ To get from the server the current list of controllers, the following REST metho
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 348
-  Server: Werkzeug/0.14.1 Python/3.6.4
-  Date: Mon, 12 Mar 2018 15:39:17 GMT
-  
+  Content-Length: 417
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Sat, 12 May 2018 23:09:54 GMT
+
   [
     {
+      "availDoors": [
+        1, 
+        2
+      ], 
       "ctrllerModelId": 1, 
       "id": 1, 
-      "macAddress": "b827eba30655", 
+      "macAddress": "b827eb2c3abd", 
       "name": "Controladora 1", 
       "uri": "http://localhost:5000/api/v1.0/controller/1"
     }, 
     {
+      "availDoors": [], 
       "ctrllerModelId": 1, 
       "id": 2, 
       "macAddress": "b827eb277791", 
@@ -3050,14 +3074,53 @@ To get from server the current list of doors in each zone, the following REST me
 **Response:**
 
 .. code-block::
-    
+
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 754
+  Content-Length: 1624
   Server: Werkzeug/0.14.1 Python/3.6.4
-  Date: Fri, 16 Mar 2018 19:54:32 GMT
+  Date: Mon, 09 Apr 2018 20:21:51 GMT
   
   [
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 1, 
+      "id": 1, 
+      "isVisitExit": 0, 
+      "name": "Molinete 1", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "snsrType": 1, 
+      "uri": "http://localhost:5000/api/v1.0/door/1"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 2, 
+      "id": 2, 
+      "isVisitExit": 0, 
+      "name": "Puerta 2", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "snsrType": 1, 
+      "uri": "http://localhost:5000/api/v1.0/door/2"
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 3, 
+      "id": 3, 
+      "isVisitExit": 0, 
+      "name": "Barrera 5", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "snsrType": 1, 
+      "uri": "http://localhost:5000/api/v1.0/door/3"
+    }, 
     {
       "alrmTime": 10, 
       "bzzrTime": 3, 
@@ -3068,6 +3131,7 @@ To get from server the current list of doors in each zone, the following REST me
       "name": "Ba\u00f1o 3", 
       "resStateId": 1, 
       "rlseTime": 7, 
+      "snsrType": 1, 
       "uri": "http://localhost:5000/api/v1.0/door/4"
     }, 
     {
@@ -3080,6 +3144,7 @@ To get from server the current list of doors in each zone, the following REST me
       "name": "Molinte 5", 
       "resStateId": 1, 
       "rlseTime": 7, 
+      "snsrType": 1, 
       "uri": "http://localhost:5000/api/v1.0/door/5"
     }, 
     {
@@ -3092,6 +3157,7 @@ To get from server the current list of doors in each zone, the following REST me
       "name": "Ingreso 2", 
       "resStateId": 1, 
       "rlseTime": 7, 
+      "snsrType": 1, 
       "uri": "http://localhost:5000/api/v1.0/door/6"
     }
   ]
@@ -3149,7 +3215,7 @@ To get all posible state the following method should be sent to the server:
 Add Door
 ~~~~~~~~
 
-| When adding a new door, a controller should be selected from Controller combobox. To get all the controllers see `Get Controllers`_.
+| When adding a new door, a controller should be selected from Controller combobox. To get all the controllers see `Get Controllers`_. If ``availDoors`` list in controller is empty, this controller should be grayed out in the list of controllers and the user shouldn't be able to choose it for the door that is being added.
 | Once the controller is selected, the door number combobox should be filled with the doors availables in the selected controller. To get the doors availables in this controller, a GET method should be sent to the server with the ID of this controller.
 
 
@@ -3187,7 +3253,7 @@ Add Door
   
 
 | The **availDoors** field has a list with the door number slots availables in the controller.
-| Once selected, the **door number** from the ``availDoors`` list, the **release time**, the **buzzer time**, the **alarm timeout** and **visit exit**, the following POST method should be sent to the server: 
+| Once selected, **door number** from ``availDoors`` list, **snsrType**, **release time**, **buzzer time**, **alarm timeout** and **visit exit**, the following POST method should be sent to the server: 
 
 
 
@@ -3202,10 +3268,13 @@ Add Door
 **JSON**
 
 .. code-block::
+  
+  {"name": "Entrada 1era", "doorNum": 2, "controllerId": 2, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}
 
-  {"name": "Entrada 1era", "doorNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
-  
-  
+
+The **snsrType** field should be **0** if the **NO** checkbox is selected. Otherwise, if **NC** checkbox is selected, it should be **1**. Both checkboxes can't be selected at the same time. 
+
+
 **Response:**
 
 .. code-block::
@@ -3220,7 +3289,7 @@ Add Door
     "code": 201, 
     "message": "Door added", 
     "status": "OK", 
-    "uri": "http://172.18.0.5:5000/api/v1.0/door/13"
+    "uri": "http://172.18.0.5:5000/api/v1.0/door/7"
   }
 
 
@@ -3267,31 +3336,38 @@ Get one Door
 
   HTTP/1.0 200 OK
   Content-Type: application/json
-  Content-Length: 246
+  Content-Length: 260
   Server: Werkzeug/0.14.1 Python/3.6.4
-  Date: Mon, 19 Mar 2018 15:40:41 GMT
+  Date: Mon, 09 Apr 2018 20:30:44 GMT
   
   {
     "alrmTime": 10, 
     "bzzrTime": 3, 
-    "controllerId": 2, 
-    "doorNum": 2, 
-    "id": 17, 
+    "controllerId": 1, 
+    "doorNum": 1, 
+    "id": 4, 
     "isVisitExit": 1, 
-    "name": "Entrada 1era", 
-    "resStateId": 4, 
+    "name": "Entrada 3era", 
+    "resStateId": 1, 
     "rlseTime": 7, 
-    "uri": "http://172.18.0.5:5000/api/v1.0/door/7", 
-    "zoneId": 2
+    "snsrType": 1, 
+    "uri": "http://localhost:5000/api/v1.0/door/4", 
+    "zoneId": 1
   }
-
-
+  
 
 
 Edit a Door
 ~~~~~~~~~~~
 
-When **edit** button is pressed the following REST method should be sent to the server:
+When **edit** button is pressed the following window should appear:
+
+|
+
+.. image:: images_front_end_specs/upd_door.png
+
+
+And the following REST method should be sent to the server:
 
 **Method:** PUT
 
@@ -3305,10 +3381,10 @@ When **edit** button is pressed the following REST method should be sent to the 
 
 .. code-block::
 
-  {"name": "Entrance One", "doorNum": 2, "controllerId": 2, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 1}
+  {"name": "Entrance One", "doorNum": 3, "snsrType": 0, "rlseTime": 9, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}
   
-  
-  
+Note that this JSON doesn't include the ``controllerId``, since it can't be modified when editing a door.
+
   
 **Response:**
 
@@ -3378,5 +3454,269 @@ When **Delete** button is pressed the following REST method should be sent to th
     "status": "OK"
   }
   
+
+
+System Users
+------------
+
+
+The system users section should show the following window:
+
+|
+
+.. image:: images_front_end_specs/system_user.png
+
+
+Get Users
+~~~~~~~~~
+
+To get from server the current list of system users, the following REST method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 443
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Wed, 16 May 2018 19:27:42 GMT
+  
+  [
+    {
+      "active": 1,
+      "fullName": "Administrator", 
+      "id": 1, 
+      "roleId": 1, 
+      "uri": "http://localhost:5000/api/v1.0/user/1", 
+      "username": "admin"
+    }, 
+    {
+      "active": 1,
+      "fullName": "German Fisanotti", 
+      "id": 2, 
+      "roleId": 2, 
+      "uri": "http://localhost:5000/api/v1.0/user/2", 
+      "username": "gfisanotti"
+    }, 
+    {
+      "active": 0,
+      "fullName": "Mariana Gonzales", 
+      "id": 4, 
+      "roleId": 3, 
+      "uri": "http://localhost:5000/api/v1.0/user/4", 
+      "username": "mgonzales"
+    }
+  ]
+
+  
+**roleId** is a field that indicates the privilegies of the system user in the UI.
+
+To get all possible roles the following method shoud be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/role
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 167
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:03:10 GMT
+  
+  [
+    {
+      "description": "Administrator", 
+      "id": 1
+    }, 
+    {
+      "description": "Operator", 
+      "id": 2
+    }, 
+    {
+      "description": "Viewer", 
+      "id": 3
+    }
+  ]
+
+
+
+Add System User
+~~~~~~~~~~~~~~~
+
+When “New” button is pressed the following pop-up will appear:
+
+.. image:: images_front_end_specs/add_system_user.png
+
+The following REST method should be sent to the server:
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user
+  
+**JSON**
+
+.. code-block::
+
+  {"username": "mcantini", "passwd": "p4ssw8rd", "fullName": "Marcos Cantini", "roleId": 2, "active": 1}
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 116
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:22:03 GMT
+  
+  {
+    "code": 201, 
+    "message": "User added", 
+    "status": "OK", 
+    "uri": "http://localhost:5000/api/v1.0/user/6"
+  }
+
+
+Get one System User
+~~~~~~~~~~~~~~~~~~~
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user/4
+  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 155
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:25:32 GMT
+  
+  {
+    "active": 0, 
+    "fullName": "Marc Shuar", 
+    "id": 4, 
+    "roleId": 3, 
+    "uri": "http://localhost:5000/api/v1.0/user/4", 
+    "username": "mshuar"
+  }
+  
+
+
+Update System User
+~~~~~~~~~~~~~~~~~~
+
+When “Edit” button is pressed the following window will appear:
+
+.. image:: images_front_end_specs/upd_system_user.png
+
+The following REST method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user/4
+  
+  
+**JSON**
+
+.. code-block::
+
+  {"username": "msuarez", "passwd": "p4ssw3rd", "fullName": "Marc Shuar", "roleId": 3, "active": 0}
+  
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:27:34 GMT
+  
+  {
+    "message": "User updated", 
+    "status": "OK"
+  }
+
+
+**Note:** If the admin user is being edited (id = 1) the only thing able to modify will be the password. The REST API will restrict the user if trying to modify anything else.
+
+  
+Delete System User
+~~~~~~~~~~~~~~~~~~
+
+When “Delete” button is pressed a pop-up will appear to confirm the operation.
+
+The following REST method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/user/4
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 51
+  Server: Werkzeug/0.14.1 Python/3.6.5
+  Date: Thu, 17 May 2018 20:29:30 GMT
+  
+  {
+    "message": "User deleted", 
+    "status": "OK"
+  }
+  
+
+**Note:** The admin user (id = 1) shouldn't be deleted. The REST API won't allow to do this operation.
+
+
+
+System User Settings
+~~~~~~~~~~~~~~~~~~~~
+
+Each user will be able to change its password and its full name from the setting section.
+
+
+.. image:: images_front_end_specs/system_user_settings.png
 
 

@@ -26,6 +26,95 @@ Bash completion is very usefull:
 
   # pacman -S bash-completion
 
+Install **vim** editor:
+
+.. code-block::
+
+  # pacman -S vim
+
+Make ``vi`` command call ``vim`` editor. This is neccesary for some commands like ``visudo``
+ 
+.. code-block::
+
+  # rm /usr/bin/vi
+  # ln -s /usr/bin/vim /usr/bin/vi
+  
+
+Vim configuration file
+
+.. code-block::
+  
+  # cp /usr/share/vim/vim80/vimrc_example.vim /etc/vimrc
+	
+To the previous file, add the following:
+
+.. code-block::
+
+  set tabstop=4
+  set shiftwidth=4
+  set expandtab
+  set nobackup
+  set noundofile
+  set nowritebackup
+  
+  
+To be able to paste text using the medium button of the mouse in a gnome-terminal, edit ``/usr/share/vim/vim80/defaults.vim`` and comment out the following lines:
+
+.. code-block::
+
+  "if has('mouse')
+  "  set mouse=a
+  "endif
+
+Set the hostname in ``/etc/hostname`` as ``dobie-cN`` where N is the number of controller just to identify it easy.
+
+
+Change root password
+
+.. code-block::
+
+  # passwd
+  
+Install colordiff
+
+.. code-block::
+
+  # pacman -S colordiff
+  
+Add the following lines to ``/etc/bash.bashrc``
+
+.. code-block::
+
+  alias ls='ls --color=auto'
+
+  PS1='\[\e[1;31m\][\u@\h \W]\$\[\e[0m\] '
+
+  [ -r /etc/DIR_COLORS ] && eval `dircolors /etc/DIR_COLORS`
+
+  alias ls='ls --color=auto'
+  alias grep='grep --color=auto'
+  alias diff='colordiff'
+
+  shopt -s histappend  #Avoid overwritting history file
+
+  HISTSIZE=5000        #History lenght of actual session
+  HISTFILESIZE=5000    #File history lenght
+
+
+  # Colored Man Pages
+  man() {
+   env \
+   LESS_TERMCAP_mb=$(printf "\e[1;31m") \
+   LESS_TERMCAP_md=$(printf "\e[1;31m") \
+   LESS_TERMCAP_me=$(printf "\e[0m") \
+   LESS_TERMCAP_se=$(printf "\e[0m") \
+   LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
+   LESS_TERMCAP_ue=$(printf "\e[0m") \
+   LESS_TERMCAP_us=$(printf "\e[1;32m") \
+   man "$@"
+  }
+
+
 Add your username:
 
 .. code-block::
@@ -42,7 +131,7 @@ Install **sudo** package and add your user to wheel group:
   
 Allow members of group wheel to execute any command without a password:
 
-Uncomment the following line in ``/etc/sudoers``
+Uncomment the following line in ``/etc/sudoers`` running ``# visudo``
 
 .. code-block::
 
@@ -67,13 +156,6 @@ Check everything with
 
   #  timedatectl status
   
-
-Install **vim** editor:
-
-.. code-block::
-
-  # pacman -S vim
-  
   
 Wired network configuration
 ---------------------------
@@ -90,11 +172,35 @@ The file should have the following content:
   Name=eth0
 
   [Network]
-  Address=10.10.7.72/24
+  Address=10.10.7.99/24
   Gateway=10.10.7.1
   DNS=10.10.10.53
   DNS=10.10.10.54
 
+Wireless network configuration
+------------------------------
+
+Follow the following guide to configure properly the wifi interface:
+
+https://github.com/kleinerman/dobie/blob/jek_docs/docs/wifi_config_on_rpi3.rst
+
+
+If adding more than one interface, remember to set just one default gateway.
+
+
+SSH server configuration
+------------------------
+
+Add or uncomment to ``/etc/ssh/sshd_config`` the following:
+
+.. code-block::
+
+  PermitRootLogin yes
+  
+  UseDNS no
+
+Copy your public ssh key to ``/root/.ssh/authorized_keys`` to allow some development scripts login without asking the password.
+To generate the ``/root/.ssh/`` directory with the rights permissons, run ``ssh-keygen`` command
 
 Pacakges to run dobie
 ---------------------
@@ -148,6 +254,24 @@ If the the master branch doesn't have the latest changes on the controller, fetc
 
   # git fetch github jek_controller:jek_controller
   # git checkout jek_controller
+  
+While we are developing, we need to clone the repository many times. In this case, put the following script in ``/opt/`` replacing the email with the correct one and give execution permissons to it.
+
+.. code-block::
+  
+  #!/bin/bash
+  git clone https://jkleinerman@github.com/kleinerman/dobie.git
+  cd dobie
+  git config --global user.email "PUT HERE THE MAIL"
+  git config --global user.name "Jorge Kleinerman"
+  git config --global core.editor "vim"
+  git remote rename origin github
+  git remote add bitbucket https://jkleinerman@bitbucket.org/kleinerman/dobie.git
+  git fetch github jek_controller:jek_controller
+  git checkout jek_controller
+
+
+
   
 Inside ``/opt/dobie/controller/c_src/`` directory, run ``make`` to compile the ioiface.
 
@@ -205,4 +329,22 @@ Start the service now
 
   # systemctl start dobie-c.service
   
+
+Saving and Restoring sd image to clone it
+-----------------------------------------
+
+Once installed and configured all the packages in the sd card, the sd image could be saved in a file with fsarchiver program to restore it in another controller or in the same in case it will damaged.
+To do that, the sd card should be put in a laptop, unmount all the partitions (tipically: ``# umount /dev/sdb1`` and ``# umount /dev/sdb2``) and using ``fsarchiver`` run:
+
+.. code-block::
+
+  # fsarchiver savefs dobie-sd-image.fsa /dev/sdb1 /dev/sdb2
+  
+To restore the image in another sd card, first, it would be partitioned in the same way the sd is partitioned to install the os from the scratch and then run:
+
+.. code-block::
+
+  # fsarchiver restfs dobie-sd-image.fsa id=0,dest=/dev/sdb1 id=1,dest=/dev/sdb2
+
+
 
