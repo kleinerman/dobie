@@ -124,13 +124,18 @@ Are you sure?
 <!-- /.modal -->
 </div>
 
-
 <script type="text/javascript">
 //init filters
 setFilterAction();
 
 //populate select list
 populateList("zones-select","zones");
+
+//clear form for new
+$('#modal-new').on('show.bs.modal', function (event){
+	//reset form
+	$('#zone-new-name').val("");
+});
 
 //fetch info for edit
 $('#modal-edit').on('show.bs.modal', function (event){

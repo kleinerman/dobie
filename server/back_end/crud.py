@@ -11,6 +11,7 @@ import crypt
 from flask import Flask, jsonify, request, abort, url_for, g
 from flask_httpauth import HTTPBasicAuth
 
+from gevent.pywsgi import WSGIServer
 
 import genmngr
 import database
@@ -169,7 +170,7 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             '''
             #Retrieve user parameters from database
-            user = self.dataBase.getUser(username)
+            user = self.dataBase.getUser(username=username)
 
             if user:
 
@@ -214,7 +215,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        userNeedKeys = ('description', 'username', 'passwd', 'roleId',)
+        userNeedKeys = ('username', 'passwd', 'fullName', 'roleId', 'active')
 
         @app.route('/api/v1.0/user', methods=['GET', 'POST'])
         @auth.login_required
@@ -230,7 +231,6 @@ class CrudMngr(genmngr.GenericMngr):
                     users = self.dataBase.getUsers()
                     for user in users:
                         user['uri'] = url_for('User', userId=user['id'], _external=True)
-                        user.pop('id')
                         user.pop('passwdHash')
                     return jsonify(users)
 
@@ -257,23 +257,41 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/user/<int:userId>', methods=['PUT', 'DELETE'])
+        @app.route('/api/v1.0/user/<int:userId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
         def User(userId):
             '''
+            GET: Get an user from database
             PUT: Update a user in database
             DELETE: Delete a user in the database.
             '''
             try:
-                if request.method == 'PUT':
+
+                if request.method == 'GET':
+                    user = self.dataBase.getUser(userId=userId)
+                    user['uri'] = request.url
+                    user.pop('passwdHash')
+                    return jsonify(user)
+
+                elif request.method == 'PUT':
                     user = {}
                     user['id'] = userId
                     for param in userNeedKeys:
                         user[param] = request.json[param]
+
+
+                    if user['id'] == 1 and (user['username'] != 'admin' or
+                       user['fullName'] != 'Administrator' or
+                       user['roleId'] != 1 or
+                       user['active'] != 1):
+                        raise database.UserError
+
                     self.dataBase.updUser(user)
                     return jsonify({'status': 'OK', 'message': 'User updated'}), OK
 
                 elif request.method == 'DELETE':
+                    if userId == 1:
+                        raise database.UserError
                     self.dataBase.delUser(userId)
                     return jsonify({'status': 'OK', 'message': 'User deleted'}), OK
 
@@ -385,6 +403,30 @@ class CrudMngr(genmngr.GenericMngr):
                 raise NotFound(str(denialCauseNotFound))
             except database.DenialCauseError as denialCauseError:
                 raise ConflictError(str(denialCauseError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
+#--------------------------------------Role----------------------------------------------
+        @app.route('/api/v1.0/role', methods=['GET'])
+        def role():
+            '''
+            GET: Return a list with all roles
+            '''
+            try:
+                ## For GET method
+                roles = self.dataBase.getRoles()
+                return jsonify(roles)
+
+
+            except database.RoleNotFound as roleNotFound:
+                raise NotFound(str(roleNotFound))
+            except database.RoleError as roleError:
+                raise ConflictError(str(roleError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -1079,7 +1121,7 @@ class CrudMngr(genmngr.GenericMngr):
 #--------------------------------------Door------------------------------------------
 
 
-        doorNeedKeys = ('name', 'doorNum', 'controllerId', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId', 'isVisitExit')
+        doorNeedKeys = ('name', 'doorNum', 'controllerId', 'snsrType', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId', 'isVisitExit')
 
         @app.route('/api/v1.0/door', methods=['POST'])
         @auth.login_required
@@ -1138,11 +1180,10 @@ class CrudMngr(genmngr.GenericMngr):
                     # Also a KeyError wil be raised if the client misses any parameter.
                     door = {}
                     door['id'] = doorId
-                    for param in doorNeedKeys:
+                    for param in [key for key in doorNeedKeys if key != 'controllerId']:
                         door[param] = request.json[param]
                     self.dataBase.updDoor(door)
                     door.pop('name')
-                    door.pop('controllerId')
                     door.pop('zoneId')
                     door.pop('isVisitExit')
                     ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
@@ -1566,6 +1607,8 @@ class CrudMngr(genmngr.GenericMngr):
 
 #----------------------------------------Main--------------------------------------------
 
-        self.logger.info('Starting Werkzeug to listen for REST methods..') 
-        app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
+        self.logger.info('Starting WSGI Server to listen for REST methods..') 
+        #app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
 
+        http_server = WSGIServer(('', 5000), app)
+        http_server.serve_forever()

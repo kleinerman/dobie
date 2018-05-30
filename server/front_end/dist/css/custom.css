@@ -204,15 +204,10 @@ label,input[type=checkbox],input[type=radio]{
 .smallcol{
 	width:30px;
 }
-/*
-#access-table tr:nth-of-type(2n+1) {
-    background-color: #f9f9f9;
-}
 
-#access-table tr:hover{
-    background-color: #f7f7f7;
+#accesses-table-container{
+	margin-left:30px;
 }
-*/
 
 #access-table, #access-table td, #access-table th {
     border: 1px solid #ddd;
@@ -279,4 +274,13 @@ input::-webkit-inner-spin-button {
 	border:1px solid #ccc;
 	padding:10px;
 	border-radius:5px;
+}
+
+
+#legend-row{
+	padding: 40px;
+}
+
+#events-table{
+	width:100%;
 }

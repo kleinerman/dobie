@@ -238,11 +238,11 @@ function edit_access_liaccess($user,$pass,$doorid,$personid,$id,$days_payload,$e
 
 	//get current liaccess
 	$response = get_access($user,$pass,$id);
-	if($response and isset($response->liAccesses) and is_array($response->liAccesses)){
+	if($response){
 
 		//build array key,value with arr[weekday] = obj;
 		$access_current=array();
-		foreach($response->liAccesses as $obj) $access_current[$obj->weekDay]=$obj;
+		if(isset($response->liAccesses)) foreach($response->liAccesses as $obj) $access_current[$obj->weekDay]=$obj;
 
 		//explode and build the sent liaccesses for each weekday
 		$days_payload_arr=explode("|",$days_payload);
@@ -559,7 +559,7 @@ function get_door($user,$pass,$id){
 	else return $response->data;
 }
 
-function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime){
+function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime, $snsrtype){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->zoneId= $zoneid;
@@ -570,13 +570,14 @@ function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisi
 	$payload_obj->rlseTime= $rlsetime;
 	$payload_obj->bzzrTime= $bzzrtime;
 	$payload_obj->alrmTime= $alrmtime;
+	$payload_obj->snsrType= $snsrtype;
 	$response=send_request($config->api_fullpath."door",$user,$pass,"post",json_encode($payload_obj));
 	//if($response->response_status != "201") return false;
 	//else return $response->data;
 	return $response;
 }
 
-function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime){
+function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime, $snsrtype){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->zoneId= $zoneid;
@@ -587,6 +588,7 @@ function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $i
 	$payload_obj->rlseTime= $rlsetime;
 	$payload_obj->bzzrTime= $bzzrtime;
 	$payload_obj->alrmTime= $alrmtime;
+	$payload_obj->snsrType= $snsrtype;
 	$response=send_request($config->api_fullpath."door/$id",$user,$pass,"put",json_encode($payload_obj));
 	if($response->response_status != "200") return false;
 	else return $response->data;
@@ -825,7 +827,7 @@ if($DEBUG){
 	//$res=do_auth("admin","admin");
 	//$res=get_organizations("admin","admin",2);
 	//$res=get_person_accesses("admin","admin",18);
-//	$res=get_access("admin","admin",44);
+	$res=get_access("admin","admin",10);
 	//$res=add_person("admin","admin","7","Ricky Martin","",123132);
 	//$res=get_door_accesses("admin","admin",5);
 //	$res=get_zones("admin","admin");
@@ -859,7 +861,7 @@ if($DEBUG){
 	//$res=get_person_accesses("admin","admin",9);
 //	$res=add_visit("admin","admin","fasdfasdf",212121,33334,2,"2018-03-02","23:59","1");
 	//$res=get_controllers("admin","admin");
-	$res=get_controller("admin","admin",3);
+//	$res=get_controller("admin","admin",3);
 	//$res=get_controller_models("admin","admin");
 
 	echo "<pre>";

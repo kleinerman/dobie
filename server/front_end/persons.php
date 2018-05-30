@@ -165,7 +165,6 @@ Are you sure?
 <!-- /.modal -->
 </div>
 
-
 <script type="text/javascript">
 //init filters
 setFilterAction();
@@ -185,6 +184,14 @@ $("#organizations-select").change(function(){
 		//disable buttons
 		$("#persons-select-edit,#persons-select-del").prop("disabled",true);
 	}
+});
+
+//clear form for new
+$('#modal-new').on('show.bs.modal', function (event){
+	//reset form
+	$('#person-new-name').val("");
+	$('#person-new-idnum').val("");
+	$('#person-new-cardnum').val("");
 });
 
 //fetch info for edit
