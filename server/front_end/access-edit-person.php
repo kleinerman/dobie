@@ -306,7 +306,7 @@ if(!accessId){
 					}
 				}
 			}
-			//fill expiration date: TODO: remove time when it comes stripped from the API
+			//fill expiration date
 			if(values.expireDate !== "undefined" && values.expireDate!="9999-12-31 00:00"){
 				//check yes
 				$("input[name=expiration][value=1]").prop("checked",true);
@@ -400,44 +400,49 @@ $("#access-edit-form").submit(function(){
 			accessRec.allWeek=0;
 			//for each day, get start, end and way
 			var error=0;
-			$("input[name=days]:checked").each(function(){
-				if($(this).val()!=""){
-					//get week day and parse as int
-					accessRec.weekDay=parseInt($(this).val());
-					// get start, end and way
- 					accessRec.startTime= $("input[name=from"+accessRec.weekDay+"]").val();
- 					accessRec.endTime = $("input[name=to"+accessRec.weekDay+"]").val();
-					var way = $("input[name=way"+accessRec.weekDay+"]:checked").val();
-					accessRec.iSide= (way%2);
-					accessRec.oSide= Math.floor(way/2);
+			
+			if($("input[name=days]:checked").length<1){
+				error="You must select at least 1 day of the week or check 'Every day'";
+			} else {
+				$("input[name=days]:checked").each(function(){
+					if($(this).val()!=""){
+						//get week day and parse as int
+						accessRec.weekDay=parseInt($(this).val());
+						// get start, end and way
+						accessRec.startTime= $("input[name=from"+accessRec.weekDay+"]").val();
+						accessRec.endTime = $("input[name=to"+accessRec.weekDay+"]").val();
+						var way = $("input[name=way"+accessRec.weekDay+"]:checked").val();
+						accessRec.iSide= (way%2);
+						accessRec.oSide= Math.floor(way/2);
 
-					//check if add access to all persons
-					if(accessRec.personId=="all"){
-						//all persons
-						//if all doors > add liaccess to organization for a zone
-						if(doorAll) var datastring = "action=add_access_liaccess_organization_zone&zoneid=" + accessRec.zoneId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
-						//else > add liaccess to organizations for a single door
-						else var datastring = "action=add_access_liaccess_organization&doorid=" + accessRec.doorId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
-					} else {
-						//single person
-						//if all doors > add liaccess to a single person for a zone
-						if(doorAll) var datastring = "action=add_access_liaccess_zone&zoneid=" + accessRec.zoneId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
-						//else > add liaccess to a single person for a single door
-						else var datastring = "action=add_access_liaccess&doorid=" + accessRec.doorId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
-					}
-					$.ajax({
-						type: "POST",
-						url: "process",
-						data: datastring,
-						success: function(resp){
-							//console.log(resp);
-						},
-						failure: function(){
-							error=1;
+						//check if add access to all persons
+						if(accessRec.personId=="all"){
+							//all persons
+							//if all doors > add liaccess to organization for a zone
+							if(doorAll) var datastring = "action=add_access_liaccess_organization_zone&zoneid=" + accessRec.zoneId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+							//else > add liaccess to organizations for a single door
+							else var datastring = "action=add_access_liaccess_organization&doorid=" + accessRec.doorId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+						} else {
+							//single person
+							//if all doors > add liaccess to a single person for a zone
+							if(doorAll) var datastring = "action=add_access_liaccess_zone&zoneid=" + accessRec.zoneId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+							//else > add liaccess to a single person for a single door
+							else var datastring = "action=add_access_liaccess&doorid=" + accessRec.doorId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
 						}
-					});
-				}
-			});
+						$.ajax({
+							type: "POST",
+							url: "process",
+							data: datastring,
+							success: function(resp){
+								//console.log(resp);
+							},
+							failure: function(){
+								error="Error when trying to create access";
+							}
+						});
+					}
+				});
+			}
 			if(!error){
 				//populate access table
 				//if all, hide accesses table
@@ -450,7 +455,7 @@ $("#access-edit-form").submit(function(){
 				parent.$("#modal-edit").modal("hide");
 			} else {
 				//show modal error
-				alert("Error when trying to create access");
+				alert(error);
 			}
 		}
 	} else {
@@ -496,43 +501,48 @@ $("#access-edit-form").submit(function(){
 			accessRec.personId = values.personId;
 			//for each day, get start, end and way. Send each liaccess as payload json to process
 			var days_payload=[];
-			$("input[name=days]:checked").each(function(){
-				if($(this).val()!=""){
-					//get week day and parse as int
-					accessRec.weekDay=parseInt($(this).val());
-					// get start, end and way
-					accessRec.startTime= $("input[name=from"+accessRec.weekDay+"]").val();
-					accessRec.endTime = $("input[name=to"+accessRec.weekDay+"]").val();
-					var way = $("input[name=way"+accessRec.weekDay+"]:checked").val();
-					accessRec.iSide= (way%2);
-					accessRec.oSide= Math.floor(way/2);
-					//add liaccess as json to payload array
-					days_payload.push(JSON.stringify(accessRec));
-				}
-			});
 
-			$.ajax({
-				type: "POST",
-				url: "process",
-				data: "action=edit_access_liaccess&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId + "&id=" + accessId + "&days_payload="+ days_payload.join("|") + "&expiredate=" + accessRec.expireDate,
-				//complete: function(resp){console.log(resp)},
-				success: function(resp){
-					if(resp[0]=='1'){
-						//populate access table
-						parent.populateTable("access-table",accessRec.personId);
-						//close modal
-						parent.$("#modal-edit").modal("hide");
-					} else {
-						//show modal error
-						alert(resp[1]);
+			if($("input[name=days]:checked").length<1){
+				alert("You must select at least 1 day of the week or check 'Every day'");
+			} else {
+				$("input[name=days]:checked").each(function(){
+					if($(this).val()!=""){
+						//get week day and parse as int
+						accessRec.weekDay=parseInt($(this).val());
+						// get start, end and way
+						accessRec.startTime= $("input[name=from"+accessRec.weekDay+"]").val();
+						accessRec.endTime = $("input[name=to"+accessRec.weekDay+"]").val();
+						var way = $("input[name=way"+accessRec.weekDay+"]:checked").val();
+						accessRec.iSide= (way%2);
+						accessRec.oSide= Math.floor(way/2);
+						//add liaccess as json to payload array
+						days_payload.push(JSON.stringify(accessRec));
 					}
-				},
-				failure: function(){
-					//show modal error
-					alert("Failure when trying to edit access");
-				},
-				error: function(){alert("Error when trying to edit access")}
-			});
+				});
+
+				$.ajax({
+					type: "POST",
+					url: "process",
+					data: "action=edit_access_liaccess&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId + "&id=" + accessId + "&days_payload="+ days_payload.join("|") + "&expiredate=" + accessRec.expireDate,
+					//complete: function(resp){console.log(resp)},
+					success: function(resp){
+						if(resp[0]=='1'){
+							//populate access table
+							parent.populateTable("access-table",accessRec.personId);
+							//close modal
+							parent.$("#modal-edit").modal("hide");
+						} else {
+							//show modal error
+							alert(resp[1]);
+						}
+					},
+					failure: function(){
+						//show modal error
+						alert("Failure when trying to edit access");
+					},
+					error: function(){alert("Error when trying to edit access")}
+				});
+			}
 		}
 	}
 	return false;

@@ -256,6 +256,24 @@ class DenialCauseNotFound(DenialCauseError):
 
 
 
+class RoleError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class RoleNotFound(RoleError):
+    '''
+    '''
+    pass
+
+
+
+
 
 class DataBase(object):
 
@@ -460,14 +478,15 @@ class DataBase(object):
         
         sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
                "Door.name AS doorName, Organization.name AS orgName, "
-               "Person.name AS personName, Event.doorLockId, Event.dateTime, "
+               "Person.name AS personName, Person.resStateId AS personDeleted, "
+               "Event.doorLockId, Event.dateTime, "
                "Event.side, Event.allowed, Event.denialCauseId "
                "FROM Event LEFT JOIN Door ON (Event.doorId = Door.id) "
                "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
                "LEFT JOIN Person ON (Event.personId = Person.id) "
                "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
                "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{} "
-               "LIMIT {},{}"
+               "ORDER BY dateTime DESC LIMIT {},{}"
                "".format(startDateTime, endDateTime, personFilter, orgFilter, 
                          doorFilter, zoneFilter, sideFilter, startEvtSql, evtsQtty)
               )
@@ -496,12 +515,22 @@ class DataBase(object):
             events = self.cursor.fetchall()
 
 
-
-            #Converting all datetime fields into string because if not doing this, "jsonify"
-            #method converts them to a format not desired like "Wed, 13 Sep 2017 17:50:00 GMT"
-            #The "GMT" at the end was causing the browser converts it to GMT time.
+            #Some adaptations before returning the events
             for event in events:
+                #Converting all datetime fields into string because if not doing this, "jsonify"
+                #method converts them to a format not desired like "Wed, 13 Sep 2017 17:50:00 GMT"
+                #The "GMT" at the end was causing the browser converts it to GMT time.
                 event['dateTime'] = event['dateTime'].strftime("%Y-%m-%d %H:%M")
+                
+                #If the person was deleted (resStateId == 5), converting it
+                #to bool 1, otherwise converting it to bool 0.
+                #If not an event involving a person, keep it null
+                if event['personDeleted']:
+                    if event['personDeleted'] == 5:
+                        event['personDeleted'] = 1
+                    else:
+                        event['personDeleted'] = 0
+
 
             return events, totalEvtsCount
 
@@ -519,14 +548,27 @@ class DataBase(object):
 
 #-------------------------------------User--------------------------------------------
 
-    def getUser(self, username):
+    def getUser(self, userId=None, username=None,):
         '''
         Return a dictionary with user fields if exists, if not it returns None
         '''
-        try:
+
+        if (userId and username) or (not userId and not username):
+            self.logger.debug("Incorrect arguments calling getUser method.")
+            raise UserError('Can not get User')
+
+        elif userId:
+            sql = "SELECT * from User WHERE id = '{}'".format(userId)
+
+        else:
             sql = "SELECT * from User WHERE username = '{}'".format(username)
+
+        try:
             self.execute(sql)
             user = self.cursor.fetchone()
+
+            if not user:
+                raise UserNotFound("User not found.")
             return user
 
         except pymysql.err.ProgrammingError as programmingError:
@@ -568,9 +610,9 @@ class DataBase(object):
 
         passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
 
-        sql = ("INSERT INTO User(description, username, passwdHash, roleId) "
-               "VALUES('{}', '{}', '{}', {})"
-               "".format(user['description'], user['username'], passwdHash, user['roleId'])
+        sql = ("INSERT INTO User(username, passwdHash, fullName, roleId, active) "
+               "VALUES('{}', '{}', '{}', {}, {})"
+               "".format(user['username'], passwdHash, user['fullName'], user['roleId'], user['active'])
               )
 
 
@@ -624,10 +666,10 @@ class DataBase(object):
 
         passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
 
-        sql = ("UPDATE User SET description = '{}', username = '{}', "
-               "passwdHash = '{}', roleId = {} WHERE id = {}"
-               "".format(user['description'], user['username'], passwdHash, 
-                         user['roleId'], user['id'])
+        sql = ("UPDATE User SET username = '{}', passwdHash = '{}', "
+               "fullName = '{}', roleId = {}, active = {} WHERE id = {}"
+               "".format(user['username'], passwdHash, user['fullName'], 
+                         user['roleId'], user['active'], user['id'])
               )
 
         try:
@@ -694,7 +736,7 @@ class DataBase(object):
             raise EventTypeError('Can not get Event Types')
 
 
-#----------------------------------DoorLocks------------------------------------------
+#----------------------------------Door Locks---------------------------------------
 
     def getDoorLocks(self):
         '''
@@ -718,7 +760,7 @@ class DataBase(object):
 
 
 
-#----------------------------------Not Reasons------------------------------------------
+#----------------------------------Denial Causes-----------------------------------
 
     def getDenialCauses(self):
         '''
@@ -733,11 +775,36 @@ class DataBase(object):
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise DenialCauseError('Can not get Not Reasons')
+            raise DenialCauseError('Can not get Denial Causes')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise DenialCauseError('Can not get Not Reasons')
+            raise DenialCauseError('Can not get Denial Causes')
+
+
+
+
+
+#----------------------------------Roles------------------------------------------
+
+    def getRoles(self):
+        '''
+        Return a a dictionary with all system user roles
+        '''
+
+        try:
+            sql = ('SELECT * FROM Role')
+            self.execute(sql)
+            roles = self.cursor.fetchall()
+            return roles
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise RoleError('Can not get Roles')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise RoleError('Can not get Roles')
 
 
 
@@ -1284,27 +1351,6 @@ class DataBase(object):
 
 
 
-    def getControllers(self):
-        '''
-        Return a list with all controllers
-        '''
-        try:
-            sql = ('SELECT * FROM Controller')
-            self.execute(sql)
-            controllers = self.cursor.fetchall()
-            return controllers
-
-        except pymysql.err.ProgrammingError as programmingError:
-            self.logger.debug(programmingError)
-            raise ControllerError('Can not get controllers')
-
-        except pymysql.err.InternalError as internalError:
-            self.logger.debug(internalError)
-            raise ControllerError('Can not get controllers')
-
-
-
-
     def getController(self, controllerId):
         '''
         Return a dictionary with all the parametters of the controller
@@ -1360,6 +1406,38 @@ class DataBase(object):
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
             raise ControllerError('Can not get specified controller')
+
+
+
+
+
+    def getControllers(self):
+        '''
+        Return a list with all controllers
+        '''
+        try:
+            sql = ('SELECT id FROM Controller')
+            self.execute(sql)
+            controllerIds = self.cursor.fetchall()
+            controllerIds = [controllerId['id'] for controllerId in controllerIds]
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise ControllerError('Can not get controllers')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not get controllers')
+
+
+
+        controllers = []
+        for controllerId in controllerIds:
+            controllers.append(self.getController(controllerId))
+
+        return controllers
+
+
 
 
 
@@ -1714,9 +1792,9 @@ class DataBase(object):
         It returns the id of the added door
         '''
 
-        sql = ("INSERT INTO Door(doorNum, name, controllerId, rlseTime, bzzrTime, "
-               "alrmTime, zoneId, isVisitExit, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {}, {})"
-               "".format(door['doorNum'], door['name'], door['controllerId'], 
+        sql = ("INSERT INTO Door(doorNum, name, controllerId, snsrType, rlseTime, bzzrTime, "
+               "alrmTime, zoneId, isVisitExit, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {}, {}, {})"
+               "".format(door['doorNum'], door['name'], door['controllerId'], door['snsrType'], 
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'], 
                          door['zoneId'], door['isVisitExit'], TO_ADD)
               )
@@ -1804,10 +1882,10 @@ class DataBase(object):
         Receive a dictionary with door parametters and update it in DB
         '''
 
-        sql = ("UPDATE Door SET doorNum = {}, name = '{}', controllerId = {}, rlseTime = {}, "
-               "bzzrTime = {}, alrmTime = {}, zoneId = {}, isVisitExit = {}, resStateId = {} "
-               "WHERE id = {}"
-               "".format(door['doorNum'], door['name'], door['controllerId'],
+        sql = ("UPDATE Door SET doorNum = {}, name = '{}', snsrType = {}, "
+               "rlseTime = {}, bzzrTime = {}, alrmTime = {}, zoneId = {}, "
+               "isVisitExit = {}, resStateId = {} WHERE id = {}"
+               "".format(door['doorNum'], door['name'], door['snsrType'],
                          door['rlseTime'], door['bzzrTime'], door['alrmTime'],
                          door['zoneId'], door['isVisitExit'], TO_UPDATE, door['id'])
               )
@@ -1921,8 +1999,11 @@ class DataBase(object):
             person['visitedOrgId'] = 'NULL'
 
         sql = ("INSERT INTO Person(name, identNumber, cardNumber, orgId, visitedOrgId, resStateId) "
-               "VALUES('{}', '{}', {}, {}, {}, {})"
-               "".format(person['name'], person['identNumber'], person['cardNumber'], person['orgId'],
+               "VALUES('{}', '{}', {}, {}, {}, {}) ON DUPLICATE KEY UPDATE "
+               "name = '{}', cardNumber = {}, orgId = {}, visitedOrgId = {}, resStateId = {}"
+               "".format(person['name'], person['identNumber'], person['cardNumber'],
+                         person['orgId'], person['visitedOrgId'], COMMITTED,
+                         person['name'], person['cardNumber'], person['orgId'],
                          person['visitedOrgId'], COMMITTED)
               )
 
@@ -2019,8 +2100,14 @@ class DataBase(object):
                               "Marking it as deleted in central DB." 
                              )
                     self.logger.debug(logMsg)
-                    sql = ("UPDATE Person SET resStateId = {} WHERE id = {}"
-                       "".format(DELETED, personId)
+                    #Setting the "cardNumber" = NULL to be able to use this card in
+                    #another future person.
+                    #Leaving the "identNumber" stored. In this way, when a person is
+                    #deleted and readded (typically a frequent visitor), with the 
+                    #ON DUPLICATE KEY UPDATE clause of the "addPerson" method, the 
+                    #same row in the database is used, avoiding duplicate with the same person.
+                    sql = ("UPDATE Person SET cardNumber = NULL, resStateId = {} "
+                           "WHERE id = {}".format(DELETED, personId)
                           )
                     self.execute(sql)
 
@@ -2131,11 +2218,14 @@ class DataBase(object):
                 self.execute(sql)
                 pendCtrllersToDel = self.cursor.fetchone()['COUNT(*)']
                 if not pendCtrllersToDel:
-                    #sql = "DELETE FROM Person WHERE id = {}".format(personId)
-                    personRenamed = "{} (DELETED)".format(personName) 
-                    sql = ("UPDATE Person SET name = '{}', identNumber = NULL, "
-                           "cardNumber = NULL, resStateId = {}, cardNumber = NULL "
-                           "WHERE id = {}".format(personRenamed, DELETED, personId)
+                    #Setting the "cardNumber" = NULL to be able to use this card in
+                    #another future person.
+                    #Leaving the "identNumber" stored. In this way, when a person is
+                    #deleted and readded (typically a frequent visitor), with the 
+                    #ON DUPLICATE KEY UPDATE clause of the "addPerson" method, the 
+                    #same row in the database is used, avoiding duplicate with the same person.
+                    sql = ("UPDATE Person SET cardNumber = NULL, resStateId = {} "
+                           "WHERE id = {}".format(DELETED, personId)
                           )
                     self.execute(sql)
 
