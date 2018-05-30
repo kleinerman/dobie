@@ -85,10 +85,11 @@ class DataBase(object):
 
         if params:
             personId, allWeek, startTime, endTime, expireDate = params
+            expDateTime = '{} {}'.format(expireDate, endTime)
             nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             nowDate, nowTime = nowDateTime.split()
 
-            if nowDate < expireDate:
+            if nowDateTime < expDateTime:
 
                 if allWeek:
 
@@ -127,7 +128,7 @@ class DataBase(object):
 
             else:
                 print("Can NOT access (expired card)")
-                return (False, None, 2)
+                return (False, personId, 2)
 
         else:
             print("This person has not access on this door/side")
@@ -303,7 +304,7 @@ class DataBase(object):
         '''
  
         sql = ("SELECT Door.id, Door.doorNum, DoorGpios.rlseOut, DoorGpios.bzzrOut, "
-               "Door.rlseTime, Door.bzzrTime, Door.alrmTime FROM "
+               "Door.snsrType, Door.rlseTime, Door.bzzrTime, Door.alrmTime FROM "
                "DoorGpios JOIN Door ON (DoorGpios.id = Door.doorNum)"
               )
                      
@@ -326,10 +327,10 @@ class DataBase(object):
             #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender Module of
             #the server send a limited access CRUD before the client respond and avoid integrity error.
             #Using REPLACE is not good since it has to DELETE and INSERT always.
-            sql = ("INSERT OR IGNORE INTO Door(id, doorNum, rlseTime, bzzrTime, alrmTime) "
-                   "VALUES({}, {}, {}, {}, {})"
-                   "".format(door['id'], door['doorNum'], door['rlseTime'],
-                             door['bzzrTime'], door['alrmTime'])
+            sql = ("INSERT OR IGNORE INTO Door(id, doorNum, snsrType, rlseTime, bzzrTime, alrmTime) "
+                   "VALUES({}, {}, {}, {}, {}, {})"
+                   "".format(door['id'], door['doorNum'], door['snsrType'], 
+                             door['rlseTime'], door['bzzrTime'], door['alrmTime'])
                   )
             self.cursor.execute(sql)
             #self.connection.commit()
@@ -354,11 +355,10 @@ class DataBase(object):
         '''
 
         try:
-            sql = ("UPDATE Door SET doorNum = {}, rlseTime = {}, "
-                   "bzzrTime = {}, alrmTime = {} WHERE id = {}"
-                   "".format(door['doorNum'], door['rlseTime'], 
-                             door['bzzrTime'], door['alrmTime'], 
-                             door['id'])
+            sql = ("UPDATE Door SET doorNum = {}, snsrType = {}, "
+                   "rlseTime = {}, bzzrTime = {}, alrmTime = {} WHERE id = {}"
+                   "".format(door['doorNum'], door['snsrType'], door['rlseTime'], 
+                             door['bzzrTime'], door['alrmTime'], door['id'])
               )
             self.cursor.execute(sql)
             #self.connection.commit()

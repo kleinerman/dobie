@@ -630,7 +630,9 @@ void *state (void *s_args)
             // Read the initial doors state and save them into the third table column
             read(state_tbl[j][1], value, 1);
             lseek(state_tbl[j][1],0,SEEK_SET);
-            state_tbl[j][2] = atoi(value);
+            // saving current state as int and inverted as we want
+            // Normally Opened as 0 and Normally Closed as 1
+            state_tbl[j][2] = !atoi(value);
 
             j++;
 
@@ -650,10 +652,12 @@ void *state (void *s_args)
                     read(state_tbl[j][1], value, 1);
                     lseek(state_tbl[j][1],0,SEEK_SET);
                     
-                    cur_state = atoi(value); // current state (int)
+                    // saving current state as int and inverted as we want
+                    // Normally Opened as 0 and Normally Closed as 1
+                    cur_state = !atoi(value);
 
                     if (cur_state == !state_tbl[j][2]) {
-                        sprintf(message, "%d;0;state=%s", state_tbl[j][0], value);
+                        sprintf(message, "%d;0;state=%d", state_tbl[j][0], cur_state);
                         // put the message into the queue
                         mq_send(args->mq, message, strlen(message), 1); // the '\0' caracter is not sent in the queue
                         printf("%s\n", message);
