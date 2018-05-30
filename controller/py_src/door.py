@@ -19,13 +19,13 @@ class Door(object):
     It also has methods to open and close a door
     '''
 
-    def __init__(self, doorParams):
+    def __init__(self, params):
 
         #Getting the logger
         self.logger = logging.getLogger('Controller')
         
-        self.doorParams = doorParams
-        self.doorId = doorParams['id']
+        self.params = params
+        self.doorId = params['id']
 
 
 
@@ -56,7 +56,7 @@ class Door(object):
         This method release or unrelase the door. For example the magnet of a door.
         '''
         
-        gpioNumber = self.doorParams['rlseOut']
+        gpioNumber = self.params['rlseOut']
 
         #If the corresponding GPIO was not charged in database, "gpioNumber" will
         #be None and the method will print a log.
@@ -76,7 +76,7 @@ class Door(object):
         This method start or stop the buzzer door.
         '''
 
-        gpioNumber = self.doorParams['bzzrOut']
+        gpioNumber = self.params['bzzrOut']
 
         #If the corresponding GPIO was not charged in database, "gpioNumber" will
         #be None and the method will print a log.        
@@ -107,7 +107,7 @@ class CleanerDoorMngr(genmngr.GenericMngr):
 
         #Getting the doorId for logging purpouses. It is got in this way 
         #to avoid passing it in constructor of the class.
-        self.doorId = doorControl['doorObj'].doorParams['id']        
+        self.doorId = doorControl['doorObj'].params['id']
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
@@ -120,8 +120,8 @@ class CleanerDoorMngr(genmngr.GenericMngr):
         self.lockTimeAccessPermit = doorControl['lockTimeAccessPermit']
         #We can't do the following, because datetime type is inmmutable
         #self.timeAccessPermit = doorControl['timeAccessPermit']
-        self.rlseTime = doorControl['doorObj'].doorParams['rlseTime']
-        self.bzzrTime = doorControl['doorObj'].doorParams['bzzrTime']
+        self.rlseTime = doorControl['doorObj'].params['rlseTime']
+        self.bzzrTime = doorControl['doorObj'].params['bzzrTime']
 
 
     def run(self):
@@ -192,7 +192,7 @@ class StarterAlrmMngr(genmngr.GenericMngr):
 
         #Getting the doorId for logging purpouses. It is got in this way 
         #to avoid passing it in constructor of the class.
-        self.doorId = doorControl['doorObj'].doorParams['id']
+        self.doorId = doorControl['doorObj'].params['id']
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
@@ -204,7 +204,7 @@ class StarterAlrmMngr(genmngr.GenericMngr):
         self.lockTimeAccessPermit = doorControl['lockTimeAccessPermit']
         #We can't do the following, because datetime type is inmmutable
         #self.timeAccessPermit = doorControl['timeAccessPermit']
-        self.alrmTime = doorControl['doorObj'].doorParams['alrmTime']
+        self.alrmTime = doorControl['doorObj'].params['alrmTime']
         self.openDoor = doorControl['openDoor']
 
 
@@ -288,8 +288,7 @@ class DoorsControl(object):
         dataBase = database.DataBase(DB_FILE)
 
 
-        #Dictionary indexed by doorId. Each door has a dictionry with all the door parametters indexed
-        #by door parametters names
+        #List with sqlite dictionary objects. Each dictionary has the door parameters
         paramsDoors = dataBase.getParamsDoors()
 
         #The following structure is a dict indexed by the doorNums. Each value is another dict

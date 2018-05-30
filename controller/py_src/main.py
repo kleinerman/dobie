@@ -226,7 +226,7 @@ class Controller(object):
 
     #---------------------------------------------------------------------------#
 
-    def procState(self, doorNum, side, openOrClose):
+    def procState(self, doorNum, side, state):
         '''
         This method is called each time a door change its state. (It is opened or closed)
         '''
@@ -237,11 +237,12 @@ class Controller(object):
                 #"DoorNotConfigured" exception if the door is not confiugred
                 doorId = self.doorsControl.getDoorId(doorNum)
                 doorControl = self.doorsControl.params[doorNum]
+                snsrType = doorControl['doorObj'].params['snsrType']
 
-                #Converting "openOrClose" to int type to evaluete it on if statement
-                openOrClose = int(openOrClose)
+                #Converting "state" to int type to evaluete it on if statement
+                state = int(state)
                 #The state of the door indicates that was opened
-                if openOrClose:
+                if state != snsrType:
                     doorControl['openDoor'].set()
                     #If the door was open in a permitted way
                     if doorControl['accessPermit'].is_set():
