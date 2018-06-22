@@ -148,8 +148,15 @@ ob_start('ob_gzhandler');
 </li>
 </ul>
 </li>
+<?if($logged->name=="admin"){?>
+<li>
+<a href="system-users"><i class="fa fa-lock fa-fw"></i> <?print_text($lang,"System Users","Usuarios de sistema");?></a>
+</li>
+<?}?>
 </ul>
 </div>
+
+
 
 <!-- /.sidebar-collapse -->
 </div>
