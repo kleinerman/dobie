@@ -1,7 +1,6 @@
 <?
 $innerheader=1;
 $requirelogin=0;
-$home_url="organizations";
 
 require_once("config.php");
 //if already logged > redirect

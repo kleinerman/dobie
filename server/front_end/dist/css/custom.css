@@ -193,11 +193,11 @@ label,input[type=checkbox],input[type=radio]{
 	overflow:auto;
 }
 
-#access-table {
+#access-table,#rows-table {
 	width:100%;
 }
 
-#access-table tr:nth-child(n+2){
+#access-table tr:nth-child(n+2),#rows-table tr:nth-child(n+2){
 	cursor:pointer;
 }
 
@@ -205,11 +205,11 @@ label,input[type=checkbox],input[type=radio]{
 	width:30px;
 }
 
-#accesses-table-container{
+#accesses-table-container, #rows-table-container{
 	margin-left:30px;
 }
 
-#access-table, #access-table td, #access-table th {
+#access-table, #access-table td, #access-table th, #rows-table, #rows-table td, #rows-table th {
     border: 1px solid #ddd;
     padding: 5px;
 }

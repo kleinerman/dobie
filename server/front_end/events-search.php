@@ -141,7 +141,8 @@ Until:<br>
 </div>
 </div>
 
-<div class="row" id="legend-row" style="">
+<div id="legend-row" style="display:none">
+<div class="row">
 <div class="col-sm-3">
 <h4>Event Type</h4>
 <span class="fa fa-fw fa-address-card"></span> Identified Access<br>
@@ -165,6 +166,15 @@ Until:<br>
 <h4>Direction</h4>
 <span class="fa fa-fw fa-sign-in"></span> Incoming<br>
 <span class="fa fa-fw fa-sign-out"></span> Outgoing<br>
+</div>
+
+</div>
+
+<div class="row">
+<div class="col-sm-12">
+<br>
+* Persons in red were deleted or they are visitors that left the building.
+</div>
 </div>
 
 </div>
@@ -319,8 +329,11 @@ function buildEventTable(data){
 		if(data[i].personName === null) data[i].personName="";
 		//init date variable for date prints
 		var dateobj = new Date(data[i].dateTime);
+		//set red row if event belongs to a deleted user
+		if(data[i].personDeleted==1) var rowclass=" todel";
+		else var rowclass="";
 		//build row
-		ret_string+="<tr><td class=\"center\">"+ get_icon(data[i].eventTypeId,"type") +"</td><td>"+ data[i].zoneName +"</td><td>"+ data[i].doorName +"</td><td class=\"center\">"+ get_icon(data[i].doorLockId,"doorlock") +"</td><td class=\"center\">"+ get_icon(data[i].side,"side") +"</td><td>"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td>"+ data[i].orgName +"</td><td>"+ data[i].personName +"</td><td class=\"center\">"+ get_icon(data[i].allowed,"allowed") +"</td><td class=\"center\">"+ get_icon(data[i].denialCauseId,"denialcause") +"</td></tr>";
+		ret_string+="<tr"+rowclass+"><td class=\"center\">"+ get_icon(data[i].eventTypeId,"type") +"</td><td>"+ data[i].zoneName +"</td><td>"+ data[i].doorName +"</td><td class=\"center\">"+ get_icon(data[i].doorLockId,"doorlock") +"</td><td class=\"center\">"+ get_icon(data[i].side,"side") +"</td><td>"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td>"+ data[i].orgName +"</td><td>"+ data[i].personName +"</td><td class=\"center\">"+ get_icon(data[i].allowed,"allowed") +"</td><td class=\"center\">"+ get_icon(data[i].denialCauseId,"denialcause") +"</td></tr>";
 	}
 
 	ret_string+="</table>";

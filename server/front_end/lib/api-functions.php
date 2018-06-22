@@ -822,12 +822,70 @@ function delete_controller($user,$pass,$id){
 	else return $response->data;
 }
 
+//System Users
+function get_users($user,$pass){
+	global $config;
+	$response=send_request($config->api_fullpath."user",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function get_roles($user,$pass){
+	global $config;
+	$response=send_request($config->api_fullpath."role",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function get_user($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."user/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function delete_user($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."user/$id",$user,$pass,"delete");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function set_user($user,$pass,$id,$fullname,$username,$password,$roleid,$active){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->passwd= $password;
+	//if editing admin, only password allowed
+	if($id!=1){
+		$payload_obj->fullName= $fullname;
+		$payload_obj->username= $username;
+		$payload_obj->roleId= $roleid;
+		$payload_obj->active= $active;
+	}
+	$response=send_request($config->api_fullpath."user/$id",$user,$pass,"put",json_encode($payload_obj));
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function add_user($user,$pass,$fullname,$username,$password,$roleid,$active){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->fullName= $fullname;
+	$payload_obj->username= $username;
+	$payload_obj->passwd= $password;
+	$payload_obj->roleId= $roleid;
+	$payload_obj->active= $active;
+	$response=send_request($config->api_fullpath."user",$user,$pass,"post",json_encode($payload_obj));
+	if($response->response_status != "201") return false;
+	else return $response->data;
+}
+
 if($DEBUG){
 	//$res=get_organizations("admin","admin");
 	//$res=do_auth("admin","admin");
 	//$res=get_organizations("admin","admin",2);
 	//$res=get_person_accesses("admin","admin",18);
-	$res=get_access("admin","admin",10);
+	//$res=get_access("admin","admin",10);
 	//$res=add_person("admin","admin","7","Ricky Martin","",123132);
 	//$res=get_door_accesses("admin","admin",5);
 //	$res=get_zones("admin","admin");
@@ -863,6 +921,8 @@ if($DEBUG){
 	//$res=get_controllers("admin","admin");
 //	$res=get_controller("admin","admin",3);
 	//$res=get_controller_models("admin","admin");
+	//$res=get_users("admin","admin");
+	//$res=get_roles("admin","admin");
 
 	echo "<pre>";
 	var_dump($res);

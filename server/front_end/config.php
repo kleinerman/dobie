@@ -42,6 +42,7 @@ $logged=new stdClass();
 //check if requires login
 $requirelogin = !isset($requirelogin) ? 1 : $requirelogin;
 $lang="en";
+$home_url="organizations";
 
 //get user record and info if logged
 if($islogged){
