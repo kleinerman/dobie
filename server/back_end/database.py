@@ -663,14 +663,22 @@ class DataBase(object):
         '''
         Receive a dictionary with user parametters and update it in DB
         '''
-
-        passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
-
-        sql = ("UPDATE User SET username = '{}', passwdHash = '{}', "
-               "fullName = '{}', roleId = {}, active = {} WHERE id = {}"
-               "".format(user['username'], passwdHash, user['fullName'], 
-                         user['roleId'], user['active'], user['id'])
-              )
+        try:
+            passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
+            sql = ("UPDATE User SET username = '{}', passwdHash = '{}', "
+                   "fullName = '{}', roleId = {}, active = {} WHERE id = {}"
+                   "".format(user['username'], passwdHash, user['fullName'], 
+                             user['roleId'], user['active'], user['id'])
+                  )
+        #This exception could happen if the front end is not sending 
+        #the password. In this situation, the SQL sentence shouldn't 
+        #update the password 
+        except KeyError:
+            sql = ("UPDATE User SET username = '{}',fullName = '{}', "
+                   "roleId = {}, active = {} WHERE id = {}"
+                   "".format(user['username'], user['fullName'],
+                             user['roleId'], user['active'], user['id'])
+                  )
 
         try:
             self.execute(sql)
