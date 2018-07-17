@@ -277,8 +277,14 @@ class CrudMngr(genmngr.GenericMngr):
                     user = {}
                     user['id'] = userId
                     for param in userNeedKeys:
-                        user[param] = request.json[param]
-
+                        #If the frontend doesn't send passwd param, keep the old
+                        #passwd. If frontend doesn't send any other required param,
+                        #re-raise the exception.
+                        try:
+                            user[param] = request.json[param]
+                        except KeyError:
+                            if param != 'passwd':
+                                raise
 
                     if user['id'] == 1 and (user['username'] != 'admin' or
                        user['fullName'] != 'Administrator' or
@@ -305,6 +311,11 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
+                #As passwd is not mandatory for PUT, removing it from 
+                #userNeedKeys to log the error message
+                if request.method == 'PUT':
+                    userNeedKeysForPut = [param for param in userNeedKeys if param != 'passwd']
+                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(userNeedKeysForPut)))
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(userNeedKeys)))
 
 
@@ -1180,7 +1191,7 @@ class CrudMngr(genmngr.GenericMngr):
                     # Also a KeyError wil be raised if the client misses any parameter.
                     door = {}
                     door['id'] = doorId
-                    for param in [key for key in doorNeedKeys if key != 'controllerId']:
+                    for param in [param for param in doorNeedKeys if param != 'controllerId']:
                         door[param] = request.json[param]
                     self.dataBase.updDoor(door)
                     door.pop('name')
