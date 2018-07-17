@@ -3657,6 +3657,18 @@ The following REST method should be sent to the server:
   {"username": "msuarez", "passwd": "p4ssw3rd", "fullName": "Marc Shuar", "roleId": 3, "active": 0}
   
 
+
+**Note**: If the user doesn't fill the password field, the JSON shouldn't have this field, and the old password will be kept
+
+
+**JSON**
+
+.. code-block::
+
+  {"username": "msuarez", "fullName": "Marc Shuar", "roleId": 3, "active": 0}
+
+
+
 **Response:**
 
 .. code-block::
