@@ -143,31 +143,34 @@ class DataBase(object):
         '''
         Save events in database when no connection to server.
         '''
+        #Asking in the way "if a == None" instead of "if a"
+        #to avoid converting to NULL when a == 0
 
-        if event['personId']:
-            personId = event['personId']
-        else:
+        if event['personId'] == None:
             personId = 'NULL'
-
-        if event['side']:
-            side = event['side']
         else:
+            personId = event['personId']
+
+        if event['side'] == None:
             side = 'NULL'
-
-        if event['allowed']:
-            allowed = int(event['allowed'])
         else:
+            side = event['side']
+
+        if event['allowed'] == None:
             allowed = 'NULL'
-
-        if event['denialCauseId']:
-            denialCauseId = event['denialCauseId']
         else:
+            #As allowed is Bool, it should be converted to int
+            allowed = int(event['allowed'])
+
+        if event['denialCauseId'] == None:
             denialCauseId = 'NULL'
-
-        if event['doorLockId']:
-            doorLockId = event['doorLockId']
         else:
+            denialCauseId = event['denialCauseId']
+
+        if event['doorLockId'] == None:
             doorLockId = 'NULL'
+        else:
+            doorLockId = event['doorLockId']
 
             
 
