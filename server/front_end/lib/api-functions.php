@@ -53,8 +53,15 @@ function send_request($url,$username,$password,$method="get",$payload="{}"){
 function do_auth($user,$pass){
 	global $config;
 	$response=send_request($config->api_fullpath."login",$user,$pass);
-	//error_log(grab_dump($response));
 	return (isset($response->response_status) and $response->response_status=="200");
+}
+
+// Front end auth returning user info
+function do_auth_user($user,$pass){
+	global $config;
+	$response=send_request($config->api_fullpath."login",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
 }
 
 
@@ -854,8 +861,8 @@ function delete_user($user,$pass,$id){
 function set_user($user,$pass,$id,$fullname,$username,$password,$roleid,$active){
 	global $config;
 	$payload_obj = new stdClass();
-	$payload_obj->passwd= $password;
-	//if editing admin, only password allowed
+	if($password!="") $payload_obj->passwd= $password;
+	//if admin, skip the other values
 	if($id!=1){
 		$payload_obj->fullName= $fullname;
 		$payload_obj->username= $username;
@@ -923,7 +930,8 @@ if($DEBUG){
 	//$res=get_controller_models("admin","admin");
 	//$res=get_users("admin","admin");
 	//$res=get_roles("admin","admin");
-
+	//$res=do_auth_user("admin","admin");
+	$res=set_user("admin","admin",1,"Administrator","admin","admin2",1,1);
 	echo "<pre>";
 	var_dump($res);
 }

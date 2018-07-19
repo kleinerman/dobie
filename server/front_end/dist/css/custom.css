@@ -174,15 +174,15 @@ label,input[type=checkbox],input[type=radio]{
 }
 
 .toadd{
-	background:#afa;
+	background:#afa !important;
 }
 
 .toupd{
-	background:#ffa;
+	background:#ffa !important;
 }
 
 .todel{
-	background:#faa;
+	background:#faa !important;
 }
 
 /*accesses*/

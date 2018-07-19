@@ -1,10 +1,14 @@
 <?
 require_once("config.php");
 
+//if login required
 if(isset($requirelogin) and $requirelogin and !$islogged) {
 	redirect_to("logout",1);
-	//echo "not logged";
-	//die();
+}
+
+//if section role is required
+if($islogged and isset($requirerole) and $requirerole<$logged->roleid){
+	redirect_to($home_url,1);
 }
 
 header("Content-type:text/html; charset=utf-8");
@@ -122,6 +126,7 @@ ob_start('ob_gzhandler');
 </li>
 </ul>
 </li>
+<?if($logged->roleid<3){?>
 <li>
 <a href="organizations"><i class="fa fa-sitemap fa-fw"></i> <?print_text($lang,"Organizations","Organizaciones");?></a>
 </li>
@@ -148,15 +153,14 @@ ob_start('ob_gzhandler');
 </li>
 </ul>
 </li>
-<?if($logged->name=="admin"){?>
+<?if($logged->roleid==1){?>
 <li>
 <a href="system-users"><i class="fa fa-lock fa-fw"></i> <?print_text($lang,"System Users","Usuarios de sistema");?></a>
 </li>
 <?}?>
+<?}?>
 </ul>
 </div>
-
-
 
 <!-- /.sidebar-collapse -->
 </div>
