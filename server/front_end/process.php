@@ -421,7 +421,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				if($zones_rec){
 					//return record
 					array_push($ret,1,$zones_rec);
-				} else array_push($ret,0,"Zones could not be retrieved");
+				} else array_push($ret,0,"Zones not found");
 			}
 		break;
 		case "edit_zone":
@@ -616,7 +616,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 					if($vdg_rec){
 						//return record
 						array_push($ret,1,$vdg_rec);
-					} else array_push($ret,0,"Visit door group doors could not be retrieved");
+					} else array_push($ret,0,"Visit door group doors could not found");
 				}
 			}
 		break;

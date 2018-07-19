@@ -14,20 +14,22 @@ if(isset($_POST['username'])){
 	$username= trim($_POST['username']);
 	$password= trim($_POST['password']);
 
-	if(do_auth($username,$password)){
-		//register _SESSION
-		$_SESSION[$config->sesskey] =  $username;
-		require_once("lib/EnDecryptText.php");
-		$EnDecryptText = new EnDecryptText();
-		$passw_enc = $EnDecryptText->Encrypt_Text($password);
-		$_SESSION[$config->sesskey."pw"] = $passw_enc;
-		//create cookie
-		setcookie($config->sesskeycookiename, $passw_enc ."|". $username."|".md5($_SERVER["HTTP_USER_AGENT"]), time() + $config->cookie_lifetime);
-		//redirect to main page
-		//header("Location: events-live");
-		header("Location: $home_url");
-//		echo "login success!";
-//		die();
+	if($user_obj=do_auth_user($username,$password)){
+		if($user_obj->active==1){
+			//register _SESSION
+			$_SESSION[$config->sesskey] = $username;
+			require_once("lib/EnDecryptText.php");
+			$EnDecryptText = new EnDecryptText();
+			$passw_enc = $EnDecryptText->Encrypt_Text($password);
+			$_SESSION[$config->sesskey."pw"] = $passw_enc;
+			$roleid_enc=$EnDecryptText->Encrypt_Text($user_obj->roleId);
+			$_SESSION[$config->sesskey."rl"] = $roleid_enc;
+			//create cookie
+			setcookie($config->sesskeycookiename, $passw_enc ."|". $roleid_enc ."|".  $username."|".md5($_SERVER["HTTP_USER_AGENT"]), time() + $config->cookie_lifetime);
+			//redirect to main page
+			header("Location: $home_url");
+			die();
+		} else $error_catch['username'] = "This user is disabled. Contact the administrator";
 	} else {
 		$error_catch['username'] = "Invalid login";
 	}

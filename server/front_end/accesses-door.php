@@ -1,5 +1,6 @@
 <?
 $leavebodyopen=1;
+$requirerole=2;
 include("header.php");
 ?>
 <div id="page-wrapper">

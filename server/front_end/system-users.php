@@ -1,12 +1,9 @@
 <?
 $leavebodyopen=1;
+$requirerole=1;
 include("header.php");
+?>
 
-if($logged->name!="admin"){?>
-<script>
-document.location.href="<?=$home_url?>";
-</script>
-<?} else {?>
 <div id="page-wrapper">
 
 <div class="row">
@@ -67,13 +64,13 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2">Password:</label>
  <div class="col-sm-10">
-      <input type="password" class="form-control" id="user-new-password" name="password" required value="">
+      <input type="password" class="form-control" id="user-new-password" name="password" value="">
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2">Confirm Password:</label>
  <div class="col-sm-10">
-      <input type="password" class="form-control" id="user-new-cpassword" name="cpassword" required value="">
+      <input type="password" class="form-control" id="user-new-cpassword" name="cpassword" value="">
  </div>
 </div>
 <div class="form-group">
@@ -150,7 +147,6 @@ $(function(){
 			if(resp[0]=='1'){
 				var values = resp[1];
 				//copy values into roleText array
-				//$.each(values,function(k,v){ roleText[v.id]=v.description; });
 				values.forEach(function(item,index){roleText[item.id]=item.description;});
 			} else {
 				//assign default values
@@ -168,7 +164,6 @@ $(function(){
 	});
 });
 
-//TODO: adapt accesses scripts to use this function instead
 function tableClickEvents2(){
 	//clickable rows for editable tables
 	$("#rows-table tr td:nth-child(n+2)").click(function(){
@@ -243,6 +238,25 @@ function populateTable(tableId){
 	});
 }
 
+function resetForm(){
+	//clear text fields
+	$("#user-new-name,#user-new-fullname,#user-new-password,#user-new-cpassword").val("");
+	//unselect options in fixed selects
+	$('#user-new-role').empty();
+	//populate role select
+	roleText.forEach(function(item,index){$('#user-new-role').append("<option value='"+index+"'>"+item+"</option>");});
+	//clear checkboxes
+	$('#user-new-active').prop("checked",true);
+	//clear id value if edit
+	editId=0;
+	//enable fields in case admin has been editing
+	$('#user-new-name,#user-new-fullname,#user-new-role,#user-new-active').prop("disabled",false);
+	//clear placeholder on passw fields
+	$('#user-new-password,#user-new-cpassword').prop("placeholder","");
+	//set passw fields to required
+	$('#user-new-password,#user-new-cpassword').prop("required",true);
+}
+
 //filter for tables
 $(".data-filter-table").keyup(function(){
 	var rows=$("#"+$(this).data("filter") + " tr:nth-child(n+2)");
@@ -253,29 +267,14 @@ $(".data-filter-table").keyup(function(){
 	})
 });
 
-//fetch info for new
 $('#modal-new').on('show.bs.modal', function (event){
 	//clear all previous values
 	resetForm();
 });
 
-function resetForm(){
-	//clear text fields
-	$("#user-new-name,#user-new-fullname,#user-new-password,#user-new-cpassword").val("");
-	//unselect options in fixed selects
-	$('#user-new-role').empty();
-	//populate role select
-	//$.each(roleText,function(k,v){$('#user-new-role').append("<option value='"+k+"'>"+v+"</option>");});
-	roleText.forEach(function(item,index){$('#user-new-role').append("<option value='"+index+"'>"+item+"</option>");});
-	//clear checkboxes
-	$('#user-new-active').prop("checked",true);
-	//clear id value if edit
-	editId=0;
-	//modal title
-	$("#modal-new-label").text("New User");
-	//enable fields in case admin has been editing
-	$('#user-new-name,#user-new-fullname,#user-new-role,#user-new-active').prop("disabled",false);
-}
+$("#rows-new").click(function(){
+	$("#modal-new-label").text("New System User");
+});
 
 //fetch info for edit
 $("#rows-edit").click(function(){
@@ -306,6 +305,10 @@ $("#rows-edit").click(function(){
 				if(userId==1){
 					$('#user-new-name,#user-new-fullname,#user-new-role,#user-new-active').prop("disabled",true);
 				}
+				//set placeholder on passw fields
+				$('#user-new-password,#user-new-cpassword').prop("placeholder","****");
+				//disabled required on passw fields
+				$('#user-new-password,#user-new-cpassword').prop("required",false);
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
@@ -333,16 +336,15 @@ $("#user-new-form").submit(function(){
 
 	if(editId!=0 && !isNaN(editId)) action_str="action=edit_user&id=" + editId;
 	else action_str="action=add_user";
-	
+
 	action_str+= "&fullname=" + userFullName + "&username=" + userName + "&password=" + userPassword + "&roleid=" + userRole + "&active=" + userActive;
 
-	//TODO: force validation admin user edit
 	if(userPassword!=userCPassword){
 		errorTxt="Password and confirmation don't match";
 	} else if(isNaN(userRole)){
 		errorTxt="Invalid role sent";
-	} else if(userFullName=="" || userName=="" || userPassword==""){
-		errorTxt="Invalid values sent";
+	} else if(userFullName=="" || userName=="" || (userPassword=="" && editId==0)){
+		errorTxt="Please fill all required fields";
 	} else {
 		$.ajax({
 			type: "POST",
@@ -418,6 +420,5 @@ $("#user-delete-form").submit(function(){
 });
 </script>
 
-<?}?>
 </body>
 </html>
