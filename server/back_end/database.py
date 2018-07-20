@@ -664,21 +664,37 @@ class DataBase(object):
         Receive a dictionary with user parametters and update it in DB
         '''
         try:
-            passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
-            sql = ("UPDATE User SET username = '{}', passwdHash = '{}', "
-                   "fullName = '{}', roleId = {}, active = {} WHERE id = {}"
-                   "".format(user['username'], passwdHash, user['fullName'], 
-                             user['roleId'], user['active'], user['id'])
-                  )
-        #This exception could happen if the front end is not sending 
-        #the password. In this situation, the SQL sentence shouldn't 
-        #update the password 
+            setUsername = ", username = '{}'".format(user['username'])
         except KeyError:
-            sql = ("UPDATE User SET username = '{}',fullName = '{}', "
-                   "roleId = {}, active = {} WHERE id = {}"
-                   "".format(user['username'], user['fullName'],
-                             user['roleId'], user['active'], user['id'])
-                  )
+            setUsername = ""
+
+        try:
+            passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
+            setPasswdHash = ", passwdHash = '{}'".format(passwdHash)
+        except KeyError:
+            setPasswdHash = ""
+
+        try:
+            setFullName = ", fullName = '{}'".format(user['fullName'])
+        except KeyError:
+            setFullName = ""
+        
+        try:
+            setRoleId = ", roleId = {}".format(user['roleId'])
+        except KeyError:
+            setRoleId = ""
+
+        try:
+            setActive = ", active = {}".format(user['active'])
+        except KeyError:
+            setActive = ""
+
+
+
+        sql = ("UPDATE User SET id = {}{}{}{}{}{} WHERE id = {}"
+               "".format(user['id'], setUsername, setPasswdHash, 
+                         setFullName, setRoleId, setActive, user['id'])
+              )
 
         try:
             self.execute(sql)
