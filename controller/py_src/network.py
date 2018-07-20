@@ -154,12 +154,20 @@ class NetMngr(genmngr.GenericMngr):
                     self.netPoller.modify(self.srvSock, select.POLLOUT)
                     #Unblocking the "netMngr" thread from the "poll()" method.
                     self.unblocker.unblock()
-                except FileNotFoundError:
+                except (FileNotFoundError, ValueError) as sendError:
+                    #FileNotFoundError:
                     #This exception could happen if it is received a null byte (b'')
                     #in POLLIN evnt, the socket is closed and "eventMngr" calls this
                     #method before POLLNVAL evnt happens to clean "self.connected".
-                    #(Not sure if this can occur)                    
+                    #(Not sure if this can occur)
+                    #ValueError:
+                    #This exception happened after to much time without sending nothing
+                    #between server and controller. On this situation, when trying to 
+                    #call self.netPoller.modify(), file descriptor cannot be a negative 
+                    #integer will be the error.
                     self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
+                    #When any of above exception happen, the outBufferQue should be cleaned.
+                    self.outBufferQue.queue.clear()
 
         else:
             self.logger.debug('Can not send message, server is disconnected.')
