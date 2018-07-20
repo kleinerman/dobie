@@ -11,7 +11,7 @@ fi
 
 #curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 1", "ctrllerModelId": 1, "macAddress": "b827eba30655"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 1", "ctrllerModelId": 1, "macAddress": "b827eb2c3abd"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 1", "ctrllerModelId": 1, "macAddress": "b827eb437bac"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 2", "ctrllerModelId": 1, "macAddress": "b827eb277791"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
 
 

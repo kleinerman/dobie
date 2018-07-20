@@ -277,20 +277,20 @@ class CrudMngr(genmngr.GenericMngr):
                     user = {}
                     user['id'] = userId
                     for param in userNeedKeys:
-                        #If the frontend doesn't send passwd param, keep the old
-                        #passwd. If frontend doesn't send any other required param,
-                        #re-raise the exception.
+                        #If the frontend doesn't send some of the parameters, keep the old ones
                         try:
                             user[param] = request.json[param]
                         except KeyError:
-                            if param != 'passwd':
-                                raise
+                            pass
 
-                    if user['id'] == 1 and (user['username'] != 'admin' or
-                       user['fullName'] != 'Administrator' or
-                       user['roleId'] != 1 or
-                       user['active'] != 1):
-                        raise database.UserError
+                    #If the user is the admin main user, doesn't modify nothing except the
+                    #passwd if the front end sent it. The second argument of pop is to
+                    #return None as default value when the key is not in the dictionary.
+                    if user['id'] == 1:
+                        user.pop('username', None)
+                        user.pop('fullName', None)
+                        user.pop('roleId', None)
+                        user.pop('active', None)
 
                     self.dataBase.updUser(user)
                     return jsonify({'status': 'OK', 'message': 'User updated'}), OK
@@ -311,12 +311,7 @@ class CrudMngr(genmngr.GenericMngr):
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
-                #As passwd is not mandatory for PUT, removing it from 
-                #userNeedKeys to log the error message
-                if request.method == 'PUT':
-                    userNeedKeysForPut = [param for param in userNeedKeys if param != 'passwd']
-                    raise BadRequest('Invalid request. Missing: {}'.format(', '.join(userNeedKeysForPut)))
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(userNeedKeys)))
+                raise BadRequest('Invalid request.')
 
 
 
