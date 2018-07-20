@@ -421,7 +421,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				if($zones_rec){
 					//return record
 					array_push($ret,1,$zones_rec);
-				} else array_push($ret,0,"Zones could not be retrieved");
+				} else array_push($ret,0,"Zones not found");
 			}
 		break;
 		case "edit_zone":
@@ -616,7 +616,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 					if($vdg_rec){
 						//return record
 						array_push($ret,1,$vdg_rec);
-					} else array_push($ret,0,"Visit door group doors could not be retrieved");
+					} else array_push($ret,0,"Visit door group doors could not found");
 				}
 			}
 		break;
@@ -738,7 +738,90 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,"Controller could not be deleted");
 			}
 		break;
-		
+
+		case "get_user":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$user_id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($user_id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$user_rec = get_user($logged->name, $logged->pw,$user_id);
+					if($user_rec){
+						//return record
+						array_push($ret,1,$user_rec);
+					} else array_push($ret,0,"User could not be retrieved");
+				}
+			}
+		break;
+		case "get_users":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				//get record
+				$users_rec = get_users($logged->name, $logged->pw);
+				if($users_rec){
+					//return record
+					array_push($ret,1,$users_rec);
+				} else array_push($ret,0,"Users not found");
+			}
+		break;
+		case "edit_user":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				$fullname = isset($_POST['fullname']) ? $_POST['fullname'] : "";
+				$username = isset($_POST['username']) ? $_POST['username'] : "";
+				$password = isset($_POST['password']) ? $_POST['password'] : "";
+				$roleid = (isset($_POST['roleid']) and is_numeric($_POST['roleid'])) ? $_POST['roleid'] : "";
+				$active = (isset($_POST['active']) and is_numeric($_POST['active'])) ? $_POST['active'] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+	    			else {
+					$users_rec = set_user($logged->name, $logged->pw,$id, $fullname, $username, $password, $roleid, $active);
+
+					if($users_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"User could not be updated");
+				}
+			}
+		break;
+		case "add_user":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$fullname = isset($_POST['fullname']) ? $_POST['fullname'] : "";
+				$username = isset($_POST['username']) ? $_POST['username'] : "";
+				$password = isset($_POST['password']) ? $_POST['password'] : "";
+				$roleid = (isset($_POST['roleid']) and is_numeric($_POST['roleid'])) ? $_POST['roleid'] : "";
+				$active = (isset($_POST['active']) and is_numeric($_POST['active'])) ? $_POST['active'] : "";
+
+				$users_rec = add_user($logged->name, $logged->pw, $fullname, $username,$password, $roleid, $active);
+
+				if($users_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"User could not be added");
+			}
+		break;
+		case "delete_user":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$users_rec = delete_user($logged->name,$logged->pw, $id);
+
+				if($users_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"User could not be deleted");
+			}
+		break;
+		case "get_roles":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				//get record
+				$roles_rec = get_roles($logged->name, $logged->pw);
+				if($roles_rec){
+					//return record
+					array_push($ret,1,$roles_rec);
+				} else array_push($ret,0,"Roles not found");
+			}
+		break;
 		default:
 			array_push($ret,0,"Operation not defined"); //send out error
 		break;

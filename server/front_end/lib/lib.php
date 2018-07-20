@@ -44,10 +44,11 @@ function persistsession(){
 	if(!$has_session and $has_cookie){
 		//perform login from cookie
 		$cookieparts=explode("|",$_COOKIE[$config->sesskeycookiename]);
-		//cookie should contain md5(md5(password))|username|md5(http_user_agent)
-		if(count($cookieparts)==3){
-			$remoteuseragent= trim($cookieparts[2]);
-			$username= trim($cookieparts[1]);
+		//cookie should contain encrypt(password)|encrypt(roleid)|username|md5(http_user_agent)
+		if(count($cookieparts)==4){
+			$remoteuseragent= trim($cookieparts[3]);
+			$username= trim($cookieparts[2]);
+			$roleid_enc= trim($cookieparts[1]);
 			$password= trim($cookieparts[0]);
 			require_once("EnDecryptText.php");
 			$EnDecryptText = new EnDecryptText();
@@ -57,6 +58,7 @@ function persistsession(){
 		      		//restore session
 		      		$_SESSION[$config->sesskey] = $username;
 		      		$_SESSION[$config->sesskey."pw"] = $password;
+		      		$_SESSION[$config->sesskey."rl"] = $EnDecryptText->Decrypt_Text($roleid_enc);
 			} else {
 				//destroy cookies
 				setcookie($config->sesskeycookiename, "", time() - $config->cookie_lifetime);

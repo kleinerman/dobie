@@ -1,5 +1,6 @@
 <?
 $leavebodyopen=1;
+$requirerole=2;
 include("header.php");
 ?>
 <div id="page-wrapper">
@@ -81,6 +82,7 @@ include("footer.php");
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
+Deleting this controller will remove all doors and accesses that belong to it.<br>
 Are you sure?
 </div>
 <div class="modal-footer center">

@@ -8,6 +8,9 @@ $config->tableprefix="";
 $wwwroot = "/";
 $config->wwwroot = $wwwroot;
 
+$lang="en";
+$home_url="events-search";
+
 //api config
 $config->api_protocol="http";
 $config->api_hostname="backend";
@@ -41,7 +44,6 @@ $islogged = (isset($_SESSION[$config->sesskey])) ? 1 : 0;
 $logged=new stdClass();
 //check if requires login
 $requirelogin = !isset($requirelogin) ? 1 : $requirelogin;
-$lang="en";
 
 //get user record and info if logged
 if($islogged){
@@ -49,6 +51,20 @@ if($islogged){
 	$EnDecryptText = new EnDecryptText();
 	$logged->name=$_SESSION[$config->sesskey];
 	$logged->pw=$EnDecryptText->Decrypt_Text($_SESSION[$config->sesskey."pw"]);
+	$logged->roleid=$EnDecryptText->Decrypt_Text($_SESSION[$config->sesskey."rl"]);
+	if($requirelogin){
+		//check if its logged and does not authenticates >> logout
+		if(!do_auth($logged->name,$logged->pw)){
+			//destroy cookies
+			setcookie($config->sesskeycookiename, "", time() - $config->cookie_lifetime);
+			//destroy session
+			//session_start();
+			session_unset();
+			session_destroy();
+			header("Location:$config->wwwroot");
+			die();
+		}
+	}
 } else {
 	if($requirelogin){
 		//page requested doesnt allow unlogged users > logout
