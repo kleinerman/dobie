@@ -1,6 +1,7 @@
 <?
 $leavebodyopen=1;
 $innerheader=1;
+$requirerole=2;
 $include_extra_js=array("clockpicker","datepicker");
 
 //get access ID or create mode
