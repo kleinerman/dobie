@@ -1921,6 +1921,8 @@ When all the filters are applied and search button is pressed a pop up window wi
 
 .. image:: images_front_end_specs/events_report.png
 
+A button at the top will allow to export all pages of the result as a .csv file
+
 
 Visits
 ------
