@@ -149,7 +149,7 @@ class NetMngr(genmngr.GenericMngr):
             self.netToMsgRec.put(msg)
 
 
-        elif msg.startswith(RCUD):
+        elif msg.startswith(RCUD) or msg.startswith(KAL):
             #When a response from an update or delete person is received, it is
             #necessary to know the controller which send that response. For this
             #reason, the MAC is inserted in the json dictionary.
