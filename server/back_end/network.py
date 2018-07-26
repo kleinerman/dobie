@@ -149,7 +149,7 @@ class NetMngr(genmngr.GenericMngr):
             self.netToMsgRec.put(msg)
 
 
-        elif msg.startswith(RCUD) or msg.startswith(KAL):
+        elif msg.startswith(RCUD):
             #When a response from an update or delete person is received, it is
             #necessary to know the controller which send that response. For this
             #reason, the MAC is inserted in the json dictionary.
@@ -161,6 +161,8 @@ class NetMngr(genmngr.GenericMngr):
                        )
             self.netToMsgRec.put(msg)
 
+        elif msg.startswith(KAL):
+            self.netToMsgRec.put(bytes([msg[0]]) + self.fdConnObjects[fd]['mac'].encode('utf8') + bytes([msg[1]]))
 
         elif msg.startswith(RRRE):
             self.netToCrudReSndr.put(self.fdConnObjects[fd]['mac'])
