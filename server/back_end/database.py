@@ -1697,6 +1697,36 @@ class DataBase(object):
 
 
 
+
+    def aliveController(self, ctrllerMac):
+        '''
+        '''
+
+        dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        sql = ("UPDATE Controller SET lastSeen = '{}', reachable = 1 WHERE "
+               "macAddress = '{}'".format(dateTime, ctrllerMac)
+              )
+
+
+        try:
+            self.execute(sql)
+            if self.cursor.rowcount < 1: #I think it has no sense on updates
+                raise ControllerNotFound('Can not update this controller for aliveness tracking')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ControllerError('Can not update this controller for aliveness tracking')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not update this controller for aliveness tracking')
+
+
+
+
+
+
+
 #----------------------------------Door----------------------------------------
 
 
