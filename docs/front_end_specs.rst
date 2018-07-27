@@ -2608,7 +2608,7 @@ The following REST method should be sent to the server:
 Controllers
 -----------
 
-This screen is used to add, edit or delete the controllers in the system:
+This screen is used to add, edit, reprogram or delete the controllers in the system:
 
 .. image:: images_front_end_specs/controller.png
 
@@ -2630,6 +2630,7 @@ To get from the server the current list of controllers, the following REST metho
 
 .. code-block::
 
+
   HTTP/1.0 200 OK
   Content-Type: application/json
   Content-Length: 417
@@ -2646,17 +2647,75 @@ To get from the server the current list of controllers, the following REST metho
       "id": 1, 
       "macAddress": "b827eb2c3abd", 
       "name": "Controladora 1", 
+      "lastSeen":"2018-07-26 19:33:55",
+      "reachable":1,
       "uri": "http://localhost:5000/api/v1.0/controller/1"
     }, 
+    {
+      "availDoors": [
+        1
+      ], 
+      "ctrllerModelId": 1, 
+      "id": 2, 
+      "macAddress": "b827eb277791", 
+      "name": "Controladora 2", 
+      "lastSeen":"2017-07-26 19:33:55",
+      "reachable":0,
+      "uri": "http://localhost:5000/api/v1.0/controller/2"
+    }
     {
       "availDoors": [], 
       "ctrllerModelId": 1, 
       "id": 2, 
       "macAddress": "b827eb277791", 
       "name": "Controladora 2", 
+      "lastSeen": null,
+      "reachable":null,
       "uri": "http://localhost:5000/api/v1.0/controller/2"
     }
   ]
+
+
+Reprogram a controller
+~~~~~~~~~~~~~~~~~~~~~~
+
+If a controller is replaced or it lost the doors, persons or/and the accesses, it can be reprovisioned, downloading all the configuration from the server to it.
+From the previous list, the controller to be reprovisioned, should be selected and the reprogram button should be pressed.
+The following method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/controller/2/reprov
+
+
+**Response:**
+
+if the response is 200 OK, a message should inform that the reprogramming of the controllers was successful.
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 157
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Mon, 12 Mar 2018 19:03:33 GMT
+
+
+
+if the response is 404 NOT FOUND, a message should inform that the reprogramming wasn't successful because the controller is not reachable.
+
+.. code-block::
+
+
+  HTTP/1.1 404 NOT FOUND
+  Content-Type: application/json
+  Content-Length: 95
+  Date: Fri, 27 Jul 2018 19:19:42 GMT
+
 
 
 
@@ -2687,6 +2746,8 @@ Get one controller
     "id": 2, 
     "macAddress": "b827eb277791", 
     "name": "Controladora 2", 
+    "lastSeen":"2017-07-26 19:33:55",
+    "reachable":0,    
     "uri": "http://localhost:5000/api/v1.0/controller/2"
   }
 
@@ -2695,7 +2756,13 @@ Get one controller
 Add Controller
 ~~~~~~~~~~~~~~
 
-When the **new** button is pressed the right window of the above screen will appear. On this window the user should set a name for the controller, the model of the controller and the MAC address of the wired interfaz of the controller.
+When the **new** button is pressed the following windows should appear:
+
+
+.. image:: images_front_end_specs/add_controller.png
+
+
+On this window the user should set a name for the controller, the model of the controller and the MAC address of the wired interfaz of the controller.
 
 To get all the models available in the system, the following method should be sent:
 
