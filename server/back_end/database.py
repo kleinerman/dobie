@@ -1416,6 +1416,10 @@ class DataBase(object):
             #Adding the avialDoors list to the controller dictionary
             controller['availDoors'] = availDoors
 
+            #Formatting lastSeen field
+            if controller['lastSeen']:
+                controller['lastSeen'] = controller['lastSeen'].strftime('%Y-%m-%d %H:%M:%S')
+
             return controller
 
 
