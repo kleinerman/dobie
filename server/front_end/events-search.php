@@ -114,14 +114,22 @@ Until:<br>
 </div>
 
 <div class="row" id="search-again-row" style="display:none">
-<div class="col-sm-12">
+<div class="col-sm-6">
 
-<div class="alert alert-warning clickable left">
+<div class="alert alert-warning clickable left" id="search-again-button">
 <span class="fa fa-chevron-left"></span> Go back to search
 </div>
 
+</div>
+
+<div class="col-sm-6">
+
+<div class="alert alert-info clickable center" id="search-download-button">
+<span class="fa fa-download"></span> Export spreadsheet <span class="fa fa-spinner fa-spin download-throbber-container" style="display:none"></span>
+</div>
 
 </div>
+
 </div>
 
 <div class="row" id="results-row" style="display:none">
@@ -137,11 +145,17 @@ Until:<br>
 
 </div>
 
-
 </div>
 </div>
 
 <div id="legend-row" style="display:none">
+<div class="row">
+<div class="col-sm-12">
+* Persons in red were deleted or they are visitors that left the building.
+<br>
+</div>
+</div>
+
 <div class="row">
 <div class="col-sm-3">
 <h4>Event Type</h4>
@@ -168,13 +182,6 @@ Until:<br>
 <span class="fa fa-fw fa-sign-out"></span> Outgoing<br>
 </div>
 
-</div>
-
-<div class="row">
-<div class="col-sm-12">
-<br>
-* Persons in red were deleted or they are visitors that left the building.
-</div>
 </div>
 
 </div>
@@ -207,6 +214,8 @@ var organizationId;
 var zoneId;
 //init values to show per page
 var perpage = 15;
+//total event count for download csv action
+var totalEvents=0;
 
 //populate select list
 populateList("organizations-select","organizations");
@@ -250,14 +259,19 @@ $("#events-search-submit").click(function(){
 });
 
 //toggle search
-$("#search-again-row").click(function(){
-	$(this).hide();
+$("#search-again-button").click(function(){
+	$("#search-again-row").hide();
 	$("#results-row,#legend-row").hide();
 	//show filter
 	$("#filter-row").slideDown("fast");
 });
 
-function populateEventList(startEvt,evtsQtty){
+//make download csv
+$("#search-download-button").click(function(){
+	populateEventList(1,totalEvents,1);
+});
+
+function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 	var orgId = ($("#organizations-select").val()!==null) ? $("#organizations-select").val() : "";
 	var personId = ($("#persons-select").val()!==null) ? $("#persons-select").val() : "";
 	var zoneId = ($("#zones-select").val()!==null) ? $("#zones-select").val() : "";
@@ -269,6 +283,12 @@ function populateEventList(startEvt,evtsQtty){
 	var endTime = $("#endTime").val();
 	var error = "";
 
+	//set default values for date vars
+	if(startDate=="") startDate = "2000-01-01";
+	if(startTime=="") startTime = "00:00";
+	if(endDate=="") endDate = "9999-12-31";
+	if(endTime=="") endTime = "00:00";
+
 	//validate values > show error modal in case of error
 	//send ajax action and show pagination values
 	if(orgId!="" && isNaN(orgId)) error = "Invalid value for: organization";
@@ -278,38 +298,62 @@ function populateEventList(startEvt,evtsQtty){
 	else if(side!="" && isNaN(side)) error = "Invalid value for: direction";
 
 	if(error==""){
-		//set default values for date vars
-		if(startDate=="") startDate = "2000-01-01";
-		if(startTime=="") startTime = "00:00";
-		if(endDate=="") endDate = "9999-12-31";
-		if(endTime=="") endTime = "00:00";
-		$.ajax({
-			type: "POST",
-			url: "process",
-			data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + evtsQtty,
-			beforeSend: function(){$("#results-container-inner,#legend-row").hide();$("#pagination-container").html(""); $(".throbber-container").fadeIn();},
-			complete: function(resp){/*console.log(resp);*/$(".throbber-container").hide(); $("#results-container-inner").fadeIn()},
-			success: function(resp){
-				if(resp[0]=='1'){
-					//populate event table
-					$("#results-container-inner").html(buildEventTable(resp[1].events));
-					//show legend
-					$("#legend-row").show();
-					//show pagination row
-					$("#pagination-container").html(showPagination(resp[1]));
-				} else {
-					//show error
-					$("#results-container-inner").html("<div class='center'>"+resp[1]+"</div>");
+		if(downloadCsv){
+			//download csv
+			$.ajax({
+				type: "POST",
+				url: "process",
+				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + totalEvents,
+				beforeSend: function(){$(".download-throbber-container").fadeIn();},
+				complete: function(resp){$(".download-throbber-container").hide();},
+				success: function(resp){
+					if(resp[0]=='1'){
+						//trigger csv
+						downloadCSV(resp[1].events,"dobie-export-event.csv");
+					} else {
+						//show modal error
+						$('#modal-error .modal-body').text(resp[1]);
+						$("#modal-error").modal("show");
+					}
+				},
+				failure: function(){
+					//show modal error
+					$('#modal-error .modal-body').text("Operation failed, please try again");
+					$("#modal-error").modal("show");
 				}
-			},
-			failure: function(){
-				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
-				$("#modal-error").modal("show");
-			}
-		});
-		//show results
-		$("#filter-row").slideUp("fast", function(){$("#results-row,#search-again-row").fadeIn();});
+			});
+		} else {
+			//render events table
+			$.ajax({
+				type: "POST",
+				url: "process",
+				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + evtsQtty,
+				beforeSend: function(){$("#results-container-inner,#legend-row").hide();$("#pagination-container").html(""); $(".throbber-container").fadeIn();},
+				complete: function(resp){/*console.log(resp);*/$(".throbber-container").hide(); $("#results-container-inner").fadeIn()},
+				success: function(resp){
+					if(resp[0]=='1'){
+						//populate event table
+						$("#results-container-inner").html(buildEventTable(resp[1].events));
+						//show legend
+						$("#legend-row").show();
+						//show pagination row
+						$("#pagination-container").html(showPagination(resp[1]));
+						//update total events number for download csv
+						totalEvents=resp[1].totalEvtsCount;
+					} else {
+						//show error
+						$("#results-container-inner").html("<div class='center'>"+resp[1]+"</div>");
+					}
+				},
+				failure: function(){
+					//show modal error
+					$('#modal-error .modal-body').text("Operation failed, please try again");
+					$("#modal-error").modal("show");
+				}
+			});
+			//show results
+			$("#filter-row").slideUp("fast", function(){$("#results-row,#search-again-row").fadeIn();});
+		}
 	} else {
 		//invalid values sent
 		$('#modal-error .modal-body').text(error);
@@ -317,11 +361,53 @@ function populateEventList(startEvt,evtsQtty){
 	}
 }
 
+function downloadCSV(eventsArr,csvFileName){
+	// Each column is separated by ";" and new line "\n" for next row
+	var separator = ";";
+	var linebreak = '\n';
+	//add column names in header
+	var csvContent = 'Type'+separator+'Zone'+separator+'Door'+separator+'Look'+separator+'Direction'+separator+'Date'+separator+'Time'+separator+'Organization'+separator+'Person'+separator+'Allowed'+separator+'Denial Cause'+separator+'Person Deleted'+linebreak;
+	eventsArr.forEach(function(data){
+		//set no value for null values
+		if(data.orgName === null) data.orgName="";
+		if(data.personName === null) data.personName="";
+		//if person deleted, show yes as last column
+		if(data.personDeleted==1) var isdel="Yes";
+		else var isdel="No";
+		//init date variable for date prints
+		var dateobj = new Date(data.dateTime);
+		csvContent += get_event_text(data.eventTypeId,"type") +separator+ data.zoneName +separator+ data.doorName +separator+ get_event_text(data.doorLockId,"doorlock") +separator+ get_event_text(data.side,"side") +separator+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +separator+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +separator+ data.orgName +separator+ data.personName +separator+ get_event_text(data.allowed,"allowed") +separator+ get_event_text(data.denialCauseId,"denialcause") +separator+ isdel +linebreak;
+	});
+
+	// The download function takes a CSV string, the filename and mimeType as parameters
+	var download = function(content, fileName, mimeType){
+		var a = document.createElement('a');
+		mimeType = mimeType || 'application/octet-stream';
+
+		if (navigator.msSaveBlob) { // IE10
+			navigator.msSaveBlob(new Blob([content], {
+				type: mimeType
+			}), fileName);
+		} else if (URL && 'download' in a) { //html5 A[download]
+			a.href = URL.createObjectURL(new Blob([content], {
+				type: mimeType
+			}));
+			a.setAttribute('download', fileName);
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		} else {
+			location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
+		}
+	}
+
+	download(csvContent, csvFileName, 'text/csv;encoding:utf-8');
+}
+
 //outputs html for event table based on received data from api
 function buildEventTable(data){
 	//init headers
 	var ret_string='<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr><th class="center">Type</th><th>Zone</th><th>Door</th><th class="center">Lock</th><th class="center">Direction</th><th>Date</th><th>Time</th><th>Organization</th><th>Person</th><th class="center">Allowed</th><th class="center">Denial Cause</th></tr>';
-	//console.log(data);
 
 	for(var i=0;i<data.length;i++){
 		//set no value for null values
@@ -374,6 +460,42 @@ function get_icon(id,mode){
 		}
 		if(iconstr!="") return "<span class='fa fa-"+ iconstr +"'></span>";
 		else return "";
+	}
+}
+
+//outputs text for all events
+function get_event_text(id,mode){
+	if(id===null) return "";
+	else {
+		var iconstr="";
+		switch(mode){
+			case "type":
+				if(id==1) iconstr="Identified Access";
+				else if(id==2) iconstr="Access with button";
+				else if(id==3) iconstr="Door remains opened";
+				else if(id==4) iconstr="Door was forced";
+			break;
+			case "doorlock":
+				if(id==1) iconstr="Card Reader";
+				else if(id==2) iconstr="Fingerprint Reader";
+				else if(id==3) iconstr="Button";
+			break;
+			case "denialcause":
+				if(id==1) iconstr="No Access";
+				else if(id==2) iconstr="Expired Card";
+				else if(id==3) iconstr="Out of time";
+			break;
+			case "side":
+				if(id==0) iconstr="Outgoing";
+				else if(id==1) iconstr="Incoming";
+			break;
+			case "allowed":
+				if(id==0) iconstr="No";
+				else if(id==1) iconstr="Yes";
+			break;
+			default: break;
+		}
+		return iconstr;
 	}
 }
 
