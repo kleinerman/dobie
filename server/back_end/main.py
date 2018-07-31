@@ -19,6 +19,7 @@ import database
 import network
 import msgreceiver
 import crud, crudresndr
+import lifechecker
 from config import *
 import ctrllermsger
 
@@ -78,6 +79,10 @@ class BackEndSrvr(object):
         msgReceiverCtrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
         self.msgReceiver.ctrllerMsger = msgReceiverCtrllerMsger
 
+
+        #Controller Alivness Checker
+        self.lifeChecker = lifechecker.lifeChecker(self.exitFlag)
+
         #self.origSigIntHandler = signal.getsignal(signal.SIGINT)
 
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
@@ -107,14 +112,17 @@ class BackEndSrvr(object):
 
         self.logger.debug('Starting Server Back End')
 
-        #Starting the "Message Receiver" thread
+        #Starting "Message Receiver" thread
         self.msgReceiver.start()
 
-        #Starting the "CRUD Re Sender" thread
+        #Starting "CRUD Re Sender" thread
         self.crudReSndr.start()
         
         #Starting the "Event Manager" thread
         self.netMngr.start()
+
+        #Starting "Life Checker Manager" thread
+        self.lifeChecker.start()
 
         #Starting "CRUD Manager" It will run in main thread
 
