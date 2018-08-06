@@ -459,12 +459,6 @@ class CrudMngr(genmngr.GenericMngr):
                 if request.method == 'GET':
                     organizations = self.dataBase.getOrganizations()
 
-                    #Remove "Visitors" organization
-                    for i, organization in enumerate(organizations):
-                        if organization['id'] == 1:
-                            organizations.pop(i)
-                            break
-
                     for organization in organizations:
                         organization['uri'] = url_for('Organization', orgId=organization['id'], _external=True)
                     return jsonify(organizations)
@@ -502,11 +496,6 @@ class CrudMngr(genmngr.GenericMngr):
             DELETE: Delete an organization
             '''
             try:
-                #If somebody is trying to modify/delete the "Visitors"
-                #organization via REST, we should respond with 404 (Not Found)
-                if orgId == 1:
-                    raise database.OrganizationNotFound('Organization not found')
-
                 ## For GET method
                 if request.method == 'GET':
                     organization = self.dataBase.getOrganization(orgId)
@@ -516,6 +505,8 @@ class CrudMngr(genmngr.GenericMngr):
                     
                 # Update an organization
                 elif request.method == 'PUT':
+                    if orgId == 1:
+                        raise database.OrganizationNotFound('Organization not found')
                     organization = {}
                     organization['id'] = orgId
                     for param in orgNeedKeys:
@@ -525,6 +516,8 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Delete an organization
                 elif request.method == 'DELETE':
+                    if orgId == 1:
+                        raise database.OrganizationNotFound('Organization not found')
                     self.dataBase.delOrganization(orgId)
                     for person in self.dataBase.getPersons(orgId, includeDeleted=False):
                         ctrllerMacsToDelPrsn = self.dataBase.markPerson(person['id'], database.TO_DELETE)
@@ -553,12 +546,6 @@ class CrudMngr(genmngr.GenericMngr):
             GET: Return a list with all persons in the organization
             '''
             try:
-                #If somebody is trying to modify/delete the "Visitors"
-                #organization via REST, we should respond with 404 (Not Found)
-                if orgId == 1:
-                    raise database.OrganizationNotFound('Organization not found')
-
-                ## For GET method
                 persons = self.dataBase.getPersons(orgId)
 
                 for person in persons:
