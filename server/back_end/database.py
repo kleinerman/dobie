@@ -1718,8 +1718,6 @@ class DataBase(object):
 
         try:
             self.execute(sql)
-            if self.cursor.rowcount < 1: #I think it has no sense on updates
-                raise ControllerNotFound('Can not update last seen and set reachable for this controller.')
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
@@ -1748,8 +1746,6 @@ class DataBase(object):
               )
         try:
             self.execute(sql)
-            if self.cursor.rowcount < 1: #I think it has no sense on updates
-                raise ControllerNotFound('Can not set controllers as not reachable.')
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
