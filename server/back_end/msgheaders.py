@@ -1,15 +1,16 @@
-int_CON  = 0x01
-int_RCON = 0x02
-int_EVT  = 0x03
-int_REVT = 0x04
-int_EVS  = 0x05
-int_REVS = 0x06
-int_CUD  = 0x07
-int_RCUD = 0x08
+int_CON  = 0x01 #Connnect
+int_RCON = 0x02 #Response to Connect
+int_EVT  = 0x03 #Event
+int_REVT = 0x04 #Response to Event
+int_EVS  = 0x05 #Many Events
+int_REVS = 0x06 #Response to Many Events
+int_CUD  = 0x07 #Create Update Delete
+int_RCUD = 0x08 #Response to Create Update Delete
 int_RRC  = 0x09 #Request Resend Curds
 int_RRP  = 0x0A #Request Re Provision the entire controller
 int_RRRE = 0x0B #Response to Request Resend Crud or Reprovision
-int_END  = 0x1F
+int_KAL  = 0x0C #Keep Alive
+int_END  = 0x1F #End
 
 
 CON  = bytes([int_CON])
@@ -23,4 +24,6 @@ RCUD = bytes([int_RCUD])
 RRC  = bytes([int_RRC])
 RRP  = bytes([int_RRP])
 RRRE = bytes([int_RRRE])
+KAL  = bytes([int_KAL])
 END  = bytes([int_END])
+

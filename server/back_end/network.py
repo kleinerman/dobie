@@ -161,6 +161,11 @@ class NetMngr(genmngr.GenericMngr):
                        )
             self.netToMsgRec.put(msg)
 
+        elif msg.startswith(KAL):
+            #When a controller sends a Keep Alive Message, it is necessary to know
+            #the MAC, for this reason, it is inserted between the header and the
+            #end of the message
+            self.netToMsgRec.put(bytes([msg[0]]) + self.fdConnObjects[fd]['mac'].encode('utf8') + bytes([msg[1]]))
 
         elif msg.startswith(RRRE):
             self.netToCrudReSndr.put(self.fdConnObjects[fd]['mac'])
@@ -173,6 +178,8 @@ class NetMngr(genmngr.GenericMngr):
 
     def sendToCtrller(self, msg, mac = None, scktFd = None):
         '''
+        This method is usded to send messages to the controller
+        using the MAC address or the socket file descriptor.
         '''
         if (not mac and not scktFd) or (mac and scktFd):
             self.logger.error('Error calling "sendToCtrller" function')
@@ -265,11 +272,6 @@ class NetMngr(genmngr.GenericMngr):
     def run(self):
         '''
         This is the main method of the thread.
-        When the controller is connected to the server, this method is blocked most of
-        the time in "poll()" method waiting for bytes to go out or incoming bytes from 
-        the server or  a event produced when the socket is broken or disconnect.
-        When there is no connection to the server, this method tries to reconnect to 
-        the server every "RECONNECT_TIME"
         '''
 
         #First of all, the database should be connected by the execution of this thread.

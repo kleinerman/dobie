@@ -126,6 +126,14 @@ class NetMngr(genmngr.GenericMngr):
         #RRP message.
         self.dataBase = None
 
+        #Calculating the number of iterations before sending Keep 
+        #Alive message to server
+        self.ITERATIONS = KEEP_ALIVE_TIME * 1000 // NET_POLL_MSEC
+
+        #This is the actual iteration. This value is incremented in 
+        #each iteration and is initializated to 0.
+        self.iteration = 0
+
 
 
 
@@ -350,6 +358,7 @@ class NetMngr(genmngr.GenericMngr):
                 while self.connected.is_set():
 
                     for fd, pollEvnt in self.netPoller.poll(NET_POLL_MSEC):
+                        self.iteration -= 1
 
                         #This will happen when the "event" thread or "reSender"
                         #thread puts bytes in the "outBufferQue" and they want to notify
@@ -443,6 +452,14 @@ class NetMngr(genmngr.GenericMngr):
 
                     #Cheking if Main thread ask as to finish.
                     self.checkExit()
+
+                    if self.iteration >= self.ITERATIONS:
+                        logMsg = 'Sending Keep Alive message to server.'
+                        self.logger.debug(logMsg)
+                        self.sendToServer(KAL + END)
+                        self.iteration = 0
+                    else:
+                        self.iteration +=1
 
 
             except (OSError, ConnectionRefusedError, ConnectionResetError):
