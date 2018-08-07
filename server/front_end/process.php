@@ -738,6 +738,17 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,"Controller could not be deleted");
 			}
 		break;
+		case "reprov_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$controllers_rec = reprov_controller($logged->name,$logged->pw, $id);
+
+				if($controllers_rec) array_push($ret,1,"Controller reprogrammed successfully");
+				else array_push($ret,0,"Controller could not be reprogrammed");
+			}
+		break;
 
 		case "get_user":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");

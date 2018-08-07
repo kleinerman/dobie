@@ -829,6 +829,13 @@ function delete_controller($user,$pass,$id){
 	else return $response->data;
 }
 
+function reprov_controller($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."controller/$id/reprov",$user,$pass,"put");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
 //System Users
 function get_users($user,$pass){
 	global $config;
@@ -888,7 +895,7 @@ function add_user($user,$pass,$fullname,$username,$password,$roleid,$active){
 }
 
 if($DEBUG){
-	//$res=get_organizations("admin","admin");
+	$res=get_organizations("admin","admin");
 	//$res=do_auth("admin","admin");
 	//$res=get_organizations("admin","admin",2);
 	//$res=get_person_accesses("admin","admin",18);
@@ -931,7 +938,7 @@ if($DEBUG){
 	//$res=get_users("admin","admin");
 	//$res=get_roles("admin","admin");
 	//$res=do_auth_user("admin","admin");
-	$res=set_user("admin","admin",1,"Administrator","admin","admin2",1,1);
+//	$res=set_user("admin","admin",1,"Administrator","admin","admin2",1,1);
 	echo "<pre>";
 	var_dump($res);
 }
