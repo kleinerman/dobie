@@ -364,6 +364,7 @@ class DataBase(object):
 
 
 
+
     def isValidVisitExit(self, event):
         '''
         Receieve an event as argument
@@ -1416,6 +1417,10 @@ class DataBase(object):
             #Adding the avialDoors list to the controller dictionary
             controller['availDoors'] = availDoors
 
+            #Formatting lastSeen field
+            if controller['lastSeen']:
+                controller['lastSeen'] = controller['lastSeen'].strftime('%Y-%m-%d %H:%M:%S')
+
             return controller
 
 
@@ -1693,6 +1698,65 @@ class DataBase(object):
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
             raise ControllerError('Error reprovisioning the controller.')
+
+
+
+
+
+    def setCtrllerReachable(self, ctrllerMac):
+        '''
+        Set "reachable" and update "lastSeen" date and time of the controller
+        received in the MAC address of the argument
+        '''
+
+        dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        sql = ("UPDATE Controller SET lastSeen = '{}', reachable = 1 WHERE "
+               "macAddress = '{}'".format(dateTime, ctrllerMac)
+              )
+
+
+        try:
+            self.execute(sql)
+            if self.cursor.rowcount < 1: #I think it has no sense on updates
+                raise ControllerNotFound('Can not update last seen and set reachable for this controller.')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ControllerError('Can not update last seen and set reachable for this controller.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not update last seen and set reachable for this controller.')
+
+
+
+
+
+    def setCtrllerNotReachable(self):
+        '''
+        To the current date and time subtract the amount of minutes that
+        a controller which doesn't send a keep alive message is considered died.
+        Then set in Controller table, the controllers which doesn't send keep
+        alive message before the previous time as not reachables.
+        '''
+
+        considerDiedDateTime = datetime.datetime.now() - datetime.timedelta(minutes=CONSIDER_DIED_MINS)
+        considerDiedDateTime = considerDiedDateTime.strftime('%Y-%m-%d %H:%M:%S')
+
+        sql = ("UPDATE Controller SET reachable = 0 WHERE lastSeen < '{}'"
+               "".format(considerDiedDateTime)
+              )
+        try:
+            self.execute(sql)
+            if self.cursor.rowcount < 1: #I think it has no sense on updates
+                raise ControllerNotFound('Can not set controllers as not reachable.')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ControllerError('Can not set controllers as not reachable.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not set controllers as not reachable.')
 
 
 

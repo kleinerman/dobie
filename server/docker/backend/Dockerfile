@@ -21,4 +21,4 @@ rm -rf /var/cache/apk/* /root/.cache /tmp/*
 # - 7979: controller connection port
 # - 5000: REST API
 EXPOSE 7979 5000
-CMD ["python", "-u", "/opt/dobie-server/main.py"]
+ENTRYPOINT ["python", "-u", "/opt/dobie-server/main.py"]
