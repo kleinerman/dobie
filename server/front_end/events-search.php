@@ -218,7 +218,7 @@ var perpage = 15;
 var totalEvents=0;
 
 //populate select list
-populateList("organizations-select","organizations");
+populateList("organizations-select","organizations",0,"","",0,1);
 populateList("zones-select","zones");
 
 //init clockpicker

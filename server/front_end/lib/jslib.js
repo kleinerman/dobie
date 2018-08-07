@@ -54,7 +54,7 @@ function updateButtons(objId){
 }
 
 //populateSelect
-function populateList(selectId,entity,id=0,actionstr="",hlvalue="",newcontroller=0){
+function populateList(selectId,entity,id=0,actionstr="",hlvalue="",newcontroller=0,orgsGetVisitors=0){
 
 	if(actionstr!=""){
 		var completeActionStr=actionstr;
@@ -75,16 +75,19 @@ function populateList(selectId,entity,id=0,actionstr="",hlvalue="",newcontroller
 				var values = resp[1];
 				var itemClass="";
 				values.forEach(function(item,index){
-					if(item.resStateId!=5){
-						itemClass="";
-						if(item.resStateId==1) itemClass=" class='toadd' disabled ";
-						else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
-						else if(item.resStateId==4) itemClass=" class='todel' disabled ";
-					        if(hlvalue!="" && item.id==hlvalue) itemClass +=" selected";
-					        //check for disabling controllers without available doors
-					        if(newcontroller && item.availDoors.length==0) itemClass +=" disabled";
-						$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
-						qValidItems++;
+					//for organizations, dont show item.id==1 Visitors unless specified
+					if(entity!="organizations" || orgsGetVisitors || item.id!=1){
+						if(item.resStateId!=5){
+							itemClass="";
+							if(item.resStateId==1) itemClass=" class='toadd' disabled ";
+							else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
+							else if(item.resStateId==4) itemClass=" class='todel' disabled ";
+							if(hlvalue!="" && item.id==hlvalue) itemClass +=" selected";
+							//check for disabling controllers without available doors
+							if(newcontroller && item.availDoors.length==0) itemClass +=" disabled";
+							$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
+							qValidItems++;
+						}
 					}
 				});
 			} else {
