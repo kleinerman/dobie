@@ -14,18 +14,18 @@ include("header.php");
 <div class="row">
 <div class="col-lg-12">
 
-<div class="select-container">
-<form action="javascript:void(0)">
-<div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="controllers-select">
-<select id="controllers-select" class="select-options form-control" name="controllers-select" size="2" onchange="updateButtons(this.id)"></select>
+<div class="table-container" id="rows-table-container">
+<input type="text" name="filter" placeholder="Filter names..." class="form-control data-filter-table" data-filter="rows-table">
+<table id="rows-table" class="table-bordered table-hover table-condensed table-responsive table-striped left">
+</table>
 </div>
-<div class="select-container-footer">
-<button id="controllers-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">New</button>
-<button id="controllers-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled>Edit</button>
-<button id="controllers-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button>
-</div>
-</form>
+
+<br><br>
+<div class="row" id="buttons-row">
+<div class="col-sm-3"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">Add</button></div>
+<div class="col-sm-3"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled>Edit</button></div>
+<div class="col-sm-3"><button id="rows-reprov" class="btn btn-warning" type="button" data-toggle="modal" data-target="#modal-reprov" disabled>Reprogram</button></div>
+<div class="col-sm-3"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button></div>
 </div>
 
 </div>
@@ -77,6 +77,24 @@ include("footer.php");
 <!-- /.modal -->
 </div>
 
+<!-- reprov modal -->
+<div class="modal fade" id="modal-reprov" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-body center">
+Are you sure you want to reprogram this controller?
+</div>
+<div class="modal-footer center">
+<form class="form-horizontal" id="controller-reprov-form" action="#">
+<button class="btn btn-success">Ok</button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-reprov').modal('hide');">Cancel</button>
+</form>
+</div>
+</div>
+</div>
+<!-- /.modal -->
+</div>
+
 <!-- delete modal -->
 <div class="modal fade" id="modal-delete" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog">
@@ -119,7 +137,7 @@ setFilterAction();
 var editId=0;
 
 //populate select list
-populateList("controllers-select","controllers");
+populateTable("rows-table");
 	
 function resetForm(){
 	//text inputs
@@ -132,10 +150,107 @@ function resetForm(){
 	editId=0;
 }
 
+//events for table checkboxes
+function tableClickEvents2(){
+	//clickable rows for editable tables
+	$("#rows-table tr td:nth-child(n+2)").click(function(){
+		$(this).parent().find("input[type=checkbox]").click();
+	})
+
+	//unclick All checkbox on row click
+	$("#rows-table tr td input[type=checkbox]").click(function(){
+		if($("#rowsAll").prop("checked")) $("#rowsAll").prop("checked",false);
+	})
+
+	//click All event
+	$("#rowsAll").click(function(){
+		if($(this).prop("checked")) {
+			$("#rows-table td input[type=checkbox]").prop("checked",true);
+			//$("#rows-del").prop("disabled",false);
+			if($('#rows-table tr td input[type=checkbox]:checked').length == 1) $("#rows-edit,#rows-del,#rows-reprov").prop("disabled",false);
+		} else {
+			$("#rows-table td input[type=checkbox]").prop("checked",false);
+			//no rows selected > disable both
+			$("#rows-edit,#rows-del,#rows-reprov").prop("disabled",true);
+		}
+	})
+	
+	//edit / delete  button toggle
+	$('#rows-table tr td input:checkbox').change(function(){
+		if($('#rows-table tr td input[type=checkbox]:checked').length > 0) {
+			//if at least 1 row selected > enable delete
+			//$("#rows-del").prop("disabled",false);
+			//enable edit only if 1 row is selected
+			if($('#rows-table tr td input[type=checkbox]:checked').length > 1) $("#rows-edit,#rows-del,#rows-reprov").prop("disabled",true);
+			else $("#rows-edit,#rows-del,#rows-reprov").prop("disabled",false);
+		} else {
+			//no rows selected > disable both
+			$("#rows-edit,#rows-del,#rows-reprov").prop("disabled",true);
+		}
+	});
+}
+
+//populate editable table
+function populateTable(tableId){
+	//clear table
+	$('#'+tableId).empty();
+	$.ajax({
+		type: "POST",
+		url: "process",
+		data: "action=get_controllers",
+		success: function(resp){
+			if(resp[0]=='1'){
+				var values = resp[1];
+				//set table headers
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th>Name</th><th>MAC</th><th>Last Seen</th><th class=\"center\">Reachable</th></tr>");
+				//populate fields with rec info
+				for(i=0;i<values.length;i++){
+					//show row
+					//pre process MAC
+					macStr = values[i].macAddress.replace(/(.{2})/g, "$1:").slice(0,-1).toUpperCase();
+					//pre process date
+					if(!values[i].lastSeen) lastSeenStr = "";
+					else {
+						var dateobj = new Date(values[i].lastSeen);
+						lastSeenStr = dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) + " " + addZeroPaddingSingle(dateobj.getHours()) + ":" +
+						addZeroPaddingSingle(dateobj.getMinutes()) + ":" +
+						addZeroPaddingSingle(dateobj.getSeconds());
+					}
+					//pre process reachable icon
+					if(values[i].reachable=="1") reachableStr="<span class=\"fa fa-check\"></span>";
+					else reachableStr= "";
+					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"controllers[]\" value="+values[i].id+"></td><td>"+values[i].name+"</td><td>"+macStr+"</td><td>"+lastSeenStr+"</td><td class=\"center\">"+reachableStr+"</td></tr>");
+				}
+				//add trigger events for rows
+				tableClickEvents2();
+			} else {
+				//show error in table
+				$('#'+tableId).append("<tr><td class='center'>"+resp[1]+"</td></tr>");
+			}
+		},
+		failure: function(){
+			//show modal error
+			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$("#modal-error").modal("show");
+		}
+	});
+}
+
+//filter for tables
+$(".data-filter-table").keyup(function(){
+	var rows=$("#"+$(this).data("filter") + " tr:nth-child(n+2)");
+	var filterValue=$(this).val().toLowerCase();
+	rows.each(function(){
+		if($(this).find("td").text().toLowerCase().includes(filterValue)) $(this).show();
+		else $(this).hide();
+	})
+});
+
 //fetch info for edit
-$("#controllers-select-edit").click(function(){
+$("#rows-edit").click(function(){
 	resetForm();
-	var controllerId = $("#controllers-select").val();
+	//var controllerId = $("#controllers-select").val();
+	var controllerId = $('#rows-table tr td input[type=checkbox]:checked')[0].value;
 	$.ajax({
 		type: "POST",
 		url: "process",
@@ -165,7 +280,7 @@ $("#controllers-select-edit").click(function(){
 });
 
 //fetch info for edit
-$("#controllers-select-add").click(function(){
+$("#rows-new").click(function(){
 	resetForm();
 	populateList("controller-model-select","controller_models");
 });
@@ -196,8 +311,42 @@ $("#controller-form").submit(function(){
 				if(resp[0]=='1'){
 					//close modal
 					$("#modal-new").modal("hide");
-					//repopulate select box
-					populateList("controllers-select","controllers");
+					//repopulate table
+					populateTable("rows-table");
+				} else {
+					//show modal error
+					$('#modal-error .modal-body').text(resp[1]);
+					$("#modal-error").modal("show");
+				}
+			},
+			failure: function(){
+				//show modal error
+				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$("#modal-error").modal("show");
+			}
+		});
+	} else {
+		//invalid values sent
+		$('#modal-error .modal-body').text("Invalid values sent");
+		$("#modal-error").modal("show");
+	}
+	return false;
+});
+
+//reprov action
+$("#controller-reprov-form").submit(function(){
+	var controllerId = $('#rows-table tr td input[type=checkbox]:checked')[0].value;
+	if(!isNaN(controllerId)){
+		$.ajax({
+			type: "POST",
+			url: "process",
+			data: "action=reprov_controller&id=" + controllerId,
+			success: function(resp){
+				if(resp[0]=='1'){
+					//close modal
+					$("#modal-reprov").modal("hide");
+					//repopulate table
+					populateTable("rows-table");
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -220,8 +369,7 @@ $("#controller-form").submit(function(){
 
 //delete action
 $("#controller-delete-form").submit(function(){
-	var controllerId = $("#controllers-select").val();
-
+	var controllerId = $('#rows-table tr td input[type=checkbox]:checked')[0].value;
 	if(!isNaN(controllerId)){
 		$.ajax({
 			type: "POST",
@@ -231,8 +379,8 @@ $("#controller-delete-form").submit(function(){
 				if(resp[0]=='1'){
 					//close modal
 					$("#modal-delete").modal("hide");
-					//repopulate select box
-					populateList("controllers-select","controllers");
+					//repopulate table
+					populateTable("rows-table");
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
