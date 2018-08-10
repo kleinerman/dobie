@@ -68,14 +68,17 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, exitFlag, netToMsgRec, netToCrudReSndr):
+    def __init__(self, exitFlag, netToMsgRec, crudReSndr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
 
+        #To call
+        self.crudReSndr = crudReSndr
+
         #Queue to send messages to crudReSndr thread
-        self.netToCrudReSndr = netToCrudReSndr
+        self.netToCrudReSndr = crudReSndr.netToCrudReSndr
 
         #Queue to send message to msgReceiver thread
         self.netToMsgRec = netToMsgRec
@@ -116,7 +119,7 @@ class NetMngr(genmngr.GenericMngr):
 
         #Dictionary to get the socket file descriptor with the MAC address
         self.macConnObjects = {}
-        
+
  
 
 
@@ -181,6 +184,7 @@ class NetMngr(genmngr.GenericMngr):
         This method is usded to send messages to the controller
         using the MAC address or the socket file descriptor.
         '''
+
         if (not mac and not scktFd) or (mac and scktFd):
             self.logger.error('Error calling "sendToCtrller" function')
             raise ValueError("One of 'mac' or 'sctkFd' arguments should be 'None'")
@@ -196,6 +200,8 @@ class NetMngr(genmngr.GenericMngr):
         except KeyError:
             self.logger.debug('Controller not connected.')
             raise CtrllerDisconnected
+
+        self.crudReSndr.resetReSendTime()
 
         outBufferQue.put(msg)
         with self.lockNetPoller:

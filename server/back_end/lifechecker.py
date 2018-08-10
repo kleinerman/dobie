@@ -22,7 +22,7 @@ class lifeChecker(genmngr.GenericMngr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('lifeChecker', exitFlag)
+        super().__init__('LifeChecker', exitFlag)
 
         #Database object to answer the CRUDs not committed.
         #The creation of this object was moved to the run method to avoid

@@ -62,7 +62,7 @@ class BackEndSrvr(object):
 
         #Creating the Net Manager Thread 
         self.netMngr = network.NetMngr(self.exitFlag, self.msgReceiver.netToMsgRec,
-                                       self.crudReSndr.netToCrudReSndr)
+                                       self.crudReSndr)
 
         #Creating CRUD Manager (This will run in main thread)
         self.crudMngr = crud.CrudMngr(self.exitFlag)
