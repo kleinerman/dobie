@@ -4,6 +4,7 @@ import logging
 import json
 import re
 import time
+import threading
 
 import genmngr
 import database
@@ -50,6 +51,18 @@ class CrudReSndr(genmngr.GenericMngr):
         #and is initializated to 0.
         self.iteration = 0
 
+        #Lock to protect self.iteration attribute
+        self.lockIteration = threading.Lock()
+
+
+
+    def resetReSendTime(self):
+        '''
+        This method will be executed by network thread reseting the iterations
+        everytime the network thread sends a message to the controller
+        '''
+        with self.lockIteration:
+            self.iteration = 0
 
 
 
@@ -152,7 +165,10 @@ class CrudReSndr(genmngr.GenericMngr):
                 #Cheking if Main thread ask as to finish.
                 self.checkExit()
 
-                if self.iteration >= self.ITERATIONS:
+                with self.lockIteration:
+                    iteration = self.iteration
+
+                if iteration >= self.ITERATIONS:
                     logMsg = 'Checking if there are controllers which need to be re provisioned.'
                     self.logger.debug(logMsg)
                     #Getting the MAC addresses of controllers which has uncommitted CRUDs.
@@ -161,9 +177,11 @@ class CrudReSndr(genmngr.GenericMngr):
                         logMsg = 'Sending Request Re Provision Message to: {}'.format(', '.join(ctrllerMacsNotComm))
                         self.logger.info(logMsg)
                         self.ctrllerMsger.requestReSendCruds(ctrllerMacsNotComm)
-                    self.iteration = 0
+                    with self.lockIteration:
+                        self.iteration = 0
                 else:
-                    self.iteration +=1
+                    with self.lockIteration:
+                        self.iteration +=1
 
                     
 
