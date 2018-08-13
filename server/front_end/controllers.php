@@ -100,7 +100,6 @@ Are you sure you want to reprogram this controller?
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-Deleting this controller will remove all doors and accesses that belong to it.<br>
 Are you sure?
 </div>
 <div class="modal-footer center">

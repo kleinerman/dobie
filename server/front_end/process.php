@@ -734,8 +734,8 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 
 				$controllers_rec = delete_controller($logged->name,$logged->pw, $id);
 
-				if($controllers_rec) array_push($ret,1,"Information saved successfully!");
-				else array_push($ret,0,"Controller could not be deleted");
+				if($controllers_rec->response_status != "200") array_push($ret,0,$controllers_rec->data->message);
+				else array_push($ret,1,"Information saved successfully!");
 			}
 		break;
 		case "reprov_controller":
