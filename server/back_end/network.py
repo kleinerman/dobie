@@ -201,6 +201,10 @@ class NetMngr(genmngr.GenericMngr):
             self.logger.debug('Controller not connected.')
             raise CtrllerDisconnected
 
+        #Everytime a message is sent to the controller, "CrudReSender"
+        #is delayed. This is to avoid "CrudReSender" thread resends CRUDs
+        #when a CRUD message has just been sent to the controller and the
+        #controller didn't answer yet.
         self.crudReSndr.resetReSendTime()
 
         outBufferQue.put(msg)
