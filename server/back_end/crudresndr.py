@@ -59,8 +59,14 @@ class CrudReSndr(genmngr.GenericMngr):
     def resetReSendTime(self):
         '''
         This method will be executed by network thread reseting the iterations
-        everytime the network thread sends a message to the controller
+        everytime the network thread sends a message to the controller.
+        This is to avoid "CrudReSender" thread resends CRUDs when a CRUD
+        message has just been sent to the controller and the controller
+        didn't answer yet.
         '''
+
+        #self.iteration is protected with self.lockIteration lock as it is
+        #modified by this thread (CrudReSender) and by NetMngr Thread
         with self.lockIteration:
             self.iteration = 0
 
@@ -165,6 +171,14 @@ class CrudReSndr(genmngr.GenericMngr):
                 #Cheking if Main thread ask as to finish.
                 self.checkExit()
 
+                #self.iteration is protected with self.lockIteration lock every time it is
+                #accessed, as it is modified by this thread (CrudReSender) and by NetMngr Thread
+                #Keep "self.iteration" locked during all below code block won't be optimal as
+                #there are methods inside this block which may spend some time accessing to
+                #database or sending things over the network. (Sending things over the network
+                #keeping the lock would cause a deadlock if not using queues)
+
+                #To avoid keeping "self.iteration" locked too much time, it is copied.
                 with self.lockIteration:
                     iteration = self.iteration
 

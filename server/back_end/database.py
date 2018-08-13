@@ -1515,7 +1515,7 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise ControllerError('Can not delete this controller')
+            raise ControllerError('Can not delete this controller, first delete all doors that belongs to it.')
 
 
 
