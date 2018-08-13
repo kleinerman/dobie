@@ -825,8 +825,9 @@ function add_controller($user,$pass,$name,$model_id,$mac){
 function delete_controller($user,$pass,$id){
 	global $config;
 	$response=send_request($config->api_fullpath."controller/$id",$user,$pass,"delete");
-	if($response->response_status != "200") return false;
-	else return $response->data;
+	//if($response->response_status != "200") return false;
+	//else return $response->data;
+	return $response;
 }
 
 function reprov_controller($user,$pass,$id){
