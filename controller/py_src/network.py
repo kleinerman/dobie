@@ -358,6 +358,12 @@ class NetMngr(genmngr.GenericMngr):
                 while self.connected.is_set():
 
                     for fd, pollEvnt in self.netPoller.poll(NET_POLL_MSEC):
+
+                        #Every time a poll event happens, the time used for one iteration is lost.
+                        #In this situation, if the controller is sending or receiving a lot of message,
+                        #it will end up sending keep alive messages very often. For this reason, every
+                        #time a poll event happens, "self.iterations" should be decremented to keep the
+                        #time between keep alive messages. 
                         self.iteration -= 1
 
                         #This will happen when the "event" thread or "reSender"
@@ -453,13 +459,18 @@ class NetMngr(genmngr.GenericMngr):
                     #Cheking if Main thread ask as to finish.
                     self.checkExit()
 
+                    #when reaching "self.ITERATIONS", a keep alive message should be
+                    #sent to the server and "self.iterations" should be reseted to 0.
+                    #Instead of assigning 0, 1 is assigned to "self.iterations", as
+                    #a keep alive message will be sent, and "self.iterations"
+                    #variable will be decremented instantaneously by 1 
                     if self.iteration >= self.ITERATIONS:
                         logMsg = 'Sending Keep Alive message to server.'
                         self.logger.debug(logMsg)
                         self.sendToServer(KAL + END)
-                        self.iteration = 0
+                        self.iteration = 1
                     else:
-                        self.iteration +=1
+                        self.iteration += 1
 
 
             except (OSError, ConnectionRefusedError, ConnectionResetError):
