@@ -734,8 +734,19 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 
 				$controllers_rec = delete_controller($logged->name,$logged->pw, $id);
 
-				if($controllers_rec) array_push($ret,1,"Information saved successfully!");
-				else array_push($ret,0,"Controller could not be deleted");
+				if($controllers_rec->response_status != "200") array_push($ret,0,$controllers_rec->data->message);
+				else array_push($ret,1,"Information saved successfully!");
+			}
+		break;
+		case "reprov_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$controllers_rec = reprov_controller($logged->name,$logged->pw, $id);
+
+				if($controllers_rec) array_push($ret,1,"Controller reprogrammed successfully");
+				else array_push($ret,0,"Controller could not be reprogrammed");
 			}
 		break;
 
