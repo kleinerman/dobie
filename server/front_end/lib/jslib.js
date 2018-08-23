@@ -171,10 +171,12 @@ function setFilterActionTable(){
 				//check all days
 				$("input[name=days]").prop("checked",true);
 				$(".dayrow").hide();
+				$(".everyday_cell").show();
 			} else {
 				//uncheck all days
 				$("input[name=days]").prop("checked",false);
 				$(".dayrow").show();
+				$(".everyday_cell").hide();
 			}
 		} else {
 			//rest of buttons
