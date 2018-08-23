@@ -304,7 +304,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 				type: "POST",
 				url: "process",
 				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + totalEvents,
-				beforeSend: function(){$(".download-throbber-container").fadeIn();},
+				beforeSend: function(){$(".download-throbber-container").show();},
 				complete: function(resp){$(".download-throbber-container").hide();},
 				success: function(resp){
 					if(resp[0]=='1'){
@@ -328,7 +328,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 				type: "POST",
 				url: "process",
 				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + evtsQtty,
-				beforeSend: function(){$("#results-container-inner,#legend-row").hide();$("#pagination-container").html(""); $(".throbber-container").fadeIn();},
+				beforeSend: function(){$("#results-container-inner,#legend-row").hide();$("#pagination-container").html(""); $(".throbber-container").show();},
 				complete: function(resp){/*console.log(resp);*/$(".throbber-container").hide(); $("#results-container-inner").fadeIn()},
 				success: function(resp){
 					if(resp[0]=='1'){
@@ -340,9 +340,11 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 						$("#pagination-container").html(showPagination(resp[1]));
 						//update total events number for download csv
 						totalEvents=resp[1].totalEvtsCount;
+						$("#search-download-button").show();
 					} else {
-						//show error
-						$("#results-container-inner").html("<div class='center'>"+resp[1]+"</div>");
+						//no results
+						$("#results-container-inner").html("<div class='left'>"+resp[1]+"</div>");
+						$("#search-download-button").hide();
 					}
 				},
 				failure: function(){

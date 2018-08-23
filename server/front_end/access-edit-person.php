@@ -73,12 +73,12 @@ include("header.php");
 <table id="schedule-table" class="table-condensed table-responsive left">
 <tr><th>Day</th><th>Time interval</th><th class="center">Incoming</th><th class="center">Outgoing</th><th class="center">Both</th></tr>
 <tr><td><label><input type="checkbox" id="allWeek_check" name="days" value="" checked> Every day</label></td>
-<td>
+<td class="everyday_cell">
 <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-</td><td class="center"><input type="radio" name="way0" value="1">
-</td><td class="center"><input type="radio" name="way0" value="2">
-</td><td class="center"><input type="radio" name="way0" value="3" checked>
+</td><td class="center everyday_cell"><input type="radio" name="way0" value="1">
+</td><td class="center everyday_cell"><input type="radio" name="way0" value="2">
+</td><td class="center everyday_cell"><input type="radio" name="way0" value="3" checked>
 </td>
 </tr>
 
@@ -284,6 +284,7 @@ if(!accessId){
 			} else {
 				//uncheck all days
 				$(".dayrow").show();
+				$(".everyday_cell").hide();
 				$("input[name=days]").prop("checked",false);
 				for(i=0;i<values.liAccesses.length;i++){
 					currLiAccess=values.liAccesses[i];
