@@ -37,8 +37,9 @@ services:
       - php
 
   php:
-    image: php:fpm
     container_name: php
+    build:
+      context: php
     volumes:
       - ../front_end:/site
 
