@@ -20,8 +20,3 @@ echo "America/Argentina/Cordoba" > /etc/timezone && \
 apk del openssl-dev libffi-dev musl-dev gcc tzdata && \
 rm -rf /var/cache/apk/* /root/.cache /tmp/*
 
-# Expose ports:
-# - 7979: controller connection port
-# - 5000: REST API
-EXPOSE 7979 5000
-ENTRYPOINT ["python", "-u", "/opt/dobie-server/main.py"]
