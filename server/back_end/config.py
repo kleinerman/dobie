@@ -2,7 +2,7 @@ import logging
 
 LOGGER_NAME = 'BackEndSrvr'
 
-LOGGING_FILE ='/opt/dobie-server/logevents.log'
+LOGGING_FILE ='/var/log/dobie-s/dobie-s.log'
 
 DB_HOST = 'database'
 DB_USER = 'dobie_usr'
