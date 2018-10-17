@@ -11,6 +11,7 @@ services:
       - "5000:5000"
     volumes:
       - ../back_end:/opt/dobie-server
+      - /var/log/dobie-s:/var/log/dobie-s
     depends_on:
       - database
     entrypoint: python -u /opt/dobie-server/main.py

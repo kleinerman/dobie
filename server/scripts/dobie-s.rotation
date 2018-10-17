@@ -1,0 +1,8 @@
+/var/log/dobie-c/dobie-s.log
+{
+	weekly
+	missingok
+	rotate 10
+	notifempty
+}
+
