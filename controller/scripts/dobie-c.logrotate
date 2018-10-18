@@ -1,0 +1,17 @@
+/var/log/dobie-c/dobie-c.log
+{
+	weekly
+	missingok
+	rotate 10
+	notifempty
+}
+
+/var/log/dobie-c/ioiface.log
+{
+    copytruncate
+    weekly
+    missingok
+    rotate 10
+    notifempty
+}
+
