@@ -9,7 +9,7 @@ sudo mkdir -p /var/log/dobie-s/
 
 read -p "Do you want to set log rotation for Dobie Server (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
-  sudo cp dobie-s.rotation /etc/logrotate.d/dobie-s
+  sudo cp dobie-s.logrotate /etc/logrotate.d/dobie-s
 fi
 
 echo "Building Docker containers.."
