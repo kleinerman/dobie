@@ -1,0 +1,15 @@
+[Unit]
+Description=Docker Compose Dobie Containers
+After=docker.service network-online.target
+Requires=docker.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+ExecStart=/usr/bin/docker-compose -p dobie -f /opt/dobie/server/ctrller_docker/docker-compose.yml start
+ExecStop=/usr/bin/docker-compose -p dobie -f /opt/dobie/server/ctrller_docker/docker-compose.yml stop
+
+
+[Install]
+WantedBy=multi-user.target

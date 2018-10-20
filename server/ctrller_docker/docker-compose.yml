@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.7'
 
 services:
 
@@ -11,10 +11,11 @@ services:
       - "5000:5000"
     volumes:
       - ../back_end:/opt/dobie-server
+      - /var/log/dobie-s:/var/log/dobie-s
     depends_on:
       - database
-#    links:
-#      - database
+    entrypoint: python -u /opt/dobie-server/main.py
+
 
   database:
     container_name: database
@@ -31,16 +32,29 @@ services:
       - "80:80"
     volumes:
       - ../front_end:/site
-#    links:
-#      - php
     depends_on:
       - php
 
+
   php:
-    image: arm32v7/php:fpm
     container_name: php
+    build:
+      context: php
     volumes:
       - ../front_end:/site
+
+
+  nodejs:
+    container_name: nodejs
+    build:
+      context: nodejs
+    ports:
+      - "5002:5002"
+      - "5004:5004"
+    volumes:
+      - ../front_end:/site
+    entrypoint: sh run-events-live.sh
+
 
 
 volumes:
