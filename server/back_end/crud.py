@@ -215,7 +215,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        userNeedKeys = ('username', 'passwd', 'fullName', 'roleId', 'active')
+        userNeedKeys = ('username', 'passwd', 'fullName', 'roleId', 'language', 'active')
 
         @app.route('/api/v1.0/user', methods=['GET', 'POST'])
         @auth.login_required
@@ -284,8 +284,8 @@ class CrudMngr(genmngr.GenericMngr):
                             pass
 
                     #If the user is the admin main user, doesn't modify nothing except the
-                    #passwd if the front end sent it. The second argument of pop is to
-                    #return None as default value when the key is not in the dictionary.
+                    #passwd or language if the front end sent it. The second argument of pop
+                    #is to return None as default value when the key is not in the dictionary.
                     if user['id'] == 1:
                         user.pop('username', None)
                         user.pop('fullName', None)

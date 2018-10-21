@@ -12,6 +12,7 @@ CREATE TABLE `User` (
     `passwdHash` varchar(128) NOT NULL,
     `fullName` varchar(64) NOT NULL,
     `roleId` integer NOT NULL,
+    `language` varchar(2) NOT NULL,
     `active` boolean NOT NULL,
     CONSTRAINT `fk_User_Role` FOREIGN KEY (`roleId`) REFERENCES `Role` (`id`)
 )

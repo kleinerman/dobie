@@ -24,7 +24,7 @@ function create {
 
 
         INSERT INTO Role(id, description) VALUES (1, 'Administrator'), (2, 'Operator'), (3, 'Viewer');
-        INSERT INTO User(username, passwdHash, fullName, roleId, active) VALUES ('admin', '\$1\$CJvRt.x.\$ZmuMH4up3zMGnip.Kn7vI0', 'Administrator', 1, 1);
+        INSERT INTO User(username, passwdHash, fullName, roleId, language, active) VALUES ('admin', '\$1\$CJvRt.x.\$ZmuMH4up3zMGnip.Kn7vI0', 'Administrator', 1, 'en', 1);
         INSERT INTO ResState(id, description) VALUES (1, 'To Add'), (2, 'To Update'), (3, 'Committed'), (4, 'To Delete'), (5, 'Deleted');
         INSERT INTO Organization(id, name, resStateId) VALUES(1, 'Visitors', 3);
         INSERT INTO EventType(id, description) VALUES(1, 'Access with card'), (2, 'Access with button'), (3, 'The door remains opened'), (4, 'The door was forced');

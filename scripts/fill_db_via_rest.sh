@@ -280,12 +280,12 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http:/
 
 
 #Creating deleting and modifying some system users
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "jcabelo", "passwd": "qwe123qwe", "fullName": "Juan Cabelo", "roleId": 1, "active": 1}' http://localhost:5000/api/v1.0/user
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "rtortoza", "passwd": "qwe123qwe", "fullName": "Ramon Tortoza", "roleId": 2, "active": 1}' http://localhost:5000/api/v1.0/user
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "lcabrera", "passwd": "qwe123qwe", "fullName": "Luis Cabrera", "roleId": 2, "active": 1}' http://localhost:5000/api/v1.0/user
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "jcabelo", "passwd": "qwe123qwe", "fullName": "Juan Cabelo", "roleId": 1, "language": "en", "active": 1}' http://localhost:5000/api/v1.0/user
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "rtortoza", "passwd": "qwe123qwe", "fullName": "Ramon Tortoza", "roleId": 2, "language": "en", "active": 1}' http://localhost:5000/api/v1.0/user
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "lcabrera", "passwd": "qwe123qwe", "fullName": "Luis Cabrera", "roleId": 2, "language": "es", "active": 1}' http://localhost:5000/api/v1.0/user
 curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://localhost:5000/api/v1.0/user/4
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "asorini", "passwd": "qwe123qwe", "fullName": "Andrea Sorini", "roleId": 3, "active": 1}' http://localhost:5000/api/v1.0/user
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"username": "asorini", "passwd": "qwe123", "fullName": "Andrea Sorini", "roleId": 3, "active": 1}' http://localhost:5000/api/v1.0/user/5
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "asorini", "passwd": "qwe123qwe", "fullName": "Andrea Sorini", "roleId": 3, "language": "en", "active": 1}' http://localhost:5000/api/v1.0/user
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"username": "asorini", "passwd": "qwe123", "fullName": "Andrea Sorini", "roleId": 3, "language": "es", "active": 1}' http://localhost:5000/api/v1.0/user/5
 
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"passwd": "qwe123qwe"}' http://localhost:5000/api/v1.0/user/1
 
