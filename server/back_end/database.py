@@ -611,9 +611,10 @@ class DataBase(object):
 
         passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
 
-        sql = ("INSERT INTO User(username, passwdHash, fullName, roleId, active) "
-               "VALUES('{}', '{}', '{}', {}, {})"
-               "".format(user['username'], passwdHash, user['fullName'], user['roleId'], user['active'])
+        sql = ("INSERT INTO User(username, passwdHash, fullName, roleId, language, active) "
+               "VALUES('{}', '{}', '{}', {}, '{}', {})"
+               "".format(user['username'], passwdHash, user['fullName'],
+                         user['roleId'], user['language'], user['active'])
               )
 
 
@@ -686,15 +687,21 @@ class DataBase(object):
             setRoleId = ""
 
         try:
+            setLanguage = ", language = '{}'".format(user['language'])
+        except KeyError:
+            setLanguage = ""
+
+        try:
             setActive = ", active = {}".format(user['active'])
         except KeyError:
             setActive = ""
 
 
 
-        sql = ("UPDATE User SET id = {}{}{}{}{}{} WHERE id = {}"
+        sql = ("UPDATE User SET id = {}{}{}{}{}{}{} WHERE id = {}"
                "".format(user['id'], setUsername, setPasswdHash, 
-                         setFullName, setRoleId, setActive, user['id'])
+                         setFullName, setRoleId, setLanguage,
+                         setActive, user['id'])
               )
 
         try:
