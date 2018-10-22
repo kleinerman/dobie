@@ -32,15 +32,52 @@ else
   sudo cp dobie-s.service /etc/systemd/system/
 fi
 
+sudo systemctl daemon-reload
+
 read -p "Do you want to start Dobie Server at boot time (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
   sudo systemctl enable dobie-s.service
 fi
-sudo systemctl daemon-reload
 
 echo "Starting Dobie server (all the containers).."
 sudo systemctl start dobie-s.service
 
+echo "Waiting Database container to be ready.."
+sleep 10
 echo "Initializing Dobie Database.."
-sleep 5
 ./db_create_drop.sh -c
+
+
+SCRIPT_ABS_PATH=`realpath purge-old-events.sh` #purge-old-events.sh is in the
+                                               #same directory of this script
+
+read -p "How many months of events do you want to store in Database: " MONTH
+cat > /tmp/purge-dobie-db.service << EOL
+[Unit]
+Description=Purge old events of Dobie DB
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash -c '$SCRIPT_ABS_PATH $MONTH'
+EOL
+sudo cp /tmp/purge-dobie-db.service /etc/systemd/system/
+sudo rm /tmp/purge-dobie-db.service 
+
+cat > /tmp/purge-dobie-db.timer << EOL
+[Unit]
+Description=Weekly purge old events of Dobie DB
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+
+[Install]
+WantedBy=timers.target
+EOL
+sudo cp /tmp/purge-dobie-db.timer /etc/systemd/system/
+sudo rm /tmp/purge-dobie-db.timer
+
+sudo systemctl daemon-reload
+sudo systemctl enable purge-dobie-db.timer
+sudo systemctl start purge-dobie-db.timer
+
+
