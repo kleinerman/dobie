@@ -17,20 +17,35 @@ fi
 read -p "Are you installing Dobie Server in the same controller (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
   cd ../ctrller_docker/
+  DOCK_COMP_DIR=$(realpath .)
 else
   cd ../docker/
+  DOCK_COMP_DIR=$(realpath .)
 fi
 
 echo "Building Docker containers.."
 docker-compose -p dobie up --no-start
 
 echo "Setting Dobie Server as Systemd service.."
-cd ../scripts/
-if [ $answer == y ] || [ $answer == Y ]; then
-  sudo cp dobie-s-ctrller.service /etc/systemd/system/dobie-s.service
-else
-  sudo cp dobie-s.service /etc/systemd/system/
-fi
+cat > /tmp/dobie-s.service << EOL
+[Unit]
+Description=Docker Compose Dobie Containers
+After=docker.service network-online.target
+Requires=docker.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+ExecStart=/usr/bin/docker-compose -p dobie -f $DOCK_COMP_DIR/docker-compose.yml start
+ExecStop=/usr/bin/docker-compose -p dobie -f $DOCK_COMP_DIR/docker-compose.yml stop
+
+
+[Install]
+WantedBy=multi-user.target
+EOL
+sudo cp /tmp/dobie-s.service /etc/systemd/system/
+sudo rm /tmp/dobie-s.service
 
 sudo systemctl daemon-reload
 
@@ -45,6 +60,7 @@ sudo systemctl start dobie-s.service
 echo "Waiting Database container to be ready.."
 sleep 10
 echo "Initializing Dobie Database.."
+cd ../scripts/
 ./db_create_drop.sh -c
 
 
@@ -68,7 +84,7 @@ cat > /tmp/purge-dobie-db.timer << EOL
 Description=Weekly purge old events of Dobie DB
 
 [Timer]
-OnCalendar=*-*-* *:*:00
+OnCalendar=*-*-* 07:07:07
 
 [Install]
 WantedBy=timers.target
