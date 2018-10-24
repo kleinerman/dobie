@@ -2,7 +2,12 @@
 
 
 echo "Dobie Server Uninstallation Script"
-echo "================++================"
+echo "=================================="
+
+read -p "Are you sure to uninstall Dobie Server? (y/n): " answer
+if [ $answer != y ] && [ $answer != Y ]; then
+  exit
+fi
 
 echo "Removing Dobie Server Logs directory.."
 sudo rm -rf /var/log/dobie-s/
@@ -28,10 +33,10 @@ sudo rm /usr/local/sbin/dobie-restore-db
 
 read -p "Do you want to remove all Docker containers, volumes and networks (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
-  docker rm $(docker ps -a -q)
-  docker rmi $(docker images -q)
-  docker volume rm dobie_database-volume
-  docker network rm dobie_default
+  sudo docker rm $(docker ps -a -q)
+  sudo docker rmi $(docker images -q)
+  sudo docker volume rm dobie_database-volume
+  sudo docker network rm dobie_default
 fi
 
 
