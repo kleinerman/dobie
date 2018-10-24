@@ -96,7 +96,7 @@ sudo systemctl start purge-dobie-db.timer
 
 
 echo "Installing scripts to save and restore Dobie DB.."
-cat > /usr/local/sbin/dobie-save-db << EOL
+cat > /tmp/dobie-save-db << EOL
 #!/bin/bash
 
 . $(realpath db-config)
@@ -105,10 +105,12 @@ DB_DOCKER_IP=\$(tr -d '", ' <<< \$(docker inspect database | grep '"IPAddress": 
 
 mysqldump -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE > dobie_db.dump
 EOL
-chmod +x /usr/local/sbin/dobie-save-db
+sudo cp /tmp/dobie-save-db /usr/local/sbin/dobie-save-db
+sudo rm /tmp/dobie-save-db
+sudo chmod +x /usr/local/sbin/dobie-save-db
 
 
-cat > /usr/local/sbin/dobie-restore-db << EOL
+cat > /tmp/dobie-restore-db << EOL
 #!/bin/bash
 
 . $(realpath db-config)
@@ -117,7 +119,9 @@ DB_DOCKER_IP=\$(tr -d '", ' <<< \$(docker inspect database | grep '"IPAddress": 
 
 mysql -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE < \$1
 EOL
-chmod +x /usr/local/sbin/dobie-restore-db
+sudo cp /tmp/dobie-restore-db /usr/local/sbin/dobie-restore-db
+sudo rm /tmp/dobie-restore-db
+sudo chmod +x /usr/local/sbin/dobie-restore-db
 
 
 
