@@ -1,27 +1,25 @@
 #!/bin/bash
 
 
-
 function create {
-    mysql -u root -pqwe123qwe -h $1 -e "CREATE USER 'dobie_usr'@'%' IDENTIFIED BY 'qwe123qwe'; 
-                                        CREATE DATABASE dobie_db; 
-                                        GRANT ALL ON dobie_db.* TO dobie_usr;"
 
-
-    #SCRIPTDIR="$(dirname "$(readlink -f "$0")")"
-    SCRIPTPATH=`realpath $0`
-    SCRIPTDIR=`dirname $SCRIPTPATH`
-
-
-
-    mysql -u dobie_usr -pqwe123qwe -h $1 dobie_db < ${SCRIPTDIR}/db_schema.sql   
+#    echo $1                                          
+#    echo $DB_ROOT_PASSWD
+#    echo $DB_USER
+#    echo $DB_PASSWD
+#    echo $DB_DATABASE
+#    echo $THIS_SCRIPT_DIR
 
 
 
-    mysql -u dobie_usr -pqwe123qwe -h $1 dobie_db -e "
 
+    mysql -u root -p$DB_ROOT_PASSWD -h $1 -e "CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWD'; 
+                                              CREATE DATABASE $DB_DATABASE; 
+                                              GRANT ALL ON $DB_DATABASE.* TO $DB_USER;"
 
+    mysql -u $DB_USER -p$DB_PASSWD -h $1 $DB_DATABASE < $THIS_SCRIPT_DIR/db_schema.sql
 
+    mysql -u $DB_USER -p$DB_PASSWD -h $1 $DB_DATABASE -e "
 
         INSERT INTO Role(id, description) VALUES (1, 'Administrator'), (2, 'Operator'), (3, 'Viewer');
         INSERT INTO User(username, passwdHash, fullName, roleId, language, active) VALUES ('admin', '\$1\$CJvRt.x.\$ZmuMH4up3zMGnip.Kn7vI0', 'Administrator', 1, 'en', 1);
@@ -40,10 +38,16 @@ function create {
 
 function drop {
 
-    mysql -u root -pqwe123qwe -h $1 -e "DROP USER 'dobie_usr';
-                                        DROP DATABASE dobie_db;"
+    mysql -u root -p$DB_ROOT_PASSWD -h $1 -e "DROP USER '$DB_USER';
+                                              DROP DATABASE $DB_DATABASE;"
 
 }
+
+
+THIS_SCRIPT_DIR=$(dirname $(realpath $0))
+
+
+. $THIS_SCRIPT_DIR/db-config
 
 
 if [[ $2 ]]; then

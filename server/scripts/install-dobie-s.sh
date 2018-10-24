@@ -59,13 +59,11 @@ sudo systemctl start dobie-s.service
 
 echo "Waiting Database container to be ready.."
 sleep 10
-echo "Initializing Dobie Database.."
+echo "Erasing any previous database and setting initial values to it.."
 cd ../scripts/
-./db_create_drop.sh -c
-
-
-SCRIPT_ABS_PATH=`realpath purge-old-events.sh` #purge-old-events.sh is in the
-                                               #same directory of this script
+docker stop backend > /dev/null 2>&1
+./db-create-drop.sh -r > /dev/null 2>&1
+docker start backend > /dev/null 2>&1
 
 read -p "How many months of events do you want to store in Database: " MONTH
 cat > /tmp/purge-dobie-db.service << EOL
@@ -74,7 +72,7 @@ Description=Purge old events of Dobie DB
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/bash -c '$SCRIPT_ABS_PATH $MONTH'
+ExecStart=/usr/bin/bash -c '$(realpath purge-old-events.sh) $MONTH'
 EOL
 sudo cp /tmp/purge-dobie-db.service /etc/systemd/system/
 sudo rm /tmp/purge-dobie-db.service 
@@ -95,5 +93,31 @@ sudo rm /tmp/purge-dobie-db.timer
 sudo systemctl daemon-reload
 sudo systemctl enable purge-dobie-db.timer
 sudo systemctl start purge-dobie-db.timer
+
+
+echo "Installing scripts to save and restore Dobie DB.."
+cat > /usr/local/sbin/dobie-save-db << EOL
+#!/bin/bash
+
+. $(realpath db-config)
+
+DB_DOCKER_IP=\$(tr -d '", ' <<< \$(docker inspect database | grep '"IPAddress": "1' | gawk '{print \$2}'))
+
+mysqldump -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE > dobie_db.dump
+EOL
+chmod +x /usr/local/sbin/dobie-save-db
+
+
+cat > /usr/local/sbin/dobie-restore-db << EOL
+#!/bin/bash
+
+. $(realpath db-config)
+
+DB_DOCKER_IP=\$(tr -d '", ' <<< \$(docker inspect database | grep '"IPAddress": "1' | gawk '{print \$2}'))
+
+mysql -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE < \$1
+EOL
+chmod +x /usr/local/sbin/dobie-restore-db
+
 
 
