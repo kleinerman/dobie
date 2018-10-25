@@ -1,22 +1,29 @@
 #!/bin/bash
 
 
+
+function chkcon {
+
+while true; do
+    DB_DOCKER_IP=$(tr -d '", ' <<< $(docker inspect database | grep '"IPAddress": "1' | gawk '{print $2}'))
+    mysql -u root -p$DB_ROOT_PASSWD -h $DB_DOCKER_IP -e "SELECT 1;" 2>&1| grep ERROR > /dev/null; 
+    if [[ $? != 0 ]]; then
+        break 
+    fi  
+    echo "Retrying connect to DB.." 
+    sleep 1
+done
+
+
+}
+
+
 function create {
-
-#    echo $1                                          
-#    echo $DB_ROOT_PASSWD
-#    echo $DB_USER
-#    echo $DB_PASSWD
-#    echo $DB_DATABASE
-#    echo $THIS_SCRIPT_DIR
-
-
-
 
     mysql -u root -p$DB_ROOT_PASSWD -h $1 -e "CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWD'; 
                                               CREATE DATABASE $DB_DATABASE; 
                                               GRANT ALL ON $DB_DATABASE.* TO $DB_USER;"
-
+    
     mysql -u $DB_USER -p$DB_PASSWD -h $1 $DB_DATABASE < $THIS_SCRIPT_DIR/db_schema.sql
 
     mysql -u $DB_USER -p$DB_PASSWD -h $1 $DB_DATABASE -e "
@@ -38,8 +45,7 @@ function create {
 
 function drop {
 
-    mysql -u root -p$DB_ROOT_PASSWD -h $1 -e "DROP USER '$DB_USER';
-                                              DROP DATABASE $DB_DATABASE;"
+    mysql -u root -p$DB_ROOT_PASSWD -h $1 -e "DROP USER '$DB_USER'; DROP DATABASE $DB_DATABASE;" > /dev/null 2>&1
 
 }
 
@@ -50,22 +56,20 @@ THIS_SCRIPT_DIR=$(dirname $(realpath $0))
 . $THIS_SCRIPT_DIR/db-config
 
 
-if [[ $2 ]]; then
-    DB_DOCKER_IP=$2
-else
-    DB_DOCKER_IP=$(tr -d '", ' <<< $(docker inspect database | grep '"IPAddress": "1' | gawk '{print $2}'))
-fi    
-
-echo "Working in DB: $DB_DOCKER_IP"
+#DB_DOCKER_IP=$(tr -d '", ' <<< $(docker inspect database | grep '"IPAddress": "1' | gawk '{print $2}'))
+#echo "DB Engine container found at: $DB_DOCKER_IP"
 
 case "$1" in
     -c)
+    chkcon
     create $DB_DOCKER_IP
     ;;
     -d)
+    chkcon
     drop $DB_DOCKER_IP
     ;;
     -r)
+    chkcon
     drop $DB_DOCKER_IP
     create $DB_DOCKER_IP
     ;;
