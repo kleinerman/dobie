@@ -57,12 +57,10 @@ fi
 echo "Starting Dobie server (all the containers).."
 sudo systemctl start dobie-s.service
 
-echo "Waiting Database container to be ready.."
-sleep 10
 echo "Erasing any previous database and setting initial values to it.."
 cd ../scripts/
 docker stop backend > /dev/null 2>&1
-./db-create-drop.sh -r > /dev/null 2>&1
+./db-create-drop.sh -r 
 docker start backend > /dev/null 2>&1
 
 read -p "How many months of events do you want to store in Database: " MONTH
