@@ -10,6 +10,7 @@ int_RRC  = 0x09 #Request Resend Curds
 int_RRP  = 0x0A #Request Re Provision the entire controller
 int_RRRE = 0x0B #Response to Request Resend Crud or Reprovision
 int_KAL  = 0x0C #Keep Alive
+int_RPO  = 0x0D #Request Power Off
 int_END  = 0x1F #End
 
 
@@ -25,5 +26,6 @@ RRC  = bytes([int_RRC])
 RRP  = bytes([int_RRP])
 RRRE = bytes([int_RRRE])
 KAL  = bytes([int_KAL])
+RPO  = bytes([int_RPO])
 END  = bytes([int_END])
 
