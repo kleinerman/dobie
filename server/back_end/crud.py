@@ -1109,6 +1109,35 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+        @app.route('/api/v1.0/controller/<int:controllerId>/poweroff', methods=['PUT'])
+        @auth.login_required
+        def poweroffController(controllerId):
+            '''
+            Re provision all CRUD of a controller.
+            '''
+            try:
+                ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
+                self.ctrllerMsger.poweroffCtrller(ctrllerMac)
+
+                return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
+
+            except network.CtrllerDisconnected:
+                raise NotFound("Controller not connected")
+            except database.ControllerNotFound as controllerNotFound:
+                raise NotFound(str(controllerNotFound))
+            except database.ControllerError as controllerError:
+                raise ConflictError(str(controllerError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
+
+
+
+
 
 
 #--------------------------------------Door------------------------------------------
