@@ -37,3 +37,8 @@ if [ $answer == y ] || [ $answer == Y ]; then
 fi
 sudo systemctl daemon-reload
 
+read -p "Do you want to start Dobie Controller now (y/n): " answer
+if [ $answer == y ] || [ $answer == Y ]; then
+  sudo systemctl start dobie-c.service
+fi
+
