@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Visit Door Groups</h1>
+<h1 class="page-header"><?=get_text("Visit Door Groups",$lang);?></h1>
 </div>
 </div>
 
@@ -16,15 +16,15 @@ include("header.php");
 
 <div class="select-container">
 <form action="javascript:void(0)">
-<div class="select-container-title">Groups</div>
+<div class="select-container-title"><?=get_text("Groups",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="visit-door-groups-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="visit-door-groups-select">
 <select id="visit-door-groups-select" class="select-options form-control" name="visit-door-groups-select" size="2"></select>
 </div>
 <div class="select-container-footer">
-<button id="visit-door-groups-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">New</button>
-<button id="visit-door-groups-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled>Edit</button>
-<button id="visit-door-groups-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button>
+<button id="visit-door-groups-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("New",$lang);?></button>
+<button id="visit-door-groups-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><?=get_text("Edit",$lang);?></button>
+<button id="visit-door-groups-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button>
 </div>
 </form>
 </div>
@@ -45,13 +45,13 @@ include("footer.php");
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-new-label">New Visitor Group</h4>
+<h4 class="modal-title" id="modal-new-label"><?=get_text("New Visitor Group",$lang);?></h4>
 </div>
 <div class="modal-body">
 
 <form class="form-horizontal" id="visit-door-groups-new-form" action="#">
 <div class="form-group">
- <label class="control-label col-sm-2">Name:</label>
+ <label class="control-label col-sm-2"><?=get_text("Name",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="visit-door-groups-new-name" name="name" value="" required maxlength="64">
  </div>
@@ -62,9 +62,9 @@ include("footer.php");
  <div class="col-sm-5">
 <!--selects--> 
 <div class="select-container">
-<div class="select-container-title">Zones</div>
+<div class="select-container-title"><?=get_text("Zones",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="zones-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="zones-select">
 <select id="zones-select" class="select-options form-control select-options-small" name="zones-select" size="2"></select>
 </div>
 <div class="select-container-footer">
@@ -73,13 +73,13 @@ include("footer.php");
 </div>
 
 <div class="select-container" id="select-container-doors" style="display:none">
-<div class="select-container-title">Doors</div>
+<div class="select-container-title"><?=get_text("Doors",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="doors-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
 <select id="doors-select" class="select-options form-control select-options-small" name="doors-select[]" size="2" multiple></select>
 </div>
 <div class="select-container-footer">
-<button type="button" class="btn btn-success" id="doors-group-selectall">Select all</button>
+<button type="button" class="btn btn-success" id="doors-group-selectall"><?=get_text("Select all",$lang);?></button>
 <br>
 </div>
 </div>
@@ -94,9 +94,9 @@ include("footer.php");
  <div class="col-sm-5">
 
 <div class="select-container" id="select-container-doors-group-current">
-<div class="select-container-title">Doors in the group</div>
+<div class="select-container-title"><?=get_text("Doors in the group",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="doors-group-current-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-group-current-select">
 <select id="doors-group-current-select" class="select-options form-control" name="doors-group-current-select" size="2" multiple></select>
 </div>
 <div class="select-container-footer">
@@ -108,7 +108,7 @@ include("footer.php");
  </div>
 </div>
 <div class="modal-footer">
-<button class="btn btn-success" id="visit-door-groups-new-submit">Save</button>
+<button class="btn btn-success" id="visit-door-groups-new-submit"><?=get_text("Save",$lang);?></button>
 </div>
 </form>
 </div>
@@ -122,12 +122,12 @@ include("footer.php");
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-Are you sure?
+<?=get_text("Are you sure",$lang);?>?
 </div>
 <div class="modal-footer center">
 <form class="form-horizontal" id="visit-door-groups-delete-form" action="#">
-<button class="btn btn-success">Ok</button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -331,7 +331,7 @@ function resetForm(){
 	//clear group id value if edit
 	editId=0;
 	//modal title
-	$("#modal-new-label").text("New Visitor Group");
+	$("#modal-new-label").text("<?=get_text("New Visitor Group",$lang);?>");
 }
 
 //fetch info for new
@@ -358,7 +358,7 @@ $('#visit-door-groups-select-edit').click(function (event){
 				editId=values.id;
 				$('#visit-door-groups-new-name').val(values.name);
 				//modal title
-				$("#modal-new-label").text("Edit Visitor Group");
+				$("#modal-new-label").text("<?=get_text("Edit Visitor Group",$lang);?>");
 				//fetch group doors
 				$.ajax({
 					type: "POST",
@@ -377,7 +377,7 @@ $('#visit-door-groups-select-edit').click(function (event){
 					},
 					failure: function(){
 						//show modal error
-						$('#modal-error .modal-body').text("Operation failed, please try again");
+						$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 						$("#modal-error").modal("show");
 					}
 				});
@@ -389,7 +389,7 @@ $('#visit-door-groups-select-edit').click(function (event){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -397,8 +397,8 @@ $('#visit-door-groups-select-edit').click(function (event){
 
 /*
 TODO:
-- ver de hacer que al popular la doors list, que muestre todas las puertas como opcion que no estén todavia en el door group select
-- ver que al remover una puerta del door group, la agrege al door select sólo si es parte del mismo
+- try to make that when populating the door list, to show all the doors as options that are not yet on the door group select
+- try to make that when removing a door from the door group, to add it to the door select Only if its part of the same
 */
 
 //new/edit action
@@ -434,7 +434,7 @@ $("#visit-door-groups-new-form").submit(function(){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -464,13 +464,13 @@ $("#visit-door-groups-delete-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;

@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Event Search</h1>
+<h1 class="page-header"><?=get_text("Event Search",$lang);?></h1>
 </div>
 </div>
 
@@ -21,9 +21,9 @@ include("header.php");
 <div class="col-lg-4">
 
 <div class="select-container">
-<div class="select-container-title">Organizations</div>
+<div class="select-container-title"><?=get_text("Organizations",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="organizations-select">
 <select id="organizations-select" class="select-options select-options-small form-control" name="organizations-select" size="2"></select>
 </div>
 </div>
@@ -31,9 +31,9 @@ include("header.php");
 <br><br><br>
 
 <div class="select-container" id="select-container-persons" style="display:none">
-<div class="select-container-title">Person</div>
+<div class="select-container-title"><?=get_text("Person",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="person-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="person-select">
 <select id="persons-select" class="select-options select-options-small form-control" name="persons-select" size="2"></select>
 </div>
 </div>
@@ -44,9 +44,9 @@ include("header.php");
 
 <div class="select-container">
 <form action="javascript:void(0)">
-<div class="select-container-title">Zone</div>
+<div class="select-container-title"><?=get_text("Zone",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="zones-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="zones-select">
 <select id="zones-select" class="select-options select-options-small form-control" name="zones-select" size="2"></select>
 </div>
 <div class="select-container-footer">
@@ -57,9 +57,9 @@ include("header.php");
 
 <div class="select-container" id="select-container-doors" style="display:none">
 <form action="javascript:void(0)">
-<div class="select-container-title">Doors</div>
+<div class="select-container-title"><?=get_text("Doors",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="doors-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
 <select id="doors-select" class="select-options select-options-small form-control" name="doors-select" size="2"></select>
 </div>
 </form>
@@ -69,12 +69,12 @@ include("header.php");
 
 <div class="select-container container-bordered">
 <form action="javascript:void(0)">
-<div class="select-container-title">Direction</div>
+<div class="select-container-title"><?=get_text("Direction",$lang);?></div>
 <div class="select-container-body left">
 <br>
-<label><input type="radio" name="side" value="" checked> Both</label><br>
-<label><input type="radio" name="side" value="1"> Incoming</label><br>
-<label><input type="radio" name="side" value="0"> Outgoing</label>
+<label><input type="radio" name="side" value="" checked> <?=get_text("Both",$lang);?></label><br>
+<label><input type="radio" name="side" value="1"> <?=get_text("Incoming",$lang);?></label><br>
+<label><input type="radio" name="side" value="0"> <?=get_text("Outgoing",$lang);?></label>
 </div>
 </form>
 </div>
@@ -85,20 +85,20 @@ include("header.php");
 
 <div class="select-container">
 <form action="javascript:void(0)">
-<div class="select-container-title">Date and Time</div>
+<div class="select-container-title"><?=get_text("Date and Time",$lang);?></div>
 <div class="select-container-body left">
 <br>
-From:<br>
-<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="From Date"><input type="text" class="form-control input_date center" id="startDate" value="<?=date("Y-m-d",mktime(0,0,0)-(60*60*24*7))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
+<?=get_text("From",$lang);?>:<br>
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From Date",$lang);?>"><input type="text" class="form-control input_date center" id="startDate" value="<?=date("Y-m-d",mktime(0,0,0)-(60*60*24*7))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
 
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" id="startTime" name="startTime"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="startTime" name="startTime"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 
 <br><br>
 
-Until:<br>
-<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="Until Date"><input type="text" class="form-control input_date center" id="endDate" value="<?=date("Y-m-d",mktime(0,0,0)+(60*60*24))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
+<?=get_text("Until",$lang);?>:<br>
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until Date",$lang);?>"><input type="text" class="form-control input_date center" id="endDate" value="<?=date("Y-m-d",mktime(0,0,0)+(60*60*24))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
 
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" id="endTime"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="endTime"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 
 </div>
 </form>
@@ -106,8 +106,8 @@ Until:<br>
 
 <br><br><br>
 
-<button id="events-search-submit" class="btn btn-success" type="button">Search</button>
-<button id="events-search-reset" class="btn btn-warning" type="button">Reset</button>
+<button id="events-search-submit" class="btn btn-success" type="button"><?=get_text("Search",$lang);?></button>
+<button id="events-search-reset" class="btn btn-warning" type="button"><?=get_text("Reset",$lang);?></button>
 
 </div>
 
@@ -117,7 +117,7 @@ Until:<br>
 <div class="col-sm-6">
 
 <div class="alert alert-warning clickable left" id="search-again-button">
-<span class="fa fa-chevron-left"></span> Go back to search
+<span class="fa fa-chevron-left"></span> <?=get_text("Go back to search",$lang);?>
 </div>
 
 </div>
@@ -125,7 +125,7 @@ Until:<br>
 <div class="col-sm-6">
 
 <div class="alert alert-info clickable center" id="search-download-button">
-<span class="fa fa-download"></span> Export spreadsheet <span class="fa fa-spinner fa-spin download-throbber-container" style="display:none"></span>
+<span class="fa fa-download"></span> <?=get_text("Export spreadsheet",$lang);?> <span class="fa fa-spinner fa-spin download-throbber-container" style="display:none"></span>
 </div>
 
 </div>
@@ -151,35 +151,35 @@ Until:<br>
 <div id="legend-row" style="display:none">
 <div class="row">
 <div class="col-sm-12">
-* Persons in red were deleted or they are visitors that left the building.
+* <?=get_text("Persons in red were deleted or they are visitors that left the building",$lang);?>.
 <br>
 </div>
 </div>
 
 <div class="row">
 <div class="col-sm-3">
-<h4>Event Type</h4>
-<span class="fa fa-fw fa-address-card"></span> Identified Access<br>
-<span class="fa fa-fw fa-circle"></span> Access with button<br>
-<span class="fa fa-fw fa-chain-broken"></span> Door remains opened<br>
-<span class="fa fa-fw fa-bolt"></span> Door was forced
+<h4><?=get_text("Event Type",$lang);?></h4>
+<span class="fa fa-fw fa-address-card"></span> <?=get_text("Identified Access",$lang);?><br>
+<span class="fa fa-fw fa-circle"></span> <?=get_text("Access with button",$lang);?><br>
+<span class="fa fa-fw fa-chain-broken"></span> <?=get_text("Door remains opened",$lang);?><br>
+<span class="fa fa-fw fa-bolt"></span> <?=get_text("Door was forced",$lang);?>
 </div>
 <div class="col-sm-3">
 <h4>Lock</h4>
-<span class="fa fa-fw fa-feed"></span> Card Reader<br>
-<span class="fa fa-fw fa-thumbs-o-up"></span> Fingerprint Reader<br>
-<span class="fa fa-fw fa-circle"></span> Button
+<span class="fa fa-fw fa-feed"></span> <?=get_text("Card Reader",$lang);?><br>
+<span class="fa fa-fw fa-thumbs-o-up"></span> <?=get_text("Fingerprint Reader",$lang);?><br>
+<span class="fa fa-fw fa-circle"></span> <?=get_text("Button",$lang);?>
 </div>
 <div class="col-sm-3">
-<h4>Denial Cause</h4>
-<span class="fa fa-fw fa-ban"></span> No Access<br>
-<span class="fa fa-fw fa-calendar-times-o"></span> Expired Card<br>
-<span class="fa fa-fw fa-clock-o"></span> Out of time
+<h4><?=get_text("Denial Cause",$lang);?></h4>
+<span class="fa fa-fw fa-ban"></span> <?=get_text("No Access",$lang);?><br>
+<span class="fa fa-fw fa-calendar-times-o"></span> <?=get_text("Expired Card",$lang);?><br>
+<span class="fa fa-fw fa-clock-o"></span> <?=get_text("Out of time",$lang);?>
 </div>
 <div class="col-sm-3">
 <h4>Direction</h4>
-<span class="fa fa-fw fa-sign-in"></span> Incoming<br>
-<span class="fa fa-fw fa-sign-out"></span> Outgoing<br>
+<span class="fa fa-fw fa-sign-in"></span> <?=get_text("Incoming",$lang);?><br>
+<span class="fa fa-fw fa-sign-out"></span> <?=get_text("Outgoing",$lang);?><br>
 </div>
 
 </div>
@@ -291,11 +291,11 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 
 	//validate values > show error modal in case of error
 	//send ajax action and show pagination values
-	if(orgId!="" && isNaN(orgId)) error = "Invalid value for: organization";
-	else if(personId!="" && isNaN(personId)) error = "Invalid value for: person";
-	else if(zoneId!="" && isNaN(zoneId)) error = "Invalid value for: zone";
-	else if(doorId!="" && isNaN(doorId)) error = "Invalid value for: door";
-	else if(side!="" && isNaN(side)) error = "Invalid value for: direction";
+	if(orgId!="" && isNaN(orgId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("organization",$lang));?>";
+	else if(personId!="" && isNaN(personId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("person",$lang));?>";
+	else if(zoneId!="" && isNaN(zoneId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("zone",$lang));?>";
+	else if(doorId!="" && isNaN(doorId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("door",$lang));?>";
+	else if(side!="" && isNaN(side)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("direction",$lang));?>";
 
 	if(error==""){
 		if(downloadCsv){
@@ -304,8 +304,8 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 				type: "POST",
 				url: "process",
 				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + totalEvents,
-				beforeSend: function(){$(".download-throbber-container").show();},
-				complete: function(resp){$(".download-throbber-container").hide();},
+				beforeSend: function(){$(".download-throbber-container").show()},
+				complete: function(resp){$(".download-throbber-container").hide()},
 				success: function(resp){
 					if(resp[0]=='1'){
 						//trigger csv
@@ -318,7 +318,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 				},
 				failure: function(){
 					//show modal error
-					$('#modal-error .modal-body').text("Operation failed, please try again");
+					$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 					$("#modal-error").modal("show");
 				}
 			});
@@ -349,7 +349,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 				},
 				failure: function(){
 					//show modal error
-					$('#modal-error .modal-body').text("Operation failed, please try again");
+					$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 					$("#modal-error").modal("show");
 				}
 			});
@@ -368,7 +368,7 @@ function downloadCSV(eventsArr,csvFileName){
 	var separator = ";";
 	var linebreak = '\n';
 	//add column names in header
-	var csvContent = 'Type'+separator+'Zone'+separator+'Door'+separator+'Look'+separator+'Direction'+separator+'Date'+separator+'Time'+separator+'Organization'+separator+'Person'+separator+'Allowed'+separator+'Denial Cause'+separator+'Person Deleted'+linebreak;
+	var csvContent = '<?=get_text("Type",$lang);?>'+separator+'<?=get_text("Zone",$lang);?>'+separator+'<?=get_text("Door",$lang);?>'+separator+'<?=get_text("Lock",$lang);?>'+separator+'<?=get_text("Direction",$lang);?>'+separator+'<?=get_text("Date",$lang);?>'+separator+'<?=get_text("Time",$lang);?>'+separator+'<?=get_text("Organization",$lang);?>'+separator+'<?=get_text("Person",$lang);?>'+separator+'<?=get_text("Allowed",$lang);?>'+separator+'<?=get_text("Denial Cause",$lang);?>'+separator+'<?=get_text("Person Deleted",$lang);?>'+linebreak;
 	eventsArr.forEach(function(data){
 		//set no value for null values
 		if(data.orgName === null) data.orgName="";
@@ -409,7 +409,7 @@ function downloadCSV(eventsArr,csvFileName){
 //outputs html for event table based on received data from api
 function buildEventTable(data){
 	//init headers
-	var ret_string='<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr><th class="center">Type</th><th>Zone</th><th>Door</th><th class="center">Lock</th><th class="center">Direction</th><th>Date</th><th>Time</th><th>Organization</th><th>Person</th><th class="center">Allowed</th><th class="center">Denial Cause</th></tr>';
+	var ret_string='<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr><th class="center"><?=get_text("Type",$lang);?></th><th><?=get_text("Zone",$lang);?></th><th><?=get_text("Door",$lang);?></th><th class="center"><?=get_text("Lock",$lang);?></th><th class="center"><?=get_text("Direction",$lang);?></th><th><?=get_text("Date",$lang);?></th><th><?=get_text("Time",$lang);?></th><th><?=get_text("Organization",$lang);?></th><th><?=get_text("Person",$lang);?></th><th class="center"><?=get_text("Allowed",$lang);?></th><th class="center"><?=get_text("Denial Cause",$lang);?></th></tr>';
 
 	for(var i=0;i<data.length;i++){
 		//set no value for null values
@@ -472,28 +472,28 @@ function get_event_text(id,mode){
 		var iconstr="";
 		switch(mode){
 			case "type":
-				if(id==1) iconstr="Identified Access";
-				else if(id==2) iconstr="Access with button";
-				else if(id==3) iconstr="Door remains opened";
-				else if(id==4) iconstr="Door was forced";
+				if(id==1) iconstr="<?=get_text("Identified Access",$lang);?>";
+				else if(id==2) iconstr="<?=get_text("Access with button",$lang);?>";
+				else if(id==3) iconstr="<?=get_text("Door remains opened",$lang);?>";
+				else if(id==4) iconstr="<?=get_text("Door was forced",$lang);?>";
 			break;
 			case "doorlock":
-				if(id==1) iconstr="Card Reader";
-				else if(id==2) iconstr="Fingerprint Reader";
-				else if(id==3) iconstr="Button";
+				if(id==1) iconstr="<?=get_text("Card Reader",$lang);?>";
+				else if(id==2) iconstr="<?=get_text("Fingerprint Reader",$lang);?>";
+				else if(id==3) iconstr="<?=get_text("Button",$lang);?>";
 			break;
 			case "denialcause":
-				if(id==1) iconstr="No Access";
-				else if(id==2) iconstr="Expired Card";
-				else if(id==3) iconstr="Out of time";
+				if(id==1) iconstr="<?=get_text("No Access",$lang);?>";
+				else if(id==2) iconstr="<?=get_text("Expired Card",$lang);?>";
+				else if(id==3) iconstr="<?=get_text("Out of time",$lang);?>";
 			break;
 			case "side":
-				if(id==0) iconstr="Outgoing";
-				else if(id==1) iconstr="Incoming";
+				if(id==0) iconstr="<?=get_text("Outgoing",$lang);?>";
+				else if(id==1) iconstr="<?=get_text("Incoming",$lang);?>";
 			break;
 			case "allowed":
-				if(id==0) iconstr="No";
-				else if(id==1) iconstr="Yes";
+				if(id==0) iconstr="<?=get_text("No",$lang);?>";
+				else if(id==1) iconstr="<?=get_text("Yes",$lang);?>";
 			break;
 			default: break;
 		}
@@ -522,9 +522,9 @@ function showPagination(data){
 		}
 
 		//start pagination bar
-		pagination_str += "<nav aria-label=\"Paging navigation\"><ul class=\"pagination\">";
+		pagination_str += "<nav aria-label=\"<?=get_text("Paging navigation",$lang);?>\"><ul class=\"pagination\">";
 		//print previous button
-		if(page>1) pagination_str += "<li class=\"page-item\"><a class=\"page-link\" href=\"javascript:void(0)\" onclick=\"populateEventList("+ ((page-2)*perpage+1)+",perpage)\">Previous</a></li>";
+		if(page>1) pagination_str += "<li class=\"page-item\"><a class=\"page-link\" href=\"javascript:void(0)\" onclick=\"populateEventList("+ ((page-2)*perpage+1)+",perpage)\"><?=get_text("Previous",$lang);?></a></li>";
 		for(var j=1;j<=max_pages;j++){
 			//print current page
 			if(j==page) pagination_str += "<li class=\"page-item active\"><span class='page-link'>"+j+"</span></li>";
@@ -533,7 +533,7 @@ function showPagination(data){
 			
 		}
 		//print next button
-		if(page<max_pages) pagination_str += "<li class=\"page-item\"><a class=\"page-link\" href=\"javascript:void(0)\" onclick=\"populateEventList("+ (page*perpage+1)+",perpage)\">Next</a></li>";
+		if(page<max_pages) pagination_str += "<li class=\"page-item\"><a class=\"page-link\" href=\"javascript:void(0)\" onclick=\"populateEventList("+ (page*perpage+1)+",perpage)\"><?=get_text("Next",$lang);?></a></li>";
 		pagination_str += "</ul></nav>";
 	}
 

@@ -13,12 +13,12 @@ function print_text($lang, $texteng, $textesp, $textger="",$textpor="",$textfren
 	if($do_get) return $valret;
 	else echo $valret;
 }
-
-/* string version of print_text */
+/*
+// string version of print_text
 function get_text($lang, $texteng, $textesp, $textger="",$textpor="",$textfrench=""){
 	return print_text($lang, $texteng, $textesp, $textger,$textpor,$textfrench,1);
 }
-
+*/
 function print_note($string, $stringspa="", $lang="eng", $color="red", $stringger="", $stringpor="", $stringfrench=""){
 	echo "<p style='font-weight:bold;color:" . $color . ";'>";
 	print_text($lang, $string, $stringspa, $stringger, $stringpor, $stringfrench);
@@ -44,8 +44,9 @@ function persistsession(){
 	if(!$has_session and $has_cookie){
 		//perform login from cookie
 		$cookieparts=explode("|",$_COOKIE[$config->sesskeycookiename]);
-		//cookie should contain encrypt(password)|encrypt(roleid)|username|md5(http_user_agent)
-		if(count($cookieparts)==4){
+		//cookie should contain encrypt(password)|encrypt(roleid)|username|md5(http_user_agent)|lang
+		if(count($cookieparts)==5){
+			$lang= trim($cookieparts[4]);
 			$remoteuseragent= trim($cookieparts[3]);
 			$username= trim($cookieparts[2]);
 			$roleid_enc= trim($cookieparts[1]);
@@ -53,12 +54,13 @@ function persistsession(){
 			require_once("EnDecryptText.php");
 			$EnDecryptText = new EnDecryptText();
 			require_once("api-functions.php");
-			//only is cookie has correct data, do login. otherwise, unlog user.
+			//only if cookie has correct data, do login. otherwise, unlog user.
 			if(do_auth($username,$EnDecryptText->Decrypt_Text($password)) and $remoteuseragent==md5($_SERVER["HTTP_USER_AGENT"])){
 		      		//restore session
 		      		$_SESSION[$config->sesskey] = $username;
 		      		$_SESSION[$config->sesskey."pw"] = $password;
 		      		$_SESSION[$config->sesskey."rl"] = $EnDecryptText->Decrypt_Text($roleid_enc);
+		      		$_SESSION[$config->sesskey."lang"] = $lang;
 			} else {
 				//destroy cookies
 				setcookie($config->sesskeycookiename, "", time() - $config->cookie_lifetime);
