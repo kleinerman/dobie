@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Doors</h1>
+<h1 class="page-header"><?=get_text("Doors",$lang);?></h1>
 </div>
 </div>
 
@@ -16,9 +16,9 @@ include("header.php");
 
 <div class="select-container">
 <form action="javascript:void(0)">
-<div class="select-container-title">Zones</div>
+<div class="select-container-title"><?=get_text("Zones",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="zones-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="zones-select">
 <select id="zones-select" class="select-options form-control" name="zones-select" size="2"></select>
 </div>
 <div class="select-container-footer">
@@ -29,15 +29,15 @@ include("header.php");
 
 <div class="select-container" id="select-container-doors" style="display:none">
 <form action="javascript:void(0)">
-<div class="select-container-title">Doors</div>
+<div class="select-container-title"><?=get_text("Doors",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="doors-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
 <select id="doors-select" class="select-options form-control" name="doors-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
 <div class="select-container-footer">
-<button id="doors-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">New</button>
-<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled>Edit</button>
-<button id="doors-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button>
+<button id="doors-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("New",$lang);?></button>
+<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><?=get_text("Edit",$lang);?></button>
+<button id="doors-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button>
 </div>
 </form>
 </div>
@@ -58,13 +58,13 @@ include("footer.php");
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-new-label">New Door</h4>
+<h4 class="modal-title" id="modal-new-label"><?=get_text("New Door",$lang);?></h4>
 </div>
 <form class="form-horizontal" id="door-new-form" action="#">
 <div class="modal-body">
 
 <div class="form-group">
- <label class="control-label col-sm-2">Name:</label>
+ <label class="control-label col-sm-2"><?=get_text("Name",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="door-new-name" name="name" value="" required maxlength="64">
  </div>
@@ -73,9 +73,9 @@ include("footer.php");
 <div class="form-group">
 <div class="col-sm-5" id="controller-select">
 <div class="select-container">
-<div class="select-container-title">Controller</div>
+<div class="select-container-title"><?=get_text("Controller",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="controllers-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="controllers-select">
 <select id="controllers-select" class="select-options select-options-small form-control" name="controllers-select" size="2" required></select>
 </div>
 <div class="select-container-footer">
@@ -86,15 +86,15 @@ include("footer.php");
 
 <div class="col-sm-3">
 <div class="select-container" style="width:130px !important">
-<div class="select-container-title">Door Number</div>
+<div class="select-container-title"><?=get_text("Door Number",$lang);?></div>
 <div class="select-container-body">
 <select id="door-number-select" class="small_input form-control" name="door-number-select" size="3" required>
-<option value="0" disabled>None
+<option value="0" disabled><?=get_text("None",$lang);?>
 </select>
 </div>
 <div class="select-container-footer">
 <div class="left">
-<label><input type="checkbox" name="door-visit-exit" id="door-visit-exit"> Visit Exit</label>
+<label><input type="checkbox" name="door-visit-exit" id="door-visit-exit"> <?=get_text("Visit Exit",$lang);?></label>
 </div>
 </div>
 </div>
@@ -102,18 +102,18 @@ include("footer.php");
 
 <div class="col-sm-4">
 <div class="select-container">
-<div class="select-container-title">Times</div>
+<div class="select-container-title"><?=get_text("Times",$lang);?></div>
 <div class="select-container-body">
 <div class="displaytable table_padding">
-<div class="displayrow"><div class="displaycell left">Release Time (s)</div><div class="displaycell"> <input class="smaller_input" type="number" name="door-release-t" id="door-release-t" max="99" min="0" value="7" required></div></div>
-<div class="displayrow"><div class="displaycell left">Buzzer Time (s)</div><div class="displaycell"><input class="smaller_input" type="number" name="door-buzzer-t" id="door-buzzer-t" max="99" min="0" value="2" required>
+<div class="displayrow"><div class="displaycell left"><?=get_text("Release Time (s)",$lang);?></div><div class="displaycell"> <input class="smaller_input" type="number" name="door-release-t" id="door-release-t" max="99" min="0" value="7" required></div></div>
+<div class="displayrow"><div class="displaycell left"><?=get_text("Buzzer Time (s)",$lang);?></div><div class="displaycell"><input class="smaller_input" type="number" name="door-buzzer-t" id="door-buzzer-t" max="99" min="0" value="2" required>
 </div></div>
-<div class="displayrow"><div class="displaycell left">Alarm Timeout (s) </div><div class="displaycell"><input class="smaller_input" type="number" name="door-alarm-t" id="door-alarm-t" max="99" min="0" value="60" required>
+<div class="displayrow"><div class="displaycell left"><?=get_text("Alarm Timeout (s)",$lang);?></div><div class="displaycell"><input class="smaller_input" type="number" name="door-alarm-t" id="door-alarm-t" max="99" min="0" value="60" required>
 </div></div></div>
 <br>
-<div class="select-container-title">Door Sensor</div>
-<label><input type="radio" name="door-sensor" value="1"> NC (Normally Closed)</label>
-<label><input type="radio" name="door-sensor" value="0"> NO (Normally Open)</label>
+<div class="select-container-title"><?=get_text("Door Sensor",$lang);?></div>
+<label><input type="radio" name="door-sensor" value="1"> <?=get_text("NC (Normally Closed)",$lang);?></label>
+<label><input type="radio" name="door-sensor" value="0"> <?=get_text("NO (Normally Open)",$lang);?></label>
 </div>
 </div>
 </div>
@@ -122,7 +122,7 @@ include("footer.php");
 
 </div>
 <div class="modal-footer">
-<button class="btn btn-success" id="door-new-submit">Save</button>
+<button class="btn btn-success" id="door-new-submit"><?=get_text("Save",$lang);?></button>
 </div>
 </form>
 </div>
@@ -135,13 +135,13 @@ include("footer.php");
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-Deleting this door will remove all events that belong to it.<br>
-Are you sure?
+<?=get_text("Deleting this door will remove all events that belong to it",$lang);?>.<br>
+<?=get_text("Are you sure",$lang);?>?
 </div>
 <div class="modal-footer center">
 <form class="form-horizontal" id="door-delete-form" action="#">
-<button class="btn btn-success">Ok</button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -213,14 +213,14 @@ function resetForm(){
 	$("#controllers-select").empty();
 	//unselect options in fixed selects
 	$('#door-number-select').empty();
-	$('#door-number-select').append("<option value='0' disabled>None");
+	$('#door-number-select').append("<option value='0' disabled><?=get_text("None",$lang);?>");
 	//clear visit exit
 	$('#door-visit-exit').prop("checked",false);
 	//clear group id value if edit
 	editId=0;
 	editDoorNum=0;
 	//modal title
-	$("#modal-new-label").text("New Door");
+	$("#modal-new-label").text("<?=get_text("New Door",$lang);?>");
 	$('#door-release-t').val(7);
 	$('#door-buzzer-t').val(2);
 	$('#door-alarm-t').val(60);
@@ -262,7 +262,7 @@ function populateListDoorNums(selectId,id=0,hlvalue=""){
 		},
 		failure: function(){
 				//show error option
-				$("#"+selectId).append("<option value=''>Operation failed, please try again</option>");
+				$("#"+selectId).append("<option value=''><?=get_text("Operation failed, please try again",$lang);?></option>");
 		}
 	});
 }
@@ -292,7 +292,7 @@ $("#doors-select-edit").click(function(){
 				if(values.isVisitExit) $('#door-visit-exit').prop("checked",true);
 				else $('#door-visit-exit').prop("checked",false);
 				//modal title
-				$("#modal-new-label").text("Edit Door");
+				$("#modal-new-label").text("<?=get_text("Edit Door",$lang);?>");
 				//fill time number fields
 				$('#door-release-t').val(values.rlseTime);
 				$('#door-buzzer-t').val(values.bzzrTime);
@@ -308,7 +308,7 @@ $("#doors-select-edit").click(function(){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -348,13 +348,13 @@ $("#door-new-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
@@ -383,13 +383,13 @@ $("#door-delete-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;

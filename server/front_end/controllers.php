@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Controllers</h1>
+<h1 class="page-header"><?=get_text("Controllers",$lang);?></h1>
 </div>
 </div>
 
@@ -15,17 +15,18 @@ include("header.php");
 <div class="col-lg-12">
 
 <div class="table-container" id="rows-table-container">
-<input type="text" name="filter" placeholder="Filter names..." class="form-control data-filter-table" data-filter="rows-table">
+<input type="text" name="filter" placeholder="<?=get_text("Filter names",$lang);?>..." class="form-control data-filter-table" data-filter="rows-table">
 <table id="rows-table" class="table-bordered table-hover table-condensed table-responsive table-striped left">
 </table>
 </div>
 
 <br><br>
 <div class="row" id="buttons-row">
-<div class="col-sm-3"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">Add</button></div>
-<div class="col-sm-3"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled>Edit</button></div>
-<div class="col-sm-3"><button id="rows-reprov" class="btn btn-warning" type="button" data-toggle="modal" data-target="#modal-reprov" disabled>Reprogram</button></div>
-<div class="col-sm-3"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button></div>
+<div class="col-sm-2"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("Add",$lang);?></button></div>
+<div class="col-sm-2"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><?=get_text("Edit",$lang);?></button></div>
+<div class="col-sm-3"><button id="rows-reprov" class="btn btn-warning" type="button" data-toggle="modal" data-target="#modal-reprov" disabled><?=get_text("Reprogram",$lang);?></button></div>
+<div class="col-sm-3"><button id="rows-poweroff" class="btn btn-info" type="button" data-toggle="modal" data-target="#modal-poweroff" disabled><?=get_text("Power Off",$lang);?></button></div>
+<div class="col-sm-2"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button></div>
 </div>
 
 </div>
@@ -44,32 +45,32 @@ include("footer.php");
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-new-label">New Controller</h4>
+<h4 class="modal-title" id="modal-new-label"><?=get_text("New Controller",$lang);?></h4>
 </div>
 <form class="form-horizontal" id="controller-form" action="#">
 <div class="modal-body">
 <div class="form-group">
- <label class="control-label col-sm-2">Name:</label>
+ <label class="control-label col-sm-2"><?=get_text("Name",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="controller-name" name="name" value="" required>
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Controller Model:</label>
+ <label class="control-label col-sm-2"><?=get_text("Controller Model",$lang);?>:</label>
  <div class="col-sm-10">
-	<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="controller-model-select">
+	<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="controller-model-select">
 	<select id="controller-model-select" class="select-options select-options-small form-control" name="controller-model-select" size="2" required></select>
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">MAC Address:</label>
+ <label class="control-label col-sm-2"><?=get_text("MAC Address",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="controller-mac" name="mac" value="" required>
  </div>
 </div>
 </div>
 <div class="modal-footer">
-<button class="btn btn-success" id="controller-submit">Save</button>
+<button class="btn btn-success" id="controller-submit"><?=get_text("Save",$lang);?></button>
 </div>
 </form>
 </div>
@@ -82,12 +83,30 @@ include("footer.php");
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-Are you sure you want to reprogram this controller?
+<?=get_text("Are you sure you want to reprogram this controller",$lang);?>?
 </div>
 <div class="modal-footer center">
 <form class="form-horizontal" id="controller-reprov-form" action="#">
-<button class="btn btn-success">Ok</button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-reprov').modal('hide');">Cancel</button>
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-reprov').modal('hide');"><?=get_text("Cancel",$lang);?></button>
+</form>
+</div>
+</div>
+</div>
+<!-- /.modal -->
+</div>
+
+<!-- poweroff modal -->
+<div class="modal fade" id="modal-poweroff" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-body center">
+<?=get_text("Are you sure you want to power off this controller",$lang);?>?
+</div>
+<div class="modal-footer center">
+<form class="form-horizontal" id="controller-poweroff-form" action="#">
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-poweroff').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -100,12 +119,12 @@ Are you sure you want to reprogram this controller?
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-Are you sure?
+<?=get_text("Are you sure",$lang);?>?
 </div>
 <div class="modal-footer center">
 <form class="form-horizontal" id="controller-delete-form" action="#">
-<button class="btn btn-success">Ok</button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -144,7 +163,7 @@ function resetForm(){
 	//selects
 	$("#controller-model-select").empty();
 	//modal title
-	$("#modal-new-label").text("New Controller");
+	$("#modal-new-label").text("<?=get_text("New Controller",$lang);?>");
 	//clear id value if edit
 	editId=0;
 }
@@ -166,11 +185,11 @@ function tableClickEvents2(){
 		if($(this).prop("checked")) {
 			$("#rows-table td input[type=checkbox]").prop("checked",true);
 			//$("#rows-del").prop("disabled",false);
-			if($('#rows-table tr td input[type=checkbox]:checked').length == 1) $("#rows-edit,#rows-del,#rows-reprov").prop("disabled",false);
+			if($('#rows-table tr td input[type=checkbox]:checked').length == 1) $("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",false);
 		} else {
 			$("#rows-table td input[type=checkbox]").prop("checked",false);
 			//no rows selected > disable both
-			$("#rows-edit,#rows-del,#rows-reprov").prop("disabled",true);
+			$("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",true);
 		}
 	})
 	
@@ -180,11 +199,11 @@ function tableClickEvents2(){
 			//if at least 1 row selected > enable delete
 			//$("#rows-del").prop("disabled",false);
 			//enable edit only if 1 row is selected
-			if($('#rows-table tr td input[type=checkbox]:checked').length > 1) $("#rows-edit,#rows-del,#rows-reprov").prop("disabled",true);
-			else $("#rows-edit,#rows-del,#rows-reprov").prop("disabled",false);
+			if($('#rows-table tr td input[type=checkbox]:checked').length > 1) $("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",true);
+			else $("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",false);
 		} else {
 			//no rows selected > disable both
-			$("#rows-edit,#rows-del,#rows-reprov").prop("disabled",true);
+			$("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",true);
 		}
 	});
 }
@@ -201,7 +220,7 @@ function populateTable(tableId){
 			if(resp[0]=='1'){
 				var values = resp[1];
 				//set table headers
-				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th>Name</th><th>MAC</th><th>Last Seen</th><th class=\"center\">Reachable</th></tr>");
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("Name",$lang);?></th><th>MAC</th><th><?=get_text("Last Seen",$lang);?></th><th class=\"center\"><?=get_text("Reachable",$lang);?></th></tr>");
 				//populate fields with rec info
 				for(i=0;i<values.length;i++){
 					//show row
@@ -229,7 +248,7 @@ function populateTable(tableId){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -258,7 +277,7 @@ $("#rows-edit").click(function(){
 			if(resp[0]=='1'){
 				//populate fields with rec info
 				var values = resp[1];
-				$("#modal-new-label").text("Edit Controller");
+				$("#modal-new-label").text("<?=get_text("Edit Controller",$lang);?>");
 				$("#controller-name").val(values.name);
 				$('#controller-mac').val(values.macAddress);
 				editId=values.id;
@@ -272,7 +291,7 @@ $("#rows-edit").click(function(){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -299,7 +318,7 @@ $("#controller-form").submit(function(){
 
 	if(!isValidMac){
 		//invalid mac sent
-		$('#modal-error .modal-body').text("MAC address sent is not valid");
+		$('#modal-error .modal-body').text("<?=get_text("MAC address sent is not valid",$lang);?>");
 		$("#modal-error").modal("show");
 	} else if(controllerName!="" && controllerName!='undefined' && !isNaN(controllerModelId)){
 		$.ajax({
@@ -320,13 +339,13 @@ $("#controller-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
@@ -354,13 +373,47 @@ $("#controller-reprov-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
+		$("#modal-error").modal("show");
+	}
+	return false;
+});
+
+//poweroff action
+$("#controller-poweroff-form").submit(function(){
+	var controllerId = $('#rows-table tr td input[type=checkbox]:checked')[0].value;
+	if(!isNaN(controllerId)){
+		$.ajax({
+			type: "POST",
+			url: "process",
+			data: "action=poweroff_controller&id=" + controllerId,
+			success: function(resp){
+				if(resp[0]=='1'){
+					//close modal
+					$("#modal-poweroff").modal("hide");
+					//repopulate table
+					populateTable("rows-table");
+				} else {
+					//show modal error
+					$('#modal-error .modal-body').text(resp[1]);
+					$("#modal-error").modal("show");
+				}
+			},
+			failure: function(){
+				//show modal error
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
+				$("#modal-error").modal("show");
+			}
+		});
+	} else {
+		//invalid values sent
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
@@ -388,13 +441,13 @@ $("#controller-delete-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
