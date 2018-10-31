@@ -71,7 +71,7 @@ ob_start('ob_gzhandler');
 <nav class="navbar navbar-default navbar-static-top">
 <div class="navbar-header">
 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-<span class="sr-only"><?print_text($lang,"Toggle navigation","Cambiar navegación");?></span>
+<span class="sr-only"><?=get_text("Toggle navigation",$lang);?></span>
 <span class="icon-bar"></span>
 <span class="icon-bar"></span>
 <span class="icon-bar"></span>
@@ -81,7 +81,7 @@ ob_start('ob_gzhandler');
 <!-- /.navbar-header -->
 <ul class="nav navbar-top-links navbar-right">
 <li class="dropdown">
-<span id="plan_length"><?print_text($lang,"Hello","Hola");?>, <span class='bold'><?=$logged->name?>!</span></span>
+<span id="plan_length"><?=get_text("Hello",$lang);?>, <span class='bold'><?=$logged->name?>!</span></span>
 </li>
 <!-- /.dropdown -->
 <li class="dropdown">
@@ -89,10 +89,10 @@ ob_start('ob_gzhandler');
 <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
 </a>
 <ul class="dropdown-menu dropdown-user">
-<li><a href="settings"><i class="fa fa-gear fa-fw"></i> <?print_text($lang,"Settings","Configuración");?></a></li>
-<li><a href="help"><i class="fa fa-life-saver fa-fw"></i> <?print_text($lang,"Help","Ayuda");?></a></li>
+<li><a href="settings"><i class="fa fa-gear fa-fw"></i> <?=get_text("Settings",$lang);?></a></li>
+<li><a href="help"><i class="fa fa-life-saver fa-fw"></i> <?=get_text("Help",$lang);?></a></li>
 <li class="divider"></li>
-<li><a href="logout"><i class="fa fa-sign-out fa-fw"></i> <?print_text($lang,"Log out","Salir");?></a>
+<li><a href="logout"><i class="fa fa-sign-out fa-fw"></i> <?=get_text("Log out",$lang);?></a>
 </li>
 </ul>
 <!-- /.dropdown-user -->
@@ -105,57 +105,59 @@ ob_start('ob_gzhandler');
 <div class="sidebar-nav navbar-collapse">
 <ul class="nav" id="side-menu">
 <li>
-<a href="dashboard"><i class="fa fa-list-ul fa-fw"></i> <?print_text($lang,"Events","Events");?><span class="fa arrow"></span></a>
+<a href="dashboard"><i class="fa fa-list-ul fa-fw"></i> <?=get_text("Events",$lang);?><span class="fa arrow"></span></a>
 <ul class="nav nav-second-level">
 <li>
-<a href="events-live"><?print_text($lang,"Live","En vivo");?></a>
+<a href="events-live"><?=get_text("Live",$lang);?></a>
 </li>
 <li>
-<a href="events-search"><?print_text($lang,"Search","Búsqueda");?></a>
+<a href="events-search"><?=get_text("Search",$lang);?></a>
 </li>
 </ul>
 </li>
 <li>
-<a href="#"><i class="fa fa-male fa-fw"></i> <?print_text($lang,"Visitors","Visitas");?><span class="fa arrow"></span></a>
+<a href="#"><i class="fa fa-male fa-fw"></i> <?=get_text("Visitors",$lang);?><span class="fa arrow"></span></a>
 <ul class="nav nav-second-level">
+<?if($logged->roleid<3){?>
 <li>
-<a href="visit-door-groups"><?print_text($lang,"Visit Door Groups","Grupos de Puertas de Visitas");?></a>
+<a href="visit-door-groups"><?=get_text("Visit Door Groups",$lang);?></a>
 </li>
+<?}?>
 <li>
-<a href="visitors"><?print_text($lang,"Manage Visitors","Administrar Visitas");?></a>
+<a href="visitors"><?=get_text("Manage Visitors",$lang);?></a>
 </li>
 </ul>
 </li>
 <?if($logged->roleid<3){?>
 <li>
-<a href="organizations"><i class="fa fa-sitemap fa-fw"></i> <?print_text($lang,"Organizations","Organizaciones");?></a>
+<a href="organizations"><i class="fa fa-sitemap fa-fw"></i> <?=get_text("Organizations",$lang);?></a>
 </li>
 <li>
-<a href="persons"><i class="fa fa-users fa-fw"></i> <?print_text($lang,"Persons","Personas");?></a>
+<a href="persons"><i class="fa fa-users fa-fw"></i> <?=get_text("Persons",$lang);?></a>
 </li>
 <li>
-<a href="controllers"><i class="fa fa-gamepad fa-fw"></i> <?print_text($lang,"Controllers","Controladores");?></a>
+<a href="controllers"><i class="fa fa-gamepad fa-fw"></i> <?=get_text("Controllers",$lang);?></a>
 </li>
 <li>
-<a href="zones"><i class="fa fa-object-ungroup fa-fw"></i> <?print_text($lang,"Zones","Zonas");?></a>
+<a href="zones"><i class="fa fa-object-ungroup fa-fw"></i> <?=get_text("Zones",$lang);?></a>
 </li>
 <li>
-<a href="doors"><i class="fa fa-building-o fa-fw"></i> <?print_text($lang,"Doors","Puertas");?></a>
+<a href="doors"><i class="fa fa-building-o fa-fw"></i> <?=get_text("Doors",$lang);?></a>
 </li>
 <li>
-<a href="access"><i class="fa fa-handshake-o fa-fw"></i> <?print_text($lang,"Accesses","Accesos");?><span class="fa arrow"></span></a>
+<a href="access"><i class="fa fa-handshake-o fa-fw"></i> <?=get_text("Accesses",$lang);?><span class="fa arrow"></span></a>
 <ul class="nav nav-second-level">
 <li>
-<a href="accesses-person"><?print_text($lang,"Person","Persona");?> <span class="fa fa-long-arrow-right"></span> <?print_text($lang,"Door","Puerta");?></a>
+<a href="accesses-person"><?=get_text("Person",$lang);?> <span class="fa fa-long-arrow-right"></span> <?=get_text("Door",$lang);?></a>
 </li>
 <li>
-<a href="accesses-door"><?print_text($lang,"Door","Puerta");?> <span class="fa fa-long-arrow-right"></span> <?print_text($lang,"Person","Persona");?></a>
+<a href="accesses-door"><?=get_text("Door",$lang);?> <span class="fa fa-long-arrow-right"></span> <?=get_text("Person",$lang);?></a>
 </li>
 </ul>
 </li>
 <?if($logged->roleid==1){?>
 <li>
-<a href="system-users"><i class="fa fa-lock fa-fw"></i> <?print_text($lang,"System Users","Usuarios de sistema");?></a>
+<a href="system-users"><i class="fa fa-lock fa-fw"></i> <?=get_text("System Users",$lang);?></a>
 </li>
 <?}?>
 <?}?>

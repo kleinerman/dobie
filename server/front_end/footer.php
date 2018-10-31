@@ -29,6 +29,9 @@ $('body').tooltip({
 selector: "[data-toggle=tooltip]",
 container: "body"
 })
+<?if((in_array("jqueryui",$include_extra_js) or in_array("datepicker",$include_extra_js)) and $lang!="en"){?>
+$(function(){datepicker_localize("<?=$lang?>")});
+<?}?>
 </script>
 <?
 }

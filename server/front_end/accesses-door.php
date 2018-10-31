@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Access - Door -> Person</h1>
+<h1 class="page-header"><?=get_text("Access - Door -> Person",$lang);?></h1>
 </div>
 </div>
 
@@ -22,9 +22,9 @@ include("header.php");
 
 <div class="select-container">
 <form action="javascript:void(0)">
-<div class="select-container-title">Zone</div>
+<div class="select-container-title"><?=get_text("Zone",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="zones-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="zones-select">
 <select id="zones-select" class="select-options select-options-small form-control" name="zones-select" size="2"></select>
 </div>
 <div class="select-container-footer">
@@ -35,14 +35,14 @@ include("header.php");
 
 <div class="select-container" id="select-container-doors" style="display:none">
 <form action="javascript:void(0)">
-<div class="select-container-title">Doors</div>
+<div class="select-container-title"><?=get_text("Doors",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="doors-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
 <select id="doors-select" class="select-options select-options-small form-control" name="doors-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
 <div class="select-container-footer">
 <div class="left">
-<button id="doors-select-all" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit">Add to all...</button>
+<button id="doors-select-all" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Add to all",$lang);?>...</button>
 </div>
 </div>
 </form>
@@ -53,7 +53,7 @@ include("header.php");
 <div class="col-lg-9 center">
 
 <div class="table-container" id="accesses-table-container" style="display:none">
-<input type="text" name="filter" placeholder="Filter names..." class="form-control data-filter-table" data-filter="access-table">
+<input type="text" name="filter" placeholder="<?=get_text("Filter names",$lang);?>..." class="form-control data-filter-table" data-filter="access-table">
 <table id="access-table" class="table-bordered table-hover table-condensed table-responsive table-striped left">
 </table>
 </div>
@@ -64,9 +64,9 @@ include("header.php");
 
 <br><br>
 <div class="row" id="buttons-row" style="display:none">
-<div class="col-sm-4"><button id="access-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit">Add</button></div>
-<div class="col-sm-4"><button id="access-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit">Edit</button></div>
-<div class="col-sm-4"><button id="access-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete">Delete</button></div>
+<div class="col-sm-4"><button id="access-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Add",$lang);?></button></div>
+<div class="col-sm-4"><button id="access-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Edit",$lang);?></button></div>
+<div class="col-sm-4"><button id="access-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete"><?=get_text("Delete",$lang);?></button></div>
 </div>
 
 </div>
@@ -121,8 +121,8 @@ Are you sure?
 </div>
 <div class="modal-footer center">
 <form class="form-horizontal" id="access-delete-form" action="#">
-<button class="btn btn-success">Ok</button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -166,7 +166,7 @@ function populateTable(tableId,doorId){
 			if(resp[0]=='1'){
 				var values = resp[1];
 				//set table headers
-				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"accessesAll\" name=\"accessesAll\" value=\"1\"></th><th>Person</th><th>Organization</th><th class=\"center\">All Week</th></tr>");
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"accessesAll\" name=\"accessesAll\" value=\"1\"></th><th><?=get_text("Person",$lang);?></th><th><?=get_text("Organization",$lang);?></th><th class=\"center\"><?=get_text("All Week",$lang);?></th></tr>");
 				//populate fields with rec info
 				for(i=0;i<values.length;i++){
 					//set row class
@@ -189,7 +189,7 @@ function populateTable(tableId,doorId){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -273,18 +273,17 @@ $("#access-delete-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//no rows selected
-		$('#modal-error .modal-body').text("Make sure to select at least 1 row");
+		$('#modal-error .modal-body').text("<?=get_text("Make sure to select at least 1 row",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
 });
-
 </script>
 
 </body>

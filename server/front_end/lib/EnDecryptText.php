@@ -124,6 +124,7 @@
     $nChar = $this->Val($cChar);
     // Divide the value by the Key to get the real value of the character.
     if ($nEncKey > 0) $nChar2 = $nChar / $nEncKey;
+else $nChar2=0;
     // Convert the value to the character.
     $cChar2 = chr($nChar2);
     $cDecryptedText .= $cChar2;
@@ -289,14 +290,19 @@
   // $nLeft: Number of left characters to right.
   //------------------------------------------------------------------------------------
   function strleft($tmp, $nLeft)
-  {$len = strlen($tmp);
+/*  {$len = strlen($tmp);
    if ($nLeft == 0)
     $str = '';
    else if ($nLeft < $len)
     $str = $this->Mid($tmp, 1, $nLeft);
    return $str;
   }
-
+*/
+  {$len = strlen($tmp);
+   if ($nLeft < $len) $str = $this->Mid($tmp, 1, $nLeft);
+   else $str = '';
+   return $str;
+}
   //------------------------------------------------------------------------------------
   // Returns a specification number of characters of the right side of a chain.
   //------------------------------------------------------------------------------------
@@ -306,11 +312,16 @@
   // $nRight: Number of right characters to left.
   //------------------------------------------------------------------------------------
   function strright($tmp, $nRight)
-  {$len = strlen($tmp);
+/*  {$len = strlen($tmp);
    if ($nRight == 0)
     $str = '';
    else if ($nRight < $len)
     $str = $this->Mid($tmp, $len - $nRight + 1, $len);
+   return $str;
+  }*/
+{$len = strlen($tmp);
+   if ($nRight < $len) $str = $this->Mid($tmp, $len - $nRight + 1, $len);
+   else $str = '';
    return $str;
   }
 

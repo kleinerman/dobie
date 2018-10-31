@@ -24,14 +24,15 @@ if(isset($_POST['username'])){
 			$_SESSION[$config->sesskey."pw"] = $passw_enc;
 			$roleid_enc=$EnDecryptText->Encrypt_Text($user_obj->roleId);
 			$_SESSION[$config->sesskey."rl"] = $roleid_enc;
+			$_SESSION[$config->sesskey."lang"] = $user_obj->language;
 			//create cookie
-			setcookie($config->sesskeycookiename, $passw_enc ."|". $roleid_enc ."|".  $username."|".md5($_SERVER["HTTP_USER_AGENT"]), time() + $config->cookie_lifetime);
+			setcookie($config->sesskeycookiename, $passw_enc ."|". $roleid_enc ."|".  $username."|".md5($_SERVER["HTTP_USER_AGENT"]) . "|" . $user_obj->language, time() + $config->cookie_lifetime);
 			//redirect to main page
 			header("Location: $home_url");
 			die();
-		} else $error_catch['username'] = "This user is disabled. Contact the administrator";
+		} else $error_catch['username'] = get_text("This user is disabled. Contact the administrator",$lang);
 	} else {
-		$error_catch['username'] = "Invalid login";
+		$error_catch['username'] = get_text("Invalid login",$lang);
 	}
 }
 
@@ -48,12 +49,12 @@ include("header.php");
 <form method="post">
 <fieldset>
 <div class="form-group">
-<input type='text' name='username' class='form-control' maxlength="64" placeholder='User Name' autofocus value='<? if(isset($_POST['username'])) echo $_POST['username']?>' required>
+<input type='text' name='username' class='form-control' maxlength="64" placeholder='<?=get_text("User Name",$lang)?>' autofocus value='<? if(isset($_POST['username'])) echo $_POST['username']?>' required>
 </div>
 <div class="form-group">
-<input id="password" type='password' name='password' class='form-control' placeholder="Password" value="" maxlength="64" required>
+<input id="password" type='password' name='password' class='form-control' placeholder="<?=get_text("Password",$lang)?>" value="" maxlength="64" required>
 </div>
-<button class="btn btn-lg btn-success btn-block" type="submit">Sign In</button>
+<button class="btn btn-lg btn-success btn-block" type="submit"><?=get_text("Sign In",$lang)?></button>
 </fieldset>
 </form>
 </div>
@@ -62,6 +63,6 @@ include("header.php");
 </div>
 </div>
 <br><br><br>
-<div id="copyright-container" class="hidden-xs hidden-sm"><?=$config->sitetitle?> &copy; 2009-<?=date("Y")?> | All Rights Reserved.</div>
+<div id="copyright-container" class="hidden-xs hidden-sm"></div>
 </div>
 <? include("footer.php");?>

@@ -749,6 +749,17 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,"Controller could not be reprogrammed");
 			}
 		break;
+		case "poweroff_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$controllers_rec = poweroff_controller($logged->name,$logged->pw, $id);
+
+				if($controllers_rec) array_push($ret,1,"Controller turned off successfully");
+				else array_push($ret,0,"Controller could not be turned off");
+			}
+		break;
 
 		case "get_user":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
@@ -786,10 +797,11 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$password = isset($_POST['password']) ? $_POST['password'] : "";
 				$roleid = (isset($_POST['roleid']) and is_numeric($_POST['roleid'])) ? $_POST['roleid'] : "";
 				$active = (isset($_POST['active']) and is_numeric($_POST['active'])) ? $_POST['active'] : "";
+				$lang = (isset($_POST['lang'])) ? $_POST['lang'] : "";
 
 				if($id=="") array_push($ret,0,"Invalid values sent");
 	    			else {
-					$users_rec = set_user($logged->name, $logged->pw,$id, $fullname, $username, $password, $roleid, $active);
+					$users_rec = set_user($logged->name, $logged->pw,$id, $fullname, $username, $password, $roleid, $active, $lang);
 
 					if($users_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"User could not be updated");
@@ -804,8 +816,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$password = isset($_POST['password']) ? $_POST['password'] : "";
 				$roleid = (isset($_POST['roleid']) and is_numeric($_POST['roleid'])) ? $_POST['roleid'] : "";
 				$active = (isset($_POST['active']) and is_numeric($_POST['active'])) ? $_POST['active'] : "";
+				$lang = (isset($_POST['lang'])) ? $_POST['lang'] : "";
 
-				$users_rec = add_user($logged->name, $logged->pw, $fullname, $username,$password, $roleid, $active);
+				$users_rec = add_user($logged->name, $logged->pw, $fullname, $username,$password, $roleid, $active, $lang);
 
 				if($users_rec) array_push($ret,1,"Information saved successfully!");
 				else array_push($ret,0,"User could not be added");

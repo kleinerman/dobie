@@ -29,9 +29,9 @@ include("header.php");
 
 <div class="select-container">
 <form action="javascript:void(0)">
-<div class="select-container-title">Zone</div>
+<div class="select-container-title"><?=get_text("Zone",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="zones-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="zones-select">
 <select id="zones-select" class="select-options select-options-small form-control" name="zones-select" size="2"></select>
 </div>
 <div class="select-container-footer">
@@ -42,14 +42,14 @@ include("header.php");
 
 <div class="select-container" id="select-container-doors" style="display:none">
 <form action="javascript:void(0)">
-<div class="select-container-title">Doors</div>
+<div class="select-container-title"><?=get_text("Doors",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="doors-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
 <select id="doors-select" class="select-options select-options-small form-control" name="doors-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
 <div class="select-container-footer">
 <div class="left">
-<button id="doors-select-all" class="btn btn-success" type="button">Add to all...</button>
+<button id="doors-select-all" class="btn btn-success" type="button"><?=get_text("Add to all",$lang);?>...</button>
 </div>
 </div>
 </form>
@@ -67,85 +67,85 @@ include("header.php");
 <div class="row">
 
 <div class="col-lg-12 center">
-<div class="select-container-title">Schedule</div>
+<div class="select-container-title"><?=get_text("Schedule",$lang);?></div>
 <div class="schedule-container">
 <form id="access-edit-form" action="#">
 <table id="schedule-table" class="table-condensed table-responsive left">
-<tr><th>Day</th><th>Time interval</th><th class="center">Incoming</th><th class="center">Outgoing</th><th class="center">Both</th></tr>
-<tr><td><label><input type="checkbox" id="allWeek_check" name="days" value="" checked> Every day</label></td>
+<tr><th><?=get_text("Day",$lang);?></th><th><?=get_text("Time interval",$lang);?></th><th class="center"><?=get_text("Incoming",$lang);?></th><th class="center"><?=get_text("Outgoing",$lang);?></th><th class="center"><?=get_text("Both",$lang);?></th></tr>
+<tr><td><label><input type="checkbox" id="allWeek_check" name="days" value="" checked> <?=get_text("Every day",$lang);?></label></td>
 <td class="everyday_cell">
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center everyday_cell"><input type="radio" name="way0" value="1">
 </td><td class="center everyday_cell"><input type="radio" name="way0" value="2">
 </td><td class="center everyday_cell"><input type="radio" name="way0" value="3" checked>
 </td>
 </tr>
 
-<tr class="dayrow"><td><label><input type="checkbox" name="days" value="1"> Monday</label></td>
+<tr class="dayrow"><td><label><input type="checkbox" name="days" value="1"> <?=get_text("Monday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way1" value="1">
 </td><td class="center"><input type="radio" name="way1" value="2">
 </td><td class="center"><input type="radio" name="way1" value="3" checked>
 </td>
 </tr>
 
-<tr class="dayrow"><td><label><input type="checkbox" name="days" value="2"> Tuesday</label></td>
+<tr class="dayrow"><td><label><input type="checkbox" name="days" value="2"> <?=get_text("Tuesday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way2" value="1">
 </td><td class="center"><input type="radio" name="way2" value="2">
 </td><td class="center"><input type="radio" name="way2" value="3" checked>
 </td>
 </tr>
 
-<tr class="dayrow"><td><label><input type="checkbox" name="days" value="3"> Wednesday</label></td>
+<tr class="dayrow"><td><label><input type="checkbox" name="days" value="3"> <?=get_text("Wednesday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way3" value="1">
 </td><td class="center"><input type="radio" name="way3" value="2">
 </td><td class="center"><input type="radio" name="way3" value="3" checked>
 </td>
 </tr>
 
-<tr class="dayrow"><td><label><input type="checkbox" name="days" value="4"> Thursday</label></td>
+<tr class="dayrow"><td><label><input type="checkbox" name="days" value="4"> <?=get_text("Thursday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way4" value="1">
 </td><td class="center"><input type="radio" name="way4" value="2">
 </td><td class="center"><input type="radio" name="way4" value="3" checked>
 </td>
 </tr>
 
-<tr class="dayrow"><td><label><input type="checkbox" name="days" value="5"> Friday</label></td>
+<tr class="dayrow"><td><label><input type="checkbox" name="days" value="5"> <?=get_text("Friday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way5" value="1">
 </td><td class="center"><input type="radio" name="way5" value="2">
 </td><td class="center"><input type="radio" name="way5" value="3" checked>
 </td>
 </tr>
 
-<tr class="dayrow"><td><label><input type="checkbox" name="days" value="6"> Saturday</label></td>
+<tr class="dayrow"><td><label><input type="checkbox" name="days" value="6"> <?=get_text("Saturday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way6" value="1">
 </td><td class="center"><input type="radio" name="way6" value="2">
 </td><td class="center"><input type="radio" name="way6" value="3" checked>
 </td>
 </tr>
 
-<tr class="dayrow"><td><label><input type="checkbox" name="days" value="7"> Sunday</label></td>
+<tr class="dayrow"><td><label><input type="checkbox" name="days" value="7"> <?=get_text("Sunday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="From"><input type="text" class="form-control from-input" value="00:00" name="from7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="Until"><input type="text" class="form-control until-input" value="23:59" name="to7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </td><td class="center"><input type="radio" name="way7" value="1">
 </td><td class="center"><input type="radio" name="way7" value="2">
 </td><td class="center"><input type="radio" name="way7" value="3" checked>
@@ -155,9 +155,9 @@ include("header.php");
 <br>
 
 <div class="left">
-Expiration Date: <label><input type="radio" name="expiration" value="0" checked> No</label> <label><input type="radio" name="expiration" value="1"> Yes</label> &nbsp;&nbsp;<input type="text" class="form-control center" name="expiration_date" id="expiration_date" value="<?=date("Y-m-d",mktime(0,0,0)+(60*60*24*365))?>">
+<?=get_text("Expiration Date",$lang);?>: <label><input type="radio" name="expiration" value="0" checked> <?=get_text("No",$lang);?></label> <label><input type="radio" name="expiration" value="1"> <?=get_text("Yes",$lang);?></label> &nbsp;&nbsp;<input type="text" class="form-control center" name="expiration_date" id="expiration_date" value="<?=date("Y-m-d",mktime(0,0,0)+(60*60*24*365))?>">
 <br><br>
-<button class="btn btn-success" type="submit">Save</button>
+<button class="btn btn-success" type="submit"><?=get_text("Save",$lang);?></button>
 </div>
 
 </form>
@@ -248,8 +248,8 @@ var doorAll=0;
 if(!accessId){
 	//if create
 	//populate header with person name
-	if(personId!="all") $("#page-header").text("New access for " + parent.$("#persons-select option:selected").text());
-	else $("#page-header").text("New access for " + parent.$("#organizations-select option:selected").text());
+	if(personId!="all") $("#page-header").text("<?=get_text("New access for ",$lang);?> " + parent.$("#persons-select option:selected").text());
+	else $("#page-header").text("<?=get_text("New access for",$lang);?> " + parent.$("#organizations-select option:selected").text());
 } else {
 	//if edit
 	//fetch access data
@@ -263,7 +263,7 @@ if(!accessId){
 			values = resp[1];
 			//console.log(values);
 			//populate header as Edit Access for Door/Person
-			$("#page-header").text("Editing "+ values.personName + " -> " + values.doorName);
+			$("#page-header").text("<?=get_text("Editing ",$lang);?> "+ values.personName + " -> " + values.doorName);
 			//mark checkboxes according to days
 			if(values.allWeek){
 				//check allweek box > is checked by default
@@ -319,12 +319,12 @@ if(!accessId){
 			}
 		} else {
 			//show error
-			alert("Error fetching access data");
+			alert("<?=get_text("Error fetching access data",$lang);?>");
 		}
 	},
 	failure: function(){
 			//show error
-			alert("Error fetching access data");
+			alert("<?=get_text("Error fetching access data",$lang);?>");
 		}
 	});
 }
@@ -394,7 +394,7 @@ $("#access-edit-form").submit(function(){
 				},
 				failure: function(){
 					//show modal error
-					alert("Operation failed, please try again");
+					alert("<?=get_text("Operation failed, please try again",$lang);?>");
 				}
 			});
 		} else {
@@ -404,7 +404,7 @@ $("#access-edit-form").submit(function(){
 			var error=0;
 			
 			if($("input[name=days]:checked").length<1){
-				error="You must select at least 1 day of the week or check 'Every day'";
+				error="<?=get_text("You must select at least 1 day of the week or check 'Every day'",$lang);?>";
 			} else {
 				$("input[name=days]:checked").each(function(){
 					if($(this).val()!=""){
@@ -439,7 +439,7 @@ $("#access-edit-form").submit(function(){
 								//console.log(resp);
 							},
 							failure: function(){
-								error="Error when trying to create access";
+								error="<?=get_text("Error when trying to create access",$lang);?>";
 							}
 						});
 					}
@@ -494,7 +494,7 @@ $("#access-edit-form").submit(function(){
 				},
 				failure: function(){
 					//show modal error
-					alert("Error when trying to create access");
+					alert("<?=get_text("Error when trying to create access",$lang);?>");
 				}
 			});
 		} else {
@@ -505,7 +505,7 @@ $("#access-edit-form").submit(function(){
 			var days_payload=[];
 
 			if($("input[name=days]:checked").length<1){
-				alert("You must select at least 1 day of the week or check 'Every day'");
+				alert("<?=get_text("You must select at least 1 day of the week or check 'Every day'",$lang);?>");
 			} else {
 				$("input[name=days]:checked").each(function(){
 					if($(this).val()!=""){
@@ -540,9 +540,9 @@ $("#access-edit-form").submit(function(){
 					},
 					failure: function(){
 						//show modal error
-						alert("Failure when trying to edit access");
+						alert("<?=get_text("Error when trying to edit access",$lang);?>");
 					},
-					error: function(){alert("Error when trying to edit access")}
+					error: function(){alert("<?=get_text("Error when trying to edit access",$lang);?>")}
 				});
 			}
 		}

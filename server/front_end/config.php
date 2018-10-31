@@ -2,14 +2,16 @@
 error_reporting(E_ALL);
 $config=new stdClass();
 $config->sitetitle="Dobie";
-$config->sitedesc="Dobie Access Control";
-if(isset($windowtitle)) $config->sitetitle.= " - $windowtitle";
 $config->tableprefix="";
 $wwwroot = "/";
 $config->wwwroot = $wwwroot;
 
-$lang="en";
+//interface vars
 $home_url="events-search";
+//lang config
+$config->valid_langs=array("en","es");
+$config->valid_langs_names = array("en" => "English", "es" => "Español");
+$lang="en"; //default lang
 
 //api config
 $config->api_protocol="http";
@@ -18,6 +20,9 @@ $config->api_port="5000";
 $config->api_path="/api/v1.0/";
 if($config->api_port!="") $config->api_fullpath=$config->api_protocol."://".$config->api_hostname.":".$config->api_port.$config->api_path;
 else $config->api_fullpath=$config->api_protocol."://".$config->api_hostname.$config->api_path;
+
+//nodejs service config
+$nodejs_port=5004;
 
 //session settings
 $config->sesskeycookiename='dobiesesslog';
@@ -34,6 +39,7 @@ if(!isset($include_extra_js)) $include_extra_js=array();
 //define common libraries
 require_once("lib/lib.php");
 require_once("lib/api-functions.php");
+require_once("lang.php");
 
 //define islogged global variable and trigger db connection in case it is
 session_start();
@@ -52,6 +58,8 @@ if($islogged){
 	$logged->name=$_SESSION[$config->sesskey];
 	$logged->pw=$EnDecryptText->Decrypt_Text($_SESSION[$config->sesskey."pw"]);
 	$logged->roleid=$EnDecryptText->Decrypt_Text($_SESSION[$config->sesskey."rl"]);
+	$logged->lang=$_SESSION[$config->sesskey."lang"];
+	$lang=$logged->lang;
 	if($requirelogin){
 		//check if its logged and does not authenticates >> logout
 		if(!do_auth($logged->name,$logged->pw)){
@@ -78,4 +86,8 @@ if($islogged){
 		die();
 	} else $logged="";
 }
+
+//set title and description
+$config->sitedesc="Dobie " . get_text("Access Control",$lang);
+if(isset($windowtitle)) $config->sitetitle.= " - $windowtitle";
 ?>
