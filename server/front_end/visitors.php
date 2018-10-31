@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Manage Visitors</h1>
+<h1 class="page-header"><?=get_text("Manage Visitors",$lang);?></h1>
 </div>
 </div>
 
@@ -15,9 +15,9 @@ include("header.php");
 <div class="col-lg-5">
 
 <div class="select-container">
-<div class="select-container-title">Visit Door Groups</div>
+<div class="select-container-title"><?=get_text("Visit Door Groups",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="visit-door-groups-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="visit-door-groups-select">
 <select id="visit-door-groups-select" class="select-options form-control select-options-small" name="visit-door-groups-select" size="2"></select>
 </div>
 <div class="select-container-footer">
@@ -26,9 +26,9 @@ include("header.php");
 </div>
 
 <div class="select-container">
-<div class="select-container-title">Visiting Organization</div>
+<div class="select-container-title"><?=get_text("Visiting Organization",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="organizations-select">
 <select id="organizations-select" class="select-options form-control select-options-small" name="organizations-select" size="2"></select>
 </div>
 <div class="select-container-footer">
@@ -37,13 +37,13 @@ include("header.php");
 </div>
 
 <div class="select-container">
-<div class="select-container-title">Card Number</div>
+<div class="select-container-title"><?=get_text("Card Number",$lang);?></div>
 <div class="select-container-body">
 <input type="text" name="cardnum" class="form-control data-filter" id="cardnum">
 </div>
 <div class="select-container-footer">
-<button type="button" class="btn btn-success" id="visitors-search">Search</button> 
-<button id="visitors-search-reset" class="btn btn-warning" type="button">Reset</button>
+<button type="button" class="btn btn-success" id="visitors-search"><?=get_text("Search",$lang);?></button> 
+<button id="visitors-search-reset" class="btn btn-warning" type="button"><?=get_text("Reset",$lang);?></button>
 </div>
 </div>
 
@@ -51,14 +51,14 @@ include("header.php");
 
 <div class="col-lg-7">
 <div class="select-container" id="visitors-select-container">
-<div class="select-container-title">Visitors</div>
+<div class="select-container-title"><?=get_text("Visitors",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="visitors-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="visitors-select">
 <select id="visitors-select" class="select-options form-control" name="visitors-select" size="2"></select>
 </div>
 <div class="select-container-footer">
-<button type="button" class="btn btn-success" id="visitors-add" data-toggle="modal" data-target="#modal-new">Add</button> 
-<button type="button" class="btn btn-danger" id="visitors-del" data-toggle="modal" data-target="#modal-delete" disabled>Remove</button>
+<button type="button" class="btn btn-success" id="visitors-add" data-toggle="modal" data-target="#modal-new"><?=get_text("Add",$lang);?></button> 
+<button type="button" class="btn btn-danger" id="visitors-del" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Remove",$lang);?></button>
 </div>
 </div>
 </div>
@@ -78,7 +78,7 @@ include("footer.php");
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-new-label">Add Visitor</h4>
+<h4 class="modal-title" id="modal-new-label"><?=get_text("Add Visitor",$lang);?></h4>
 </div>
 
 <form class="form-horizontal" id="visit-new-form" action="#">
@@ -88,27 +88,27 @@ include("footer.php");
 <div class="row">
 
 <div class="col-sm-6">
-<label class="control-label">Name:</label><br>
+<label class="control-label"><?=get_text("Name",$lang);?>:</label><br>
 <input type="text" class="form-control" id="visit-name" name="name" value="" required maxlength="64">
 <br>
-<label class="control-label">Identification Number:</label><br>
+<label class="control-label"><?=get_text("Identification Number",$lang);?>:</label><br>
 <input type="text" class="form-control" id="visit-idnum" name="idnum" value="" required maxlength="64">
 <br>
-<label class="control-label">Card Number:</label><br>
+<label class="control-label"><?=get_text("Card Number",$lang);?>:</label><br>
 <input type="number" class="form-control" id="visit-cardnum" name="cardnum" value="" min="0" max="2147483646" required>
 <br>
-<label class="control-label">Expiration:</label><br>
-<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="Expiration Date"><input type="text" class="form-control input_date center" id="expiration-date" value="<?=date("Y-m-d",mktime(0,0,0))?>" required><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
+<label class="control-label"><?=get_text("Expiration",$lang);?>:</label><br>
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Date",$lang);?>"><input type="text" class="form-control input_date center" id="expiration-date" value="<?=date("Y-m-d",mktime(0,0,0))?>" required><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
 
-<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" title="Expiration Hour"><input type="text" class="form-control from-input" value="23:59" id="expiration-hour" required><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Hour",$lang);?>"><input type="text" class="form-control from-input" value="23:59" id="expiration-hour" required><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
 </div>
 
 <div class="col-sm-6">
 
 <div class="select-container">
-<div class="select-container-title">Visit Door Group</div>
+<div class="select-container-title"><?=get_text("Visit Door Group",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="visit-door-groups-select-new">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="visit-door-groups-select-new">
 <select id="visit-door-groups-select-new" class="select-options select-options-small form-control" name="visit-door-groups-select" size="2" multiple required></select>
 </div>
 <div class="select-container-footer">
@@ -116,9 +116,9 @@ include("footer.php");
 </div>
 
 <div class="select-container">
-<div class="select-container-title">Visiting Organization</div>
+<div class="select-container-title"><?=get_text("Visiting Organization",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select-new">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="organizations-select-new">
 <select id="organizations-select-new" class="select-options select-options-small form-control" name="organizations-select-new" size="2" required></select>
 </div>
 <div class="select-container-footer">
@@ -131,7 +131,7 @@ include("footer.php");
 
 </div>
 <div class="modal-footer">
-<button class="btn btn-success" id="visit-new-submit">Save</button>
+<button class="btn btn-success" id="visit-new-submit"><?=get_text("Save",$lang);?></button>
 </div>
 </form>
 </div>
@@ -143,12 +143,12 @@ include("footer.php");
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-Are you sure?
+<?=get_text("Are you sure",$lang);?>?
 </div>
 <div class="modal-footer center">
 <form class="form-horizontal" id="visitors-delete-form" action="#">
-<button class="btn btn-success">Ok</button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -254,7 +254,7 @@ function resetForm(){
 	//clear visiting org
 	$("#organizations-select-new").empty();
 	//modal title
-	$("#modal-new-label").text("Add Visitor");
+	$("#modal-new-label").text("<?=get_text("Add Visitor",$lang);?>");
 }
 
 //new/edit action
@@ -275,21 +275,20 @@ $("#visit-new-form").submit(function(){
 
 	//validate fields
 	if(visitName=="" || visitName == null){
-		error = "Please fill the Visit Name field";
+		error = "<?=get_text("Please fill the Visit Name field",$lang);?>";
 	} else if(visitIdNum=="" || visitIdNum == null){
-		error = "Please fill the Identification Number field";
+		error = "<?=get_text("Please fill the Identification Number field",$lang);?>";
 	} else if(visitCardNum=="" || visitCardNum == null){
-		error = "Please fill the Card Number field";
+		error = "<?=get_text("Please fill the Card Number field",$lang);?>";
 	} else if(isNaN(visitVisitedOrgId)){
-		error = "Please select an Organization";
+		error = "<?=get_text("Please select an Organization",$lang);?>";
 	} else if(visitDoorGroupIds.length<1){
-		error = "Please select at least one Door Group";
+		error = "<?=get_text("Please select at least one Door Group",$lang);?>";
 	} else {
 		$.ajax({
 			type: "POST",
 			url: "process",
 			data: "action=add_visit&name=" + visitName + "&idnum=" + visitIdNum + "&cardnum=" + visitCardNum + "&orgid=" + visitVisitedOrgId + "&expirationdate=" + expirationDate + "&expirationhour=" + expirationHour + "&doorgroupids=" + visitDoorGroupIds.join("|"),
-			complete: function(resp){console.log(resp)},
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
@@ -304,7 +303,7 @@ $("#visit-new-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
@@ -340,7 +339,7 @@ $("#visitors-delete-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});

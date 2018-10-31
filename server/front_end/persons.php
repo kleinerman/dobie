@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Persons</h1>
+<h1 class="page-header"><?=get_text("Persons",$lang);?></h1>
 </div>
 </div>
 
@@ -16,9 +16,9 @@ include("header.php");
 
 <div class="select-container">
 <form action="javascript:void(0)">
-<div class="select-container-title">Organizations</div>
+<div class="select-container-title"><?=get_text("Organizations",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="organizations-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="organizations-select">
 <select id="organizations-select" class="select-options form-control" name="organizations-select" size="2"></select>
 </div>
 <div class="select-container-footer">
@@ -29,15 +29,15 @@ include("header.php");
 
 <div class="select-container" id="select-container-persons" style="display:none">
 <form action="javascript:void(0)">
-<div class="select-container-title">Persons</div>
+<div class="select-container-title"><?=get_text("Persons",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="persons-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="persons-select">
 <select id="persons-select" class="select-options form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
 <div class="select-container-footer">
-<button id="persons-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">New</button>
-<button id="persons-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled>Edit</button>
-<button id="persons-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button>
+<button id="persons-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("New",$lang);?></button>
+<button id="persons-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled><?=get_text("Edit",$lang);?></button>
+<button id="persons-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button>
 </div>
 </form>
 </div>
@@ -58,25 +58,25 @@ include("footer.php");
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-new-label">New Person</h4>
+<h4 class="modal-title" id="modal-new-label"><?=get_text("New Person",$lang);?></h4>
 </div>
 <form class="form-horizontal" id="person-new-form" action="#">
 <div class="modal-body">
 
 <div class="form-group">
- <label class="control-label col-sm-2">Name:</label>
+ <label class="control-label col-sm-2"><?=get_text("Name",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="person-new-name" name="name" value="" required maxlength="64">
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Identification Number:</label>
+ <label class="control-label col-sm-2"><?=get_text("Identification Number",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="person-new-idnum" name="idnum" value="" maxlength="64">
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Card Number:</label>
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646">
  </div>
@@ -84,7 +84,7 @@ include("footer.php");
 
 </div>
 <div class="modal-footer">
-<button class="btn btn-success" id="person-new-submit">Save</button>
+<button class="btn btn-success" id="person-new-submit"><?=get_text("Save",$lang);?></button>
 </div>
 </form>
 </div>
@@ -98,26 +98,26 @@ include("footer.php");
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-edit-label">Edit Person</h4>
+<h4 class="modal-title" id="modal-edit-label"><?=get_text("Edit Person",$lang);?></h4>
 </div>
 <form class="form-horizontal" id="person-edit-form" action="#">
 <div class="modal-body">
 
 <div class="form-group">
- <label class="control-label col-sm-2">Name:</label>
+ <label class="control-label col-sm-2"><?=get_text("Name",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="person-edit-name" name="name" value="" maxlength="64" required>
       <input type="hidden" id="person-edit-id" name="id" value="">
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Identification Number:</label>
+ <label class="control-label col-sm-2"><?=get_text("Identification Number",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="person-edit-idnum" name="idnum" value="" maxlength="64">
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Card Number:</label>
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646">
  </div>
@@ -125,7 +125,7 @@ include("footer.php");
 
 </div>
 <div class="modal-footer">
-<button class="btn btn-success" id="person-edit-submit">Save</button>
+<button class="btn btn-success" id="person-edit-submit"><?=get_text("Save",$lang);?></button>
 </div>
 </form>
 </div>
@@ -138,12 +138,12 @@ include("footer.php");
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-Are you sure?
+<?=get_text("Are you sure",$lang);?>?
 </div>
 <div class="modal-footer center">
 <form class="form-horizontal" id="person-delete-form" action="#">
-<button class="btn btn-success">Ok</button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -219,7 +219,7 @@ $('#modal-edit').on('show.bs.modal', function (event){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -250,13 +250,13 @@ $("#person-new-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
@@ -288,13 +288,13 @@ $("#person-edit-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
@@ -323,13 +323,13 @@ $("#person-delete-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;

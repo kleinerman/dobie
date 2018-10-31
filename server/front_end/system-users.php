@@ -8,7 +8,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">System Users</h1>
+<h1 class="page-header"><?=get_text("System Users",$lang);?></h1>
 </div>
 </div>
 
@@ -16,16 +16,16 @@ include("header.php");
 <div class="col-lg-12">
 
 <div class="table-container" id="rows-table-container">
-<input type="text" name="filter" placeholder="Filter names..." class="form-control data-filter-table" data-filter="rows-table">
+<input type="text" name="filter" placeholder="<?=get_text("Filter names",$lang);?>..." class="form-control data-filter-table" data-filter="rows-table">
 <table id="rows-table" class="table-bordered table-hover table-condensed table-responsive table-striped left">
 </table>
 </div>
 
 <br><br>
 <div class="row" id="buttons-row">
-<div class="col-sm-4"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">Add</button></div>
-<div class="col-sm-4"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled>Edit</button></div>
-<div class="col-sm-4"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button></div>
+<div class="col-sm-4"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("Add",$lang);?></button></div>
+<div class="col-sm-4"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><?=get_text("Edit",$lang);?></button></div>
+<div class="col-sm-4"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button></div>
 </div>
 
 </div>
@@ -44,51 +44,63 @@ include("footer.php");
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-new-label">New System User</h4>
+<h4 class="modal-title" id="modal-new-label"><?=get_text("New System User",$lang);?></h4>
 </div>
 <form class="form-horizontal" id="user-new-form" action="#">
 <div class="modal-body">
 
 <div class="form-group">
- <label class="control-label col-sm-2">Full Name:</label>
+ <label class="control-label col-sm-2"><?=get_text("Full Name",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="user-new-fullname" name="fullname" value="" required maxlength="64">
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Username:</label>
+ <label class="control-label col-sm-2"><?=get_text("User name",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="user-new-name" name="name" value="" required maxlength="64">
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Password:</label>
+ <label class="control-label col-sm-2"><?=get_text("Password",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="password" class="form-control" id="user-new-password" name="password" value="">
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Confirm Password:</label>
+ <label class="control-label col-sm-2"><?=get_text("Confirm Password",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="password" class="form-control" id="user-new-cpassword" name="cpassword" value="">
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Role:</label>
+ <label class="control-label col-sm-2"><?=get_text("Role",$lang);?>:</label>
  <div class="col-sm-10">
       <select id="user-new-role" name="role" required></select>
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2">Active:</label>
+ <label class="control-label col-sm-2"><?=get_text("Active",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="checkbox" id="user-new-active" name="active" value="1">
+ </div>
+</div>
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Language",$lang);?>:</label>
+ <div class="col-sm-10">
+      <select id="user-new-lang" name="lang">
+<?php
+foreach($config->valid_langs as $langval){
+	echo "<option value='$langval'>".$config->valid_langs_names[$langval];
+}
+?>
+      </select>
  </div>
 </div>
 
 </div>
 <div class="modal-footer">
-<button class="btn btn-success" id="user-new-submit">Save</button>
+<button class="btn btn-success" id="user-new-submit"><?=get_text("Save",$lang);?></button>
 </div>
 </form>
 </div>
@@ -101,12 +113,12 @@ include("footer.php");
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-Are you sure?
+<?=get_text("Are you sure",$lang);?>?
 </div>
 <div class="modal-footer center">
 <form class="form-horizontal" id="user-delete-form" action="#">
-<button class="btn btn-success">Ok</button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -150,15 +162,15 @@ $(function(){
 				values.forEach(function(item,index){roleText[item.id]=item.description;});
 			} else {
 				//assign default values
-				roleText[1]="Administrator";
-				roleText[2]="Operator";
-				roleText[3]="Viewer";
+				roleText[1]="<?=get_text("Administrator",$lang);?>";
+				roleText[2]="<?=get_text("Operator",$lang);?>";
+				roleText[3]="<?=get_text("Viewer",$lang);?>";
 			}
 			populateTable("rows-table");
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Could not load roles");
+			$('#modal-error .modal-body').text("<?=get_text("Could not load roles",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -215,7 +227,7 @@ function populateTable(tableId){
 			if(resp[0]=='1'){
 				var values = resp[1];
 				//set table headers
-				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th>Username</th><th>Description</th><th>Role</th><th class=\"center\">Active</th></tr>");
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("User name",$lang);?></th><th><?=get_text("Description",$lang);?></th><th><?=get_text("Role",$lang);?></th><th class=\"center\"><?=get_text("Active",$lang);?></th></tr>");
 				//populate fields with rec info
 				for(i=0;i<values.length;i++){
 					//show row
@@ -232,7 +244,7 @@ function populateTable(tableId){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -254,7 +266,7 @@ function resetForm(){
 	//clear placeholder on passw fields
 	$('#user-new-password,#user-new-cpassword').prop("placeholder","");
 	//set passw fields to required
-	$('#user-new-password,#user-new-cpassword').prop("required",true);
+	//$('#user-new-password,#user-new-cpassword').prop("required",true);
 }
 
 //filter for tables
@@ -267,19 +279,23 @@ $(".data-filter-table").keyup(function(){
 	})
 });
 
+//on show both new and edit modals
 $('#modal-new').on('show.bs.modal', function (event){
 	//clear all previous values
 	resetForm();
 });
 
+//new user modal
 $("#rows-new").click(function(){
-	$("#modal-new-label").text("New System User");
+	$("#modal-new-label").text("<?=get_text("New System User",$lang);?>");
+	//set passw fields to required
+	$('#user-new-password,#user-new-cpassword').prop("required",true);
 });
 
 //fetch info for edit
 $("#rows-edit").click(function(){
 	var userId = $('#rows-table tr td input[type=checkbox]:checked')[0].value;
-	$("#modal-new-label").text("Edit User");
+	$("#modal-new-label").text("<?=get_text("Edit User",$lang);?>");
 	$.ajax({
 		type: "POST",
 		url: "process",
@@ -300,7 +316,10 @@ $("#rows-edit").click(function(){
 				//check active value
 				if(values.active==1) $('#user-new-active').prop("checked",true);
 				else $('#user-new-active').prop("checked",false);
-				
+				//select lang
+				//$('#user-new-lang option['+values.language+']').prop("selected","selected").change();
+				$('#user-new-lang').val(values.language).change();
+
 				//disable fields if editing admin
 				if(userId==1){
 					$('#user-new-name,#user-new-fullname,#user-new-role,#user-new-active').prop("disabled",true);
@@ -308,7 +327,7 @@ $("#rows-edit").click(function(){
 				//set placeholder on passw fields
 				$('#user-new-password,#user-new-cpassword').prop("placeholder","****");
 				//disabled required on passw fields
-				$('#user-new-password,#user-new-cpassword').prop("required",false);
+				$('#user-new-password,#user-new-cpassword').prop("required",false).change();
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
@@ -317,7 +336,7 @@ $("#rows-edit").click(function(){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -331,20 +350,21 @@ $("#user-new-form").submit(function(){
 	var userPassword = $("#user-new-password").val();
 	var userCPassword = $("#user-new-cpassword").val();
 	var userRole = $('#user-new-role').val();
+	var userLang = $('#user-new-lang').val();
 	if(typeof($('#user-new-active:checked').val())=="undefined") {var userActive = 0} else {var userActive = 1}
 	var errorTxt="";
 
 	if(editId!=0 && !isNaN(editId)) action_str="action=edit_user&id=" + editId;
 	else action_str="action=add_user";
 
-	action_str+= "&fullname=" + userFullName + "&username=" + userName + "&password=" + userPassword + "&roleid=" + userRole + "&active=" + userActive;
+	action_str+= "&fullname=" + userFullName + "&username=" + userName + "&password=" + userPassword + "&roleid=" + userRole + "&active=" + userActive + "&lang=" + userLang;
 
 	if(userPassword!=userCPassword){
-		errorTxt="Password and confirmation don't match";
+		errorTxt="<?=get_text("Password and confirmation don't match",$lang);?>";
 	} else if(isNaN(userRole)){
-		errorTxt="Invalid role sent";
-	} else if(userFullName=="" || userName=="" || (userPassword=="" && editId==0)){
-		errorTxt="Please fill all required fields";
+		errorTxt="<?=get_text("Invalid role sent",$lang);?>";
+	} else if(userFullName=="" || userName=="" || userLang=="" || (userPassword=="" && editId==0)){
+		errorTxt="<?=get_text("Please fill all required fields",$lang);?>";
 	} else {
 		$.ajax({
 			type: "POST",
@@ -364,12 +384,12 @@ $("#user-new-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	}
-	
+
 	if(errorTxt!=""){
 		//invalid values sent
 		$('#modal-error .modal-body').text(errorTxt);
@@ -385,7 +405,7 @@ $("#user-delete-form").submit(function(){
 	if(!isNaN(userId)){
 		if(userId==1){
 			//admin user cant be deleted
-			$('#modal-error .modal-body').text("Admin user cannot be deleted");
+			$('#modal-error .modal-body').text("<?=get_text("Admin user cannot be deleted",$lang);?>");
 			$("#modal-error").modal("show");
 		} else {
 			$.ajax({
@@ -406,14 +426,14 @@ $("#user-delete-form").submit(function(){
 				},
 				failure: function(){
 					//show modal error
-					$('#modal-error .modal-body').text("Operation failed, please try again");
+					$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 					$("#modal-error").modal("show");
 				}
 			});
 		}
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;

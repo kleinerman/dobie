@@ -837,6 +837,13 @@ function reprov_controller($user,$pass,$id){
 	else return $response->data;
 }
 
+function poweroff_controller($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."controller/$id/poweroff",$user,$pass,"put");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
 //System Users
 function get_users($user,$pass){
 	global $config;
@@ -866,10 +873,11 @@ function delete_user($user,$pass,$id){
 	else return $response->data;
 }
 
-function set_user($user,$pass,$id,$fullname,$username,$password,$roleid,$active){
+function set_user($user,$pass,$id,$fullname,$username,$password,$roleid,$active,$userlang="en"){
 	global $config;
 	$payload_obj = new stdClass();
 	if($password!="") $payload_obj->passwd= $password;
+	$payload_obj->language= $userlang;
 	//if admin, skip the other values
 	if($id!=1){
 		$payload_obj->fullName= $fullname;
@@ -882,7 +890,7 @@ function set_user($user,$pass,$id,$fullname,$username,$password,$roleid,$active)
 	else return $response->data;
 }
 
-function add_user($user,$pass,$fullname,$username,$password,$roleid,$active){
+function add_user($user,$pass,$fullname,$username,$password,$roleid,$active,$userlang="en"){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->fullName= $fullname;
@@ -890,13 +898,14 @@ function add_user($user,$pass,$fullname,$username,$password,$roleid,$active){
 	$payload_obj->passwd= $password;
 	$payload_obj->roleId= $roleid;
 	$payload_obj->active= $active;
+	$payload_obj->language= $userlang;
 	$response=send_request($config->api_fullpath."user",$user,$pass,"post",json_encode($payload_obj));
 	if($response->response_status != "201") return false;
 	else return $response->data;
 }
 
 if($DEBUG){
-	$res=get_organizations("admin","admin");
+	//$res=get_organizations("admin","admin");
 	//$res=do_auth("admin","admin");
 	//$res=get_organizations("admin","admin",2);
 	//$res=get_person_accesses("admin","admin",18);
@@ -937,9 +946,11 @@ if($DEBUG){
 //	$res=get_controller("admin","admin",3);
 	//$res=get_controller_models("admin","admin");
 	//$res=get_users("admin","admin");
+	//$res=get_user("admin","admin",5);
 	//$res=get_roles("admin","admin");
 	//$res=do_auth_user("admin","admin");
 //	$res=set_user("admin","admin",1,"Administrator","admin","admin2",1,1);
+	$res=set_user("admin","admin",5,"Andrea Sorini","asorini","andrea",3,1,"es");
 	echo "<pre>";
 	var_dump($res);
 }

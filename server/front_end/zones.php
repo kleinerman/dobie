@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header">Zones</h1>
+<h1 class="page-header"><?=get_text("Zones",$lang);?></h1>
 </div>
 </div>
 
@@ -17,13 +17,13 @@ include("header.php");
 <div class="select-container">
 <form action="javascript:void(0)">
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="Filter options..." class="form-control data-filter" data-filter="zones-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="zones-select">
 <select id="zones-select" class="select-options form-control" name="zones-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
 <div class="select-container-footer">
-<button id="zones-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new">New</button>
-<button id="zones-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled>Edit</button>
-<button id="zones-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled>Delete</button>
+<button id="zones-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("New",$lang);?></button>
+<button id="zones-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled><?=get_text("Edit",$lang);?></button>
+<button id="zones-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button>
 </div>
 </form>
 </div>
@@ -44,19 +44,19 @@ include("footer.php");
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-new-label">New Zone</h4>
+<h4 class="modal-title" id="modal-new-label"><?=get_text("New Zone",$lang);?></h4>
 </div>
 <form class="form-horizontal" id="zone-new-form" action="#">
 <div class="modal-body">
 <div class="form-group">
- <label class="control-label col-sm-2">Name:</label>
+ <label class="control-label col-sm-2"><?=get_text("Name",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="zone-new-name" name="name" value="" required>
  </div>
 </div>
 </div>
 <div class="modal-footer">
-<button class="btn btn-success" id="zone-new-submit">Save</button>
+<button class="btn btn-success" id="zone-new-submit"><?=get_text("Save",$lang);?></button>
 </div>
 </form>
 </div>
@@ -70,12 +70,12 @@ include("footer.php");
 <div class="modal-content">
 <div class="modal-header">
 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="modal-edit-label">Edit Zone</h4>
+<h4 class="modal-title" id="modal-edit-label"><?=get_text("Edit Zone",$lang);?></h4>
 </div>
 <form class="form-horizontal" id="zone-edit-form" action="#">
 <div class="modal-body">
 <div class="form-group">
- <label class="control-label col-sm-2">Name:</label>
+ <label class="control-label col-sm-2"><?=get_text("Name",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="zone-edit-name" name="name" value="" required>
       <input type="hidden" id="zone-edit-id" name="id" value="">
@@ -83,7 +83,7 @@ include("footer.php");
 </div>
 </div>
 <div class="modal-footer">
-<button class="btn btn-success" id="zone-edit-submit">Save</button>
+<button class="btn btn-success" id="zone-edit-submit"><?=get_text("Save",$lang);?></button>
 </div>
 </form>
 </div>
@@ -96,13 +96,13 @@ include("footer.php");
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-Deleting this zone will remove all doors that belong to it.<br>
+<?=get_text("Deleting this zone will remove all doors that belongs to it",$lang);?>.<br>
 Are you sure?
 </div>
 <div class="modal-footer center">
 <form class="form-horizontal" id="zone-delete-form" action="#">
-<button class="btn btn-success">Ok</button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');">Cancel</button>
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-delete').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -160,7 +160,7 @@ $('#modal-edit').on('show.bs.modal', function (event){
 		},
 		failure: function(){
 			//show modal error
-			$('#modal-error .modal-body').text("Operation failed, please try again");
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -188,13 +188,13 @@ $("#zone-new-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
@@ -223,13 +223,13 @@ $("#zone-edit-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
@@ -258,13 +258,13 @@ $("#zone-delete-form").submit(function(){
 			},
 			failure: function(){
 				//show modal error
-				$('#modal-error .modal-body').text("Operation failed, please try again");
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
 				$("#modal-error").modal("show");
 			}
 		});
 	} else {
 		//invalid values sent
-		$('#modal-error .modal-body').text("Invalid values sent");
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
 		$("#modal-error").modal("show");
 	}
 	return false;
