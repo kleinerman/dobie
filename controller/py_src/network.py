@@ -3,6 +3,7 @@ import logging
 import datetime
 import time
 import os
+import subprocess
 import re
 
 import select
@@ -257,6 +258,8 @@ class NetMngr(genmngr.GenericMngr):
         elif msg.startswith(RRC):
             self.sendToServer(RRRE + END)
 
+        elif msg.startswith(RPO):
+            subprocess.Popen([POWEROFF_BIN])
 
 
 
