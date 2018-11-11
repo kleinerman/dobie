@@ -1,6 +1,12 @@
 #!/bin/bash
 
 
+#This function is used to check and wait if the connection with the database
+#engine isn't up before doing any operation.
+#This is needed because the script which installs the server, calls this script
+#as soon as it starts the containers and sometimes the DB engine isn't ready
+#to receive connections or maybe the database container doesn't have an IP yet
+#and the DB_DOCKER_IP variable is empty.
 
 function chkcon {
 
@@ -55,9 +61,9 @@ THIS_SCRIPT_DIR=$(dirname $(realpath $0))
 
 . $THIS_SCRIPT_DIR/db-config
 
-
+#The DB_DOCKER_IP variable was already filled by the chkcon function.
+#For this reason, the following line isn't needed anymore
 #DB_DOCKER_IP=$(tr -d '", ' <<< $(docker inspect database | grep '"IPAddress": "1' | gawk '{print $2}'))
-#echo "DB Engine container found at: $DB_DOCKER_IP"
 
 case "$1" in
     -c)

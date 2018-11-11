@@ -27,5 +27,10 @@ NET_POLL_MSEC = 1000
 
 CONSIDER_DIED_MINS = 1
 
+
+NODEJS_HOST = 'nodejs'
+NODEJS_PORT = 5002
+NODEJS_TOUT = 2
+
 loggingLevel = logging.DEBUG
 

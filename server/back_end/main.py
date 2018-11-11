@@ -22,6 +22,7 @@ import crud, crudresndr
 import lifechecker
 from config import *
 import ctrllermsger
+import rtevent
 
 
 import os
@@ -54,8 +55,12 @@ class BackEndSrvr(object):
         signal.signal(signal.SIGTERM, self.finishHandler)
         signal.signal(signal.SIGINT, self.finishHandler)
 
-        #Creating the Message Receiver Thread
-        self.msgReceiver = msgreceiver.MsgReceiver(self.exitFlag)
+
+        #Creating Real Time Event Manager Thread
+        self.rtEventMngr = rtevent.RtEventMngr(self.exitFlag)
+
+        #Creating Message Receiver Thread
+        self.msgReceiver = msgreceiver.MsgReceiver(self.exitFlag, self.rtEventMngr.msgRecToRtEvent)
 
         #Creating the Crud Resender Thread
         self.crudReSndr = crudresndr.CrudReSndr(self.exitFlag)
@@ -111,6 +116,9 @@ class BackEndSrvr(object):
 
 
         self.logger.debug('Starting Server Back End')
+
+        #Starting "Real Time Event" thread
+        self.rtEventMngr.start()
 
         #Starting "Message Receiver" thread
         self.msgReceiver.start()
