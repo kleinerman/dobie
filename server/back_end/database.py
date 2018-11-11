@@ -440,6 +440,75 @@ class DataBase(object):
 
 
 
+    def getFmtEvent(self, event):
+        '''
+        It receives an event and returns the event formatted adding 
+        fields like zone name, door name, organization name, person name.
+        '''
+
+        #When sending the JSON via requests module in rtevent,
+        #the NULL values should be None
+        for k in event:
+            if event[k] == 'NULL':
+                event[k] = None
+
+        try:
+            #Getting from DB the Zone and Door name
+            sql = ("SELECT Zone.name AS zoneName, Door.name AS doorName "
+                   "FROM Door JOIN Zone ON (Door.zoneId = Zone.id) "
+                   "WHERE Door.id = {}".format(event['doorId'])
+                  )
+
+            self.execute(sql)
+            zoneAndDoor = self.cursor.fetchone()
+
+            #If the event involves a person, getting from DB the Organization
+            #and Person name
+            if event['personId']:
+                sql = ("SELECT Organization.name AS orgName, Person.name AS personName, "
+                       "FROM Person JOIN Organization ON (Person.orgId = Organization.id) "
+                       "WHERE Person.id = {}".format(event['personId'])
+                      )
+
+                self.execute(sql)
+                orgAndPerson = self.cursor.fetchone()
+
+            fmtEvent = {}
+            fmtEvent['eventTypeId'] = event['eventTypeId']
+            fmtEvent['zoneName'] = zoneAndDoor['zoneName']
+            fmtEvent['doorName'] = zoneAndDoor['doorName']
+
+            if event['personId']:
+                fmtEvent['orgName'] = orgAndPerson['orgName']
+                fmtEvent['personName'] = orgAndPerson['personName']
+            else:
+                fmtEvent['orgName'] = None
+                fmtEvent['personName'] = None
+
+            #Setting personDeleted field as None always as
+            #it has no sense in live events
+            fmtEvent['personDeleted'] = None
+            fmtEvent['doorLockId'] = event['doorLockId']
+            fmtEvent['dateTime'] = event['dateTime']
+            fmtEvent['side'] = event['side']
+            fmtEvent['allowed'] = event['allowed']
+            fmtEvent['denialCauseId'] = event['denialCauseId']
+
+            return fmtEvent
+
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise EventError
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise EventError
+
+
+
+
+
     def getEvents(self, orgId, personId, zoneId, doorId, startDateTime, 
                   endDateTime, side, startEvt, evtsQtty):
         '''

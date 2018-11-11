@@ -15,6 +15,7 @@ pip install --no-cache-dir Flask && \
 pip install --no-cache-dir Flask-HTTPAuth && \
 pip install --no-cache-dir PyMySQL && \
 pip install --no-cache-dir gevent && \
+pip install --no-cache-dir requests && \
 cp /usr/share/zoneinfo/America/Argentina/Cordoba /etc/localtime && \
 echo "America/Argentina/Cordoba" > /etc/timezone && \
 apk del openssl-dev libffi-dev musl-dev gcc tzdata && \
