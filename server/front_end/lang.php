@@ -404,13 +404,13 @@ $dictionary = array(
 		'es' => 'Tiempos'
 	),
 	strtolower('Release Time (s)') => array(
-		'es' => 'Tiempo de Apertura (s)'
+		'es' => 'T. de Apertura (s)'
 	),
 	strtolower('Buzzer Time (s)') => array(
-		'es' => 'Tiempo de Buzzer (s)'
+		'es' => 'T. de Buzzer (s)'
 	),
 	strtolower('Alarm Timeout (s)') => array(
-		'es' => 'Tiempo de Alarma (s)'
+		'es' => 'T. de Alarma (s)'
 	),
 	strtolower('Door Sensor') => array(
 		'es' => 'Sensor de Puerta'
