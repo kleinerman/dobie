@@ -1,0 +1,10 @@
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+$.ajax({
+method: "POST",
+url: "//quebec.capitalinasdc.com:5002/readevent",
+data: {"allowed":1,"dateTime":"2018-10-29 11:26","denialCauseId":null,"doorLockId":1,"doorName":"Puerta Principal","eventTypeId":1,"id":1,"orgName":"Bonifies Networks","personDeleted":0,"personName":"Daniel Falcioni","side":0,"zoneName":"Zona Sur"}
+}).done(function( msg ) {
+	alert(msg);
+});
+</script>

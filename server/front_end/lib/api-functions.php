@@ -930,7 +930,7 @@ if($DEBUG){
 //	add_access_allweek($user,$pass,$doorid,$personid,$iside,$oside,$starttime,$endtime,$expiredate){
 //	edit_access_allweek($user,$pass,$id,$iside,$oside,$starttime,$endtime,$expiredate){
 //	$res=add_access_allweek("admin","admin",1,3,1,1,"09:00","13:00","9999-12-31");
-	//$res=get_events("admin","admin","","","","","","2017-01-16","00:00","2018-08-16","00:00");
+	//$res=get_events("admin","admin","","","","","","2017-01-16","00:00","2019-08-16","00:00");
 	//$res=get_visit_door_groups("admin","admin");
 	//$res=get_visit_door_group("admin","admin",1);
 	//$res=set_visit_door_group("admin","admin",9,"Door Group 9","5|6");
@@ -950,8 +950,9 @@ if($DEBUG){
 	//$res=get_roles("admin","admin");
 	//$res=do_auth_user("admin","admin");
 //	$res=set_user("admin","admin",1,"Administrator","admin","admin2",1,1);
-	$res=set_user("admin","admin",5,"Andrea Sorini","asorini","andrea",3,1,"es");
-	echo "<pre>";
-	var_dump($res);
+//	$res=set_user("admin","admin",5,"Andrea Sorini","asorini","andrea",3,1,"es");
+	//echo "<pre>";
+	//var_dump($res);
+	//echo json_encode($res->data->events[0]);
 }
 ?>
