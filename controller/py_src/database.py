@@ -785,7 +785,7 @@ class DataBase(object):
             self.cursor.execute(sql)
             #self.connection.commit()
             
-            sql = "DELETE FROM Person WHERE id != 1"
+            sql = "DELETE FROM Person"
             self.cursor.execute(sql)
             #self.connection.commit()
 
