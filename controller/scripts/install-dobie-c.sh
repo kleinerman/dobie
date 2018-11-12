@@ -18,7 +18,27 @@ mkdir -p /var/lib/dobie-c/
 
 read -p "Do you want to set log rotation for Dobie Controller (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
-  cp dobie-c.logrotate /etc/logrotate.d/dobie-c
+cat > /tmp/dobie-c.logrotate << EOL
+/var/log/dobie-c/dobie-c.log
+{
+    daily
+    missingok
+    rotate 10
+    notifempty
+}
+
+/var/log/dobie-c/ioiface.log
+{
+    copytruncate
+    daily
+    missingok
+    rotate 10
+    notifempty
+}
+EOL
+
+sudo cp /tmp/dobie-c.logrotate /etc/logrotate.d/dobie-c
+sudo rm /tmp/dobie-c.logrotate
 fi
 
 echo "Removing previous DB if exists.."
@@ -29,7 +49,23 @@ echo "Creating and initializing a new DB.."
 ./init-db.py
 
 echo "Setting Dobie Controller as Systemd service.."
-cp dobie-c.service /etc/systemd/system/
+cat > /tmp/dobie-c.service << EOL
+[Unit]
+Description=Dobie controller service
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env python3 -u /opt/dobie/controller/py_src/main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOL
+sudo cp /tmp/dobie-c.service /etc/systemd/system/
+sudo rm /tmp/dobie-c.service
 
 read -p "Do you want to start Dobie Controller at boot time (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
