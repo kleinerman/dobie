@@ -76,7 +76,7 @@ ob_start('ob_gzhandler');
 <span class="icon-bar"></span>
 <span class="icon-bar"></span>
 </button>
-<a class="navbar-brand" href="events-live"> <?=$config->sitedesc?></a>
+<a class="navbar-brand" href="<?=$home_url?>"> <?=$config->sitedesc?></a>
 </div>
 <!-- /.navbar-header -->
 <ul class="nav navbar-top-links navbar-right">

@@ -428,43 +428,6 @@ function buildEventTable(data){
 	return ret_string;
 }
 
-//outputs html for the fa icon for all events
-function get_icon(id,mode){
-	if(id===null) return "";
-	else {
-		var iconstr="";
-		switch(mode){
-			case "type":
-				if(id==1) iconstr="address-card";
-				else if(id==2) iconstr="circle";
-				else if(id==3) iconstr="chain-broken";
-				else if(id==4) iconstr="bolt";
-			break;
-			case "doorlock":
-				if(id==1) iconstr="feed";
-				else if(id==2) iconstr="thumbs-o-up";
-				else if(id==3) iconstr="circle";
-			break;
-			case "denialcause":
-				if(id==1) iconstr="ban";
-				else if(id==2) iconstr="calendar-times-o";
-				else if(id==3) iconstr="clock-o";
-			break;
-			case "side":
-				if(id==0) iconstr="sign-out";
-				else if(id==1) iconstr="sign-in";
-			break;
-			case "allowed":
-				if(id==0) iconstr="times";
-				else if(id==1) iconstr="check";
-			break;
-			default: break;
-		}
-		if(iconstr!="") return "<span class='fa fa-"+ iconstr +"'></span>";
-		else return "";
-	}
-}
-
 //outputs text for all events
 function get_event_text(id,mode){
 	if(id===null) return "";
