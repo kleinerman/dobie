@@ -465,7 +465,7 @@ class DataBase(object):
             #If the event involves a person, getting from DB the Organization
             #and Person name
             if event['personId']:
-                sql = ("SELECT Organization.name AS orgName, Person.name AS personName, "
+                sql = ("SELECT Organization.name AS orgName, Person.name AS personName "
                        "FROM Person JOIN Organization ON (Person.orgId = Organization.id) "
                        "WHERE Person.id = {}".format(event['personId'])
                       )
@@ -613,6 +613,43 @@ class DataBase(object):
             raise EventError
 
         
+
+
+    def purgeEvents(self, untilDateTime):
+        '''
+        Deletes rows from Event table until "untilDateTime".
+        Also deletes persons from Person table which resStateId = DELETED
+        and have not more events in Event table.
+        Returns the amount of deleted events or raise "EventNotFound"
+        exception if any event wasn't deleted.
+        '''
+
+        if not untilDateTime:
+            #This is when the REST client doesn't send untilDateTime as
+            #argument in the URL
+            raise EventError('Can not delete events without untilDateTime')
+
+        try:
+
+            sql = "DELETE FROM Event WHERE dateTime <= '{}'".format(untilDateTime)
+            self.execute(sql)
+            delEvents = self.cursor.rowcount
+
+            if delEvents < 1:
+                raise EventNotFound('Events not found')
+
+
+            sql = ("DELETE FROM Person WHERE Person.resStateId = {} "
+                   "AND Person.id NOT IN (SELECT Event.personId "
+                   "FROM Event WHERE personId IS NOT NULL)".format(DELETED)
+                  )
+            self.execute(sql)
+
+            return delEvents
+
+        except (pymysql.err.IntegrityError, pymysql.err.InternalError) as dbEventError:
+            self.logger.debug(dbEventError)
+            raise EventError('Can not delete events')
 
 
 
