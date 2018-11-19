@@ -1595,6 +1595,33 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+        @app.route('/api/v1.0/purgeevents', methods=['DELETE'])
+        @auth.login_required
+        def purgeEvents():
+            '''
+            Deletes events from Event table until "untilDateTime" which is 
+            receivied as an argument
+            Returns a JSON object with the amount of deleted events.
+            If no event was deleted, a 404 Not Found will be returned
+            '''
+
+            try:
+
+                untilDateTime = request.args.get('untilDateTime')
+                delEvents = self.dataBase.purgeEvents(untilDateTime)
+                return jsonify({'delEvents': delEvents, 'message': 'Events Deleted'}), OK
+
+            except database.EventNotFound as eventNotFound:
+                raise NotFound(str(eventNotFound))
+
+            except (database.EventError, TypeError):
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
 
 #--------------------------------------Visitors------------------------------------------
 
