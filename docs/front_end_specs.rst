@@ -1924,6 +1924,111 @@ When all the filters are applied and search button is pressed a pop up window wi
 A button at the top will allow to export all pages of the result as a .csv file
 
 
+Events Live
+~~~~~~~~~~~
+|
+
+The Frontend should be able to receive a POST method with a JSON containing the event. The JSON will have the event in the same format as the above sections.
+
+
+**JSON**
+
+.. code-block::
+
+  {
+   "allowed": 1, 
+   "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT", 
+   "eventTypeId": 1, 
+   "id": 1543, 
+   "doorLockId": 1, 
+   "denialCauseId": null, 
+   "orgName": "Datacenter Capitalinas", 
+   "personName": "Jorge Kleinerman", 
+   "personDeleted": 0, 
+   "doorName": "Ingreso F66", 
+   "side": 1, 
+   "zoneName": "Ingreso Oficina"
+  }
+
+
+The endpoint should be:
+
+.. code-block::
+
+  http://hostname:port/readevent
+
+
+The events should be shown as soon as they are received in the following way:
+
+|
+
+.. image:: images_front_end_specs/events_live.png
+
+
+
+
+
+Purge Events
+~~~~~~~~~~~~
+|
+
+.. image:: images_front_end_specs/events_purge.png
+
+When the **Delete Events** button is pressed, a pop up should appear asking if the user is sure.
+|
+
+.. image:: images_front_end_specs/events_purge_confirmation.png
+
+
+The following REST method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/purgeevent?untilDateTime=2017-10-16+20:27
+
+
+``untilDateTime`` is a varible with the date that all the events before this date and time will be deleted.
+
+
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 44
+  Date: Tue, 20 Nov 2018 15:24:04 GMT
+
+  {"delEvents":54,"message":"Events Deleted"}
+
+
+The number of deleted events should be shown in a pop up
+
+|
+
+.. image:: images_front_end_specs/events_deleted_success.png
+
+
+If no events were deleted, the following message will arrive from server:
+
+.. code-block::
+
+  HTTP/1.1 404 NOT FOUND
+  Content-Type: application/json
+  Content-Length: 87
+  Date: Tue, 20 Nov 2018 17:20:27 GMT
+  
+  {"code":404,"error":"request not found","message":"Events not found","status":"error"}
+
+A pop up should indicate this.
+
+
 Visits
 ------
 
@@ -2679,7 +2784,7 @@ To get from the server the current list of controllers, the following REST metho
 Reprogram a controller
 ~~~~~~~~~~~~~~~~~~~~~~
 
-If a controller is replaced or it lost the doors, persons or/and the accesses, it can be reprovisioned, downloading all the configuration from the server to it.
+If a controller is replaced or it losts the doors, persons or/and the accesses, it can be reprovisioned, downloading all the configuration from the server to it.
 From the previous list, the controller to be reprovisioned, should be selected and the reprogram button should be pressed.
 The following method should be sent to the server:
 
