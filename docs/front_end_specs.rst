@@ -2824,6 +2824,56 @@ if the response is 404 NOT FOUND, a message should inform that the reprogramming
 
 
 
+Poweroff a controller
+~~~~~~~~~~~~~~~~~~~~~
+
+When we want to de-energize a controller, the correct way is to power off the operative system of the controller. To do this, the desired controller should be selected, and the power button off should be pressed.
+
+
+The following method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/controller/2/poweroff
+
+
+**Response:**
+
+if the response is 200 OK, a message should inform that the controller received the poweroff message.
+
+.. code-block::
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Content-Length: 47
+    Date: Tue, 20 Nov 2018 23:00:36 GMT
+    
+    {"message":"Controller accepted power off message","status":"OK"}
+
+
+
+if the response is 404 NOT FOUND, a message should inform that the controller doesn't receive the poweroff message.
+
+.. code-block::
+
+
+    HTTP/1.1 404 NOT FOUND
+    Content-Type: application/json
+    Content-Length: 91
+    Date: Tue, 20 Nov 2018 23:05:26 GMT
+    
+    {"code":404,"error":"request not found","message":"Controller not found","status":"error"}
+
+
+
+
+
+
+
 Get one controller
 ~~~~~~~~~~~~~~~~~~
 
