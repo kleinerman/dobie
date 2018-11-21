@@ -1119,7 +1119,7 @@ class CrudMngr(genmngr.GenericMngr):
                 ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
                 self.ctrllerMsger.poweroffCtrller(ctrllerMac)
 
-                return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
+                return jsonify({'status': 'OK', 'message': 'Controller accepted power off message'}), OK
 
             except network.CtrllerDisconnected:
                 raise NotFound("Controller not connected")
