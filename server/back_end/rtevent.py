@@ -3,6 +3,7 @@ import logging
 import requests
 
 import genmngr
+import database
 from config import *
 
 
@@ -25,6 +26,10 @@ class RtEventMngr(genmngr.GenericMngr):
 
         self.msgRecToRtEvent = queue.Queue()
 
+        #The creation of this object was moved to the run method to avoid
+        #freezing the main thread when there is no connection to database.
+        self.dataBase = None
+
 
 
     def run(self):
@@ -32,6 +37,9 @@ class RtEventMngr(genmngr.GenericMngr):
         This is the main method of the thread. Most of the time it is blocked
         waiting for events coming from the "Message Receiver" thread.
         '''
+
+        #First of all, the database should be connected by the execution of this thread
+        self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self)
 
         while True:
             try:
@@ -41,8 +49,20 @@ class RtEventMngr(genmngr.GenericMngr):
                 self.checkExit()
 
                 try:
-                    self.logger.debug("Sending to nodejs live event: {}".format(event))
-                    requests.post(self.nodejsUrl, json=event, timeout=NODEJS_TOUT)
+                    #Before sending the event to the events-live.js application,
+                    #it should be formatted adding some fields. This is done
+                    #using "getFmtEvent" function from database.
+                    #Is better to do this in this thread and not in "msgreceiver"
+                    #since here we have more time. Also if this thread crashes for 
+                    #a data base error is not so important as "msgreceiver" thread
+                    fmtEvent = self.dataBase.getFmtEvent(event)
+                except database.EventError:
+                    self.logger.warning("Error trying to format event")
+
+
+                try:
+                    self.logger.debug("Sending to nodejs live event: {}".format(fmtEvent))
+                    requests.post(self.nodejsUrl, json=fmtEvent, timeout=NODEJS_TOUT)
                 except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
                     self.logger.warning("Error trying to connect to nodejs")
 
