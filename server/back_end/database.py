@@ -1843,7 +1843,7 @@ class DataBase(object):
 
 
 
-    def setCtrllerNotReachable(self):
+    def setCtrllersNotReachable(self):
         '''
         To the current date and time subtract the amount of minutes that
         a controller which doesn't send a keep alive message is considered died.
@@ -1854,11 +1854,26 @@ class DataBase(object):
         considerDiedDateTime = datetime.datetime.now() - datetime.timedelta(minutes=CONSIDER_DIED_MINS)
         considerDiedDateTime = considerDiedDateTime.strftime('%Y-%m-%d %H:%M:%S')
 
-        sql = ("UPDATE Controller SET reachable = 0 WHERE lastSeen < '{}'"
-               "".format(considerDiedDateTime)
-              )
+        twoConsiderDiedDateTime = datetime.datetime.now() - datetime.timedelta(minutes=2*CONSIDER_DIED_MINS)
+        twoConsiderDiedDateTime = twoConsiderDiedDateTime.strftime('%Y-%m-%d %H:%M:%S')
+
         try:
+
+            sql = ("SELECT name, macAddress, lastSeen FROM Controller WHERE lastSeen < '{}' AND lastSeen > '{}'"
+               "".format(considerDiedDateTime, twoConsiderDiedDateTime)
+                  )
             self.execute(sql)
+            deadCtrllers = self.cursor.fetchall()
+            for deadCtrller in deadCtrllers:
+                deadCtrller['lastSeen'] = deadCtrller['lastSeen'].strftime('%Y-%m-%d %H:%M:%S')
+
+
+            sql = ("UPDATE Controller SET reachable = 0 WHERE lastSeen < '{}' AND lastSeen > '{}'"
+                   "".format(considerDiedDateTime, twoConsiderDiedDateTime)
+                  )
+            self.execute(sql)
+
+            return deadCtrllers
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)

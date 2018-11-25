@@ -18,7 +18,7 @@ class lifeChecker(genmngr.GenericMngr):
     CRUDs to this controller.    
     '''
 
-    def __init__(self, exitFlag):
+    def __init__(self, exitFlag, toRtEventQueue):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
@@ -37,6 +37,9 @@ class lifeChecker(genmngr.GenericMngr):
         #This is the actual iteration. This value is incremented in each iteration
         #and is initializated to 0.
         self.iteration = 0
+
+
+        self.toRtEventQueue = toRtEventQueue
 
 
 
@@ -59,7 +62,9 @@ class lifeChecker(genmngr.GenericMngr):
             if self.iteration >= self.ITERATIONS:
                 logMsg = 'Checking controller alivnesses.'
                 self.logger.debug(logMsg)
-                self.dataBase.setCtrllerNotReachable()
+                deadCtrllers = self.dataBase.setCtrllersNotReachable()
+                for deadCtrller in deadCtrllers:
+                    self.toRtEventQueue.put(deadCtrller)
                 self.iteration = 0
             else:
                 self.iteration += 1
