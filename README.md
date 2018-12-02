@@ -17,6 +17,12 @@ Detailed Reports
 The dashboard has a friendly user interface to query any kind of event captured by the controllers.
 Smart filters can help you to search events by date, time slot, organization, person, zone, door and even side.
 
+![IMAGE ALT TEXT](docs/images_readme/filters_screen.png)
+
+Detailed reports can be retrieved and exported as csv files.
+
+![IMAGE ALT TEXT](docs/images_readme/report_screen.png)
+
 
 High Scalability
 ----------------
