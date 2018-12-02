@@ -48,6 +48,9 @@ Autorecovery from Network Outages
 ---------------------------------
 
 Faced to network outages, the controller board can work without network and it has the ability to automatically restore the connection with the central server without manual intervention. Also it can keep all activity logs and send them to the main server after restore the connection.
+In the same way, all pending configuration and accesses created in the dashboard, will be sent to the controller after the recovery.
+
+
 
 
 
