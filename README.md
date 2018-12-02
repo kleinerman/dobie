@@ -8,6 +8,9 @@ Dobie is a reliable and high scalable access control system. It can fit in any 
 The system can work with just one controller managing up to three doors and add controllers on demand to add more doors.  
 Very flexible access managing, high detailed reports and real-time monitoring are some of the many strong features of the system.
 
+![IMAGE ALT TEXT](docs/images_readme/controller.png)
+
+
 Features
 ========
 
