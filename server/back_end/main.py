@@ -60,7 +60,7 @@ class BackEndSrvr(object):
         self.rtEventMngr = rtevent.RtEventMngr(self.exitFlag)
 
         #Creating Message Receiver Thread
-        self.msgReceiver = msgreceiver.MsgReceiver(self.exitFlag, self.rtEventMngr.msgRecToRtEvent)
+        self.msgReceiver = msgreceiver.MsgReceiver(self.exitFlag, self.rtEventMngr.toRtEventQueue)
 
         #Creating the Crud Resender Thread
         self.crudReSndr = crudresndr.CrudReSndr(self.exitFlag)
@@ -84,9 +84,8 @@ class BackEndSrvr(object):
         msgReceiverCtrllerMsger = ctrllermsger.CtrllerMsger(self.netMngr)
         self.msgReceiver.ctrllerMsger = msgReceiverCtrllerMsger
 
-
         #Controller Alivness Checker
-        self.lifeChecker = lifechecker.lifeChecker(self.exitFlag)
+        self.lifeChecker = lifechecker.lifeChecker(self.exitFlag, self.rtEventMngr.toRtEventQueue)
 
         #self.origSigIntHandler = signal.getsignal(signal.SIGINT)
 
