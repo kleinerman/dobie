@@ -465,7 +465,7 @@ class DataBase(object):
             #If the event involves a person, getting from DB the Organization
             #and Person name
             if event['personId']:
-                sql = ("SELECT Organization.name AS orgName, Person.name AS personName, "
+                sql = ("SELECT Organization.name AS orgName, Person.name AS personName "
                        "FROM Person JOIN Organization ON (Person.orgId = Organization.id) "
                        "WHERE Person.id = {}".format(event['personId'])
                       )
@@ -613,6 +613,43 @@ class DataBase(object):
             raise EventError
 
         
+
+
+    def purgeEvents(self, untilDateTime):
+        '''
+        Deletes rows from Event table until "untilDateTime".
+        Also deletes persons from Person table which resStateId = DELETED
+        and have not more events in Event table.
+        Returns the amount of deleted events or raise "EventNotFound"
+        exception if any event wasn't deleted.
+        '''
+
+        if not untilDateTime:
+            #This is when the REST client doesn't send untilDateTime as
+            #argument in the URL
+            raise EventError('Can not delete events without untilDateTime')
+
+        try:
+
+            sql = "DELETE FROM Event WHERE dateTime <= '{}'".format(untilDateTime)
+            self.execute(sql)
+            delEvents = self.cursor.rowcount
+
+            if delEvents < 1:
+                raise EventNotFound('Events not found')
+
+
+            sql = ("DELETE FROM Person WHERE Person.resStateId = {} "
+                   "AND Person.id NOT IN (SELECT Event.personId "
+                   "FROM Event WHERE personId IS NOT NULL)".format(DELETED)
+                  )
+            self.execute(sql)
+
+            return delEvents
+
+        except (pymysql.err.IntegrityError, pymysql.err.InternalError) as dbEventError:
+            self.logger.debug(dbEventError)
+            raise EventError('Can not delete events')
 
 
 
@@ -1782,53 +1819,82 @@ class DataBase(object):
     def setCtrllerReachable(self, ctrllerMac):
         '''
         Set "reachable" and update "lastSeen" date and time of the controller
-        received in the MAC address of the argument
+        which MAC address is received as argument.
+        If the controller wasn't previously alive, returns a dictionary with 
+        the controller parametters.
         '''
 
-        dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        sql = ("UPDATE Controller SET lastSeen = '{}', reachable = 1 WHERE "
-               "macAddress = '{}'".format(dateTime, ctrllerMac)
-              )
-
+        dateTimeNow = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         try:
+            #A JSON of the controller should be returned if the controller wasn't previously alive.
+            #If it was previously alive, no JSON should be returned and "revivedCtrller" will be None
+            sql = ("SELECT 1 AS reachable, name, macAddress, '{}' AS lastSeen FROM Controller WHERE "
+                   "macAddress = '{}' AND reachable = {}".format(dateTimeNow, ctrllerMac, 0)
+                  )
+            self.execute(sql)
+            revivedCtrller = self.cursor.fetchone()
+
+            #Every time a keep alive message is received, "lastSeen" column should
+            #be updated with now date and time.
+            sql = ("UPDATE Controller SET lastSeen = '{}', reachable = 1 WHERE "
+                   "macAddress = '{}'".format(dateTimeNow, ctrllerMac)
+                  )
             self.execute(sql)
 
-        except pymysql.err.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
+            return revivedCtrller
+
+        except (pymysql.err.IntegrityError, pymysql.err.InternalError) as dbEventError:
+            self.logger.debug(dbEventError)
             raise ControllerError('Can not update last seen and set reachable for this controller.')
-        except pymysql.err.InternalError as internalError:
-            self.logger.debug(internalError)
-            raise ControllerError('Can not update last seen and set reachable for this controller.')
 
 
 
 
 
-    def setCtrllerNotReachable(self):
+    def setCtrllersNotReachable(self):
         '''
-        To the current date and time subtract the amount of minutes that
-        a controller which doesn't send a keep alive message is considered died.
-        Then set in Controller table, the controllers which doesn't send keep
-        alive message before the previous time as not reachables.
+        To the current date and time, the amount of minutes a controller which
+        doesn't send a keep alive message is considered died, is substracted.
+        Then, set as "not reachables" in Controller table, the controllers which
+        didn't send "keep alive message" after the previous time.
+        To set the controller as "not reachable" and include it in the returned
+        list of dictionaries with controllers parametters, the "lastSeen" date and
+        time also should be after the substraction of current date and time minus
+        two times considered died time.
+        This is to avoid keep returning every time this method is called, the same
+        parametters of a died controller and continue generating the same live event.
         '''
 
-        considerDiedDateTime = datetime.datetime.now() - datetime.timedelta(minutes=CONSIDER_DIED_MINS)
-        considerDiedDateTime = considerDiedDateTime.strftime('%Y-%m-%d %H:%M:%S')
+        diedDateTime = datetime.datetime.now() - datetime.timedelta(minutes=CONSIDER_DIED_MINS)
+        diedDateTime = diedDateTime.strftime('%Y-%m-%d %H:%M:%S')
 
-        sql = ("UPDATE Controller SET reachable = 0 WHERE lastSeen < '{}'"
-               "".format(considerDiedDateTime)
-              )
+        twoDiedDateTime = datetime.datetime.now() - datetime.timedelta(minutes=2*CONSIDER_DIED_MINS)
+        twoDiedDateTime = twoDiedDateTime.strftime('%Y-%m-%d %H:%M:%S')
+
         try:
+            sql = ("UPDATE Controller SET reachable = 0 WHERE lastSeen < '{}' AND lastSeen > '{}'"
+                   "".format(diedDateTime, twoDiedDateTime)
+                  )
             self.execute(sql)
 
-        except pymysql.err.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            raise ControllerError('Can not set controllers as not reachable.')
-        except pymysql.err.InternalError as internalError:
-            self.logger.debug(internalError)
-            raise ControllerError('Can not set controllers as not reachable.')
+            sql = ("SELECT reachable, name, macAddress, lastSeen FROM "
+                   "Controller WHERE lastSeen < '{}' AND lastSeen > '{}'"
+                   "".format(diedDateTime, twoDiedDateTime)
+                  )
+            self.execute(sql)
+            deadCtrllers = self.cursor.fetchall()
+
+            for deadCtrller in deadCtrllers:
+                deadCtrller['lastSeen'] = deadCtrller['lastSeen'].strftime('%Y-%m-%d %H:%M:%S')
+
+            #deadCtrllers could be an empty tuple if all controllers are alive
+            return deadCtrllers
+
+        except (pymysql.err.IntegrityError, pymysql.err.InternalError) as dbEventError:
+            self.logger.debug(dbEventError)
+            raise ControllerError('Can not set contollers as not reachable.')
+
 
 
 

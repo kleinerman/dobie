@@ -9,10 +9,12 @@ from config import *
 class RtEventMngr(genmngr.GenericMngr):
     '''
     This thread is created by the main thread.
-    When the message receiver thread receives an event, it 
-    puts the event in "msgRecToRtEvent" queue (attribute of this class). 
-    This thread gets the events from the queue and sends then to the 
-    events-live.js app running in nodejs via REST using a POST method.
+    When the "message receiver thread" receives an event from the controller,
+    or it receives a "keep alive" message detecting that a controller revives,
+    or "life checker" thread detects that a controller died, the event is put
+    in "toRtEventQueue" queue (attribute of this class). 
+    This thread gets the events from the queue and sends them to the events-live.js
+    app running in nodejs via REST using a POST method.
     '''
 
     def __init__(self, exitFlag):
@@ -23,7 +25,7 @@ class RtEventMngr(genmngr.GenericMngr):
    
         self.nodejsUrl = 'http://{}:{}/readevent'.format(NODEJS_HOST, NODEJS_PORT)
 
-        self.msgRecToRtEvent = queue.Queue()
+        self.toRtEventQueue = queue.Queue()
 
 
 
@@ -35,9 +37,9 @@ class RtEventMngr(genmngr.GenericMngr):
 
         while True:
             try:
-                #Blocking until Message Receiver thread sends an event or 
-                #EXIT_CHECK_TIME expires 
-                event = self.msgRecToRtEvent.get(timeout=EXIT_CHECK_TIME)
+                #Blocking until Message Receiver or Life Checker thread sends 
+                #an event or EXIT_CHECK_TIME expires.
+                event = self.toRtEventQueue.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
 
                 try:
