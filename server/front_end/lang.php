@@ -231,6 +231,51 @@ $dictionary = array(
 		'es' => 'Persona Borrada'
 	),
 
+	//events live
+	strtolower('Clear filter') => array(
+		'es' => 'Limpiar filtro'
+	),
+	strtolower('Clear events') => array(
+		'es' => 'Limpiar eventos'
+	),
+
+	//events purge
+	strtolower('Purge') => array(
+		'es' => 'Purgar'
+	),
+	strtolower('Events Purge') => array(
+		'es' => 'Purgar Eventos'
+	),
+	strtolower('Events before selected date and time will be erased') => array(
+		'es' => 'Los eventos ocurridos antes de la fecha y hora indicados serán borrados'
+	),
+	strtolower('Purge Until') => array(
+		'es' => 'Purgar Hasta'
+	),
+	strtolower('Purge Until Time') => array(
+		'es' => 'Purgar Hasta Hora'
+	),
+	strtolower('Delete Events') => array(
+		'es' => 'Eliminar Eventos'
+	),
+	strtolower('Are you sure you want to remove all events before') => array(
+		'es' => 'Está seguro que quiere eliminar todos los eventos anteriores a'
+	),
+	strtolower('events were deleted successfully') => array(
+		'es' => 'eventos fueron eliminados exitosamente'
+	),
+
+	//events live
+	strtolower('Events Live') => array(
+		'es' => 'Eventos en Vivo'
+	),
+	strtolower('Filter') => array(
+		'es' => 'Filtrar'
+	),
+	strtolower('No events') => array(
+		'es' => 'Sin eventos'
+	),
+
 	//visit door groups
 	strtolower('Groups') => array(
 		'es' => 'Grupos'
@@ -249,6 +294,15 @@ $dictionary = array(
 	),
 	strtolower('Name') => array(
 		'es' => 'Nombre'
+	),
+	strtolower('Names') => array(
+		'es' => 'Nombres'
+	),
+	strtolower('First Name') => array(
+		'es' => 'Nombre de Pila'
+	),
+	strtolower('Last Name') => array(
+		'es' => 'Apellido'
 	),
 	strtolower('Select all') => array(
 		'es' => 'Seleccionar todos'
@@ -303,8 +357,11 @@ $dictionary = array(
 	strtolower('Visit Door Group') => array(
 		'es' => 'Grupo de Puertas de Visitas'
 	),
-	strtolower('Please fill the Visit Name field') => array(
-		'es' => 'Por favor llenar el campo de Nombre de Visita'
+	strtolower('Please fill the Visit Names field') => array(
+		'es' => 'Por favor llenar el campo de Nombres de Visita'
+	),
+	strtolower('Please fill the Visit Last Name field') => array(
+		'es' => 'Por favor llenar el campo de Apellido de Visita'
 	),
 	strtolower('Please fill the Identification Number field') => array(
 		'es' => 'Por favor llenar el campo de Número de Identificación'
@@ -336,6 +393,24 @@ $dictionary = array(
 	),
 	strtolower('Edit Person') => array(
 		'es' => 'Editar Persona'
+	),
+	strtolower('Import CSV') => array(
+		'es' => 'Importar CSV'
+	),
+	strtolower('Import a .CSV file with rows with the following format') => array(
+		'es' => 'Importar un archivo .CSV de filas con el siguiente formato'
+	),
+	strtolower('Ignore first line of file (column headers)') => array(
+		'es' => 'Ignorar primer línea de archivo (encabezados de columna)'
+	),
+	strtolower('Send') => array(
+		'es' => 'Enviar'
+	),
+	strtolower('Make sure the csv file has the correct format, and preferably UTF-8 encoding.') => array(
+		'es' => 'Asegurese que el archivo CSV tenga un formato correcto, preferiblemente con encoding UTF-8.'
+	),
+	strtolower('Total persons imported') => array(
+		'es' => 'Total de personas importadas'
 	),
 
 	//controllers

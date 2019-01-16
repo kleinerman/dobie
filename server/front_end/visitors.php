@@ -88,8 +88,11 @@ include("footer.php");
 <div class="row">
 
 <div class="col-sm-6">
-<label class="control-label"><?=get_text("Name",$lang);?>:</label><br>
-<input type="text" class="form-control" id="visit-name" name="name" value="" required maxlength="64">
+<label class="control-label"><?=get_text("First Name",$lang);?>:</label><br>
+<input type="text" class="form-control" id="visit-names" name="names" value="" required maxlength="64">
+<br>
+<label class="control-label"><?=get_text("Last Name",$lang);?>:</label><br>
+<input type="text" class="form-control" id="visit-lastname" name="lastname" value="" required maxlength="64">
 <br>
 <label class="control-label"><?=get_text("Identification Number",$lang);?>:</label><br>
 <input type="text" class="form-control" id="visit-idnum" name="idnum" value="" required maxlength="64">
@@ -244,7 +247,7 @@ $("#visitors-select").change(function(){
 
 function resetForm(){
 	//name, id and cardnum
-	$("#visit-name,#visit-idnum,#visit-cardnum").val("");
+	$("#visit-names,#visit-lastname,#visit-idnum,#visit-cardnum").val("");
 	//clear date and time to defaults
 	var dateobj = new Date();
 	$("#expiration-date").val(dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()));
@@ -259,7 +262,8 @@ function resetForm(){
 
 //new/edit action
 $("#visit-new-form").submit(function(){
-	var visitName = $('#visit-name').val();
+	var visitNames = $('#visit-names').val();
+	var visitLastName = $('#visit-lastname').val();
 	var visitIdNum = $('#visit-idnum').val();
 	var visitCardNum = $('#visit-cardnum').val();
 	var visitVisitedOrgId = $('#organizations-select-new').val();
@@ -274,8 +278,10 @@ $("#visit-new-form").submit(function(){
 	var error = "";
 
 	//validate fields
-	if(visitName=="" || visitName == null){
-		error = "<?=get_text("Please fill the Visit Name field",$lang);?>";
+	if(visitNames=="" || visitNames == null){
+		error = "<?=get_text("Please fill the Visit Names field",$lang);?>";
+	} else if(visitLastName=="" || visitLastName == null){
+		error = "<?=get_text("Please fill the Visit Last Name field",$lang);?>";
 	} else if(visitIdNum=="" || visitIdNum == null){
 		error = "<?=get_text("Please fill the Identification Number field",$lang);?>";
 	} else if(visitCardNum=="" || visitCardNum == null){
@@ -288,7 +294,7 @@ $("#visit-new-form").submit(function(){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=add_visit&name=" + visitName + "&idnum=" + visitIdNum + "&cardnum=" + visitCardNum + "&orgid=" + visitVisitedOrgId + "&expirationdate=" + expirationDate + "&expirationhour=" + expirationHour + "&doorgroupids=" + visitDoorGroupIds.join("|"),
+			data: "action=add_visit&names=" + visitNames + "&lastname=" + visitLastName + "&idnum=" + visitIdNum + "&cardnum=" + visitCardNum + "&orgid=" + visitVisitedOrgId + "&expirationdate=" + expirationDate + "&expirationhour=" + expirationHour + "&doorgroupids=" + visitDoorGroupIds.join("|"),
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
