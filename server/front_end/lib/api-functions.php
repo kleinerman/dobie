@@ -125,11 +125,12 @@ function get_person($user,$pass,$id){
 	else return $response->data;
 }
 
-function add_person($user,$pass,$orgid,$name,$idnum,$cardnum,$visitedorgid=null){
+function add_person($user,$pass,$orgid,$names,$lastname,$idnum,$cardnum,$visitedorgid=null){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->orgId= $orgid;
-	$payload_obj->name= $name;
+	$payload_obj->names= $names;
+	$payload_obj->lastName= $lastname;
 	$payload_obj->identNumber= $idnum;
 	$payload_obj->cardNumber= $cardnum;
 	$payload_obj->visitedOrgId= $visitedorgid;
@@ -139,11 +140,12 @@ function add_person($user,$pass,$orgid,$name,$idnum,$cardnum,$visitedorgid=null)
 	return $response;
 }
 
-function set_person($user,$pass,$id,$orgid,$name,$idnum,$cardnum){
+function set_person($user,$pass,$id,$orgid,$names,$lastname,$idnum,$cardnum){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->orgId= $orgid;
-	$payload_obj->name= $name;
+	$payload_obj->names= $names;
+	$payload_obj->lastName= $lastname;
 	$payload_obj->identNumber= $idnum;
 	$payload_obj->cardNumber= $cardnum;
 	$payload_obj->visitedOrgId= null;
@@ -482,6 +484,21 @@ function get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$si
 	return $response;
 }
 
+function purge_events($user,$pass,$untildatetime=""){
+	global $config;
+	if($untildatetime!=""){
+		//encode white spaces
+		$untildatetime = str_replace(" ","+",$untildatetime);
+		$response=send_request($config->api_fullpath."purgeevents?untilDateTime=$untildatetime",$user,$pass,"delete");
+	} else {
+		$response = new stdClass();
+		$response->response_status=404;
+		$response->message="Invalid date sent";
+	}
+
+	return $response;
+}
+
 
 //Zones
 
@@ -744,9 +761,9 @@ function get_visitors($user,$pass,$visitdoorgroupid="",$orgid="",$cardnum=""){
 	return $response;
 }
 
-function add_visit($user,$pass,$name,$idnum,$cardnum,$orgid,$expirationdate,$expirationhour,$doorgroupids_str=""){
+function add_visit($user,$pass,$names,$lastname,$idnum,$cardnum,$orgid,$expirationdate,$expirationhour,$doorgroupids_str=""){
 	//add user
-	$response = add_person($user,$pass,1,$name,$idnum,$cardnum,$orgid);
+	$response = add_person($user,$pass,1,$names,$lastname,$idnum,$cardnum,$orgid);
 
 	if($response->response_status == "201"){
 		//get created person id
@@ -951,8 +968,9 @@ if($DEBUG){
 	//$res=do_auth_user("admin","admin");
 //	$res=set_user("admin","admin",1,"Administrator","admin","admin2",1,1);
 //	$res=set_user("admin","admin",5,"Andrea Sorini","asorini","andrea",3,1,"es");
-	//echo "<pre>";
-	//var_dump($res);
+	$res=purge_events("admin","admin","2018-12-25+20:27");
+	echo "<pre>";
+	var_dump($res);
 	//echo json_encode($res->data->events[0]);
 }
 ?>
