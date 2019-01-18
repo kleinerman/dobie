@@ -108,11 +108,12 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
 				$orgid = isset($_POST['orgid']) ? $_POST['orgid'] : "";
-				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$names = isset($_POST['names']) ? $_POST['names'] : "";
+				$lastname = isset($_POST['lastname']) ? $_POST['lastname'] : "";
 				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
 				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
 
-				$persons_rec = add_person($logged->name, $logged->pw, $orgid, $name, $idnum, $cardnum);
+				$persons_rec = add_person($logged->name, $logged->pw, $orgid, $names, $lastname, $idnum, $cardnum);
 				//if($persons_rec) array_push($ret,1,"Information saved successfully!");
 				//else array_push($ret,0,"Person could not be added");
 				if($persons_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
@@ -124,13 +125,14 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 			else {
 				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
 				$orgid = isset($_POST['orgid']) ? $_POST['orgid'] : "";
-				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$names = isset($_POST['names']) ? $_POST['names'] : "";
+				$lastname = isset($_POST['lastname']) ? $_POST['lastname'] : "";
 				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
 				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
 
 				if($id=="") array_push($ret,0,"Invalid values sent");
 	    			else {
-					$persons_rec = set_person($logged->name, $logged->pw,$id, $orgid, $name, $idnum, $cardnum);
+					$persons_rec = set_person($logged->name, $logged->pw,$id, $orgid, $names, $lastname, $idnum, $cardnum);
 
 					if($persons_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"Person could not be updated");
@@ -148,7 +150,50 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,"Person could not be deleted");
 			}
 		break;
-		
+		case "import_persons":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$orgid = (isset($_POST['orgid']) or !is_numeric($_POST['orgid'])) ? $_POST['orgid'] : "";
+				$ignore_first_line = isset($_POST['form-import-ignore']) ? $_POST['form-import-ignore'] : 0;
+				$file = (isset($_FILES['form-import-input']) and is_array($_FILES['form-import-input'])) ? $_FILES['form-import-input'] : "";
+
+				//validate file
+				if((substr_count($file["type"], "text",0)<1) or ($file["error"]!=0) or ($file["size"]<1)){
+					array_push($ret,0,"File sent is invalid");
+				} elseif($orgid==""){
+					array_push($ret,0,"No organization specified");
+				} else {
+					//file and arguments look good
+					$rows_imported=0;
+					//parse each line
+					$file_lines = file($file["tmp_name"]);
+					if(count($file_lines)>0){
+						//ignore first line if specified
+						if($ignore_first_line) $start_from=1;
+						else $start_from=0;
+						for($i=$start_from;$i<count($file_lines);$i++){
+//$file_lines[$i] = mb_convert_encoding($file_lines[$i],"UTF-8",'UTF-16LE');
+							//parse line values
+							$line_parts = explode(",",$file_lines[$i]);
+							if(count($line_parts)==4){
+								$names = trim($line_parts[0]);
+								$lastname = trim($line_parts[1]);
+								$idnum = trim($line_parts[2]);
+								$cardnum = trim($line_parts[3]);
+								//check that fields are valid for person > if not, ignore line
+								if($names!="" and $lastname!="" and is_numeric($idnum) and is_numeric($cardnum)){
+									$persons_rec = add_person($logged->name, $logged->pw, $orgid, $names, $lastname, $idnum, $cardnum);
+									if($persons_rec->response_status == "201") $rows_imported++;
+								} //else an argument in the file is incorrect
+
+							} //else line has incorrect number of values
+						}
+					} //else empty line
+					array_push($ret,1,$rows_imported);
+				}
+			}
+		break;
+
 		case "get_person_accesses":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
@@ -398,6 +443,20 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,$events_rec->data->message);
 			}
 		break;
+		case "purge_events":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$untildatetime = (isset($_POST["untildatetime"]) and $_POST["untildatetime"]!="") ? $_POST["untildatetime"] : "";
+
+				if($untildatetime=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//purge events
+					$events_rec = purge_events($logged->name, $logged->pw,$untildatetime);
+					if($events_rec and $events_rec->response_status==200) array_push($ret,1,$events_rec->data);
+					else array_push($ret,0,$events_rec->data->message);
+				}
+			}
+		break;
 
 		case "get_zone":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
@@ -637,7 +696,8 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 		case "add_visit":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
-				$name = isset($_POST['name']) ? $_POST['name'] : "";
+				$names = isset($_POST['names']) ? $_POST['names'] : "";
+				$lastname = isset($_POST['lastname']) ? $_POST['lastname'] : "";
 				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
 				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
 				$orgid = isset($_POST['orgid']) ? $_POST['orgid'] : "";
@@ -645,7 +705,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$expirationhour = isset($_POST['expirationhour']) ? $_POST['expirationhour'] : "23:59";
 				$doorgroupids = isset($_POST['doorgroupids']) ? $_POST['doorgroupids'] : "";
 
-				$visit_rec = add_visit($logged->name, $logged->pw, $name, $idnum, $cardnum, $orgid, $expirationdate, $expirationhour, $doorgroupids);
+				$visit_rec = add_visit($logged->name, $logged->pw, $names, $lastname, $idnum, $cardnum, $orgid, $expirationdate, $expirationhour, $doorgroupids);
 
 				if($visit_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
 				else array_push($ret,0,$visit_rec->data->message);

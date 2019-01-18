@@ -10,6 +10,11 @@ include("header.php");
 </div>
 </div>
 
+<div class="row">
+<div class="col-lg-12" id="controller-alerts-container">
+</div>
+</div>
+
 <div class="row" id="filter-row" style="display:none">
 
 <div class="col-lg-4">
@@ -77,8 +82,8 @@ include("header.php");
 
 <br><br><br>
 
-<button id="events-search-submit" class="btn btn-success" type="button"><?=get_text("Search",$lang);?></button>
-<button id="events-search-reset" class="btn btn-warning" type="button"><?=get_text("Reset",$lang);?></button>
+<button id="events-search-reset-filter" class="btn btn-warning" type="button"><?=get_text("Clear filter",$lang);?></button>
+<button id="events-search-reset" class="btn btn-primary" type="button"><?=get_text("Clear events",$lang);?></button>
 
 </div>
 
@@ -88,7 +93,7 @@ include("header.php");
 <div class="col-sm-12">
 
 <div class="alert alert-warning clickable left" id="search-again-button">
-<span class="fa fa-search"></span> <?=get_text("Filter...",$lang);?>
+<span class="fa fa-search"></span> <?=get_text("Filter",$lang);?>...
 </div>
 
 </div>
@@ -105,6 +110,40 @@ include("header.php");
 </table>
 
 </div>
+
+
+<div id="legend-row">
+
+<div class="row">
+<div class="col-sm-3">
+<h4><?=get_text("Event Type",$lang);?></h4>
+<span class="fa fa-fw fa-address-card"></span> <?=get_text("Identified Access",$lang);?><br>
+<span class="fa fa-fw fa-circle"></span> <?=get_text("Access with button",$lang);?><br>
+<span class="fa fa-fw fa-chain-broken"></span> <?=get_text("Door remains opened",$lang);?><br>
+<span class="fa fa-fw fa-bolt"></span> <?=get_text("Door was forced",$lang);?>
+</div>
+<div class="col-sm-3">
+<h4><?=get_text("Lock",$lang);?></h4>
+<span class="fa fa-fw fa-feed"></span> <?=get_text("Card Reader",$lang);?><br>
+<span class="fa fa-fw fa-thumbs-o-up"></span> <?=get_text("Fingerprint Reader",$lang);?><br>
+<span class="fa fa-fw fa-circle"></span> <?=get_text("Button",$lang);?>
+</div>
+<div class="col-sm-3">
+<h4><?=get_text("Denial Cause",$lang);?></h4>
+<span class="fa fa-fw fa-ban"></span> <?=get_text("No Access",$lang);?><br>
+<span class="fa fa-fw fa-calendar-times-o"></span> <?=get_text("Expired Card",$lang);?><br>
+<span class="fa fa-fw fa-clock-o"></span> <?=get_text("Out of time",$lang);?>
+</div>
+<div class="col-sm-3">
+<h4><?=get_text("Direction",$lang);?></h4>
+<span class="fa fa-fw fa-sign-in"></span> <?=get_text("Incoming",$lang);?><br>
+<span class="fa fa-fw fa-sign-out"></span> <?=get_text("Outgoing",$lang);?><br>
+</div>
+
+</div>
+
+</div>
+
 
 </div>
 </div>
@@ -125,6 +164,16 @@ include("header.php");
 	text-align:center;
 }
 
+#controller-alerts-container{
+	overflow:auto;
+	max-height:270px;
+	margin-bottom:10px;
+}
+
+.controller-alert .alert{
+	margin:5px auto;
+}
+
 .blinking-dot{
 	background:#a00;width:10px;height:10px;border-radius:5px;display:inline-block;margin-bottom:5px
 }
@@ -133,15 +182,87 @@ include("header.php");
     animation: blinker 0.8s cubic-bezier(.5, 0, 1, 1) infinite alternate;  
 }
 
-@keyframes blinker {  
+@keyframes blinker {
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
 </style>
 
 <? include("footer.php");?>
 
 <script type="text/javascript">
+//init filters
+setFilterAction();
+
+var organizationId="";
+var zoneId="";
+var filterPersonId="";
+var filterDoorId="";
+var filterSide="";
+
+//populate select list
+populateList("organizations-select","organizations",0,"","",0,1);
+populateList("zones-select","zones");
+
+//action for organization select
+$("#organizations-select").change(function(){
+	organizationId=$("#organizations-select").val();
+	if(!isNaN(organizationId) && organizationId!="undefined"){
+		//populate list
+		populateList("persons-select","persons",organizationId);
+		//show list
+		$("#select-container-persons").fadeIn();
+	}
+});
+
+//action for zone select
+$("#zones-select").change(function(){
+	zoneId=$("#zones-select").val();
+	if(!isNaN(zoneId) && zoneId!="undefined"){
+		//populate list
+		populateList("doors-select","doors",zoneId);
+		//show list
+		$("#select-container-doors").fadeIn();
+	}
+});
+
+//this is so filter vars are set
+$("#persons-select").change(function(){
+	filterPersonId=$("#persons-select").val();
+});
+
+$("#doors-select").change(function(){
+	filterDoorId=$("#doors-select").val();
+});
+
+$("input[name=side]").change(function(){
+	filterSide=$("input[name=side]:checked").val();
+});
+
+//form reset
+$("#events-search-reset").click(function(){
+	location.reload();
+});
+
+//clear filter
+$("#events-search-reset-filter").click(function(){
+	organizationId="";
+	zoneId="";
+	filterPersonId="";
+	filterDoorId="";
+	filterSide="";
+	$("#persons-select option:selected,#doors-select option:selected,#zones-select option:selected,#organizations-select option:selected").prop("selected",false);
+	$("input[name=side][value='']").prop("checked",true);
+	//show filter button
+	$("#filter-row").slideUp("fast");
+	$("#search-again-button").show();
+	//collapse sub menus
+	$("#select-container-doors,#select-container-persons").hide();
+	
+});
+
+//add events on live table
 function addEventInTable(data){
 	//set no value for null values
 	if(data.orgName === null) data.orgName="";
@@ -158,8 +279,7 @@ function addEventInTable(data){
 
 //toggle search
 $("#search-again-button").click(function(){
-	$("#search-again-row").hide();
-	$("#results-row,#legend-row").hide();
+	$(this).hide();
 	//show filter
 	$("#filter-row").slideDown("fast");
 });
@@ -178,15 +298,32 @@ $.getScript(window.location.protocol + "//" + window.location.hostname+":<?=$nod
 	if(typeof io !== 'undefined'){
 		var socketio = io.connect(window.location.hostname+":<?=$nodejs_port?>");
 		socketio.on("message_to_client", function(data){
-			//$("#events-container").append(data + "<br>");
-			var dataParsed2=JSON.parse(data);
-			//var dataParsed=JSON.parse(dataParsed2.sendval);
-			$("#noevents-row").hide();
-			$(addEventInTable(dataParsed2)).insertAfter("#events-table-header-row").show("slow").toggleClass("newevent");
-			console.log(dataParsed2);
+			var dataParsed=JSON.parse(data);
+			//check if controller down event was sent
+			if(typeof dataParsed.macAddress !="undefined" && typeof dataParsed.reachable !="undefined"){
+				//controller down/up case
+				if(dataParsed.reachable==0){
+					$("#controller-alerts-container").prepend('<div class="controller-alert"><div class="alert alert-danger alert-message-inner"><button type="button" class="close" data-dismiss="alert">&times;</button>'+dataParsed.lastSeen + ": " + dataParsed.name + " (" + buildMacFromString(dataParsed.macAddress) + ") is down!"+'</div></div>');
+				} else {
+					$("#controller-alerts-container").prepend('<div class="controller-alert"><div class="alert alert-success alert-message-inner"><button type="button" class="close" data-dismiss="alert">&times;</button>'+dataParsed.lastSeen + ": " + dataParsed.name + " (" + buildMacFromString(dataParsed.macAddress) + ") is back up."+'</div></div>');
+				}
+			} else {
+				//normal live event case
+				//if filter vars are not set or they match > show
+				if((organizationId=="" || dataParsed.orgId == organizationId)
+				&& (zoneId=="" || dataParsed.zoneId == zoneId)
+				&& (filterPersonId=="" || dataParsed.personId == filterPersonId)
+				&& (filterDoorId=="" || dataParsed.doorId == filterDoorId)
+				&& (filterSide=="" || dataParsed.side == filterSide)){
+					//hide noevents row
+					$("#noevents-row").hide();
+					$(addEventInTable(dataParsed)).insertAfter("#events-table-header-row").show("slow").toggleClass("newevent");
+				}
+			}
 		});
 	}
 });
+
 </script>
 
 </body>
