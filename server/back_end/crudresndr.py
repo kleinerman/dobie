@@ -143,7 +143,8 @@ class CrudReSndr(genmngr.GenericMngr):
                     #Persons never colud be in state TO_ADD. For this reason,
                     #only TO_UPDATE or TO_DELETE state is retrieved
                     for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE):
-                        person.pop('name')
+                        person.pop('names')
+                        person.pop('lastName')
                         person.pop('orgId')
                         person.pop('visitedOrgId')
                         #"updPerson" method receive a list of MAC addresses to update. Because in this case only one
