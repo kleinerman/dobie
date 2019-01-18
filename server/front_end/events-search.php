@@ -165,7 +165,7 @@ include("header.php");
 <span class="fa fa-fw fa-bolt"></span> <?=get_text("Door was forced",$lang);?>
 </div>
 <div class="col-sm-3">
-<h4>Lock</h4>
+<h4><?=get_text("Lock",$lang);?></h4>
 <span class="fa fa-fw fa-feed"></span> <?=get_text("Card Reader",$lang);?><br>
 <span class="fa fa-fw fa-thumbs-o-up"></span> <?=get_text("Fingerprint Reader",$lang);?><br>
 <span class="fa fa-fw fa-circle"></span> <?=get_text("Button",$lang);?>
@@ -177,7 +177,7 @@ include("header.php");
 <span class="fa fa-fw fa-clock-o"></span> <?=get_text("Out of time",$lang);?>
 </div>
 <div class="col-sm-3">
-<h4>Direction</h4>
+<h4><?=get_text("Direction",$lang);?></h4>
 <span class="fa fa-fw fa-sign-in"></span> <?=get_text("Incoming",$lang);?><br>
 <span class="fa fa-fw fa-sign-out"></span> <?=get_text("Outgoing",$lang);?><br>
 </div>

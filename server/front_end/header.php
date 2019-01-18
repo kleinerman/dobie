@@ -113,6 +113,11 @@ ob_start('ob_gzhandler');
 <li>
 <a href="events-search"><?=get_text("Search",$lang);?></a>
 </li>
+<?if($logged->roleid<3){?>
+<li>
+<a href="events-purge"><?=get_text("Purge",$lang);?></a>
+</li>
+<?}?>
 </ul>
 </li>
 <li>

@@ -85,6 +85,9 @@ function populateList(selectId,entity,id=0,actionstr="",hlvalue="",newcontroller
 							if(hlvalue!="" && item.id==hlvalue) itemClass +=" selected";
 							//check for disabling controllers without available doors
 							if(newcontroller && item.availDoors.length==0) itemClass +=" disabled";
+							//join person names if present
+							if(typeof item.names!=="undefined" && typeof item.lastName!=="undefined") item.name = item.names + " " + item.lastName;
+							//show
 							$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
 							qValidItems++;
 						}
@@ -262,4 +265,9 @@ function get_icon(id,mode){
 		if(iconstr!="") return "<span class='fa fa-"+ iconstr +"'></span>";
 		else return "";
 	}
+}
+
+//display string of mac from format aaaaaaaa to AA:AA:AA:AA
+function buildMacFromString(macstring){
+	return macstring.replace(/(.{2})/g, "$1:").slice(0,-1).toUpperCase();
 }

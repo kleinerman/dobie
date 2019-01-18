@@ -225,7 +225,7 @@ function populateTable(tableId){
 				for(i=0;i<values.length;i++){
 					//show row
 					//pre process MAC
-					macStr = values[i].macAddress.replace(/(.{2})/g, "$1:").slice(0,-1).toUpperCase();
+					macStr = buildMacFromString(values[i].macAddress);
 					//pre process date
 					if(!values[i].lastSeen) lastSeenStr = "";
 					else {
