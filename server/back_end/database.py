@@ -443,7 +443,7 @@ class DataBase(object):
     def getFmtEvent(self, event):
         '''
         It receives an event and returns the event formatted adding 
-        fields like zone name, door name, organization name, person name.
+        fields like zone name, door name, organization name, person names and lastName.
         '''
 
         #When sending the JSON via requests module in rtevent,
@@ -454,7 +454,7 @@ class DataBase(object):
 
         try:
             #Getting from DB the Zone and Door name
-            sql = ("SELECT Zone.name AS zoneName, Door.name AS doorName "
+            sql = ("SELECT Zone.id AS zoneId, Zone.name AS zoneName, Door.name AS doorName "
                    "FROM Door JOIN Zone ON (Door.zoneId = Zone.id) "
                    "WHERE Door.id = {}".format(event['doorId'])
                   )
@@ -465,7 +465,8 @@ class DataBase(object):
             #If the event involves a person, getting from DB the Organization
             #and Person name
             if event['personId']:
-                sql = ("SELECT Organization.name AS orgName, Person.name AS personName "
+                sql = ("SELECT Organization.id AS orgId, Organization.name AS orgName, "
+                       "CONCAT(Person.names, ' ', Person.lastName) AS personName "
                        "FROM Person JOIN Organization ON (Person.orgId = Organization.id) "
                        "WHERE Person.id = {}".format(event['personId'])
                       )
@@ -475,15 +476,21 @@ class DataBase(object):
 
             fmtEvent = {}
             fmtEvent['eventTypeId'] = event['eventTypeId']
-            fmtEvent['zoneName'] = zoneAndDoor['zoneName']
+            fmtEvent['doorId'] = event['doorId']
             fmtEvent['doorName'] = zoneAndDoor['doorName']
+            fmtEvent['zoneId'] = zoneAndDoor['zoneId']
+            fmtEvent['zoneName'] = zoneAndDoor['zoneName']
+
+            fmtEvent['personId'] = event['personId']
 
             if event['personId']:
-                fmtEvent['orgName'] = orgAndPerson['orgName']
                 fmtEvent['personName'] = orgAndPerson['personName']
+                fmtEvent['orgId'] = orgAndPerson['orgId']
+                fmtEvent['orgName'] = orgAndPerson['orgName']
             else:
-                fmtEvent['orgName'] = None
                 fmtEvent['personName'] = None
+                fmtEvent['orgId'] = None
+                fmtEvent['orgName'] = None
 
             #Setting personDeleted field as None always as
             #it has no sense in live events
@@ -548,7 +555,7 @@ class DataBase(object):
         
         sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
                "Door.name AS doorName, Organization.name AS orgName, "
-               "Person.name AS personName, Person.resStateId AS personDeleted, "
+               "CONCAT(Person.names, ' ', Person.lastName) AS personName, Person.resStateId AS personDeleted, "
                "Event.doorLockId, Event.dateTime, "
                "Event.side, Event.allowed, Event.denialCauseId "
                "FROM Event LEFT JOIN Door ON (Event.doorId = Door.id) "
@@ -2224,12 +2231,12 @@ class DataBase(object):
         if not person['visitedOrgId']:
             person['visitedOrgId'] = 'NULL'
 
-        sql = ("INSERT INTO Person(name, identNumber, cardNumber, orgId, visitedOrgId, resStateId) "
-               "VALUES('{}', '{}', {}, {}, {}, {}) ON DUPLICATE KEY UPDATE "
-               "name = '{}', cardNumber = {}, orgId = {}, visitedOrgId = {}, resStateId = {}"
-               "".format(person['name'], person['identNumber'], person['cardNumber'],
+        sql = ("INSERT INTO Person(names, lastName, identNumber, cardNumber, orgId, visitedOrgId, resStateId) "
+               "VALUES('{}', '{}', '{}', {}, {}, {}, {}) ON DUPLICATE KEY UPDATE "
+               "names = '{}', lastName = '{}', cardNumber = {}, orgId = {}, visitedOrgId = {}, resStateId = {}"
+               "".format(person['names'], person['lastName'], person['identNumber'], person['cardNumber'],
                          person['orgId'], person['visitedOrgId'], COMMITTED,
-                         person['name'], person['cardNumber'], person['orgId'],
+                         person['names'], person['lastName'], person['cardNumber'], person['orgId'],
                          person['visitedOrgId'], COMMITTED)
               )
 
@@ -2395,11 +2402,10 @@ class DataBase(object):
 
         try:
             #Determines the pendig operation of that person on that controller
-            sql = "SELECT name, resStateId FROM Person WHERE id = {}".format(personId)
+            sql = "SELECT resStateId FROM Person WHERE id = {}".format(personId)
 
             self.execute(sql)
             row = self.cursor.fetchone()
-            personName = row['name']
             resState = row['resStateId']
 
             if resState == TO_DELETE:
@@ -2534,10 +2540,10 @@ class DataBase(object):
         if not person['visitedOrgId']:
             person['visitedOrgId'] = 'NULL'
 
-        sql = ("UPDATE Person SET name = '{}', identNumber = '{}', cardNumber = {}, orgId = {}, "
-               "visitedOrgId = {} WHERE id = {}"
-               "".format(person['name'], person['identNumber'], person['cardNumber'], 
-                         person['orgId'], person['visitedOrgId'], person['id'])
+        sql = ("UPDATE Person SET names = '{}', lastName = '{}', identNumber = '{}', "
+               "cardNumber = {}, orgId = {}, visitedOrgId = {} WHERE id = {}"
+               "".format(person['names'], person['lastName'], person['identNumber'], 
+                         person['cardNumber'], person['orgId'], person['visitedOrgId'], person['id'])
               )
 
         try:
@@ -2594,7 +2600,7 @@ class DataBase(object):
                   )
             self.execute(sql)
 
-            sql = ("SELECT Access.id, Access.personId, Person.name AS personName, "
+            sql = ("SELECT Access.id, Access.personId, CONCAT(Person.names, ' ', Person.lastName) AS personName, "
                    "Organization.name AS organizationName, Access.doorId, "
                    "Door.name AS doorName, Zone.name AS zoneName, "
                    "Access.allWeek, Access.iSide, Access.oSide, Access.startTime, "
@@ -2699,7 +2705,7 @@ class DataBase(object):
                     raise DoorNotFound('Door not found')
 
                 # Get all access from an specific door
-                sql = ("SELECT Access.id, Access.personId, Person.name AS personName, "
+                sql = ("SELECT Access.id, Access.personId, CONCAT(Person.names, ' ', Person.lastName) AS personName, "
                        "Organization.name AS organizationName, Access.allWeek, Access.iSide, Access.oSide, "
                        "Access.startTime, Access.endTime, Access.expireDate, Access.resStateId "
                        "FROM Access JOIN Person ON (Access.personId = Person.id) JOIN Organization ON "
