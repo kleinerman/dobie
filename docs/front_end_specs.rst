@@ -467,7 +467,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Ruben Juearez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}
+  {"names": "Carlos Ruben", "lastName": "Alvarez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}
   
   
 **Response:**
@@ -535,7 +535,8 @@ Get one Person
   {
     "cardNumber": 5326224, 
     "id": 2, 
-    "name": "Carlos Alvarez", 
+    "names": "Carlos Ruben",
+    "lastName": "Alaverez", 
     "uri": "http://172.18.0.3:5000/api/v1.0/person/2"
   }
 
@@ -562,7 +563,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Lucas Suarez", "identNumber": "23063146", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  {"names": "Lucas Camilo", "lastName": "Sorin", "identNumber": "23063146", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
   
   
   
@@ -660,6 +661,15 @@ If the person is not present in the system, the following message will be receiv
 A pop up should inform the success or unsuccess of the operation
 
 
+
+Import Persons from a CSV file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When "import CSV" button is pressed in the main person screen, the following popup should appear:
+
+.. image:: images_front_end_specs/import_csv.png
+
+The frontend should send a POST method for each line, in the same way it sends the POST when adding one person. See `Add Person`_
 
 
 Accesses
@@ -1926,9 +1936,16 @@ A button at the top will allow to export all pages of the result as a .csv file
 
 Events Live
 ~~~~~~~~~~~
-|
 
-The Frontend should be able to receive a POST method with a JSON containing the event. The JSON will have the event in the same format as the above sections.
+
+| The Frontend should be able to receive a POST method with a JSON containing the event.
+| Note that the events sent to the frontend in this situation (live events) differ a little from the events returned when the frontend queries them in the Event Report section.
+| Here, the JSON events add zoneId, doorId, orgId and personId.
+| The personDeleted field always will come with value "null" since it has no sense another value.
+| Finally, the eventId field won't come, since it is unnecesary.
+| The adding of above fields are needed for a filter that will be in this section to view specific events.
+| For example, one organization events, one person events, one zone events, one door events,, one direction events, the combinations of two or more, etc.
+
 
 
 **JSON**
@@ -1936,18 +1953,19 @@ The Frontend should be able to receive a POST method with a JSON containing the 
 .. code-block::
 
   {
-   "allowed": 1, 
-   "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT", 
    "eventTypeId": 1, 
-   "id": 1543, 
-   "doorLockId": 1, 
-   "denialCauseId": null, 
+   "zoneId": "3", 
+   "zoneName": "Ingreso Oficina"
+   "doorName": "Ingreso F66",
+   "orgId": 2, 
    "orgName": "Datacenter Capitalinas", 
    "personName": "Jorge Kleinerman", 
-   "personDeleted": 0, 
-   "doorName": "Ingreso F66", 
+   "personDeleted": null, 
+   "doorLockId": 1, 
+   "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT", 
    "side": 1, 
-   "zoneName": "Ingreso Oficina"
+   "allowed": 1, 
+   "denialCauseId": null
   }
 
 
