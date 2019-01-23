@@ -890,20 +890,25 @@ class CrudMngr(genmngr.GenericMngr):
                     person['uri'] = request.url
                     return jsonify(person)
 
-				## For PUT and DELETE method
+		## For PUT and DELETE method
                 elif request.method == 'PUT':
                     person = {}
                     person['id'] = personId
                     for param in prsnNeedKeys:
                         person[param] = request.json[param]
-                    self.dataBase.updPerson(person)
-                    person.pop('names')
-                    person.pop('lastName')
-                    person.pop('identNumber')
-                    person.pop('orgId')
-                    person.pop('visitedOrgId')
-                    ctrllerMacsToUpdPrsn = self.dataBase.markPerson(personId, database.TO_UPDATE)
-                    self.ctrllerMsger.updPerson(ctrllerMacsToUpdPrsn, person)
+                    needUpdCtrllers = self.dataBase.updPerson(person)
+
+                    #If it isn't necessary to update the "cardNumber" in the controller,
+                    #the following "if" statement will not be executed
+                    if needUpdCtrllers:
+                        person.pop('names')
+                        person.pop('lastName')
+                        person.pop('identNumber')
+                        person.pop('orgId')
+                        person.pop('visitedOrgId')
+                        ctrllerMacsToUpdPrsn = self.dataBase.markPerson(personId, database.TO_UPDATE)
+                        self.ctrllerMsger.updPerson(ctrllerMacsToUpdPrsn, person)
+
                     return jsonify({'status': 'OK', 'message': 'Person updated.'}), OK
 
                 elif request.method == 'DELETE':

@@ -645,7 +645,11 @@ class DataBase(object):
             if delEvents < 1:
                 raise EventNotFound('Events not found')
 
-
+            #Deleting all persons which are marked as "DELETED" and don't have
+            #more events in Event table.
+            #When doing this, it is important to exclude the events with
+            #personId = NULL (Example: Accesses with button, door forced, etc).
+            #If this is not done, the SQL sentence doesn't work.
             sql = ("DELETE FROM Person WHERE Person.resStateId = {} "
                    "AND Person.id NOT IN (SELECT Event.personId "
                    "FROM Event WHERE personId IS NOT NULL)".format(DELETED)
@@ -1861,41 +1865,39 @@ class DataBase(object):
 
     def setCtrllersNotReachable(self):
         '''
-        To the current date and time, the amount of minutes a controller which
-        doesn't send a keep alive message is considered died, is substracted.
-        Then, set as "not reachables" in Controller table, the controllers which
-        didn't send "keep alive message" after the previous time.
-        To set the controller as "not reachable" and include it in the returned
-        list of dictionaries with controllers parametters, the "lastSeen" date and
-        time also should be after the substraction of current date and time minus
-        two times considered died time.
-        This is to avoid keep returning every time this method is called, the same
-        parametters of a died controller and continue generating the same live event.
+        The current date and time is substracted by the amount of minutes 
+        "CONSIDER_DIED_MINS" (config parametter).
+        If there are controllers which the previous state was "reachable"
+        and didn't send keep alive messages in that interval of time, they
+        are returned in the "deadCtrllers" list and they are updated as 
+        "not reachables"
         '''
 
         diedDateTime = datetime.datetime.now() - datetime.timedelta(minutes=CONSIDER_DIED_MINS)
         diedDateTime = diedDateTime.strftime('%Y-%m-%d %H:%M:%S')
 
-        twoDiedDateTime = datetime.datetime.now() - datetime.timedelta(minutes=2*CONSIDER_DIED_MINS)
-        twoDiedDateTime = twoDiedDateTime.strftime('%Y-%m-%d %H:%M:%S')
-
         try:
-            sql = ("UPDATE Controller SET reachable = 0 WHERE lastSeen < '{}' AND lastSeen > '{}'"
-                   "".format(diedDateTime, twoDiedDateTime)
-                  )
-            self.execute(sql)
 
-            sql = ("SELECT reachable, name, macAddress, lastSeen FROM "
-                   "Controller WHERE lastSeen < '{}' AND lastSeen > '{}'"
-                   "".format(diedDateTime, twoDiedDateTime)
+            sql = ("SELECT 0 AS reachable, name, macAddress, lastSeen FROM "
+                   "Controller WHERE reachable = 1 AND lastSeen < '{}'"
+                   "".format(diedDateTime)
                   )
             self.execute(sql)
             deadCtrllers = self.cursor.fetchall()
 
+            sql = ("UPDATE Controller SET reachable = 0 WHERE reachable = 1 AND lastSeen < '{}'"
+                   "".format(diedDateTime)
+                  )
+            self.execute(sql)
+
+            #deadCtrllers could be an empty tuple if all controllers are alive
+            #and the following for loop will not be executed
             for deadCtrller in deadCtrllers:
                 deadCtrller['lastSeen'] = deadCtrller['lastSeen'].strftime('%Y-%m-%d %H:%M:%S')
 
             #deadCtrllers could be an empty tuple if all controllers are alive
+            #and we are returning empty tuple and the for loop of "lifeChcker" thread
+            #will not be executed
             return deadCtrllers
 
         except (pymysql.err.IntegrityError, pymysql.err.InternalError) as dbEventError:
@@ -2535,22 +2537,41 @@ class DataBase(object):
 
     def updPerson(self, person):
         '''
-        Receive a dictionary with id organization
+        Receive a dictionary with new person parametters.
+        Return True if controllers need to be updated.
+        Return False if there is no need to update the controllers.
         '''
         if not person['visitedOrgId']:
             person['visitedOrgId'] = 'NULL'
 
-        sql = ("UPDATE Person SET names = '{}', lastName = '{}', identNumber = '{}', "
-               "cardNumber = {}, orgId = {}, visitedOrgId = {} WHERE id = {}"
-               "".format(person['names'], person['lastName'], person['identNumber'], 
-                         person['cardNumber'], person['orgId'], person['visitedOrgId'], person['id'])
-              )
 
         try:
+            #Saving old card number before updating to know if it is necessary
+            #to update it in the controller
+            sql = "SELECT cardNumber FROM Person WHERE id = {}".format(person['id'])
+            self.execute(sql)
+            oldCardNumber = self.cursor.fetchone()['cardNumber']
+
+
+            sql = ("UPDATE Person SET names = '{}', lastName = '{}', identNumber = '{}', "
+                   "cardNumber = {}, orgId = {}, visitedOrgId = {} WHERE id = {}"
+                   "".format(person['names'], person['lastName'], person['identNumber'],
+                             person['cardNumber'], person['orgId'], person['visitedOrgId'], person['id'])
+                  )
+
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise PersonNotFound('Person not found')
 
+            if oldCardNumber != int(person['cardNumber']):
+                return True
+            else:
+                return False
+
+
+        except TypeError:
+            self.logger.debug('Error trying to retrieve old card number.')
+            raise PersonNotFound('Person not found')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise PersonError("Can't update this person. Card number or Identification number already exists.")
