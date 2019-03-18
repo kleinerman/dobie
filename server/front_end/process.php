@@ -327,8 +327,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
 				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+				$personid = (isset($_POST['personid'])) ? ($_POST['personid']) : "";
 
-				add_access_allweek_organization($logged->name, $logged->pw, $doorid, $orgid, $iside, $oside,$starttime,$endtime,$expiredate);
+				add_access_allweek_organization($logged->name, $logged->pw, $doorid, $orgid, $iside, $oside,$starttime,$endtime,$expiredate,$personid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all persons in organization");
@@ -345,8 +346,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
 				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+				$personid = (isset($_POST['personid'])) ? ($_POST['personid']) : "";
 
-				$access_rec = add_access_liaccess_organization($logged->name, $logged->pw, $doorid, $orgid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate);
+				$access_rec = add_access_liaccess_organization($logged->name, $logged->pw, $doorid, $orgid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate, $personid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all persons in organization");
@@ -362,8 +364,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
 				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+				$doorid = (isset($_POST['doorid'])) ? ($_POST['doorid']) : "";
 
-				add_access_allweek_zone($logged->name, $logged->pw, $personid, $zoneid, $iside, $oside,$starttime,$endtime,$expiredate);
+				add_access_allweek_zone($logged->name, $logged->pw, $personid, $zoneid, $iside, $oside,$starttime,$endtime,$expiredate,$doorid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all doors in zone");
@@ -380,8 +383,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
 				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+				$doorid = (isset($_POST['doorid'])) ? ($_POST['doorid']) : "";
 
-				add_access_liaccess_zone($logged->name, $logged->pw, $personid, $zoneid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate);
+				add_access_liaccess_zone($logged->name, $logged->pw, $personid, $zoneid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate,$doorid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all doors in zone");
@@ -397,8 +401,10 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
 				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+				$personid = (isset($_POST['personid'])) ? ($_POST['personid']) : "";
+				$doorid = (isset($_POST['doorid'])) ? ($_POST['doorid']) : "";
 
-				add_access_allweek_organization_zone($logged->name, $logged->pw, $zoneid, $orgid, $iside, $oside,$starttime,$endtime,$expiredate);
+				add_access_allweek_organization_zone($logged->name, $logged->pw, $zoneid, $orgid, $iside, $oside,$starttime,$endtime,$expiredate,$personid,$doorid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all doors in zone");
@@ -415,8 +421,10 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$starttime = (isset($_POST['starttime'])) ? $_POST['starttime'] : "00:00";
 				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
+				$personid = (isset($_POST['personid'])) ? ($_POST['personid']) : "";
+				$doorid = (isset($_POST['doorid'])) ? ($_POST['doorid']) : "";
 
-				add_access_liaccess_organization_zone($logged->name, $logged->pw, $zoneid, $orgid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate);
+				add_access_liaccess_organization_zone($logged->name, $logged->pw, $zoneid, $orgid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate, $personid, $doorid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all doors in zone");

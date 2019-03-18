@@ -35,16 +35,13 @@ include("header.php");
 
 <div class="select-container" id="select-container-doors" style="display:none">
 <form action="javascript:void(0)">
-<div class="select-container-title"><?=get_text("Doors",$lang);?></div>
+<div class="select-container-title"><?=get_text("Doors",$lang);?> <!--<button id="doors-select-all" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Add to all",$lang);?>...</button>--><button id="doors-select-all" class="btn btn-primary btn-xs" type="button"><?=get_text("Select all",$lang);?></button>
+</div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
-<select id="doors-select" class="select-options select-options-small form-control" name="doors-select" size="2" onchange="updateButtons(this.id)"></select>
+<select id="doors-select" class="select-options select-options-small form-control" name="doors-select" size="2" onchange="updateButtons(this.id)" multiple></select>
 </div>
-<div class="select-container-footer">
-<div class="left">
-<button id="doors-select-all" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Add to all",$lang);?>...</button>
-</div>
-</div>
+<div class="select-container-footer"></div>
 </form>
 </div>
 
@@ -64,9 +61,10 @@ include("header.php");
 
 <br><br>
 <div class="row" id="buttons-row" style="display:none">
-<div class="col-sm-4"><button id="access-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Add",$lang);?></button></div>
-<div class="col-sm-4"><button id="access-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Edit",$lang);?></button></div>
-<div class="col-sm-4"><button id="access-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete"><?=get_text("Delete",$lang);?></button></div>
+<div class="col-sm-3"><button id="access-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Add",$lang);?></button></div>
+<div class="col-sm-3"><button id="access-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Edit",$lang);?></button></div>
+<div class="col-sm-3"><button id="access-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete"><?=get_text("Delete",$lang);?></button></div>
+<div class="col-sm-3"><button id="access-refresh" class="btn btn-warning" type="button"><?=get_text("Refresh",$lang);?></button></div>
 </div>
 
 </div>
@@ -212,6 +210,8 @@ $("#zones-select").change(function(){
 		populateList("doors-select","doors",zoneId);
 		//hide accesses table
 		$("#accesses-table-container").hide();
+		//hide buttons
+		$("#buttons-row").hide();
 		//show list
 		$("#select-container-doors").fadeIn();
 	}
@@ -228,13 +228,31 @@ $("#doors-select").change(function(){
 		$("#buttons-row").fadeIn();
 		//disable buttons
 		$("#access-edit,#access-del").prop("disabled",true);
+		//enable refresh
+		$("#access-refresh").prop("disabled",false);
+	} else {
+		//multiple doors selected
+		$("#accesses-table-container").hide();
+		//disable refresh
+		$("#access-refresh").prop("disabled",true);
 	}
 });
 
 //Add to all button > open iframe modal
-$("#doors-select-all").click(function(){
+/*$("#doors-select-all").click(function(){
 	var zoneId= $("#zones-select").val();
 	$("#modal-edit").find('iframe').prop('src','access-edit-door?doorid=all&zoneid='+zoneId);
+});*/
+//send a group of door ids instead
+$("#doors-select-all").click(function(){
+	//$("#modal-edit").find('iframe').prop('src','access-edit-person?personid=all&orgid='+orgId);
+	$('#doors-select option').prop('selected',true)
+	//show buttons
+	$("#buttons-row").fadeIn();
+	//disable buttons
+	$("#access-edit,#access-del").prop("disabled",true);
+	//hide accesses table
+	$("#accesses-table-container").hide();
 });
 
 //Add button > open iframe modal
@@ -283,6 +301,18 @@ $("#access-delete-form").submit(function(){
 		$("#modal-error").modal("show");
 	}
 	return false;
+});
+
+//Refresh button > repopulate table
+$("#access-refresh").click(function(){
+	var doorId=$("#doors-select").val();
+	//populate access list
+	if(!isNaN(doorId) && doorId!="undefined") populateTable("access-table",doorId);
+});
+
+//focus success button on delete modal shown
+$("#modal-delete").on("shown.bs.modal",function(){
+	$("#access-delete-form .btn-success").focus();
 });
 </script>
 
