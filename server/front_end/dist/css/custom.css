@@ -205,8 +205,10 @@ label,input[type=checkbox],input[type=radio]{
 	width:30px;
 }
 
+@media(min-width:767px){
 #accesses-table-container, #rows-table-container{
 	margin-left:30px;
+}
 }
 
 #access-table, #access-table td, #access-table th, #rows-table, #rows-table td, #rows-table th {

@@ -16,11 +16,11 @@ include("header.php");
 <div class="col-lg-12 center">
 <?=get_text("Events before selected date and time will be erased",$lang);?>:<br><br>
 <form class="form-horizontal" id="events-prepurge-form" action="#">
-<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Purge Until",$lang);?>"><input type="text" class="form-control input_date center" id="endDate" value="<?=date("Y-m-d",mktime(0,0,0)-(60*60*24*7))?>" required><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Purge Until",$lang);?>"><input type="text" class="form-control input_date center" id="endDate" value="<?=date("Y-m-d",mktime(0,0,0)-(60*60*24*7))?>" required><span class="input-group-addon"><span class="far fa-calendar-alt"></span></span></div>
 
-<div class="input-group clockpicker" data-placement="right" data-align="top" data-autoclose="true" title="<?=get_text("Purge Until Time",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="endTime" name="endTime" required><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="right" data-align="top" data-autoclose="true" title="<?=get_text("Purge Until Time",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="endTime" name="endTime" required><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 <br><br>
-<button class="btn btn-success"><?=get_text("Delete Events",$lang);?></button>
+<button class="btn btn-success"><span class="fa fa-trash"></span> <?=get_text("Delete Events",$lang);?></button>
 </form>
 </div>
 </div>

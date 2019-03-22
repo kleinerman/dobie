@@ -232,7 +232,7 @@ $dictionary = array(
 	),
 
 	//events live
-	strtolower('Clear filter') => array(
+	strtolower('Reset filter') => array(
 		'es' => 'Limpiar filtro'
 	),
 	strtolower('Clear events') => array(
@@ -507,8 +507,8 @@ $dictionary = array(
 	),
 
 	//accesses
-	strtolower('Access - Person -> Door') => array(
-		'es' => 'Accesos - Persona -> Puerta'
+	strtolower('Access: Person') => array(
+		'es' => 'Accesos: Persona'
 	),
 	strtolower('Add to all') => array(
 		'es' => 'Agregar a todos'
@@ -579,8 +579,8 @@ $dictionary = array(
 	strtolower('Error when trying to edit access') => array(
 		'es' => 'Error al intentar editar acceso'
 	),
-	strtolower('Access - Door -> Person') => array(
-		'es' => 'Accesos - Puerta -> Persona'
+	strtolower('Access: Door') => array(
+		'es' => 'Accesos: Puerta'
 	),
 
 	//system users

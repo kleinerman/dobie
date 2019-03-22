@@ -42,8 +42,8 @@ include("header.php");
 <input type="text" name="cardnum" class="form-control data-filter" id="cardnum">
 </div>
 <div class="select-container-footer">
-<button type="button" class="btn btn-success" id="visitors-search"><?=get_text("Search",$lang);?></button> 
-<button id="visitors-search-reset" class="btn btn-warning" type="button"><?=get_text("Reset",$lang);?></button>
+<button type="button" class="btn btn-success" id="visitors-search"><span class="fa fa-search"></span> <?=get_text("Search",$lang);?></button> 
+<button id="visitors-search-reset" class="btn btn-warning" type="button"><span class="fa fa-power-off"></span> <?=get_text("Reset",$lang);?></button>
 </div>
 </div>
 
@@ -57,8 +57,8 @@ include("header.php");
 <select id="visitors-select" class="select-options form-control" name="visitors-select" size="2"></select>
 </div>
 <div class="select-container-footer">
-<button type="button" class="btn btn-success" id="visitors-add" data-toggle="modal" data-target="#modal-new"><?=get_text("Add",$lang);?></button> 
-<button type="button" class="btn btn-danger" id="visitors-del" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Remove",$lang);?></button>
+<button type="button" class="btn btn-success" id="visitors-add" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span> <?=get_text("Add",$lang);?></button> 
+<button type="button" class="btn btn-danger" id="visitors-del" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span> <?=get_text("Remove",$lang);?></button>
 </div>
 </div>
 </div>
@@ -101,9 +101,9 @@ include("footer.php");
 <input type="number" class="form-control" id="visit-cardnum" name="cardnum" value="" min="0" max="2147483646" required>
 <br>
 <label class="control-label"><?=get_text("Expiration",$lang);?>:</label><br>
-<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Date",$lang);?>"><input type="text" class="form-control input_date center" id="expiration-date" value="<?=date("Y-m-d",mktime(0,0,0))?>" required><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Date",$lang);?>"><input type="text" class="form-control input_date center" id="expiration-date" value="<?=date("Y-m-d",mktime(0,0,0))?>" required><span class="input-group-addon"><span class="far fa-calendar-alt"></span></span></div>
 
-<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Hour",$lang);?>"><input type="text" class="form-control from-input" value="23:59" id="expiration-hour" required><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Hour",$lang);?>"><input type="text" class="form-control from-input" value="23:59" id="expiration-hour" required><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 </div>
 
 <div class="col-sm-6">

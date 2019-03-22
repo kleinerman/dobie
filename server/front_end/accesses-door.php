@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header"><?=get_text("Access - Door -> Person",$lang);?></h1>
+<h1 class="page-header"><?=get_text("Access: Door",$lang);?> <span class="fa fa-arrow-right"></span> <?=get_text("Person",$lang);?></h1>
 </div>
 </div>
 
@@ -51,8 +51,9 @@ include("header.php");
 
 <div class="table-container" id="accesses-table-container" style="display:none">
 <input type="text" name="filter" placeholder="<?=get_text("Filter names",$lang);?>..." class="form-control data-filter-table" data-filter="access-table">
-<table id="access-table" class="table-bordered table-hover table-condensed table-responsive table-striped left">
-</table>
+<div class="table-responsive">
+<table id="access-table" class="table table-bordered table-hover table-condensed table-striped left"></table>
+</div>
 </div>
 
 </div>
@@ -61,11 +62,13 @@ include("header.php");
 
 <br><br>
 <div class="row" id="buttons-row" style="display:none">
-<div class="col-sm-3"><button id="access-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Add",$lang);?></button></div>
-<div class="col-sm-3"><button id="access-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Edit",$lang);?></button></div>
-<div class="col-sm-3"><button id="access-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete"><?=get_text("Delete",$lang);?></button></div>
-<div class="col-sm-3"><button id="access-refresh" class="btn btn-warning" type="button"><?=get_text("Refresh",$lang);?></button></div>
+<div class="col-xs-3"><button id="access-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-edit"><span class="fa fa-plus"></span> <span class="hidden-xs"><?=get_text("Add",$lang);?></span></button></div>
+<div class="col-xs-3"><button id="access-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit"><span class="fa fa-pen"></span> <span class="hidden-xs"><?=get_text("Edit",$lang);?></span></button></div>
+<div class="col-xs-3"><button id="access-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete"><span class="fa fa-times"></span> <span class="hidden-xs"><?=get_text("Delete",$lang);?></span></button></div>
+<div class="col-xs-3"><button id="access-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span> <span class="hidden-xs"><?=get_text("Refresh",$lang);?></span></button></div>
 </div>
+
+<br><br>
 
 </div>
 
