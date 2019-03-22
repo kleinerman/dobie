@@ -82,8 +82,8 @@ include("header.php");
 
 <br><br><br>
 
-<button id="events-search-reset-filter" class="btn btn-warning" type="button"><?=get_text("Clear filter",$lang);?></button>
-<button id="events-search-reset" class="btn btn-primary" type="button"><?=get_text("Clear events",$lang);?></button>
+<button id="events-search-reset-filter" class="btn btn-warning" type="button"><span class="fa fa-power-off"></span> <?=get_text("Reset filter",$lang);?></button>
+<button id="events-search-reset" class="btn btn-danger" type="button"><span class="fa fa-times"></span> <?=get_text("Clear events",$lang);?></button>
 
 </div>
 
@@ -102,10 +102,10 @@ include("header.php");
 <div class="col-lg-12">
 <hr>
 
-<div id="events-container">
+<div id="events-container" class="table-responsive gowide">
 
-<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr id="events-table-header-row">
-<th class="center"><?=get_text("Type",$lang);?></th><th><?=get_text("Zone",$lang);?></th><th><?=get_text("Door",$lang);?></th><th class="center"><?=get_text("Lock",$lang);?></th><th class="center"><?=get_text("Direction",$lang);?></th><th><?=get_text("Date",$lang);?></th><th><?=get_text("Time",$lang);?></th><th><?=get_text("Organization",$lang);?></th><th><?=get_text("Person",$lang);?></th><th class="center"><?=get_text("Allowed",$lang);?></th><th class="center"><?=get_text("Denial Cause",$lang);?></th></tr>
+<table id="events-table" class="table table-bordered table-hover table-condensed table-striped left"><tr id="events-table-header-row">
+<th class="center hidden-xs"><?=get_text("Type",$lang);?></th><th class="hidden-xs"><?=get_text("Zone",$lang);?></th><th><?=get_text("Door",$lang);?></th><th class="center hidden-xs"><?=get_text("Lock",$lang);?></th><th class="center hidden-xs"><?=get_text("Direction",$lang);?></th><th class="hidden-xs"><?=get_text("Date",$lang);?></th><th><?=get_text("Time",$lang);?></th><th class="hidden-xs"><?=get_text("Organization",$lang);?></th><th><?=get_text("Person",$lang);?></th><th class="center"><?=get_text("Allowed",$lang);?></th><th class="center hidden-xs"><?=get_text("Denial Cause",$lang);?></th></tr>
 <tr id="noevents-row"><td colspan="11"><?=get_text("No events",$lang);?></td></tr>
 </table>
 
@@ -119,25 +119,25 @@ include("header.php");
 <h4><?=get_text("Event Type",$lang);?></h4>
 <span class="fa fa-fw fa-address-card"></span> <?=get_text("Identified Access",$lang);?><br>
 <span class="fa fa-fw fa-circle"></span> <?=get_text("Access with button",$lang);?><br>
-<span class="fa fa-fw fa-chain-broken"></span> <?=get_text("Door remains opened",$lang);?><br>
+<span class="fa fa-fw fa-unlink"></span> <?=get_text("Door remains opened",$lang);?><br>
 <span class="fa fa-fw fa-bolt"></span> <?=get_text("Door was forced",$lang);?>
 </div>
 <div class="col-sm-3">
 <h4><?=get_text("Lock",$lang);?></h4>
-<span class="fa fa-fw fa-feed"></span> <?=get_text("Card Reader",$lang);?><br>
-<span class="fa fa-fw fa-thumbs-o-up"></span> <?=get_text("Fingerprint Reader",$lang);?><br>
+<span class="fa fa-fw fa-rss"></span> <?=get_text("Card Reader",$lang);?><br>
+<span class="fa fa-fw fa-thumbs-up"></span> <?=get_text("Fingerprint Reader",$lang);?><br>
 <span class="fa fa-fw fa-circle"></span> <?=get_text("Button",$lang);?>
 </div>
 <div class="col-sm-3">
 <h4><?=get_text("Denial Cause",$lang);?></h4>
 <span class="fa fa-fw fa-ban"></span> <?=get_text("No Access",$lang);?><br>
-<span class="fa fa-fw fa-calendar-times-o"></span> <?=get_text("Expired Card",$lang);?><br>
-<span class="fa fa-fw fa-clock-o"></span> <?=get_text("Out of time",$lang);?>
+<span class="far fa-fw fa-calendar-times"></span> <?=get_text("Expired Card",$lang);?><br>
+<span class="far fa-fw fa-clock"></span> <?=get_text("Out of time",$lang);?>
 </div>
 <div class="col-sm-3">
 <h4><?=get_text("Direction",$lang);?></h4>
-<span class="fa fa-fw fa-sign-in"></span> <?=get_text("Incoming",$lang);?><br>
-<span class="fa fa-fw fa-sign-out"></span> <?=get_text("Outgoing",$lang);?><br>
+<span class="fa fa-fw fa-sign-in-alt"></span> <?=get_text("Incoming",$lang);?><br>
+<span class="fa fa-fw fa-sign-out-alt"></span> <?=get_text("Outgoing",$lang);?><br>
 </div>
 
 </div>
@@ -273,7 +273,7 @@ function addEventInTable(data){
 	if(data.personDeleted==1) var rowclass=" todel";
 	else var rowclass="";
 	//build row
-	ret_string="<tr style='display:none' class='newevent"+rowclass+"'><td class=\"center\">"+ get_icon(data.eventTypeId,"type") +"</td><td>"+ data.zoneName +"</td><td>"+ data.doorName +"</td><td class=\"center\">"+ get_icon(data.doorLockId,"doorlock") +"</td><td class=\"center\">"+ get_icon(data.side,"side") +"</td><td>"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td>"+ data.orgName +"</td><td>"+ data.personName +"</td><td class=\"center\">"+ get_icon(data.allowed,"allowed") +"</td><td class=\"center\">"+ get_icon(data.denialCauseId,"denialcause") +"</td></tr>";
+	ret_string="<tr style='display:none' class='newevent"+rowclass+"'><td class=\"center hidden-xs\">"+ get_icon(data.eventTypeId,"type") +"</td><td class=\"hidden-xs\">"+ data.zoneName +"</td><td>"+ data.doorName +"</td><td class=\"center hidden-xs\">"+ get_icon(data.doorLockId,"doorlock") +"</td><td class=\"center hidden-xs\">"+ get_icon(data.side,"side") +"</td><td class=\"hidden-xs\">"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td class=\"hidden-xs\">"+ data.orgName +"</td><td>"+ data.personName +"</td><td class=\"center\">"+ get_icon(data.allowed,"allowed") +"</td><td class=\"center hidden-xs\">"+ get_icon(data.denialCauseId,"denialcause") +"</td></tr>";
 	return ret_string;
 }
 

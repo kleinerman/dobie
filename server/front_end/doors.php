@@ -35,9 +35,9 @@ include("header.php");
 <select id="doors-select" class="select-options form-control" name="doors-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
 <div class="select-container-footer">
-<button id="doors-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("New",$lang);?></button>
-<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><?=get_text("Edit",$lang);?></button>
-<button id="doors-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button>
+<button id="doors-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></span></button>
+<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button>
+<button id="doors-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button>
 </div>
 </form>
 </div>
@@ -394,7 +394,11 @@ $("#door-delete-form").submit(function(){
 	}
 	return false;
 });
-</script>
 
+//focus success button on delete modal shown
+$("#modal-delete").on("shown.bs.modal",function(){
+	$("#door-delete-form .btn-success").focus();
+});
+</script>
 </body>
 </html>

@@ -17,15 +17,16 @@ include("header.php");
 
 <div class="table-container" id="rows-table-container">
 <input type="text" name="filter" placeholder="<?=get_text("Filter names",$lang);?>..." class="form-control data-filter-table" data-filter="rows-table">
-<table id="rows-table" class="table-bordered table-hover table-condensed table-responsive table-striped left">
-</table>
+<div class="table-responsive">
+<table id="rows-table" class="table table-bordered table-hover table-condensed table-striped left"></table>
+</div>
 </div>
 
 <br><br>
 <div class="row" id="buttons-row">
-<div class="col-sm-4"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("Add",$lang);?></button></div>
-<div class="col-sm-4"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><?=get_text("Edit",$lang);?></button></div>
-<div class="col-sm-4"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button></div>
+<div class="col-xs-4 center"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></span></button></div>
+<div class="col-xs-4 center"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button></div>
+<div class="col-xs-4 center"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button></div>
 </div>
 
 </div>
@@ -438,7 +439,11 @@ $("#user-delete-form").submit(function(){
 	}
 	return false;
 });
-</script>
 
+//focus success button on delete modal shown
+$("#modal-delete").on("shown.bs.modal",function(){
+	$("#user-delete-form .btn-success").focus();
+});
+</script>
 </body>
 </html>

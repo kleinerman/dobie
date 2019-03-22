@@ -89,16 +89,16 @@ include("header.php");
 <div class="select-container-body left">
 <br>
 <?=get_text("From",$lang);?>:<br>
-<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From Date",$lang);?>"><input type="text" class="form-control input_date center" id="startDate" value="<?=date("Y-m-d",mktime(0,0,0)-(60*60*24*7))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From Date",$lang);?>"><input type="text" class="form-control input_date center" id="startDate" value="<?=date("Y-m-d",mktime(0,0,0)-(60*60*24*7))?>"><span class="input-group-addon"><span class="far fa-calendar-alt"></span></span></div>
 
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="startTime" name="startTime"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="startTime" name="startTime"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 
 <br><br>
 
 <?=get_text("Until",$lang);?>:<br>
-<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until Date",$lang);?>"><input type="text" class="form-control input_date center" id="endDate" value="<?=date("Y-m-d",mktime(0,0,0)+(60*60*24))?>"><span class="input-group-addon"><span class="fa fa-calendar"></span></span></div>
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until Date",$lang);?>"><input type="text" class="form-control input_date center" id="endDate" value="<?=date("Y-m-d",mktime(0,0,0)+(60*60*24))?>"><span class="input-group-addon"><span class="far fa-calendar-alt"></span></span></div>
 
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="endTime"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="endTime"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 
 </div>
 </form>
@@ -106,8 +106,8 @@ include("header.php");
 
 <br><br><br>
 
-<button id="events-search-submit" class="btn btn-success" type="button"><?=get_text("Search",$lang);?></button>
-<button id="events-search-reset" class="btn btn-warning" type="button"><?=get_text("Reset",$lang);?></button>
+<button id="events-search-submit" class="btn btn-success" type="button"><span class="fa fa-search"></span> <?=get_text("Search",$lang);?></button>
+<button id="events-search-reset" class="btn btn-warning" type="button"><span class="fa fa-power-off"></span> <?=get_text("Reset",$lang);?></button>
 
 </div>
 
@@ -161,25 +161,25 @@ include("header.php");
 <h4><?=get_text("Event Type",$lang);?></h4>
 <span class="fa fa-fw fa-address-card"></span> <?=get_text("Identified Access",$lang);?><br>
 <span class="fa fa-fw fa-circle"></span> <?=get_text("Access with button",$lang);?><br>
-<span class="fa fa-fw fa-chain-broken"></span> <?=get_text("Door remains opened",$lang);?><br>
+<span class="fa fa-fw fa-unlink"></span> <?=get_text("Door remains opened",$lang);?><br>
 <span class="fa fa-fw fa-bolt"></span> <?=get_text("Door was forced",$lang);?>
 </div>
 <div class="col-sm-3">
 <h4><?=get_text("Lock",$lang);?></h4>
-<span class="fa fa-fw fa-feed"></span> <?=get_text("Card Reader",$lang);?><br>
-<span class="fa fa-fw fa-thumbs-o-up"></span> <?=get_text("Fingerprint Reader",$lang);?><br>
+<span class="fa fa-fw fa-rss"></span> <?=get_text("Card Reader",$lang);?><br>
+<span class="fa fa-fw fa-thumbs-up"></span> <?=get_text("Fingerprint Reader",$lang);?><br>
 <span class="fa fa-fw fa-circle"></span> <?=get_text("Button",$lang);?>
 </div>
 <div class="col-sm-3">
 <h4><?=get_text("Denial Cause",$lang);?></h4>
 <span class="fa fa-fw fa-ban"></span> <?=get_text("No Access",$lang);?><br>
-<span class="fa fa-fw fa-calendar-times-o"></span> <?=get_text("Expired Card",$lang);?><br>
-<span class="fa fa-fw fa-clock-o"></span> <?=get_text("Out of time",$lang);?>
+<span class="far fa-fw fa-calendar-times"></span> <?=get_text("Expired Card",$lang);?><br>
+<span class="far fa-fw fa-clock"></span> <?=get_text("Out of time",$lang);?>
 </div>
 <div class="col-sm-3">
 <h4><?=get_text("Direction",$lang);?></h4>
-<span class="fa fa-fw fa-sign-in"></span> <?=get_text("Incoming",$lang);?><br>
-<span class="fa fa-fw fa-sign-out"></span> <?=get_text("Outgoing",$lang);?><br>
+<span class="fa fa-fw fa-sign-in-alt"></span> <?=get_text("Incoming",$lang);?><br>
+<span class="fa fa-fw fa-sign-out-alt"></span> <?=get_text("Outgoing",$lang);?><br>
 </div>
 
 </div>

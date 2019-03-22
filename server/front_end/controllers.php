@@ -16,17 +16,20 @@ include("header.php");
 
 <div class="table-container" id="rows-table-container">
 <input type="text" name="filter" placeholder="<?=get_text("Filter names",$lang);?>..." class="form-control data-filter-table" data-filter="rows-table">
-<table id="rows-table" class="table-bordered table-hover table-condensed table-responsive table-striped left">
-</table>
+<div class="table-responsive">
+<table id="rows-table" class="table table-bordered table-hover table-condensed table-striped left"></table>
+</div>
 </div>
 
 <br><br>
 <div class="row" id="buttons-row">
-<div class="col-sm-2"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("Add",$lang);?></button></div>
-<div class="col-sm-2"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><?=get_text("Edit",$lang);?></button></div>
-<div class="col-sm-3"><button id="rows-reprov" class="btn btn-warning" type="button" data-toggle="modal" data-target="#modal-reprov" disabled><?=get_text("Reprogram",$lang);?></button></div>
-<div class="col-sm-3"><button id="rows-poweroff" class="btn btn-info" type="button" data-toggle="modal" data-target="#modal-poweroff" disabled><?=get_text("Power Off",$lang);?></button></div>
-<div class="col-sm-2"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button></div>
+<div class="col-xs-1 center"></div>
+<div class="col-xs-2 center"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></button></div>
+<div class="col-xs-2 center"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button></div>
+<div class="col-xs-2 center"><button id="rows-reprov" class="btn btn-warning" type="button" data-toggle="modal" data-target="#modal-reprov" disabled><span class="fa fa-sync-alt"></span><span class="hidden-xs"> <?=get_text("Reprogram",$lang);?></span></button></div>
+<div class="col-xs-2 center"><button id="rows-poweroff" class="btn btn-info" type="button" data-toggle="modal" data-target="#modal-poweroff" disabled><span class="fa fa-power-off"></span><span class="hidden-xs"> <?=get_text("Power Off",$lang);?></span></button></div>
+<div class="col-xs-2 center"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button></div>
+<div class="col-xs-1 center"></div>
 </div>
 
 </div>
@@ -452,7 +455,11 @@ $("#controller-delete-form").submit(function(){
 	}
 	return false;
 });
-</script>
 
+//focus success button on delete modal shown
+$("#modal-delete").on("shown.bs.modal",function(){
+	$("#controller-delete-form .btn-success").focus();
+});
+</script>
 </body>
 </html>
