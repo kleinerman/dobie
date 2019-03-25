@@ -237,32 +237,32 @@ function get_icon(id,mode){
 		var iconstr="";
 		switch(mode){
 			case "type":
-				if(id==1) iconstr="address-card";
-				else if(id==2) iconstr="circle";
-				else if(id==3) iconstr="chain-broken";
-				else if(id==4) iconstr="bolt";
+				if(id==1) iconstr="fa fa-address-card";
+				else if(id==2) iconstr="fa fa-circle";
+				else if(id==3) iconstr="fa fa-unlink";
+				else if(id==4) iconstr="fa fa-bolt";
 			break;
 			case "doorlock":
-				if(id==1) iconstr="feed";
-				else if(id==2) iconstr="thumbs-o-up";
-				else if(id==3) iconstr="circle";
+				if(id==1) iconstr="fa fa-rss";
+				else if(id==2) iconstr="fa fa-thumbs-up";
+				else if(id==3) iconstr="fa fa-circle";
 			break;
 			case "denialcause":
-				if(id==1) iconstr="ban";
-				else if(id==2) iconstr="calendar-times-o";
-				else if(id==3) iconstr="clock-o";
+				if(id==1) iconstr="fa fa-ban";
+				else if(id==2) iconstr="far fa-calendar-times";
+				else if(id==3) iconstr="far fa-clock";
 			break;
 			case "side":
-				if(id==0) iconstr="sign-out";
-				else if(id==1) iconstr="sign-in";
+				if(id==0) iconstr="fa fa-sign-out-alt";
+				else if(id==1) iconstr="fa fa-sign-in-alt";
 			break;
 			case "allowed":
-				if(id==0) iconstr="times";
-				else if(id==1) iconstr="check";
+				if(id==0) iconstr="fa fa-times";
+				else if(id==1) iconstr="fa fa-check";
 			break;
 			default: break;
 		}
-		if(iconstr!="") return "<span class='fa fa-"+ iconstr +"'></span>";
+		if(iconstr!="") return "<span class='"+ iconstr +"'></span>";
 		else return "";
 	}
 }
