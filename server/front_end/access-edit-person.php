@@ -246,7 +246,7 @@ var doorAll=0;
 if(!accessId){
 	//if create
 	//populate header with person name
-	if(!isNaN(personId)) $("#page-header").text("<?=get_text("New access for ",$lang);?> " + parent.$("#persons-select option:selected").text());
+	if(!isNaN(personId)) $("#page-header").text("<?=get_text("New access for",$lang);?> " + parent.$("#persons-select option:selected").text());
 	else $("#page-header").text("<?=get_text("New access for",$lang);?> " + parent.$("#organizations-select option:selected").text());
 } else {
 	//if edit
@@ -261,7 +261,7 @@ if(!accessId){
 			values = resp[1];
 			//console.log(values);
 			//populate header as Edit Access for Door/Person
-			$("#page-header").text("<?=get_text("Editing",$lang);?> "+ values.personName + " -> " + values.doorName);
+			$("#page-header").html("<?=get_text("Editing",$lang);?> "+ values.personName + " <span class=\"fa fa-arrow-right\"></span> " + values.doorName);
 			//mark checkboxes according to days
 			if(values.allWeek){
 				//check allweek box > is checked by default

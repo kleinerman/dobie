@@ -271,3 +271,35 @@ function get_icon(id,mode){
 function buildMacFromString(macstring){
 	return macstring.replace(/(.{2})/g, "$1:").slice(0,-1).toUpperCase();
 }
+
+//funcs for live FC / Raw card number conversion
+function bin2dec(bin){
+  return parseInt(bin, 2).toString(10);
+}
+
+function dec2bin(dec){
+  return (dec >>> 0).toString(2);
+}
+
+function zerofill_left(number, length){
+    var my_string = '' + number;
+    while (my_string.length < length){
+        my_string = '0' + my_string;
+    }
+    return my_string;
+}
+
+function rawToFC(inputv){
+ var tempv=zerofill_left(dec2bin(inputv),24)
+ return bin2dec(tempv.substring(0,8)) + ", " +
+ bin2dec(tempv.substring(8))
+}
+
+function FCToRaw(inputv){
+ var inputParts = inputv.split(",");
+ var ret = "";
+ if(inputParts.length==2){
+  ret=bin2dec(zerofill_left(dec2bin(inputParts[0]),8) + zerofill_left(dec2bin(inputParts[1]),16));
+ }
+ return ret;
+}

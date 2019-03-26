@@ -42,6 +42,8 @@ include("header.php");
 </form>
 </div>
 
+<div id="select-container-persons-details" style="display:none">Details</div>
+
 </div>
 </div>
 
@@ -82,9 +84,17 @@ include("footer.php");
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?>:</label>
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (Raw):</label>
  <div class="col-sm-10">
       <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646">
+ </div>
+</div>
+
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (FC):</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control small_input" id="person-new-cardnum-fc-1" name="cardnumfc1" value="">
+       , <input type="text" class="form-control" id="person-new-cardnum-fc-2" name="cardnumfc2" value="">
  </div>
 </div>
 
@@ -129,9 +139,17 @@ include("footer.php");
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?>:</label>
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (Raw):</label>
  <div class="col-sm-10">
       <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646">
+ </div>
+</div>
+
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (FC):</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control small_input" id="person-edit-cardnum-fc-1" name="cardnumfc1" value="">
+       , <input type="text" class="form-control" id="person-edit-cardnum-fc-2" name="cardnumfc2" value="">
  </div>
 </div>
 
@@ -213,6 +231,21 @@ include("footer.php");
 	width:auto;
 	display:inline;
 }
+
+#select-container-persons-details{
+	display: inline-block;
+	vertical-align: top;
+	padding-top: 66px;
+	color: #aaa;
+}
+
+#person-edit-cardnum-fc-2,#person-new-cardnum-fc-2{
+	width:80%
+}
+
+#person-edit-cardnum-fc-1,#person-edit-cardnum-fc-2,#person-new-cardnum-fc-1,#person-new-cardnum-fc-2{
+	display:inline
+}
 </style>
 
 <script type="text/javascript">
@@ -233,16 +266,97 @@ $("#organizations-select").change(function(){
 		$("#select-container-persons").fadeIn();
 		//disable buttons
 		$("#persons-select-edit,#persons-select-del").prop("disabled",true);
+		//hide details
+		$('#select-container-persons-details').hide()
 	}
 });
 
+//populate quick details box on person change
+$("#persons-select").change(function(){
+	var personId = $(this).val();
+	if(!isNaN(personId)){
+		$.ajax({
+			type: "POST",
+			url: "process",
+			data: "action=get_person&id=" + personId,
+			success: function(resp){
+				if(resp[0]=='1'){
+					//populate details with rec info
+					var values = resp[1];
+					$('#select-container-persons-details').html("<?=get_text("Identification Number",$lang);?>: "+ values.identNumber +"<br><?=get_text("Card Number",$lang);?>: " + values.cardNumber + " - " + rawToFC(values.cardNumber));
+					//show details
+					$('#select-container-persons-details').show()
+				} else {
+					//hide details
+					$('#select-container-persons-details').hide()
+				}
+			},
+			failure: function(){
+				//hide details
+				$('#select-container-persons-details').hide()
+			}
+		});
+	}
+});
+
+//events to live update card number fields
+function buildFCnum(mode){
+	var part1=$("#person-"+mode+"-cardnum-fc-1").val();
+	var part2=$("#person-"+mode+"-cardnum-fc-2").val();
+	return (part1 + ", " + part2);
+}
+
+$("#person-edit-cardnum").keyup(function(){
+	var numparts = rawToFC($(this).val()).split(",");
+	if(numparts.length==2){
+		$("#person-edit-cardnum-fc-1").val(numparts[0]);
+		$("#person-edit-cardnum-fc-2").val(numparts[1]);
+	} else {
+		$("#person-edit-cardnum-fc-1").val("");
+		$("#person-edit-cardnum-fc-2").val("");
+	}
+});
+
+$("#person-edit-cardnum-fc-1, #person-edit-cardnum-fc-2").keyup(function(){
+	$("#person-edit-cardnum").val(FCToRaw(buildFCnum("edit")));
+});
+
+$("#person-new-cardnum").keyup(function(){
+	var numparts = rawToFC($(this).val()).split(",");
+	if(numparts.length==2){
+		$("#person-new-cardnum-fc-1").val(numparts[0]);
+		$("#person-new-cardnum-fc-2").val(numparts[1]);
+	} else {
+		$("#person-new-cardnum-fc-1").val("");
+		$("#person-new-cardnum-fc-2").val("");
+	}
+});
+
+$("#person-new-cardnum-fc-1, #person-new-cardnum-fc-2").keyup(function(){
+	$("#person-new-cardnum").val(FCToRaw(buildFCnum("new")));
+});
+
+//jump to fc2 on 3 nums fc
+$("#person-edit-cardnum-fc-1").keyup(function(){
+	if($(this).val()>99) $("#person-edit-cardnum-fc-2").focus();
+});
+
+$("#person-new-cardnum-fc-1").keyup(function(){
+	if($(this).val()>99) $("#person-new-cardnum-fc-2").focus();
+});
+
+/*$("#person-new-cardnum").keyup(function(){
+	$("#person-new-cardnum-fc").val(rawToFC($(this).val()));
+});
+
+$("#person-new-cardnum-fc").keyup(function(){
+	$("#person-new-cardnum").val(FCToRaw($(this).val()));
+});
+*/
 //clear form for new
 $('#modal-new').on('show.bs.modal', function (event){
 	//reset form
-	$('#person-new-names').val("");
-	$('#person-new-lastname').val("");
-	$('#person-new-idnum').val("");
-	$('#person-new-cardnum').val("");
+	$('#person-new-names, #person-new-lastname, #person-new-idnum, #person-new-cardnum, #person-new-cardnum-fc').val("");
 });
 
 //fetch info for edit
@@ -262,6 +376,14 @@ $('#modal-edit').on('show.bs.modal', function (event){
 				$('#person-edit-lastname').val(values.lastName);
 				$('#person-edit-idnum').val(values.identNumber);
 				$('#person-edit-cardnum').val(values.cardNumber);
+				var tempfc=rawToFC(values.cardNumber).split(",");
+				if(tempfc.length==2) {
+					$('#person-edit-cardnum-fc-1').val(tempfc[0]);
+					$('#person-edit-cardnum-fc-2').val(tempfc[1]);
+				} else {
+					$('#person-edit-cardnum-fc-1').val("");
+					$('#person-edit-cardnum-fc-2').val("");
+				}
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
