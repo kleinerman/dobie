@@ -14,7 +14,7 @@ include("header.php");
 <div class="row">
 <div class="col-lg-12">
 
-<div class="select-container">
+<div class="select-container valigntop">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Organizations",$lang);?></div>
 <div class="select-container-body">
@@ -27,7 +27,7 @@ include("header.php");
 </form>
 </div>
 
-<div class="select-container" id="select-container-persons" style="display:none">
+<div class="select-container valigntop" id="select-container-persons" style="display:none">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Persons",$lang);?> <button class="btn btn-primary btn-xs" id="import-csv-button" data-toggle="modal" data-target="#modal-import"><span class="fa fa-plus"></span> <?=get_text("Import CSV",$lang);?></button></div>
 <div class="select-container-body">
@@ -38,6 +38,7 @@ include("header.php");
 <button id="persons-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></button>
 <button id="persons-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button>
 <button id="persons-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button>
+<button id="persons-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span> <span class="hidden-xs"><?=get_text("Refresh",$lang);?></span></button>
 </div>
 </form>
 </div>
@@ -68,33 +69,33 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("First Name",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-names" name="names" value="" required maxlength="64">
+      <input type="text" class="form-control" id="person-new-names" name="names" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Last Name",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-lastname" name="lastname" value="" required maxlength="64">
+      <input type="text" class="form-control" id="person-new-lastname" name="lastname" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Identification Number",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-idnum" name="idnum" value="" maxlength="64">
+      <input type="number" class="form-control" id="person-new-idnum" name="idnum" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (Raw):</label>
  <div class="col-sm-10">
-      <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646">
+      <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646" required>
  </div>
 </div>
 
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (FC):</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control small_input" id="person-new-cardnum-fc-1" name="cardnumfc1" value="">
-       , <input type="text" class="form-control" id="person-new-cardnum-fc-2" name="cardnumfc2" value="">
+      <input type="text" class="form-control small_input" id="person-new-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3">
+       , <input type="text" class="form-control" id="person-new-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
  </div>
 </div>
 
@@ -135,21 +136,21 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Identification Number",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-edit-idnum" name="idnum" value="" maxlength="64">
+      <input type="number" class="form-control" id="person-edit-idnum" name="idnum" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (Raw):</label>
  <div class="col-sm-10">
-      <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646">
+      <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646" required>
  </div>
 </div>
 
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (FC):</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control small_input" id="person-edit-cardnum-fc-1" name="cardnumfc1" value="">
-       , <input type="text" class="form-control" id="person-edit-cardnum-fc-2" name="cardnumfc2" value="">
+      <input type="text" class="form-control small_input" id="person-edit-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3">
+       , <input type="text" class="form-control" id="person-edit-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
  </div>
 </div>
 
@@ -246,6 +247,7 @@ include("footer.php");
 #person-edit-cardnum-fc-1,#person-edit-cardnum-fc-2,#person-new-cardnum-fc-1,#person-new-cardnum-fc-2{
 	display:inline
 }
+
 </style>
 
 <script type="text/javascript">
@@ -306,7 +308,7 @@ function buildFCnum(mode){
 	return (part1 + ", " + part2);
 }
 
-$("#person-edit-cardnum").keyup(function(){
+$("#person-edit-cardnum").on('input', function(){
 	var numparts = rawToFC($(this).val()).split(",");
 	if(numparts.length==2){
 		$("#person-edit-cardnum-fc-1").val(numparts[0]);
@@ -317,11 +319,11 @@ $("#person-edit-cardnum").keyup(function(){
 	}
 });
 
-$("#person-edit-cardnum-fc-1, #person-edit-cardnum-fc-2").keyup(function(){
+$("#person-edit-cardnum-fc-1, #person-edit-cardnum-fc-2").on('input', function(){
 	$("#person-edit-cardnum").val(FCToRaw(buildFCnum("edit")));
 });
 
-$("#person-new-cardnum").keyup(function(){
+$("#person-new-cardnum").on('input', function(){
 	var numparts = rawToFC($(this).val()).split(",");
 	if(numparts.length==2){
 		$("#person-new-cardnum-fc-1").val(numparts[0]);
@@ -332,17 +334,24 @@ $("#person-new-cardnum").keyup(function(){
 	}
 });
 
-$("#person-new-cardnum-fc-1, #person-new-cardnum-fc-2").keyup(function(){
+$("#person-new-cardnum-fc-1, #person-new-cardnum-fc-2").on('input', function(){
 	$("#person-new-cardnum").val(FCToRaw(buildFCnum("new")));
 });
 
-//jump to fc2 on 3 nums fc
-$("#person-edit-cardnum-fc-1").keyup(function(){
-	if($(this).val()>99) $("#person-edit-cardnum-fc-2").focus();
+//jump to fc2 on 3 nums fc1
+$("#person-edit-cardnum-fc-1").on('input', function(){
+	if($(this).val().length>2) $("#person-edit-cardnum-fc-2").focus();
+});
+$("#person-new-cardnum-fc-1").on('input', function(){
+	if($(this).val().length>2) $("#person-new-cardnum-fc-2").focus();
 });
 
-$("#person-new-cardnum-fc-1").keyup(function(){
-	if($(this).val()>99) $("#person-new-cardnum-fc-2").focus();
+//jump to fc1 on 0 nums fc2
+$("#person-edit-cardnum-fc-2").on('input', function(){
+	if($(this).val().length==0) $("#person-edit-cardnum-fc-1").focus();
+});
+$("#person-new-cardnum-fc-2").on('input', function(){
+	if($(this).val().length==0) $("#person-new-cardnum-fc-1").focus();
 });
 
 /*$("#person-new-cardnum").keyup(function(){
@@ -356,7 +365,7 @@ $("#person-new-cardnum-fc").keyup(function(){
 //clear form for new
 $('#modal-new').on('show.bs.modal', function (event){
 	//reset form
-	$('#person-new-names, #person-new-lastname, #person-new-idnum, #person-new-cardnum, #person-new-cardnum-fc').val("");
+	$('#person-new-names, #person-new-lastname, #person-new-idnum, #person-new-cardnum, #person-new-cardnum-fc-1, #person-new-cardnum-fc-2').val("");
 });
 
 //fetch info for edit
@@ -597,6 +606,15 @@ $("#person-delete-form").submit(function(){
 //focus success button on delete modal shown
 $("#modal-delete").on("shown.bs.modal",function(){
 	$("#person-delete-form .btn-success").focus();
+});
+
+//Refresh button > repopulate list
+$("#persons-refresh").click(function(){
+	if(!isNaN(organizationId) && organizationId!="undefined") populateList("persons-select","persons",organizationId);
+	//hide details
+	$('#select-container-persons-details').hide();
+	//disable edit and del buttons
+	$("#persons-select-del,#persons-select-edit").prop("disabled",1);
 });
 </script>
 

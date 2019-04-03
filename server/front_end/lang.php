@@ -412,6 +412,9 @@ $dictionary = array(
 	strtolower('Total persons imported') => array(
 		'es' => 'Total de personas importadas'
 	),
+	strtolower('Refresh') => array(
+		'es' => 'Refrescar'
+	),
 
 	//controllers
 	strtolower('Controllers') => array(

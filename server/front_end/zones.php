@@ -24,6 +24,7 @@ include("header.php");
 <button id="zones-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></span></button>
 <button id="zones-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button>
 <button id="zones-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button>
+<button id="zones-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span> <span class="hidden-xs"><?=get_text("Refresh",$lang);?></span></button>
 </div>
 </form>
 </div>
@@ -273,6 +274,13 @@ $("#zone-delete-form").submit(function(){
 //focus success button on delete modal shown
 $("#modal-delete").on("shown.bs.modal",function(){
 	$("#zone-delete-form .btn-success").focus();
+});
+
+//Refresh button > repopulate list
+$("#zones-refresh").click(function(){
+	populateList("zones-select","zones");
+	//disable edit and del buttons
+	$("#zones-select-del, #zones-select-edit").prop("disabled",1);
 });
 </script>
 </body>
