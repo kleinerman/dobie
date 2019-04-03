@@ -24,6 +24,7 @@ include("header.php");
 <button id="organizations-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></span></button>
 <button id="organizations-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button>
 <button id="organizations-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button>
+<button id="organizations-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span> <span class="hidden-xs"><?=get_text("Refresh",$lang);?></span></button>
 </div>
 </form>
 </div>
@@ -274,6 +275,13 @@ $("#organization-delete-form").submit(function(){
 //focus success button on delete modal shown
 $("#modal-delete").on("shown.bs.modal",function(){
 	$("#organization-delete-form .btn-success").focus();
+});
+
+//Refresh button > repopulate list
+$("#organizations-refresh").click(function(){
+	populateList("organizations-select","organizations");
+	//disable edit and del buttons
+	$("#organizations-select-del, #organizations-select-edit").prop("disabled",1);
 });
 </script>
 

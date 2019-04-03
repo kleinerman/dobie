@@ -152,7 +152,7 @@ label,input[type=checkbox],input[type=radio]{
 
 /*new styles dobie*/
 .select-container{
-	width:270px;
+	width:250px;
 	display:inline-block;
 	margin-right:50px;
 }
@@ -171,6 +171,11 @@ label,input[type=checkbox],input[type=radio]{
 	text-align:right;
 	margin-top:10px;
 	line-height:30px;
+}
+
+/*this is for stacking abm buttons*/
+.select-container-footer .btn{
+	margin-bottom:5px;
 }
 
 .toadd{
