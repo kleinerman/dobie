@@ -26,7 +26,7 @@ include("header.php");
 <div class="col-xs-2 center"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></button></div>
 <div class="col-xs-2 center"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button></div>
 <div class="col-xs-2 center"><button id="rows-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span><span class="hidden-xs"> <?=get_text("Refresh",$lang);?></span></button></div>
-<div class="col-xs-2 center"><button id="rows-reprov" class="btn btn-default" type="button" data-toggle="modal" data-target="#modal-reprov" disabled><span class="fa fa-sync"></span><span class="hidden-xs"> <?=get_text("Reprogram",$lang);?></span></button></div>
+<div class="col-xs-2 center"><button id="rows-reprov" class="btn btn-violet" type="button" data-toggle="modal" data-target="#modal-reprov" disabled><span class="fa fa-redo-alt"></span><span class="hidden-xs"> <?=get_text("Reprogram",$lang);?></span></button></div>
 <div class="col-xs-2 center"><button id="rows-poweroff" class="btn btn-info" type="button" data-toggle="modal" data-target="#modal-poweroff" disabled><span class="fa fa-power-off"></span><span class="hidden-xs"> <?=get_text("Power Off",$lang);?></span></button></div>
 <div class="col-xs-2 center"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button></div>
 </div>

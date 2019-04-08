@@ -33,7 +33,7 @@ include("header.php");
 <div class="select-container" id="select-container-persons" style="display:none">
 <div class="select-container-title"><?=get_text("Person",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="person-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="persons-select">
 <select id="persons-select" class="select-options select-options-small form-control" name="persons-select" size="2"></select>
 </div>
 </div>
@@ -151,7 +151,7 @@ include("header.php");
 <div id="legend-row" style="display:none">
 <div class="row">
 <div class="col-sm-12">
-* <?=get_text("Persons in red were deleted or they are visitors that left the building",$lang);?>.
+* <?=get_text("Persons in gray were deleted or are visitors who left the building",$lang);?>.
 <br>
 </div>
 </div>
@@ -417,8 +417,10 @@ function buildEventTable(data){
 		if(data[i].personName === null) data[i].personName="";
 		//init date variable for date prints
 		var dateobj = new Date(data[i].dateTime);
-		//set red row if event belongs to a deleted user
-		if(data[i].personDeleted==1) var rowclass=" class='todel'";
+		//set grey row if event belongs to a deleted user
+		//red if access was denied
+		if(data[i].allowed==0) var rowclass=" class='todel'";
+		else if(data[i].personDeleted==1) var rowclass=" class='deleted'";
 		else var rowclass="";
 		//build row
 		ret_string+="<tr"+rowclass+"><td class=\"center\">"+ get_icon(data[i].eventTypeId,"type") +"</td><td>"+ data[i].zoneName +"</td><td>"+ data[i].doorName +"</td><td class=\"center\">"+ get_icon(data[i].doorLockId,"doorlock") +"</td><td class=\"center\">"+ get_icon(data[i].side,"side") +"</td><td>"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td>"+ data[i].orgName +"</td><td>"+ data[i].personName +"</td><td class=\"center\">"+ get_icon(data[i].allowed,"allowed") +"</td><td class=\"center\">"+ get_icon(data[i].denialCauseId,"denialcause") +"</td></tr>";

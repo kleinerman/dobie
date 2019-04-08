@@ -190,6 +190,10 @@ label,input[type=checkbox],input[type=radio]{
 	background:#faa !important;
 }
 
+.deleted{
+	background:#ccc !important;
+}
+
 /*accesses*/
 .table-container{
 	display:grid;
@@ -290,4 +294,14 @@ input::-webkit-inner-spin-button {
 
 #events-table{
 	width:100%;
+}
+
+.btn-violet{
+	color: #fff !important;
+	background-color: #8e44ad;
+	border-color: #6d228b;
+}
+
+.btn-violet:hover{
+	background-color: #7d339c;
 }
