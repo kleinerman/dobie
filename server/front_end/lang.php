@@ -149,8 +149,8 @@ $dictionary = array(
 	strtolower('Export spreadsheet') => array(
 		'es' => 'Exportar hoja de datos'
 	),
-	strtolower('Persons in red were deleted or they are visitors that left the building') => array(
-		'es' => 'Las personas en rojo fueron borradas o son visitas que dejaron el lugar'
+	strtolower('Persons in gray were deleted or are visitors who left the building') => array(
+		'es' => 'Las personas en gris fueron borradas o son visitas que dejaron el lugar'
 	),
 	strtolower('Event Type') => array(
 		'es' => 'Tipo de Evento'

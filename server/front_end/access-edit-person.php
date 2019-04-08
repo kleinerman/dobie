@@ -153,7 +153,7 @@ include("header.php");
 <div class="left">
 <?=get_text("Expiration Date",$lang);?>: <label><input type="radio" name="expiration" value="0" checked> <?=get_text("No",$lang);?></label> <label><input type="radio" name="expiration" value="1"> <?=get_text("Yes",$lang);?></label> &nbsp;&nbsp;<input type="text" class="form-control center" name="expiration_date" id="expiration_date" value="<?=date("Y-m-d",mktime(0,0,0)+(60*60*24*365))?>">
 <br><br>
-<button class="btn btn-success" type="submit"><?=get_text("Save",$lang);?></button>
+<button class="btn btn-success" id="form-submit-button" type="submit"><?=get_text("Save",$lang);?></button> <button id="form-spinner" class="btn btn-default" type="button" disabled style="display:none"><span class="fas fa-spinner fa-pulse"></span></button>
 </div>
 
 </form>
@@ -377,6 +377,8 @@ $("#access-edit-form").submit(function(){
 				type: "POST",
 				url: "process",
 				data: datastring,
+				beforeSend:function(){$("#form-submit-button").hide();$("#form-spinner").show()},
+				complete:function(){$("#form-submit-button").show();$("#form-spinner").hide()},
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate access table
@@ -442,6 +444,8 @@ $("#access-edit-form").submit(function(){
 							type: "POST",
 							url: "process",
 							data: datastring,
+							beforeSend:function(){$("#form-submit-button").hide();$("#form-spinner").show()},
+							complete:function(){$("#form-submit-button").show();$("#form-spinner").hide()},
 							success: function(resp){
 								//console.log(resp);
 							},
@@ -491,6 +495,8 @@ $("#access-edit-form").submit(function(){
 				type: "POST",
 				url: "process",
 				data: datastring,
+				beforeSend:function(){$("#form-submit-button").hide();$("#form-spinner").show()},
+				complete:function(){$("#form-submit-button").show();$("#form-spinner").hide()},
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate access table
@@ -536,7 +542,8 @@ $("#access-edit-form").submit(function(){
 					type: "POST",
 					url: "process",
 					data: "action=edit_access_liaccess&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId + "&id=" + accessId + "&days_payload="+ days_payload.join("|") + "&expiredate=" + accessRec.expireDate,
-					//complete: function(resp){console.log(resp)},
+					beforeSend:function(){$("#form-submit-button").hide();$("#form-spinner").show()},
+					complete:function(){$("#form-submit-button").show();$("#form-spinner").hide();/*console.log(resp)*/},
 					success: function(resp){
 						if(resp[0]=='1'){
 							//populate access table

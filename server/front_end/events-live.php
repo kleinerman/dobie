@@ -32,7 +32,7 @@ include("header.php");
 <div class="select-container" id="select-container-persons" style="display:none">
 <div class="select-container-title"><?=get_text("Person",$lang);?></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="person-select">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="persons-select">
 <select id="persons-select" class="select-options select-options-small form-control" name="persons-select" size="2"></select>
 </div>
 </div>
@@ -269,8 +269,10 @@ function addEventInTable(data){
 	if(data.personName === null) data.personName="";
 	//init date variable for date prints
 	var dateobj = new Date(data.dateTime);
-	//set red row if event belongs to a deleted user
-	if(data.personDeleted==1) var rowclass=" todel";
+	//set grey row if event belongs to a deleted user
+	//red if access was denied
+	if(data.allowed==0) var rowclass=" todel";
+	else if(data.personDeleted==1) var rowclass=" deleted";
 	else var rowclass="";
 	//build row
 	ret_string="<tr style='display:none' class='newevent"+rowclass+"'><td class=\"center hidden-xs\">"+ get_icon(data.eventTypeId,"type") +"</td><td class=\"hidden-xs\">"+ data.zoneName +"</td><td>"+ data.doorName +"</td><td class=\"center hidden-xs\">"+ get_icon(data.doorLockId,"doorlock") +"</td><td class=\"center hidden-xs\">"+ get_icon(data.side,"side") +"</td><td class=\"hidden-xs\">"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td class=\"hidden-xs\">"+ data.orgName +"</td><td>"+ data.personName +"</td><td class=\"center\">"+ get_icon(data.allowed,"allowed") +"</td><td class=\"center hidden-xs\">"+ get_icon(data.denialCauseId,"denialcause") +"</td></tr>";
