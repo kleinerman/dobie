@@ -41,9 +41,10 @@ CREATE TABLE `Person` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `names` varchar(35) NOT NULL,
     `lastName` varchar(25) NOT NULL,
-    `identNumber` varchar(40),
+    `identNumber` varchar(40) NOT NULL,
+    `note` varchar(80),
     `cardNumber` integer,
-    `orgId` integer,
+    `orgId` integer NOT NULL,
     `visitedOrgId` integer,
     `resStateId` integer NOT NULL,
     CONSTRAINT `fk_Person_Organization` FOREIGN KEY (`orgId`) REFERENCES `Organization` (`id`),
@@ -53,8 +54,6 @@ CREATE TABLE `Person` (
 ;
 
 CREATE UNIQUE INDEX cardNumberIndex ON Person (cardNumber)
-;
-CREATE UNIQUE INDEX identNumberIndex ON Person (identNumber)
 ;
 
 

@@ -847,7 +847,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 #-------------------------------------Person------------------------------------------
 
-        prsnNeedKeys = ('names', 'lastName', 'identNumber', 'cardNumber', 'orgId', 'visitedOrgId')
+        prsnNeedKeys = ('names', 'lastName', 'identNumber', 'note', 'cardNumber', 'orgId', 'visitedOrgId')
 
         @app.route('/api/v1.0/person', methods=['POST'])
         @auth.login_required
@@ -904,6 +904,7 @@ class CrudMngr(genmngr.GenericMngr):
                         person.pop('names')
                         person.pop('lastName')
                         person.pop('identNumber')
+                        person.pop('note')
                         person.pop('orgId')
                         person.pop('visitedOrgId')
                         ctrllerMacsToUpdPrsn = self.dataBase.markPerson(personId, database.TO_UPDATE)
@@ -1638,14 +1639,23 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             Returns visitors. This resource receives arguments in the URL that 
             parameterize the list of visitors returned.
+            At the moment, the GUI uses this resource in different places:
+             -To get the visitors at the moment they are in the building: in this
+             situation it can uses "visitedOrgId", "visitDoorGroupId" and "cardNumber"
+             arguments and it can ommit any or all of them.
+             -When a visitor enters the building, and it was previously a visitor (he 
+             is in DELETED state but all the data is availabe), to retrieve this data 
+             with the "identNumber" to autofill the "add visitor" screen: in this situation, 
+             the GUI only uses "identNumber" argument.
             '''
             try:
-
                 visitedOrgId = request.args.get('visitedOrgId')
                 visitDoorGroupId = request.args.get('visitDoorGroupId')
                 cardNumber = request.args.get('cardNumber')
+                identNumber = request.args.get('identNumber')
 
-                visitors = self.dataBase.getVisitors(visitedOrgId, visitDoorGroupId, cardNumber)
+                visitors = self.dataBase.getVisitors(visitedOrgId, visitDoorGroupId, 
+                                                     cardNumber, identNumber)
                 return jsonify(visitors)
 
             except database.PersonNotFound as personNotFound:
@@ -1663,7 +1673,6 @@ class CrudMngr(genmngr.GenericMngr):
 #----------------------------------------Main--------------------------------------------
 
         self.logger.info('Starting WSGI Server to listen for REST methods..') 
-        #app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)
 
         http_server = WSGIServer(('', 5000), app)
         http_server.serve_forever()

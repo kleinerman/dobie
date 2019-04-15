@@ -1413,20 +1413,28 @@ class DataBase(object):
 #-----------------------------------Visitors-----------------------------------------
 
 
-    def getVisitors(self, visitedOrgId, visitDoorGroupId, cardNumber):
+    def getVisitors(self, visitedOrgId, visitDoorGroupId, cardNumber, identNumber):
         '''
-        Returns a list with all visitors in the system.
+        Returns a list with visitors.
         It receive as arguments the ID of the organization the visitor is visiting,
-        the Visit Door Group used by the visitor to enter the building or the card
-        number of the visit.
-        Using the last argument, the previous ones has no sense to be different of None.
-        Any of the arguments could be None
+        the Visit Door Group used by the visitor to enter the building, the card
+        number of the visitor and the identification number of the visitor. Any of them
+        can be None.
+        If using "cardNumber" or "identNumber", the rest of the arguments has no sense
+        to be different of None.
+        Using "identNumber" is to retrieve data of deleted visitor that is going to enter
+        again in the building. If there is more than one visitor with the same "identNumber",
+        more than one will be returned but the GUI will use the first one.
+        When using "identNumber" variable, the "restStateId" should be "DELETED". When
+        using any of the other three variables, the "restStateId" should NOT be "DELETED"
         '''
 
         if visitedOrgId:
-            visitedOrgFilter = " Person.visitedOrgId = {}".format(visitedOrgId)
+            visitedOrgFilter = "Person.visitedOrgId = {}".format(visitedOrgId)
+
         else:
-            visitedOrgFilter = " Person.visitedOrgId IS NOT NULL"
+            visitedOrgFilter = "Person.visitedOrgId IS NOT NULL"
+
 
         if visitDoorGroupId:
             visitDoorGroupFilter = (" AND VisitDoorGroupDoor.visitDoorGroupId = {}"
@@ -1439,6 +1447,13 @@ class DataBase(object):
             cardNumberFilter = " AND Person.cardNumber = {}".format(cardNumber)
         else:
             cardNumberFilter = ''
+
+        if identNumber:
+            identNumberFilter = (" AND Person.identNumber = '{}' AND Person.resStateId = {}"
+                                 .format(identNumber, DELETED)
+                                )
+        else:
+            identNumberFilter = " AND Person.resStateId != {}".format(DELETED)
 
         #Using LEFT JOIN between Person table and Access table, because for any
         #strange reason the visitor has not access to the doors in the visit
@@ -1453,8 +1468,9 @@ class DataBase(object):
         sql = ("SELECT DISTINCT Person.* FROM Person LEFT JOIN Access ON "
                "(Person.id = Access.personId) LEFT JOIN VisitDoorGroupDoor "
                "ON (Access.doorId = VisitDoorGroupDoor.doorId) "
-               "WHERE {}{}{}"
-               "".format(visitedOrgFilter, visitDoorGroupFilter, cardNumberFilter)
+               "WHERE {}{}{}{}"
+               "".format(visitedOrgFilter, visitDoorGroupFilter, 
+                         cardNumberFilter, identNumberFilter)
               )
 
         try:
@@ -2224,31 +2240,61 @@ class DataBase(object):
     def addPerson(self, person):
         '''
         Receive a dictionary with person parametters and save it in DB
+        The person row is inserted in COMMITTED state since the person is not sent to
+        controller at the moment it is inserted here. It it sent to the controller when
+        an access is created.
+        If a visitor is being added and the system already have the visitor with the same
+        "identNumber" and "restStateId = DELETED", instead of adding a new row, the old
+        row is updated with the new card, name, etc.
+        If a not visitor person is being added with the same "identNumber" of some deleted
+        visitor a new row will be generated with INSERT (not UPDATE will be performed).
+        The same will happen if a not visitor person is being added with the same
+        "identNumber" of a not visitor person. (Two persons with the same "identNumber
+        could be").
+        Also INSERT will be performed with two active visitors with the same "identNumber".
         '''
 
-        #The person row is inserted in COMMITTED state since the person is not sent to
-        #controller at the moment it is inserted here. It it sent to the controller when
-        #an access is created.
-
+        #Changing None to 'NULL' for writting correct SQL syntax below.
         if not person['visitedOrgId']:
-            person['visitedOrgId'] = 'NULL'
+            visitedOrgId = 'NULL'
+        else:
+            visitedOrgId = person['visitedOrgId']
 
-        sql = ("INSERT INTO Person(names, lastName, identNumber, cardNumber, orgId, visitedOrgId, resStateId) "
-               "VALUES('{}', '{}', '{}', {}, {}, {}, {}) ON DUPLICATE KEY UPDATE "
-               "names = '{}', lastName = '{}', cardNumber = {}, orgId = {}, visitedOrgId = {}, resStateId = {}"
-               "".format(person['names'], person['lastName'], person['identNumber'], person['cardNumber'],
-                         person['orgId'], person['visitedOrgId'], COMMITTED,
-                         person['names'], person['lastName'], person['cardNumber'], person['orgId'],
-                         person['visitedOrgId'], COMMITTED)
-              )
 
         try:
+
+            sql = ("SELECT id FROM Person WHERE identNumber = '{}' "
+                   "AND visitedOrgId IS NOT NULL AND resStateId = {}"
+                   "".format(person['identNumber'], DELETED)
+                  )
+
             self.execute(sql)
-            return self.cursor.lastrowid
+            row = self.cursor.fetchone()
+
+            if row and person['visitedOrgId']:
+                personId = row['id']
+
+                sql = ("UPDATE Person SET names = '{}', lastName = '{}', cardNumber = {}, "
+                       "note = '{}', visitedOrgId = {}, resStateId = {} WHERE id = {}"
+                       "".format(person['names'], person['lastName'], person['cardNumber'],
+                                 person['note'], visitedOrgId, COMMITTED, personId)
+                      )
+                self.execute(sql)
+                return personId
+
+            else:
+                sql = ("INSERT INTO Person(names, lastName, identNumber, note, cardNumber, orgId, "
+                       "visitedOrgId, resStateId) VALUES('{}', '{}', '{}', '{}', {}, {}, {}, {})"
+                       "".format(person['names'], person['lastName'], person['identNumber'], person['note'],
+                                 person['cardNumber'], person['orgId'], visitedOrgId, COMMITTED)
+
+                     )
+                self.execute(sql)
+                return self.cursor.lastrowid
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise PersonError("Can't add this person. Card number or Identification number already exists.")
+            raise PersonError("Can't add this person. Card number already exists.")
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
             raise PersonError("Can not add this person. Internal error.")
@@ -2553,9 +2599,9 @@ class DataBase(object):
             oldCardNumber = self.cursor.fetchone()['cardNumber']
 
 
-            sql = ("UPDATE Person SET names = '{}', lastName = '{}', identNumber = '{}', "
+            sql = ("UPDATE Person SET names = '{}', lastName = '{}', identNumber = '{}', note = '{}', "
                    "cardNumber = {}, orgId = {}, visitedOrgId = {} WHERE id = {}"
-                   "".format(person['names'], person['lastName'], person['identNumber'],
+                   "".format(person['names'], person['lastName'], person['identNumber'], person['note'],
                              person['cardNumber'], person['orgId'], person['visitedOrgId'], person['id'])
                   )
 
