@@ -31,8 +31,8 @@ if [ $answer == y ] || [ $answer == Y ]; then
 
 else
 
-  curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 1", "ctrllerModelId": 1, "macAddress": "fa163e3946d7"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
-  curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 2", "ctrllerModelId": 1, "macAddress": "fa163e76206f"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
+  curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 1", "ctrllerModelId": 1, "macAddress": "525400a6d900"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
+  curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 2", "ctrllerModelId": 1, "macAddress": "52540050ea6d"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
 
 fi
 
@@ -106,33 +106,33 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 
 
 #Static Persons
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Jorge Emanuel", "lastName": "Kleinerman", "identNumber": "28063146", "cardNumber": 5379295, "orgId": 2, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Ary D.", "lastName": "Kleinerman", "identNumber": "21063146", "cardNumber": 5300738, "orgId": 2, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "German Andres", "lastName": "Fisanotti", "identNumber": "22063146", "cardNumber": 9038876, "orgId": 2, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Lucas", "lastName": "Ferre", "identNumber": "23063146", "cardNumber": 9136307, "orgId": 2, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Daniel", "lastName": "Costa", "identNumber": "24631946", "cardNumber": 6036754, "orgId": 3, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Romina", "lastName": "Goner", "identNumber": "25063146", "cardNumber": 5327374, "orgId": 3, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Carlos", "lastName": "Navares", "identNumber": "26063146", "cardNumber": 5330640, "orgId": 3, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Lorena", "lastName": "Tolares", "identNumber": "27063146", "cardNumber": 5325783, "orgId": 5, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Gonzalo", "lastName": "Bonatti", "identNumber": "28543146", "cardNumber": 12843557, "orgId": 5, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Mariano", "lastName": "Roter", "identNumber": "19063146", "cardNumber": 12844869, "orgId": 5, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Mauro J.", "lastName": "Alvarez", "identNumber": "21161141", "cardNumber": 9184668, "orgId": 5, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Monica", "lastName": "Llanos", "identNumber": "25073147", "cardNumber": 9198124, "orgId": 6, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Ruben", "lastName": "Gonzales", "identNumber": "24737047", "cardNumber": 11943284, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Ricardo", "lastName": "Telurio", "identNumber": "14063246", "cardNumber": 5300739, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Ruben", "lastName": "Pecamenta", "identNumber": "40063146", "cardNumber": 4300757, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Sol Maria", "lastName": "Tapia", "identNumber": "23563346", "cardNumber": 5300768, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Jorge Emanuel", "lastName": "Kleinerman", "identNumber": "28063146", "note": "nota de prueba", "cardNumber": 5379295, "orgId": 2, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Ary D.", "lastName": "Kleinerman", "identNumber": "21063146", "note": "nota de prueba", "cardNumber": 5300738, "orgId": 2, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "German Andres", "lastName": "Fisanotti", "identNumber": "22063146", "note": "nota de prueba", "cardNumber": 9038876, "orgId": 2, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Lucas", "lastName": "Ferre", "identNumber": "23063146", "note": "nota de prueba", "cardNumber": 9136307, "orgId": 2, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Daniel", "lastName": "Costa", "identNumber": "24631946", "note": "nota de prueba", "cardNumber": 6036754, "orgId": 3, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Romina", "lastName": "Goner", "identNumber": "25063146", "note": "nota de prueba", "cardNumber": 5327374, "orgId": 3, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Carlos", "lastName": "Navares", "identNumber": "26063146", "note": "nota de prueba", "cardNumber": 5330640, "orgId": 3, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Lorena", "lastName": "Tolares", "identNumber": "27063146", "note": "nota de prueba", "cardNumber": 5325783, "orgId": 5, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Gonzalo", "lastName": "Bonatti", "identNumber": "28543146", "note": "nota de prueba", "cardNumber": 12843557, "orgId": 5, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Mariano", "lastName": "Roter", "identNumber": "19063146", "note": "nota de prueba", "cardNumber": 12844869, "orgId": 5, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Mauro J.", "lastName": "Alvarez", "identNumber": "21161141", "note": "nota de prueba", "cardNumber": 9184668, "orgId": 5, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Monica", "lastName": "Llanos", "identNumber": "25073147", "note": "nota de prueba", "cardNumber": 9198124, "orgId": 6, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Ruben", "lastName": "Gonzales", "identNumber": "24737047", "note": "nota de prueba", "cardNumber": 11943284, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Ricardo", "lastName": "Telurio", "identNumber": "14063246", "note": "nota de prueba", "cardNumber": 5300739, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Ruben", "lastName": "Pecamenta", "identNumber": "40063146", "note": "nota de prueba", "cardNumber": 4300757, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Sol Maria", "lastName": "Tapia", "identNumber": "23563346", "note": "nota de prueba", "cardNumber": 5300768, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
 
 
 
 #Some Visitors
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Claudia", "lastName": "Toloza", "identNumber": "11064146", "cardNumber": 2163612, "orgId": 1, "visitedOrgId": 2}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Diego", "lastName": "Joner", "identNumber": "25033546", "cardNumber": 5327790, "orgId": 1, "visitedOrgId": 2}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Mariana", "lastName": "Turin", "identNumber": "24053646", "cardNumber": 5330823, "orgId": 1, "visitedOrgId": 3}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Marcelo", "lastName": "Olerti", "identNumber": "8463146", "cardNumber": 5326147, "orgId": 1, "visitedOrgId": 3}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Marcos A.", "lastName": "Vison", "identNumber": "65263146", "cardNumber": 7306735, "orgId": 1, "visitedOrgId": 5}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Carlos R.", "lastName": "Vasquez", "identNumber": "36043156", "cardNumber": 4310747, "orgId": 1, "visitedOrgId": 6}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Tatiana", "lastName": "Rodriguez", "identNumber": "29063356", "cardNumber": 8304763, "orgId": 1, "visitedOrgId": 7}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Claudia", "lastName": "Toloza", "identNumber": "11064146", "note": "nota de prueba", "cardNumber": 2163612, "orgId": 1, "visitedOrgId": 2}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Diego", "lastName": "Joner", "identNumber": "25033546", "note": "nota de prueba", "cardNumber": 5327790, "orgId": 1, "visitedOrgId": 2}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Mariana", "lastName": "Turin", "identNumber": "24053646", "note": "nota de prueba", "cardNumber": 5330823, "orgId": 1, "visitedOrgId": 3}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Marcelo", "lastName": "Olerti", "identNumber": "8463146", "note": "nota de prueba", "cardNumber": 5326147, "orgId": 1, "visitedOrgId": 3}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Marcos A.", "lastName": "Vison", "identNumber": "65263146", "note": "nota de prueba", "cardNumber": 7306735, "orgId": 1, "visitedOrgId": 5}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Carlos R.", "lastName": "Vasquez", "identNumber": "36043156", "note": "nota de prueba", "cardNumber": 4310747, "orgId": 1, "visitedOrgId": 6}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Tatiana", "lastName": "Rodriguez", "identNumber": "29063356", "note": "nota de prueba", "cardNumber": 8304763, "orgId": 1, "visitedOrgId": 7}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
 
 
 
@@ -249,7 +249,6 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId"
 
 
 
-
 ################# Accesses for Visitors ####################
 #Claudia Toloza
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 17, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
@@ -280,7 +279,8 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId"
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 23, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 
 #Modifying Sol Tapia Values
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"names": "Soledad Rocio", "lastName": "Tapia", "identNumber": "24573247", "cardNumber": 5300817, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person/16
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"names": "Soledad Rocio", "lastName": "Tapia", "identNumber": "24573247", "note": "nota modificada", "cardNumber": 5300817, "orgId": 7, "visitedOrgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person/16
+
 
 #Waiting 3 seconds to let database finish de insertion of the accesses of deleted persons
 sleep 3 
