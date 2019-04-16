@@ -90,12 +90,17 @@ include("footer.php");
       <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646" required>
  </div>
 </div>
-
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (FC):</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control small_input" id="person-new-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3">
-       , <input type="text" class="form-control" id="person-new-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
+      <input type="number" class="form-control small_input" id="person-new-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3">
+       , <input type="number" class="form-control" id="person-new-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
+ </div>
+</div>
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Note",$lang);?>:</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control" id="person-new-note" name="note" value="" maxlength="256">
  </div>
 </div>
 
@@ -145,12 +150,17 @@ include("footer.php");
       <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646" required>
  </div>
 </div>
-
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (FC):</label>
  <div class="col-sm-10">
       <input type="text" class="form-control small_input" id="person-edit-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3">
        , <input type="text" class="form-control" id="person-edit-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
+ </div>
+</div>
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Note",$lang);?>:</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control" id="person-edit-note" name="note" value="" maxlength="256">
  </div>
 </div>
 
@@ -232,22 +242,6 @@ include("footer.php");
 	width:auto;
 	display:inline;
 }
-
-#select-container-persons-details{
-	display: inline-block;
-	vertical-align: top;
-	padding-top: 66px;
-	color: #aaa;
-}
-
-#person-edit-cardnum-fc-2,#person-new-cardnum-fc-2{
-	width:80%
-}
-
-#person-edit-cardnum-fc-1,#person-edit-cardnum-fc-2,#person-new-cardnum-fc-1,#person-new-cardnum-fc-2{
-	display:inline
-}
-
 </style>
 
 <script type="text/javascript">
@@ -269,7 +263,7 @@ $("#organizations-select").change(function(){
 		//disable buttons
 		$("#persons-select-edit,#persons-select-del").prop("disabled",true);
 		//hide details
-		$('#select-container-persons-details').hide()
+		$('#select-container-persons-details').hide();
 	}
 });
 
@@ -285,7 +279,9 @@ $("#persons-select").change(function(){
 				if(resp[0]=='1'){
 					//populate details with rec info
 					var values = resp[1];
-					$('#select-container-persons-details').html("<?=get_text("Identification Number",$lang);?>: "+ values.identNumber +"<br><?=get_text("Card Number",$lang);?>: " + values.cardNumber + " - " + rawToFC(values.cardNumber));
+					$('#select-container-persons-details').html("<?=get_text("Identification Number",$lang);?>: "+ values.identNumber +
+					"<br><?=get_text("Card Number",$lang);?>: " + values.cardNumber + " - " + rawToFC(values.cardNumber));
+					if(values.note!="") $('#select-container-persons-details').append("<br><?=get_text("Note",$lang);?>: " + values.note);
 					//show details
 					$('#select-container-persons-details').show()
 				} else {
@@ -301,76 +297,18 @@ $("#persons-select").change(function(){
 	}
 });
 
-//events to live update card number fields
-function buildFCnum(mode){
-	var part1=$("#person-"+mode+"-cardnum-fc-1").val();
-	var part2=$("#person-"+mode+"-cardnum-fc-2").val();
-	return (part1 + ", " + part2);
-}
+//init events for cardnum fields (update and live calculation on input)
+addCardnumEvents("person-edit");
+addCardnumEvents("person-new");
 
-$("#person-edit-cardnum").on('input', function(){
-	var numparts = rawToFC($(this).val()).split(",");
-	if(numparts.length==2){
-		$("#person-edit-cardnum-fc-1").val(numparts[0]);
-		$("#person-edit-cardnum-fc-2").val(numparts[1]);
-	} else {
-		$("#person-edit-cardnum-fc-1").val("");
-		$("#person-edit-cardnum-fc-2").val("");
-	}
-});
-
-$("#person-edit-cardnum-fc-1, #person-edit-cardnum-fc-2").on('input', function(){
-	$("#person-edit-cardnum").val(FCToRaw(buildFCnum("edit")));
-});
-
-$("#person-new-cardnum").on('input', function(){
-	var numparts = rawToFC($(this).val()).split(",");
-	if(numparts.length==2){
-		$("#person-new-cardnum-fc-1").val(numparts[0]);
-		$("#person-new-cardnum-fc-2").val(numparts[1]);
-	} else {
-		$("#person-new-cardnum-fc-1").val("");
-		$("#person-new-cardnum-fc-2").val("");
-	}
-});
-
-$("#person-new-cardnum-fc-1, #person-new-cardnum-fc-2").on('input', function(){
-	$("#person-new-cardnum").val(FCToRaw(buildFCnum("new")));
-});
-
-//jump to fc2 on 3 nums fc1
-$("#person-edit-cardnum-fc-1").on('input', function(){
-	if($(this).val().length>2) $("#person-edit-cardnum-fc-2").focus();
-});
-$("#person-new-cardnum-fc-1").on('input', function(){
-	if($(this).val().length>2) $("#person-new-cardnum-fc-2").focus();
-});
-
-//jump to fc1 on 0 nums fc2
-$("#person-edit-cardnum-fc-2").on('input', function(){
-	if($(this).val().length==0) $("#person-edit-cardnum-fc-1").focus();
-});
-$("#person-new-cardnum-fc-2").on('input', function(){
-	if($(this).val().length==0) $("#person-new-cardnum-fc-1").focus();
-});
-
-/*$("#person-new-cardnum").keyup(function(){
-	$("#person-new-cardnum-fc").val(rawToFC($(this).val()));
-});
-
-$("#person-new-cardnum-fc").keyup(function(){
-	$("#person-new-cardnum").val(FCToRaw($(this).val()));
-});
-*/
 //clear form for new
 $('#modal-new').on('show.bs.modal', function (event){
 	//reset form
-	$('#person-new-names, #person-new-lastname, #person-new-idnum, #person-new-cardnum, #person-new-cardnum-fc-1, #person-new-cardnum-fc-2').val("");
+	$('#person-new-names, #person-new-lastname, #person-new-idnum, #person-new-cardnum, #person-new-cardnum-fc-1, #person-new-cardnum-fc-2,#person-new-note').val("");
 });
 
 //fetch info for edit
 $('#modal-edit').on('show.bs.modal', function (event){
-	// If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
 	var personId = $("#persons-select").val();
 	$.ajax({
 		type: "POST",
@@ -385,10 +323,11 @@ $('#modal-edit').on('show.bs.modal', function (event){
 				$('#person-edit-lastname').val(values.lastName);
 				$('#person-edit-idnum').val(values.identNumber);
 				$('#person-edit-cardnum').val(values.cardNumber);
+				$('#person-edit-note').val(values.note);
 				var tempfc=rawToFC(values.cardNumber).split(",");
 				if(tempfc.length==2) {
-					$('#person-edit-cardnum-fc-1').val(tempfc[0]);
-					$('#person-edit-cardnum-fc-2').val(tempfc[1]);
+					$('#person-edit-cardnum-fc-1').val(myTrim(tempfc[0]));
+					$('#person-edit-cardnum-fc-2').val(myTrim(tempfc[1]));
 				} else {
 					$('#person-edit-cardnum-fc-1').val("");
 					$('#person-edit-cardnum-fc-2').val("");
@@ -479,6 +418,8 @@ $("#form-import-submit").click(function(){
 				$("#modal-error").modal("show");
 				//repopulate select box
 				populateList("persons-select","persons",organizationId);
+				//hide details
+				$('#select-container-persons-details').hide();
 			} else {
 				//show error
 				$('#form-import-error').text(resp[1]);
@@ -497,18 +438,21 @@ $("#person-new-form").submit(function(){
 	var personLastName = $("#person-new-lastname").val();
 	var personIdNum = $("#person-new-idnum").val();
 	var personCardNum = $("#person-new-cardnum").val();
+	var personNote = $("#person-new-note").val();
 
 	if(personNames!="" && personNames!='undefined' && personLastName!="" && personLastName!='undefined'){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=add_person&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum,
+			data: "action=add_person&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum  + "&note=" + personNote,
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
 					$("#modal-new").modal("hide");
 					//repopulate select box
 					populateList("persons-select","persons",organizationId);
+					//hide details
+					$('#select-container-persons-details').hide();
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -536,18 +480,21 @@ $("#person-edit-form").submit(function(){
 	var personLastName = $("#person-edit-lastname").val();
 	var personIdNum = $("#person-edit-idnum").val();
 	var personCardNum = $("#person-edit-cardnum").val();
+	var personNote = $("#person-edit-note").val();
 
 	if(!isNaN(personId) && personNames!="" && personNames!='undefined' && personLastName!="" && personLastName!='undefined'){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=edit_person&id=" + personId+"&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum,
+			data: "action=edit_person&id=" + personId+"&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum + "&note=" + personNote,
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
 					$("#modal-edit").modal("hide");
 					//repopulate select box
 					populateList("persons-select","persons",organizationId);
+					//hide details
+					$('#select-container-persons-details').hide();
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -583,6 +530,8 @@ $("#person-delete-form").submit(function(){
 					$("#modal-delete").modal("hide");
 					//repopulate select box
 					populateList("persons-select","persons",organizationId);
+					//hide details
+					$('#select-container-persons-details').hide();
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);

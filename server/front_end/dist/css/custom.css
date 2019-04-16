@@ -106,6 +106,10 @@ label,input[type=checkbox],input[type=radio]{
 	float: left;
 }
 
+label.control-label{
+	cursor:default;
+}
+
 /*new styles*/
 
 /*login*/
@@ -304,4 +308,25 @@ input::-webkit-inner-spin-button {
 
 .btn-violet:hover{
 	background-color: #7d339c;
+}
+
+/*persons / visitors*/
+#select-container-persons-details,#select-container-visitors-details{
+	display: inline-block;
+	vertical-align: top;
+	padding-top: 66px;
+	color: #aaa;
+}
+
+#person-edit-cardnum-fc-2,#person-new-cardnum-fc-2{
+	width:80%
+}
+
+#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-2{
+	width:70%
+}
+
+#person-edit-cardnum-fc-1,#person-edit-cardnum-fc-2,#person-new-cardnum-fc-1,#person-new-cardnum-fc-2,
+#visit-edit-cardnum-fc-1,#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-1,#visit-new-cardnum-fc-2{
+	display:inline
 }
