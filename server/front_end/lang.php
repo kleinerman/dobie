@@ -375,6 +375,12 @@ $dictionary = array(
 	strtolower('Please select at least one Door Group') => array(
 		'es' => 'Por favor seleccionar al menos un Grupo de Puertas'
 	),
+	strtolower('Edit Visitor') => array(
+		'es' => 'Editar Visita'
+	),
+	strtolower('Invalid visit selected') => array(
+		'es' => 'Visita seleccionada inválida'
+	),
 
 	//organizations
 	strtolower('New Organization') => array(
@@ -414,6 +420,9 @@ $dictionary = array(
 	),
 	strtolower('Refresh') => array(
 		'es' => 'Refrescar'
+	),
+	strtolower('Note') => array(
+		'es' => 'Nota'
 	),
 
 	//controllers

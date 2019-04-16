@@ -299,7 +299,7 @@ $("#rows-edit").click(function(){
 	});
 });
 
-//fetch info for edit
+//fetch info for new
 $("#rows-new").click(function(){
 	resetForm();
 	populateList("controller-model-select","controller_models");

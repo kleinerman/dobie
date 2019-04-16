@@ -112,8 +112,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$lastname = isset($_POST['lastname']) ? $_POST['lastname'] : "";
 				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
 				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
+				$note = isset($_POST['note']) ? $_POST['note'] : "";
 
-				$persons_rec = add_person($logged->name, $logged->pw, $orgid, $names, $lastname, $idnum, $cardnum);
+				$persons_rec = add_person($logged->name, $logged->pw, $orgid, $names, $lastname, $idnum, $cardnum,$note);
 				//if($persons_rec) array_push($ret,1,"Information saved successfully!");
 				//else array_push($ret,0,"Person could not be added");
 				if($persons_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
@@ -129,10 +130,11 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$lastname = isset($_POST['lastname']) ? $_POST['lastname'] : "";
 				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
 				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
+				$note = isset($_POST['note']) ? $_POST['note'] : "";
 
 				if($id=="") array_push($ret,0,"Invalid values sent");
 	    			else {
-					$persons_rec = set_person($logged->name, $logged->pw,$id, $orgid, $names, $lastname, $idnum, $cardnum);
+					$persons_rec = set_person($logged->name, $logged->pw,$id, $orgid, $names, $lastname, $idnum, $cardnum,$note);
 
 					if($persons_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"Person could not be updated");
@@ -694,8 +696,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$visitdoorgroupid = (isset($_POST['visitdoorgroupid']) and is_numeric($_POST['visitdoorgroupid'])) ? intval($_POST['visitdoorgroupid']) : "";
 				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? intval($_POST['orgid']) : "";
 				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
+				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
 
-				$visitors_rec=get_visitors($logged->name, $logged->pw, $visitdoorgroupid, $orgid, $cardnum);
+				$visitors_rec=get_visitors($logged->name, $logged->pw, $visitdoorgroupid, $orgid, $cardnum, $idnum);
 
 				if($visitors_rec and $visitors_rec->response_status==200) array_push($ret,1,$visitors_rec->data);
 				else array_push($ret,0,$visitors_rec->data->message);
@@ -712,14 +715,34 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$expirationdate = isset($_POST['expirationdate']) ? $_POST['expirationdate'] : "";
 				$expirationhour = isset($_POST['expirationhour']) ? $_POST['expirationhour'] : "23:59";
 				$doorgroupids = isset($_POST['doorgroupids']) ? $_POST['doorgroupids'] : "";
+				$note = isset($_POST['note']) ? $_POST['note'] : "";
 
-				$visit_rec = add_visit($logged->name, $logged->pw, $names, $lastname, $idnum, $cardnum, $orgid, $expirationdate, $expirationhour, $doorgroupids);
+				$visit_rec = add_visit($logged->name, $logged->pw, $names, $lastname, $idnum, $cardnum, $orgid, $expirationdate, $expirationhour, $doorgroupids, $note);
 
 				if($visit_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
 				else array_push($ret,0,$visit_rec->data->message);
 			}
 		break;
+		case "edit_visit":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+				$names = isset($_POST['names']) ? $_POST['names'] : "";
+				$lastname = isset($_POST['lastname']) ? $_POST['lastname'] : "";
+				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
+				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
+				$note = isset($_POST['note']) ? $_POST['note'] : "";
+				$orgid = isset($_POST['orgid']) ? $_POST['orgid'] : "";
 
+				if($id=="") array_push($ret,0,"Invalid values sent");
+	    			else {
+					$persons_rec = set_visit($logged->name, $logged->pw,$id, $names, $lastname, $idnum, $cardnum, $note, $orgid);
+
+					if($persons_rec) array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,"Person could not be updated");
+				}
+			}
+		break;
 		case "get_controller":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {

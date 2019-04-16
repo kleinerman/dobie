@@ -125,7 +125,7 @@ function get_person($user,$pass,$id){
 	else return $response->data;
 }
 
-function add_person($user,$pass,$orgid,$names,$lastname,$idnum,$cardnum,$visitedorgid=null){
+function add_person($user,$pass,$orgid,$names,$lastname,$idnum,$cardnum,$note="",$visitedorgid=null){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->orgId= $orgid;
@@ -133,6 +133,7 @@ function add_person($user,$pass,$orgid,$names,$lastname,$idnum,$cardnum,$visited
 	$payload_obj->lastName= $lastname;
 	$payload_obj->identNumber= $idnum;
 	$payload_obj->cardNumber= $cardnum;
+	$payload_obj->note= $note;
 	$payload_obj->visitedOrgId= $visitedorgid;
 	$response=send_request($config->api_fullpath."person",$user,$pass,"post",json_encode($payload_obj));
 	//if($response->response_status != "201") return false;
@@ -140,7 +141,7 @@ function add_person($user,$pass,$orgid,$names,$lastname,$idnum,$cardnum,$visited
 	return $response;
 }
 
-function set_person($user,$pass,$id,$orgid,$names,$lastname,$idnum,$cardnum){
+function set_person($user,$pass,$id,$orgid,$names,$lastname,$idnum,$cardnum,$note=""){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->orgId= $orgid;
@@ -148,6 +149,7 @@ function set_person($user,$pass,$id,$orgid,$names,$lastname,$idnum,$cardnum){
 	$payload_obj->lastName= $lastname;
 	$payload_obj->identNumber= $idnum;
 	$payload_obj->cardNumber= $cardnum;
+	$payload_obj->note= $note;
 	$payload_obj->visitedOrgId= null;
 	$response=send_request($config->api_fullpath."person/$id",$user,$pass,"put",json_encode($payload_obj));
 	if($response->response_status != "200") return false;
@@ -838,22 +840,21 @@ function delete_visit_door_group($user,$pass,$id){
 
 //Visitors
 
-function get_visitors($user,$pass,$visitdoorgroupid="",$orgid="",$cardnum=""){
+function get_visitors($user,$pass,$visitdoorgroupid="",$orgid="",$cardnum="",$idnum=""){
 	global $config;
 	$querystring="";
-	if($visitdoorgroupid!="") $querystring.="visitDoorGroupId=".$visitdoorgroupid;
-	if($orgid!="") $querystring.="&visitedOrgId=".$orgid;
-	if($cardnum!="") $querystring.="&cardNumber=".$cardnum;
+	if($visitdoorgroupid!="") $querystring.="visitDoorGroupId=".$visitdoorgroupid."&";
+	if($orgid!="") $querystring.="visitedOrgId=".$orgid."&";
+	if($cardnum!="") $querystring.="cardNumber=".$cardnum."&";
+	if($idnum!="") $querystring.="identNumber=".$idnum;
 
 	$response=send_request($config->api_fullpath."visitor?$querystring",$user,$pass);
-	//$response=send_request($config->api_fullpath."visitor",$user,$pass);
-	//echo $config->api_fullpath."visitor";
 	return $response;
 }
 
-function add_visit($user,$pass,$names,$lastname,$idnum,$cardnum,$orgid,$expirationdate,$expirationhour,$doorgroupids_str=""){
+function add_visit($user,$pass,$names,$lastname,$idnum,$cardnum,$orgid,$expirationdate,$expirationhour,$doorgroupids_str="",$note=""){
 	//add user
-	$response = add_person($user,$pass,1,$names,$lastname,$idnum,$cardnum,$orgid);
+	$response = add_person($user,$pass,1,$names,$lastname,$idnum,$cardnum,$note,$orgid);
 
 	if($response->response_status == "201"){
 		//get created person id
@@ -879,6 +880,21 @@ function add_visit($user,$pass,$names,$lastname,$idnum,$cardnum,$orgid,$expirati
 		}
 	}
 	return $response;
+}
+
+function set_visit($user,$pass,$id,$names,$lastname,$idnum,$cardnum,$note="",$orgid){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->orgId= 1;
+	$payload_obj->names= $names;
+	$payload_obj->lastName= $lastname;
+	$payload_obj->identNumber= $idnum;
+	$payload_obj->cardNumber= $cardnum;
+	$payload_obj->note= $note;
+	$payload_obj->visitedOrgId= $orgid;
+	$response=send_request($config->api_fullpath."person/$id",$user,$pass,"put",json_encode($payload_obj));
+	if($response->response_status != "200") return false;
+	else return $response->data;
 }
 
 //Controllers
@@ -1046,7 +1062,8 @@ if($DEBUG){
 	//$res=delete_visit_door_group("admin","admin",4);
 	//$res=get_persons("admin","admin",1);
 	//$res=get_person("admin","admin",18);
-//	$res=get_visitors("admin","admin");
+	//$res=get_visitors("admin","admin");
+	//$res=get_visitors("admin","admin","","","",894568408);
 	//$res=get_person_accesses("admin","admin",9);
 //	$res=add_visit("admin","admin","fasdfasdf",212121,33334,2,"2018-03-02","23:59","1");
 	//$res=get_controllers("admin","admin");
