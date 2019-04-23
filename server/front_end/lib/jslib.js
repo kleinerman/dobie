@@ -93,7 +93,7 @@ function populateList(selectId,entity,id=0,actionstr="",hlvalue="",newcontroller
 							//join person names if present
 							if(typeof item.names!=="undefined" && typeof item.lastName!=="undefined") item.name = item.names + " " + item.lastName;
 							//show note if visitor and note exists
-							if(entity=="visitors" && item.note!="") item.name += " ("+truncate_str(item.note,8)+")";
+							if(entity=="visitors" && item.note && item.note!="") item.name += " ("+truncate_str(item.note,8)+")";
 							//show
 							$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
 							qValidItems++;

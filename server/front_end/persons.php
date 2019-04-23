@@ -281,7 +281,7 @@ $("#persons-select").change(function(){
 					var values = resp[1];
 					$('#select-container-persons-details').html("<?=get_text("Identification Number",$lang);?>: "+ values.identNumber +
 					"<br><?=get_text("Card Number",$lang);?>: " + values.cardNumber + " - " + rawToFC(values.cardNumber));
-					if(values.note!="") $('#select-container-persons-details').append("<br><?=get_text("Note",$lang);?>: " + values.note);
+					if(values.note && values.note!="") $('#select-container-persons-details').append("<br><?=get_text("Note",$lang);?>: " + values.note);
 					//show details
 					$('#select-container-persons-details').show()
 				} else {
