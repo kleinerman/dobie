@@ -18,7 +18,7 @@ include("header.php");
 <form action="javascript:void(0)">
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="zones-select">
-<select id="zones-select" class="select-options form-control" name="zones-select" size="2" onchange="updateButtons(this.id)"></select>
+<select id="zones-select" class="select-options form-control" name="zones-select" size="2" <?php if($logged->roleid<2){?>onchange="updateButtons(this.id)"<?}?>></select>
 </div>
 <div class="select-container-footer">
 <button id="zones-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></span></button>
@@ -138,6 +138,10 @@ $('#modal-new').on('show.bs.modal', function (event){
 	//reset form
 	$('#zone-new-name').val("");
 });
+
+<?php
+if($logged->roleid<2){
+?>
 
 //fetch info for edit
 $('#modal-edit').on('show.bs.modal', function (event){
@@ -275,6 +279,13 @@ $("#zone-delete-form").submit(function(){
 $("#modal-delete").on("shown.bs.modal",function(){
 	$("#zone-delete-form .btn-success").focus();
 });
+
+<?php
+} else {
+	//disable all buttons but the refresh one in case of viewer
+	echo "$('#zones-select-add,#zones-select-edit,#zones-select-del').prop('disabled', true)";
+}
+?>
 
 //Refresh button > repopulate list
 $("#zones-refresh").click(function(){

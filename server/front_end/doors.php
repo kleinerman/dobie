@@ -32,7 +32,7 @@ include("header.php");
 <div class="select-container-title"><?=get_text("Doors",$lang);?></div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
-<select id="doors-select" class="select-options form-control" name="doors-select" size="2" onchange="updateButtons(this.id)"></select>
+<select id="doors-select" class="select-options form-control" name="doors-select" size="2"<?php if($logged->roleid<2){?> onchange="updateButtons(this.id)"<?}?>></select>
 </div>
 <div class="select-container-footer">
 <button id="doors-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></span></button>
@@ -268,6 +268,10 @@ function populateListDoorNums(selectId,id=0,hlvalue=""){
 	});
 }
 
+<?php
+if($logged->roleid<2){
+?>
+
 //fetch info for edit
 $("#doors-select-edit").click(function(){
 	//clear all previous values
@@ -400,6 +404,13 @@ $("#door-delete-form").submit(function(){
 $("#modal-delete").on("shown.bs.modal",function(){
 	$("#door-delete-form .btn-success").focus();
 });
+
+<?php
+} else {
+	//disable all buttons but the refresh one in case of viewer
+	echo "$('#doors-select-add,#doors-select-edit,#doors-select-del').prop('disabled', true)";
+}
+?>
 
 //Refresh button > repopulate list
 $("#doors-refresh").click(function(){

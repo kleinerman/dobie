@@ -110,10 +110,10 @@ ob_start('ob_gzhandler');
 <li>
 <a href="events-live"><span class="fa fa-bolt fa-fw"></span> <?=get_text("Live",$lang);?></a>
 </li>
+<?if($logged->roleid<3){?>
 <li>
 <a href="events-search"><span class="fa fa-search fa-fw"></span> <?=get_text("Search",$lang);?></a>
 </li>
-<?if($logged->roleid<3){?>
 <li>
 <a href="events-purge"><span class="fa fa-trash fa-fw"></span><?=get_text("Purge",$lang);?></a>
 </li>
