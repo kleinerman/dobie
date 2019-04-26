@@ -203,7 +203,7 @@ function populateTable(tableId){
 					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"controllers[]\" value="+values[i].id+"></td><td>"+values[i].name+"</td><td>"+macStr+"</td><td>"+lastSeenStr+"</td><td class=\"center\">"+reachableStr+"</td></tr>");
 				}
 				//add trigger events for rows
-				<?php if($logged->roleid<3){?>tableClickEvents2(); <?php } else {?>
+				<?php if($logged->roleid<2){?>tableClickEvents2(); <?php } else {?>
 				$('#rows-table input[type=checkbox]').hide();
 				<?php }?>
 			} else {
@@ -230,7 +230,7 @@ $(".data-filter-table").keyup(function(){
 });
 
 <?php
-if($logged->roleid<3){
+if($logged->roleid<2){
 ?>
 
 //events for table checkboxes
