@@ -1037,7 +1037,7 @@ class DataBase(object):
         or as DELETED if there is not more persons on it
         '''
 
-        if self.getPersons(orgId, includeDeleted=False):
+        if self.getOrgPersons(orgId, includeDeleted=False):
             sql = ("UPDATE Organization SET resStateId = {} WHERE id = {}"
                    "".format(TO_DELETE, orgId)
                   )
@@ -2159,7 +2159,65 @@ class DataBase(object):
 
 #-------------------------------Person-----------------------------------
 
-    def getPersons(self, orgId, includeDeleted=True):
+
+    def getPersons(self, identNumber=None, cardNumber=None,
+                   namesPattern=None, lastNamePattern=None):
+        '''
+        Return a dictionary with all persons in an organization,
+        By default the method also retrieve the persons mark as DELETED.
+        If "includeDeleted" flag is set to False, it will only return all
+        the persons not marked as DELETED
+        '''
+
+        if identNumber == None and \
+           cardNumber == None and \
+           namesPattern == None and \
+           lastNamePattern == None:
+            raise PersonError('Can not get specified persons.')
+
+        personFilter = []
+
+        if identNumber:
+            personFilter.append("Person.identNumber = '{}'".format(identNumber))
+
+        if cardNumber:
+            personFilter.append("Person.cardNumber = {}".format(cardNumber))
+
+        if namesPattern:
+            personFilter.append("Person.names LIKE '%{}%'".format(namesPattern))
+
+        if lastNamePattern:
+            personFilter.append("Person.lastName LIKE '%{}%'".format(lastNamePattern))
+
+        personFilter = " OR ".join(personFilter)
+
+
+        sql = ("SELECT Person.names, Person.lastName, Organization.name, Person.identNumber, "
+               "Person.note, Person.cardNumber FROM Person JOIN Organization ON "
+               "(Person.orgId = Organization.id) WHERE Person.visitedOrgId IS NULL AND "
+               "Person.resStateId != {} AND ({})".format(DELETED, personFilter)
+              )
+
+        try:
+            self.execute(sql)
+            persons = self.cursor.fetchall()
+            if not persons:
+                raise PersonNotFound('Persons not found')
+            return persons
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise PersonError('Can not get specified persons.')
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise PersonError('Can not get specified persons.')
+
+
+
+
+
+    def getOrgPersons(self, orgId, includeDeleted=True):
         '''
         Return a dictionary with all persons in an organization,
         By default the method also retrieve the persons mark as DELETED.

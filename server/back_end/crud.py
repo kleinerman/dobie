@@ -519,7 +519,7 @@ class CrudMngr(genmngr.GenericMngr):
                     if orgId == 1:
                         raise database.OrganizationNotFound('Organization not found')
                     self.dataBase.delOrganization(orgId)
-                    for person in self.dataBase.getPersons(orgId, includeDeleted=False):
+                    for person in self.dataBase.getOrgPersons(orgId, includeDeleted=False):
                         ctrllerMacsToDelPrsn = self.dataBase.markPerson(person['id'], database.TO_DELETE)
                         self.ctrllerMsger.delPerson(ctrllerMacsToDelPrsn, person['id'])
                         
@@ -546,7 +546,7 @@ class CrudMngr(genmngr.GenericMngr):
             GET: Return a list with all persons in the organization
             '''
             try:
-                persons = self.dataBase.getPersons(orgId)
+                persons = self.dataBase.getOrgPersons(orgId)
 
                 for person in persons:
                     person['uri'] = url_for('modPerson', personId=person['id'], _external=True)
@@ -849,20 +849,32 @@ class CrudMngr(genmngr.GenericMngr):
 
         prsnNeedKeys = ('names', 'lastName', 'identNumber', 'note', 'cardNumber', 'orgId', 'visitedOrgId')
 
-        @app.route('/api/v1.0/person', methods=['POST'])
+        @app.route('/api/v1.0/person', methods=['POST', 'GET'])
         @auth.login_required
         def addPerson():
             '''
             Add a new Person into the database.
             '''
             try:
-                person = {}
-                for param in prsnNeedKeys:
-                    person[param] = request.json[param]
-                personId = self.dataBase.addPerson(person)
-                uri = url_for('modPerson', personId=personId, _external=True)
-                return jsonify({'status': 'OK', 'message': 'Person added.', 'code': CREATED, 'uri': uri}), CREATED
+                if request.method == 'POST':
+                    person = {}
+                    for param in prsnNeedKeys:
+                        person[param] = request.json[param]
+                    personId = self.dataBase.addPerson(person)
+                    uri = url_for('modPerson', personId=personId, _external=True)
+                    return jsonify({'status': 'OK', 'message': 'Person added.', 'code': CREATED, 'uri': uri}), CREATED
 
+                elif request.method == 'GET':
+                    identNumber = request.args.get('identNumber')
+                    cardNumber = request.args.get('cardNumber')
+                    namesPattern = request.args.get('namesPattern')
+                    lastNamePattern = request.args.get('lastNamePattern')
+                    persons = self.dataBase.getPersons(identNumber, cardNumber, namesPattern, lastNamePattern)
+                    return jsonify(persons)
+
+
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
             except database.PersonError as personError:
                 raise ConflictError(str(personError))
             except TypeError:
