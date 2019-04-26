@@ -81,7 +81,7 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Identification Number",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="number" class="form-control" id="person-new-idnum" name="idnum" value="" maxlength="64" required>
+      <input type="text" class="form-control" id="person-new-idnum" name="idnum" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">
@@ -93,8 +93,8 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (FC):</label>
  <div class="col-sm-10">
-      <input type="number" class="form-control small_input" id="person-new-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3">
-       , <input type="number" class="form-control" id="person-new-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
+      <input type="text" class="form-control small_input" id="person-new-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3">
+       , <input type="text" class="form-control" id="person-new-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
  </div>
 </div>
 <div class="form-group">
@@ -141,7 +141,7 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Identification Number",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="number" class="form-control" id="person-edit-idnum" name="idnum" value="" maxlength="64" required>
+      <input type="text" class="form-control" id="person-edit-idnum" name="idnum" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">

@@ -1,5 +1,6 @@
 <?
 $leavebodyopen=1;
+$requirerole=2;
 $include_extra_js=array("clockpicker","datepicker");
 include("header.php");
 ?>

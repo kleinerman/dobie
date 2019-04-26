@@ -7,7 +7,7 @@ $wwwroot = "/";
 $config->wwwroot = $wwwroot;
 
 //interface vars
-$home_url="events-search";
+$home_url="events-live";
 //lang config
 $config->valid_langs=array("en","es");
 $config->valid_langs_names = array("en" => "English", "es" => "Español");

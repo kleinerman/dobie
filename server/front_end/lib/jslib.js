@@ -319,8 +319,8 @@ function addCardnumEvents(idprefix){
 	$("#"+idprefix+"-cardnum").on('input', function(){
 		var numparts = rawToFC($(this).val()).split(",");
 		if(numparts.length==2){
-			$("#"+idprefix+"-cardnum-fc-1").val(numparts[0]);
-			$("#"+idprefix+"-cardnum-fc-2").val(numparts[1]);
+			$("#"+idprefix+"-cardnum-fc-1").val(myTrim(numparts[0]));
+			$("#"+idprefix+"-cardnum-fc-2").val(myTrim(numparts[1]));
 		} else {
 			$("#"+idprefix+"-cardnum-fc-1").val("");
 			$("#"+idprefix+"-cardnum-fc-2").val("");
