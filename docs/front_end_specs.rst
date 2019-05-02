@@ -326,12 +326,14 @@ The following REST method should be sent to the server:
 Persons
 -------
 
-This screen is used to “add”, “edit” or “delete” persons. For any of this actions,
+
+In this section there are two screens. One of them lets “add”, “edit” or “delete” persons. For any of this actions,
 an organizations should be selected first.
+The second screen, lets search persons using a part of the name or/and a part of the last name or/and the identification number or/and the card number. 
 
 .. image:: images_front_end_specs/person.png
 
-To get from server the current list of organizations, see `Get Organizations`_ section.
+For the first screen, to get from server the current list of organizations, see `Get Organizations`_ section.
 
 Get Persons
 ~~~~~~~~~~~
@@ -451,7 +453,7 @@ Add Person
 
 When “New” button is pressed the following pop-up will appear:
 
-.. image:: images_front_end_specs/add_person.png
+.. image:: images_front_end_specs/add_upd_person.png
 
 The following REST method should be sent to the server:
 
@@ -467,7 +469,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"names": "Carlos Ruben", "lastName": "Alvarez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}
+  {"names": "Carlos Ruben", "lastName": "Alvarez", "identNumber": "27063146", "note": "This person has a blue car", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}
   
   
 **Response:**
@@ -547,7 +549,7 @@ Edit a Person
 
 When “Edit” button is pressed the following pop-up will appear:
 
-.. image:: images_front_end_specs/upd_person.png
+.. image:: images_front_end_specs/add_upd_person.png
 
 The following REST method should be sent to the server:
 
@@ -563,7 +565,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"names": "Lucas Camilo", "lastName": "Sorin", "identNumber": "23063146", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
+  {"names": "Lucas Camilo", "lastName": "Sorin", "identNumber": "23063146", "note": "He has a blue car", "cardNumber": 9136307, "orgId": 3, "visitedOrgId": null}
   
   
   
@@ -644,7 +646,7 @@ If the person is not present in the system, the following message will be receiv
 **Response:**
 
 .. code-block::
-  
+
   HTTP/1.0 404 NOT FOUND
   Content-Type: application/json
   Content-Length: 107
@@ -670,6 +672,65 @@ When "import CSV" button is pressed in the main person screen, the following pop
 .. image:: images_front_end_specs/import_csv.png
 
 The frontend should send a POST method for each line, in the same way it sends the POST when adding one person. See `Add Person`_
+
+
+Search Persons
+~~~~~~~~~~~~~~
+
+The second screen of persons section lets search persons using a part of the name or/and a part of the last name or/and the identification number or/and the card number.
+
+.. image:: images_front_end_specs/search_persons.png
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://localhost:5000/api/v1.0/person?namesPattern=or&lastNamePattern=kleiner&cardNumber=5379295&identNumber=28063146"
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 149
+  Date: Thu, 02 May 2019 17:55:23 GMT
+
+  [{"cardNumber":5379295,"identNumber":"28063146","lastName":"Kleinerman","orgName":"Bonifies Networks","names":"Jorge Emanuel","note":"nota de prueba"}]
+
+Any of the variables to search the persons can be omitted but not all off them
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://localhost:5000/api/v1.0/person?lastNamePattern=kleiner
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 289
+  Date: Thu, 02 May 2019 17:58:34 GMT
+
+  [{"cardNumber":5379295,"identNumber":"28063146","lastName":"Kleinerman","orgName":"Bonifies Networks","names":"Jorge Emanuel","note":"nota de prueba"},{"cardNumber":5300738,"identNumber":"21063146","lastName":"Kleinerman","orgName":"Bonifies Networks","names":"Ary D.","note":"nota de prueba"}]
+
+
+Persons found should be shown in the following way
+
+.. image:: images_front_end_specs/search_persons_result.png
+
+
 
 
 Accesses
