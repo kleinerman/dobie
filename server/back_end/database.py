@@ -2189,13 +2189,14 @@ class DataBase(object):
         if lastNamePattern:
             personFilter.append("Person.lastName LIKE '%{}%'".format(lastNamePattern))
 
-        personFilter = " OR ".join(personFilter)
+        personFilter = " AND ".join(personFilter)
 
 
-        sql = ("SELECT Person.names, Person.lastName, Organization.name, Person.identNumber, "
-               "Person.note, Person.cardNumber FROM Person JOIN Organization ON "
-               "(Person.orgId = Organization.id) WHERE Person.visitedOrgId IS NULL AND "
-               "Person.resStateId != {} AND ({})".format(DELETED, personFilter)
+        sql = ("SELECT Person.names, Person.lastName, Organization.name AS orgName, "
+               "Person.identNumber, Person.note, Person.cardNumber FROM Person JOIN "
+               "Organization ON (Person.orgId = Organization.id) WHERE "
+               "Person.visitedOrgId IS NULL AND Person.resStateId != {} AND {} LIMIT 10"
+               "".format(DELETED, personFilter)
               )
 
         try:
