@@ -61,7 +61,7 @@ ob_start('ob_gzhandler');
 <link href="dist/css/bootstrap-clockpicker.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
 <?}?>
 <!-- More Custom CSS -->
-<link href='dist/css/custom.css?v=3' rel='stylesheet' type='text/css'>
+<link href='dist/css/custom.css?v=4' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <?if(!isset($innerheader)){?>
@@ -137,9 +137,21 @@ ob_start('ob_gzhandler');
 <li>
 <a href="organizations"><span class="fa fa-sitemap fa-fw"></span> <?=get_text("Organizations",$lang);?></a>
 </li>
+<?}?>
 <li>
-<a href="persons"><span class="fa fa-users fa-fw"></span> <?=get_text("Persons",$lang);?></a>
+<a href="#"><span class="fa fa-users fa-fw"></span> <?=get_text("Persons",$lang);?><span class="fa arrow"></span></a>
+<ul class="nav nav-second-level">
+<?if($logged->roleid<3){?>
+<li>
+<a href="persons"><span class="fa fa-users fa-fw"></span> <?=get_text("Manage Persons",$lang);?></a>
 </li>
+<?}?>
+<li>
+<a href="persons-search"><span class="fa fa-search fa-fw"></span> <?=get_text("Search Persons",$lang);?></a>
+</li>
+</ul>
+</li>
+<?if($logged->roleid<3){?>
 <li>
 <a href="controllers"><span class="fa fa-gamepad fa-fw"></span> <?=get_text("Controllers",$lang);?></a>
 </li>

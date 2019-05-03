@@ -163,6 +163,17 @@ function delete_person($user,$pass,$id){
 	else return $response->data;
 }
 
+function search_person($user,$pass,$names="",$lastname="",$idnum="",$cardnum=""){
+	global $config;
+	$querystring="";
+	if($names!="") $querystring.="namesPattern=".$names;
+	if($lastname!="") $querystring.="&lastNamePattern=".$lastname;
+	if($idnum!="") $querystring.="&identNumber=".$idnum;
+	if($cardnum!="") $querystring.="&cardNumber=".$cardnum;
+
+	$response=send_request($config->api_fullpath."person?$querystring",$user,$pass);
+	return $response;
+}
 
 //Accesses
 
@@ -1076,6 +1087,7 @@ if($DEBUG){
 //	$res=set_user("admin","admin",1,"Administrator","admin","admin2",1,1);
 //	$res=set_user("admin","admin",5,"Andrea Sorini","asorini","andrea",3,1,"es");
 	//$res=purge_events("admin","admin","2018-12-25+20:27");
+	//$res=search_person("admin","admin","","","27063146","");
 	echo "<pre>";
 	var_dump($res);
 	//echo json_encode($res->data->events[0]);

@@ -96,6 +96,13 @@ $dictionary = array(
 	strtolower('Person') => array(
 		'es' => 'Persona'
 	),
+	strtolower('Manage Persons') => array(
+		'es' => 'Administrar Personas'
+	),
+	strtolower('Search Persons') => array(
+		'es' => 'Buscar Personas'
+	),
+	
 	strtolower('Door') => array(
 		'es' => 'Puerta'
 	),
@@ -649,6 +656,26 @@ $dictionary = array(
 	),
 	strtolower('Administrator') => array(
 		'es' => 'Administrador'
+	),
+	
+	//Search Person
+	strtolower('Last Name Pattern') => array(
+		'es' => 'Patrón Búsqueda de Apellido'
+	),
+	strtolower('Names Pattern') => array(
+		'es' => 'Patrón Búsqueda de Nombre'
+	),
+	strtolower('Please fill at least one field') => array(
+		'es' => 'Favor de llenar al menos un campo'
+	),
+	strtolower('Ident. #') => array(
+		'es' => '# de Ident.'
+	),
+	strtolower('Card #') => array(
+		'es' => '# de Tarjeta'
+	),
+	strtolower('No results') => array(
+		'es' => 'Sin resultados'
 	)
 );
 
