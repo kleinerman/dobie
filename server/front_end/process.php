@@ -152,6 +152,19 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,"Person could not be deleted");
 			}
 		break;
+		case "search_person":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$names = isset($_POST['names']) ? $_POST['names'] : "";
+				$lastname = isset($_POST['lastname']) ? $_POST['lastname'] : "";
+				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
+				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
+
+				$persons_rec = search_person($logged->name, $logged->pw, $names, $lastname, $idnum, $cardnum);
+				if($persons_rec and $persons_rec->response_status==200) array_push($ret,1,$persons_rec->data);
+				else array_push($ret,0,$persons_rec->data->message);
+			}
+		break;
 		case "import_persons":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {

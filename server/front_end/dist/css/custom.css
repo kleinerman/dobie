@@ -322,11 +322,15 @@ input::-webkit-inner-spin-button {
 	width:80%
 }
 
-#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-2{
+#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-2,.cardnum-fc-2{
 	width:70%
 }
 
+.cardnum-fc-2{
+	max-width:120px;
+}
+
 #person-edit-cardnum-fc-1,#person-edit-cardnum-fc-2,#person-new-cardnum-fc-1,#person-new-cardnum-fc-2,
-#visit-edit-cardnum-fc-1,#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-1,#visit-new-cardnum-fc-2{
+#visit-edit-cardnum-fc-1,#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-1,#visit-new-cardnum-fc-2,.cardnum-fc{
 	display:inline
 }
