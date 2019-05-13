@@ -962,9 +962,17 @@ In the last case, the access will have a field called "liAccesses" which will ha
 Add Access
 ~~~~~~~~~~
 
-For the first screen **(Person -> Door)**, before pressing **"add"** button an specific person or an entire organization should be selected and the following window will appear:
+For the first screen **(Person -> Door)**, before pressing **"add"** button an specific person or an entire organization should be selected and the following buttons will appear:
 
-.. image:: images_front_end_specs/add_access_per_pas.png
+.. image:: images_front_end_specs/add_access_per_door_sel_way.png
+
+
+The user can select the way to add the acceess to the person. It could be selecting a **Zone** or a **Door Group**
+
+If the user select **Zone** button, the following screen will appear:
+
+
+.. image:: images_front_end_specs/add_access_per_door.png
 
 In this window a **"Zone"** should be selected.
 To get all the zones the following REST method should be sent to the server:
@@ -2111,352 +2119,6 @@ A pop up should indicate this.
 Visits
 ------
 
-Visit Door Groups
-~~~~~~~~~~~~~~~~~
-
-The visits will be allowed to enter the building through some group of doors depending the organization to be visited.
-With the following screen, the user can view, create, edit or delete a **visit door group**.
-
-.. image:: images_front_end_specs/visit_door_group.png
-
-
-Get Visit Door Groups
-+++++++++++++++++++++
-
-To get from the server the current list of Visit Door Group, the following REST method should be sent:
-
-**Method:** GET
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.3:5000/api/v1.0/visitdoorgroup
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 461
-  Server: Werkzeug/0.14.1 Python/3.6.4
-  Date: Sun, 18 Feb 2018 14:38:15 GMT
-  
-  [
-    {
-      "id": 1, 
-      "name": "Ingreso Este", 
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1"
-    }, 
-    {
-      "id": 2, 
-      "name": "Ingreso Oeste", 
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/2"
-    }, 
-    {
-      "id": 3, 
-      "name": "Ingreso Norte", 
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
-    }, 
-    {
-      "id": 5, 
-      "name": "Molinetes", 
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
-    }
-  ]
-
-
-
-Add a Visit Door Group
-++++++++++++++++++++++
-
-To add a new Visit Door Group, the **new** button should be pressed and a window to create the group should appear. 
-First of all, a name should be assigned to it. This will be done sending a POST method.
-
-**Method:** POST
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.3:5000/api/v1.0/visitdoorgroup
-  
-**JSON**
-
-.. code-block::
-
-  {"name": "Puertas Front Torre A"}
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 201 CREATED
-  Content-Type: application/json
-  Content-Length: 139
-  Server: Werkzeug/0.14.1 Python/3.6.4
-  Date: Sun, 18 Feb 2018 14:34:46 GMT
-  
-  {
-    "code": 201, 
-    "message": "Visit Door Group added", 
-    "status": "OK", 
-    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
-  }
-
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.3:5000/api/v1.0/organization
-  
-**JSON**
-
-.. code-block::
-
-  {"name": "Zipper Corp."}
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 201 CREATED
-  Content-Type: application/json
-  Content-Length: 141
-  Server: Werkzeug/0.13 Python/3.6.2
-  Date: Tue, 26 Dec 2017 18:42:18 GMT
-  
-  {
-    "code": 201, 
-    "message": "Visit Door Group added", 
-    "status": "OK", 
-    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
-  }
-  
- 
-
-Then, the user should select the doors he wants to assign to this Visit Door Group. To do this, a Zone should be selected and the corresponding door from the selected zone.
-
-To get all the Zones see Get Zones
-To get all the Doors from a Zone, see Get Doors
-
-With the ID of the Visit Door Group and the ID of the door, the following method should be sent to the server:
-
-**Method:** PUT
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3/door/4
-  
-  
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 70
-  Server: Werkzeug/0.13 Python/3.6.2
-  Date: Tue, 26 Dec 2017 19:14:00 GMT
-  
-  {
-    "message": "Door added to Visit Door Group", 
-    "status": "OK"
-  }
-
-
-
-Get one Visit Door Group
-++++++++++++++++++++++++
-
-**Method:** GET
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3
-
- 
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 113
-  Server: Werkzeug/0.13 Python/3.6.2
-  Date: Tue, 26 Dec 2017 20:07:53 GMT
-  
-  {
-    "id": 3, 
-    "name": "Puertas Front Torre B", 
-    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
-  }
-
-
-Get the doors from a Visit Door Group
-+++++++++++++++++++++++++++++++++++++
-
-**Method:** GET
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1/door
-  
-  
-**Response:**
-
-.. code-block::
-
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 742
-  Server: Werkzeug/0.13 Python/3.6.2
-  Date: Tue, 26 Dec 2017 20:34:30 GMT
-  
-  [
-    {
-      "alrmTime": 10, 
-      "bzzrTime": 3, 
-      "controllerId": 2, 
-      "doorNum": 1, 
-      "id": 1, 
-      "name": "Molinete 1", 
-      "resStateId": 1, 
-      "rlseTime": 7, 
-      "uri": "http://172.18.0.4:5000/api/v1.0/door/1", 
-      "zoneId": 1
-    }, 
-    {
-      "alrmTime": 10, 
-      "bzzrTime": 3, 
-      "controllerId": 2, 
-      "doorNum": 2, 
-      "id": 2, 
-      "name": "Puerta 2", 
-      "resStateId": 1, 
-      "rlseTime": 7, 
-      "uri": "http://172.18.0.4:5000/api/v1.0/door/2", 
-      "zoneId": 1
-    }, 
-    {
-      "alrmTime": 10, 
-      "bzzrTime": 3, 
-      "controllerId": 1, 
-      "doorNum": 1, 
-      "id": 4, 
-      "name": "Ba\u00f1o 3", 
-      "resStateId": 1, 
-      "rlseTime": 7, 
-      "uri": "http://172.18.0.4:5000/api/v1.0/door/4", 
-      "zoneId": 1
-    }
-  ]
-
-
-
-Modify a Visit Door Group Name
-++++++++++++++++++++++++++++++
-
-To modify the name of the Visit Door Group the following method should be sent to the server:
-
-
-**Method:** PUT
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/1  
-
-
-**JSON**
-
-.. code-block::
-
-  {"name": "FrontDesk Torre B"}
-
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 63
-  Server: Werkzeug/0.13 Python/3.6.2
-  Date: Wed, 27 Dec 2017 19:09:10 GMT
-  
-  {
-    "message": "Visit Door Group updated", 
-    "status": "OK"
-  }
-
-
-Remove doors from a Visit Door Group
-++++++++++++++++++++++++++++++++++++
-
-To remove doors from a Visit Door Group the following method should be sent to the server:
-
-**Method:** DELETE
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/1/door/2  
-
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 73
-  Server: Werkzeug/0.13 Python/3.6.2
-  Date: Wed, 27 Dec 2017 19:15:01 GMT
-  
-  {
-    "message": "Door deleted from Visit Door Group", 
-    "status": "OK"
-  }
-  
-
-Remove an entire Vist Door Group and all its doors
-++++++++++++++++++++++++++++++++++++++++++++++++++
- 
-**Method:** DELETE
-
-**URI:**
-
-.. code-block::
-
-  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/3
-
-
-**Response:**
-
-.. code-block::
-
-  HTTP/1.0 200 OK
-  Content-Type: application/json
-  Content-Length: 63
-  Server: Werkzeug/0.13 Python/3.6.2
-  Date: Wed, 27 Dec 2017 19:21:12 GMT
-  
-  {
-    "message": "Visit Door Group deleted", 
-    "status": "OK"
-  }
 
 View and remove visitors
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2783,8 +2445,8 @@ The following REST method should be sent to the server:
 
 
 | Visiting organization combobox should show all the organizations. The **visitedOrgId** field of visitor's JSON should be the ID of the organization selected in this combobox. To get all the organizations, see `Get Organizations`_
-| To fill the combobox **Visit Door Group**, all Visit Door Groups should be retrieved. To do it, see `Get Visit Door Groups`_.
-| All the doors of the selected Visit Door Group should be retrieved. To do it, see `Get the doors from a Visit Door Group`_.
+| To fill the combobox **Visit Door Group**, all Door Groups should be retrieved and only the ones which has the field "isForVisit" equal to 1 should be used. To do it, see `Get Door Groups`_.
+| All the doors of the selected Visit Door Group should be retrieved. To do it, see `Get the doors from a Door Group`_.
 | Once we have all the doors, an **All Week Access** should be created for the visitor in each door of the group. The expiration date of the access should be the expiration selected in the pop up. By default it should expires at 23:59 of the current day.
 | To give access see: `Add All Week Access`_
 
@@ -3353,15 +3015,19 @@ When “Delete” button is pressed the following REST method should be sent to 
 Doors
 -----
 
+Manage Doors
+~~~~~~~~~~~~
+
+
 This screen is used to “add”, “edit” or “delete” doors. For any of this actions,
 a zone should be selected first.
 
-.. image:: images_front_end_specs/door.png
+.. image:: images_front_end_specs/manage_door.png
 
 To get from server the current list of zones, see `Get Zones`_ section.
 
 Get Doors
-~~~~~~~~~
++++++++++
 
 To get from server the current list of doors in each zone, the following REST method should be sent:
 
@@ -3516,7 +3182,7 @@ To get all posible state the following method should be sent to the server:
 
  
 Add Door
-~~~~~~~~
+++++++++
 
 | When adding a new door, a controller should be selected from Controller combobox. To get all the controllers see `Get Controllers`_. If ``availDoors`` list in controller is empty, this controller should be grayed out in the list of controllers and the user shouldn't be able to choose it for the door that is being added.
 | Once the controller is selected, the door number combobox should be filled with the doors availables in the selected controller. To get the doors availables in this controller, a GET method should be sent to the server with the ID of this controller.
@@ -3620,7 +3286,7 @@ If **doorNum** is in use, the following response will arrive:
 
 
 Get one Door
-~~~~~~~~~~~~
+++++++++++++
 
 **Method:** GET
 
@@ -3661,7 +3327,7 @@ Get one Door
 
 
 Edit a Door
-~~~~~~~~~~~
++++++++++++
 
 When **edit** button is pressed the following window should appear:
 
@@ -3729,7 +3395,7 @@ If **doorNum** is in use, the following response will arrive
 
 
 Delete Door
-~~~~~~~~~~~
++++++++++++
 
 When **Delete** button is pressed the following REST method should be sent to the server:
 
@@ -3757,6 +3423,337 @@ When **Delete** button is pressed the following REST method should be sent to th
     "status": "OK"
   }
   
+
+
+Door Groups
+~~~~~~~~~~~
+
+The visits will be allowed to enter the building through some group of doors depending the organization to be visited.
+With the following screen, the user can view, create, edit or delete a **visit door group**.
+
+.. image:: images_front_end_specs/door_group.png
+
+
+Get Door Groups
++++++++++++++++
+
+To get from the server the current list of Door Groups, the following REST method should be sent:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/doorgroup
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 461
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 18 Feb 2018 14:38:15 GMT
+  
+  [
+    {
+      "id": 1, 
+      "name": "Ingreso Este", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1"
+      "isForVisit": 1
+      
+    }, 
+    {
+      "id": 2, 
+      "name": "Ingreso Oeste", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/2"
+      "isForVisit": 1
+    }, 
+    {
+      "id": 3, 
+      "name": "Ingreso Norte", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
+      "isForVisit": 1
+    }, 
+    {
+      "id": 5, 
+      "name": "Molinetes", 
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
+      "isForVisit": 0
+    }
+  ]
+
+
+
+Add Door Group
+++++++++++++++
+
+To add a new Door Group, the **new** button should be pressed and a window to create the group should appear. 
+The JSON sent in the POST method should have the name and a boolean to indicate if this door group is for visitors.
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/visitdoorgroup
+  
+**JSON**
+
+.. code-block::
+
+  {"name": "Puertas Front Torre A", "isForVisit": 1}
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 201 CREATED
+  Content-Type: application/json
+  Content-Length: 139
+  Server: Werkzeug/0.14.1 Python/3.6.4
+  Date: Sun, 18 Feb 2018 14:34:46 GMT
+  
+  {
+    "code": 201, 
+    "message": "Door Group added", 
+    "status": "OK", 
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
+  }
+
+
+
+ 
+
+Then, the user should select the doors he wants to assign to this Door Group. To do this, a Zone should be selected and the corresponding door from the selected zone.
+
+To get all the Zones see Get Zones
+To get all the Doors from a Zone, see Get Doors
+
+With the ID of the Door Group and the ID of the door, the following method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/doorgroup/3/door/4
+  
+  
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 70
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 19:14:00 GMT
+  
+  {
+    "message": "Door added to Door Group", 
+    "status": "OK"
+  }
+
+
+
+Get one Door Group
+++++++++++++++++++
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/doorgroup/3
+
+ 
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 113
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 20:07:53 GMT
+  
+  {
+    "id": 3, 
+    "name": "Puertas Front Torre B", 
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
+    "isForVisit": 1
+  }
+
+
+Get the doors from a Door Group
++++++++++++++++++++++++++++++++
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/doorgroup/1/door
+  
+  
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 742
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Tue, 26 Dec 2017 20:34:30 GMT
+  
+  [
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 1, 
+      "id": 1, 
+      "name": "Molinete 1", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://172.18.0.4:5000/api/v1.0/door/1", 
+      "zoneId": 1
+      "isVisitExit": 0
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 2, 
+      "doorNum": 2, 
+      "id": 2, 
+      "name": "Puerta 2", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://172.18.0.4:5000/api/v1.0/door/2", 
+      "zoneId": 1
+      "isVisitExit": 0
+    }, 
+    {
+      "alrmTime": 10, 
+      "bzzrTime": 3, 
+      "controllerId": 1, 
+      "doorNum": 1, 
+      "id": 4, 
+      "name": "Buzon 4", 
+      "resStateId": 1, 
+      "rlseTime": 7, 
+      "uri": "http://172.18.0.4:5000/api/v1.0/door/4", 
+      "zoneId": 1
+      "isVisitExit":0
+    }
+  ]
+
+
+
+Modify a Door Group
++++++++++++++++++++
+
+To modify a Door Group the following method should be sent to the server:
+
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/visitdoorgroup/1  
+
+
+**JSON**
+
+.. code-block::
+
+  {"name": "FrontDesk Torre B", "isForVisit": 0}
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 63
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Wed, 27 Dec 2017 19:09:10 GMT
+  
+  {
+    "message": "Door Group updated", 
+    "status": "OK"
+  }
+
+
+Remove doors from a Door Group
+++++++++++++++++++++++++++++++
+
+To remove doors from a Door Group the following method should be sent to the server:
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/doorgroup/1/door/2  
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 73
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Wed, 27 Dec 2017 19:15:01 GMT
+  
+  {
+    "message": "Door deleted from Visit Door Group", 
+    "status": "OK"
+  }
+  
+
+Remove an entire Door Group and all its doors
++++++++++++++++++++++++++++++++++++++++++++++
+ 
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.5:5000/api/v1.0/doorgroup/3
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.0 200 OK
+  Content-Type: application/json
+  Content-Length: 63
+  Server: Werkzeug/0.13 Python/3.6.2
+  Date: Wed, 27 Dec 2017 19:21:12 GMT
+  
+  {
+    "message": "Door Group deleted", 
+    "status": "OK"
+  }
+
+
 
 
 System Users
