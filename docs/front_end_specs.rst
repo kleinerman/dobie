@@ -1102,6 +1102,112 @@ To get all doors from a zone, the following REST method should be sent to the se
 
 
 
+If the user select **Door Group** button, the following screen will appear:
+
+.. image:: images_front_end_specs/add_access_per_doorgroup.png
+
+
+In this window all Door Groups should be shown.
+To get all Door Groups the following REST method should be sent to the server:
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/doorgroup
+
+ 
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 305
+  Date: Wed, 15 May 2019 14:38:10 GMT
+
+  [
+    {
+      "id":1, 
+      "isForVisit":1, 
+      "name":"Ingreso Visitas Este", 
+      "uri":"http://localhost:5000/api/v1.0/doorgroup/1"
+    }, 
+    {
+      "id":3, 
+      "isForVisit":1, 
+      "name":"Ingreso Visitas Norte", 
+      "uri":"http://localhost:5000/api/v1.0/doorgroup/3"
+    }, 
+    {
+      "id":6, 
+      "isForVisit":0, 
+      "name":"Grupo Total", 
+      "uri":"http://localhost:5000/api/v1.0/doorgroup/6"
+    }
+  ]
+
+
+The Door Groups which are used for visitors entrance has ``"isForVisit": 1``, and should be shown with gray background. 
+
+
+When the user select a Door Group, all the doors of this Door Group should be shown below.
+To get all the doors from a Door Groups the following REST method should be sent to the server:
+
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/doorgroup/2/door
+
+ 
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 403
+  Date: Wed, 15 May 2019 14:49:35 GMT
+
+  [
+    {
+      "alrmTime":10,
+      "bzzrTime":3,
+      "controllerId":1,
+      "doorNum":2,
+      "id":2,
+      "isVisitExit":0,
+      "name":"Molinete",
+      "resStateId":1,
+      "rlseTime":7,
+      "snsrType":1,
+      "uri":"http://localhost:5000/api/v1.0/door/2",
+      "zoneId":1},
+    {
+      "alrmTime":10,
+      "bzzrTime":3,
+      "controllerId":1,
+      "doorNum":3,
+      "id":3,
+      "isVisitExit":0,
+      "name":
+      "Puerta Ascensor",
+      "resStateId":1,
+      "rlseTime":7,
+      "snsrType":0,
+      "uri":"http://localhost:5000/api/v1.0/door/3",
+      "zoneId":3
+    }
+  ]
+
+
+
 For the second screen **(Door -> Person)**, before pressing **"add"** button an specific door or an entire zone should be selected and the following window will appear:
 
 .. image:: images_front_end_specs/add_access_pas_per.png
@@ -2135,12 +2241,16 @@ To get a list of visitors, the following POST method should be sent to the serve
 
 .. code-block::
 
-  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1&visitedOrgId=2
+  http://172.18.0.5:5000/api/v1.0/visitor?doorGroupId=1&visitedOrgId=2
   
 
-``visitDoorGroupId`` variable should have the ID of the visit door group where the visitor was authorized to enter the building.
+``doorGroupId`` variable should have the ID of the visit door group where the visitor was authorized to enter the building.
 
 ``visitedOrgId`` variable should have the ID of the organization the visitor was registered to visit.
+
+``cardNumber`` variable should have the card number that the visit is using.
+
+The ``cardNumber`` variable could be combined with the other variables but tipically will be used alone since only one visitor can have one card.
 
 An the tipical response would be:
 
@@ -2176,7 +2286,7 @@ An the tipical response would be:
   ]
 
 If one of the above variables is omitted, all the resources that this variable could filter, would be retrieved.
-For example, if ``visitedOrgId`` variable is omitted, all the visitors who were registered to enter trough the visit door group with ID = 1 who are visiting different organizations, will be retrieved.
+For example, if ``visitedOrgId`` variable is omitted, all the visitors who were registered to enter trough the Door Group with ID = 1 who are visiting different organizations, will be retrieved.
 
 **Method:** GET
 
@@ -2184,7 +2294,7 @@ For example, if ``visitedOrgId`` variable is omitted, all the visitors who were 
 
 .. code-block::
 
-  http://172.18.0.5:5000/api/v1.0/visitor?visitDoorGroupId=1  
+  http://172.18.0.5:5000/api/v1.0/visitor?doorGroupId=1  
 
 **Response:**
 
@@ -2245,7 +2355,7 @@ For example, if ``visitedOrgId`` variable is omitted, all the visitors who were 
     }
   ]
 
-In the same way, if ``visitDoorGroupId`` variable is omitted, all the visitors who were registered to visit organization with ID = 2 who could have entered trough different visit door groups, will be retrieved.
+In the same way, if ``doorGroupId`` variable is omitted, all the visitors who were registered to visit organization with ID = 2 who could have entered trough different Door Goups, will be retrieved.
 
 
 **Method:** GET
@@ -2289,7 +2399,7 @@ In the same way, if ``visitDoorGroupId`` variable is omitted, all the visitors w
   ]
 
 
-If both variables are omitted, all the visitors in the building will be retrieved
+If all the variables are omitted, all the visitors in the building will be retrieved
 
 **Method:** GET
 
