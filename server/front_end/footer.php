@@ -22,7 +22,7 @@ if(!isset($innerheader)){?>
 <?if(in_array("clockpicker",$include_extra_js)){?>
 <script type="text/javascript" src="dist/js/bootstrap-clockpicker.min.js"></script>
 <?}?>
-<script type="text/javascript" src="lib/jslib.js?v=2"></script>
+<script type="text/javascript" src="lib/jslib.js?v=3"></script>
 <script type="text/javascript">
 // tooltip init
 $('body').tooltip({

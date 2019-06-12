@@ -69,8 +69,8 @@ $dictionary = array(
 	strtolower('Visitors') => array(
 		'es' => 'Visitas'
 	),
-	strtolower('Visit Door Groups') => array(
-		'es' => 'Grupos de Puertas de Visitas'
+	strtolower('Door Groups') => array(
+		'es' => 'Grupos de Puertas'
 	),
 	strtolower('Manage Visitors') => array(
 		'es' => 'Administrar Visitas'
@@ -89,6 +89,9 @@ $dictionary = array(
 	),
 	strtolower('Doors') => array(
 		'es' => 'Puertas'
+	),
+	strtolower('Manage Doors') => array(
+		'es' => 'Administrar Puertas'
 	),
 	strtolower('Accesses') => array(
 		'es' => 'Accesos'
@@ -296,8 +299,12 @@ $dictionary = array(
 	strtolower('Delete') => array(
 		'es' => 'Borrar'
 	),
-	strtolower('New Visitor Group') => array(
-		'es' => 'Crear Grupo de Visitas'
+
+	strtolower('New Door Group') => array(
+		'es' => 'Crear Grupo de Puertas'
+	),
+	strtolower('Door Group') => array(
+		'es' => 'Grupo de Puertas'
 	),
 	strtolower('Name') => array(
 		'es' => 'Nombre'
@@ -326,8 +333,11 @@ $dictionary = array(
 	strtolower('Cancel') => array(
 		'es' => 'Cancelar'
 	),
-	strtolower('Edit Visitor Group') => array(
-		'es' => 'Editar Grupo de Visitas'
+	strtolower('Edit Door Group') => array(
+		'es' => 'Editar Grupo de Puertas'
+	),
+	strtolower('For Visits') => array(
+		'es' => 'Para Visitas'
 	),
 
 	//visit manage visits
@@ -363,6 +373,9 @@ $dictionary = array(
 	),
 	strtolower('Visit Door Group') => array(
 		'es' => 'Grupo de Puertas de Visitas'
+	),
+	strtolower('Visit Door Groups') => array(
+		'es' => 'Grupos de Puertas de Visitas'
 	),
 	strtolower('Please fill the Visit Names field') => array(
 		'es' => 'Por favor llenar el campo de Nombres de Visita'
@@ -600,6 +613,9 @@ $dictionary = array(
 	),
 	strtolower('Access: Door') => array(
 		'es' => 'Accesos: Puerta'
+	),
+	strtolower('Create access to') => array(
+		'es' => 'Crear acceso para'
 	),
 
 	//system users

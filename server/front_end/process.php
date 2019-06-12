@@ -380,8 +380,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
 				$doorid = (isset($_POST['doorid'])) ? ($_POST['doorid']) : "";
+				$doorgroupid = (isset($_POST['doorgroupid'])) ? ($_POST['doorgroupid']) : "";
 
-				add_access_allweek_zone($logged->name, $logged->pw, $personid, $zoneid, $iside, $oside,$starttime,$endtime,$expiredate,$doorid);
+				add_access_allweek_zone($logged->name, $logged->pw, $personid, $zoneid, $iside, $oside,$starttime,$endtime,$expiredate,$doorid,$doorgroupid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all doors in zone");
@@ -399,8 +400,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "23:59";
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
 				$doorid = (isset($_POST['doorid'])) ? ($_POST['doorid']) : "";
+				$doorgroupid = (isset($_POST['doorgroupid'])) ? ($_POST['doorgroupid']) : "";
 
-				add_access_liaccess_zone($logged->name, $logged->pw, $personid, $zoneid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate,$doorid);
+				add_access_liaccess_zone($logged->name, $logged->pw, $personid, $zoneid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate,$doorid,$doorgroupid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all doors in zone");
@@ -418,8 +420,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
 				$personid = (isset($_POST['personid'])) ? ($_POST['personid']) : "";
 				$doorid = (isset($_POST['doorid'])) ? ($_POST['doorid']) : "";
+				$doorgroupid = (isset($_POST['doorgroupid'])) ? ($_POST['doorgroupid']) : "";
 
-				add_access_allweek_organization_zone($logged->name, $logged->pw, $zoneid, $orgid, $iside, $oside,$starttime,$endtime,$expiredate,$personid,$doorid);
+				add_access_allweek_organization_zone($logged->name, $logged->pw, $zoneid, $orgid, $iside, $oside,$starttime,$endtime,$expiredate,$personid,$doorid,$doorgroupid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all doors in zone");
@@ -438,8 +441,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$expiredate = (isset($_POST['expiredate'])) ? $_POST['expiredate'] : "9999-12-31";
 				$personid = (isset($_POST['personid'])) ? ($_POST['personid']) : "";
 				$doorid = (isset($_POST['doorid'])) ? ($_POST['doorid']) : "";
+				$doorgroupid = (isset($_POST['doorgroupid'])) ? ($_POST['doorgroupid']) : "";
 
-				add_access_liaccess_organization_zone($logged->name, $logged->pw, $zoneid, $orgid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate, $personid, $doorid);
+				add_access_liaccess_organization_zone($logged->name, $logged->pw, $zoneid, $orgid, $weekday, $iside, $oside, $starttime, $endtime, $expiredate, $personid, $doorid,$doorgroupid);
 
 				//function doesnt return any value > return success always
 				array_push($ret,1,"Accesses added to all doors in zone");
@@ -620,6 +624,17 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 			}
 		break;
 
+		case "get_door_groups":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				//get record
+				$vdg_rec = get_door_groups($logged->name, $logged->pw);
+				if($vdg_rec){
+					//return record
+					array_push($ret,1,$vdg_rec);
+				} else array_push($ret,0,"Door groups not found");
+			}
+		break;
 		case "get_visit_door_groups":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
@@ -631,7 +646,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				} else array_push($ret,0,"Visit door groups not found");
 			}
 		break;
-		case "get_visit_door_group":
+		case "get_door_group":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
 				$vdg_id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
@@ -639,54 +654,56 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				if($vdg_id=="") array_push($ret,0,"Invalid values sent");
 				else {
 					//get record
-					$vdg_rec = get_visit_door_group($logged->name, $logged->pw,$vdg_id);
+					$vdg_rec = get_door_group($logged->name, $logged->pw,$vdg_id);
 					if($vdg_rec){
 						//return record
 						array_push($ret,1,$vdg_rec);
-					} else array_push($ret,0,"Visit door group could not be retrieved");
+					} else array_push($ret,0,"Door group could not be retrieved");
 				}
 			}
 		break;
-		case "edit_visit_door_group":
+		case "edit_door_group":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
 				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
 				$doorids = (isset($_POST['doorids'])) ? $_POST['doorids'] : "";
+				$isvisit = (isset($_POST['isvisit'])) ? $_POST['isvisit'] : 1;
 
 				if($id=="") array_push($ret,0,"Invalid values sent");
 				//empty name can be considered as a valid scenario
 	    			else {
-					$vdg_rec = set_visit_door_group($logged->name, $logged->pw, $id, $name,$doorids);
+					$vdg_rec = set_door_group($logged->name, $logged->pw, $id, $name,$doorids,$isvisit);
 
 					if($vdg_rec) array_push($ret,1,"Information saved successfully!");
-					else array_push($ret,0,"Visit door group could not be updated");
+					else array_push($ret,0,"Door group could not be updated");
 				}
 			}
 		break;
-		case "add_visit_door_group":
+		case "add_door_group":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
 				$doorids = (isset($_POST['doorids'])) ? $_POST['doorids'] : "";
+				$isvisit = (isset($_POST['isvisit'])) ? $_POST['isvisit'] : 1;
 
-				$vdg_rec = add_visit_door_group($logged->name, $logged->pw, $name, $doorids);
+				$vdg_rec = add_door_group($logged->name, $logged->pw, $name, $doorids,$isvisit);
 				if($vdg_rec) array_push($ret,1,"Information saved successfully!");
-				else array_push($ret,0,"Visit door group could not be added");
+				else array_push($ret,0,"Door group could not be added");
 			}
 		break;
-		case "delete_visit_door_group":
+		case "delete_door_group":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
 				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
 
-				$vdg_rec = delete_visit_door_group($logged->name,$logged->pw, $id);
+				$vdg_rec = delete_door_group($logged->name,$logged->pw, $id);
 
 				if($vdg_rec) array_push($ret,1,"Information saved successfully!");
-				else array_push($ret,0,"Visit door group could not be deleted");
+				else array_push($ret,0,"Door group could not be deleted");
 			}
 		break;
-		case "get_visit_door_group_doors":
+		case "get_door_group_doors":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
 				$vdg_id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
@@ -694,11 +711,11 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				if($vdg_id=="") array_push($ret,0,"Invalid values sent");
 				else {
 					//get record
-					$vdg_rec = get_visit_door_group_doors($logged->name, $logged->pw,$vdg_id);
+					$vdg_rec = get_door_group_doors($logged->name, $logged->pw,$vdg_id);
 					if($vdg_rec){
 						//return record
 						array_push($ret,1,$vdg_rec);
-					} else array_push($ret,0,"Visit door group doors could not found");
+					} else array_push($ret,0,"Door group doors could not found");
 				}
 			}
 		break;
