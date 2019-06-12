@@ -47,10 +47,10 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Este"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Oeste"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Norte"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Sur"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Este", "isForVisit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Oeste", "isForVisit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Norte", "isForVisit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Sur", "isForVisit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
 
 
 
@@ -69,27 +69,27 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/1/door/2
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/1/door/3
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/1/door/2
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/1/door/3
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/2/door/4
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/2/door/6
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/2/door/4
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/2/door/6
 
 #Deleting one door from visitdoorgroup 2
-curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/2/door/4
+curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/2/door/4
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/2/door/5
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/2/door/5
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/3/door/1
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/3/door/2
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/3/door/1
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/3/door/2
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/4/door/3
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/4/door/1
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/4/door/3
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/4/door/1
 
 #Deleting all preivious visitdoorgroup previously created
-curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/visitdoorgroup/4
+curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/4
 
 
 

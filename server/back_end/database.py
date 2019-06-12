@@ -85,7 +85,7 @@ class ZoneNotFound(ZoneError):
 
 
 
-class VisitDoorGroupError(Exception):
+class DoorGroupError(Exception):
     '''
     '''
     def __init__(self, errorMessage):
@@ -95,7 +95,7 @@ class VisitDoorGroupError(Exception):
         return self.errorMessage
 
 
-class VisitDoorGroupNotFound(VisitDoorGroupError):
+class DoorGroupNotFound(DoorGroupError):
     '''
     '''
     pass
@@ -290,6 +290,22 @@ class DataBase(object):
 
 
         self.connect()
+
+
+
+
+    def escapeDict(self, dictObj):
+        '''
+        Escaping special characters of the dictionary
+        values like quote or double quote.
+
+        '''
+        for key, value in dictObj.items():
+            if type(value) == str:
+                dictObj[key] = pymysql.escape_string(value)
+        return dictObj
+
+
 
 
 
@@ -725,6 +741,9 @@ class DataBase(object):
         It returns the id of the added user.
         '''
 
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        user = self.escapeDict(user)
 
         passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
 
@@ -782,6 +801,11 @@ class DataBase(object):
         '''
         Receive a dictionary with user parametters and update it in DB
         '''
+
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        user = self.escapeDict(user)
+
         try:
             setUsername = ", username = '{}'".format(user['username'])
         except KeyError:
@@ -1010,6 +1034,10 @@ class DataBase(object):
         It returns the id of the added organization.
         '''
 
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        organization = self.escapeDict(organization)
+
         sql = ("INSERT INTO Organization(name, resStateId) VALUES('{}', {})"
                "".format(organization['name'], COMMITTED)
               )
@@ -1068,6 +1096,10 @@ class DataBase(object):
         '''
         Receive a dictionary with organization parametters and update it in DB
         '''
+
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        organization = self.escapeDict(organization)
 
         sql = ("UPDATE Organization SET name = '{}' WHERE id = {}"
                "".format(organization['name'], organization['id'])
@@ -1188,6 +1220,10 @@ class DataBase(object):
         Receive a dictionary with zone parametters and save it in DB
         It returns the id of the added zone.
         '''
+        
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        zone = self.escapeDict(zone)
 
         sql = ("INSERT INTO Zone(name) VALUES('{}')"
                "".format(zone['name'])
@@ -1232,6 +1268,10 @@ class DataBase(object):
         Receive a dictionary with zone parametters and update it in DB
         '''
 
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        zone = self.escapeDict(zone)
+
         sql = ("UPDATE Zone SET name = '{}' WHERE id = {}"
                "".format(zone['name'], zone['id'])
               )
@@ -1250,63 +1290,68 @@ class DataBase(object):
 
 
 
-#------------------------------Visit Door Group--------------------------------
+#------------------------------Door Group--------------------------------
 
 
 
 
-    def getVisitDoorGroups(self):
+    def getDoorGroups(self):
         '''
-        Return a dictionary with all Visit Door Groups
+        Return a dictionary with all Door Groups
         '''
-        sql = ("SELECT * FROM VisitDoorGroup")
+        sql = ("SELECT * FROM DoorGroup")
         try:
             self.execute(sql)
-            visitDoorGroups = self.cursor.fetchall()
-            return visitDoorGroups
+            doorGroups = self.cursor.fetchall()
+            return doorGroups
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise VisitDoorGroupError('Can not get VisitDoorGroups')
+            raise DoorGroupError('Can not get Door Groups')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitDoorGroupError('Can not get VisitDoorGroups')
+            raise DoorGroupError('Can not get Door Groups')
 
 
 
-    def getVisitDoorGroup(self, visitDoorGroupId):
+    def getDoorGroup(self, doorGroupId):
         '''
-        Return a a dictionary with Visit Door Group data
+        Return a a dictionary with Door Group data
         '''
     
-        sql = ("SELECT * FROM VisitDoorGroup WHERE id = {}"
-               "".format(visitDoorGroupId)
+        sql = ("SELECT * FROM DoorGroup WHERE id = {}"
+               "".format(doorGroupId)
               )
         try:
             self.execute(sql)
-            visitDoorGroup = self.cursor.fetchone()
-            if not visitDoorGroup:
-                raise VisitDoorGroupNotFound('Visit Door Group not found')
-            return visitDoorGroup
+            doorGroup = self.cursor.fetchone()
+            if not doorGroup:
+                raise DoorGroupNotFound('Door Group not found')
+            return doorGroup
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise VisitDoorGroupError('Can not get specified VisitDoorGroup')
+            raise DoorGroupError('Can not get specified Door Group')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitDoorGroupError('Can not get specified VisitDoorGroup')
+            raise DoorGroupError('Can not get specified Door Group')
 
 
-    def addVisitDoorGroup(self, visitDoorGroup):
+    def addDoorGroup(self, doorGroup):
         '''
-        Receive a dictionary with Visit Door Group parametters 
-        and save it in DB. It returns the id of the added Visit Door Group.
+        Receive a dictionary with Door Group parametters 
+        and save it in DB. It returns the id of the added Door Group.
         '''
 
-        sql = ("INSERT INTO VisitDoorGroup(name) VALUES('{}')"
-               "".format(visitDoorGroup['name'])
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        doorGroup = self.escapeDict(doorGroup)
+
+
+        sql = ("INSERT INTO DoorGroup(name, isForVisit) VALUES('{}', {})"
+               "".format(doorGroup['name'], doorGroup['isForVisit'])
               )
 
         try:
@@ -1315,64 +1360,70 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitDoorGroupError('Can not add this Visit Door Group')
+            raise DoorGroupError('Can not add this Door Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitDoorGroupError('Can not add this Visit Door Group: wrong argument')
+            raise DoorGroupError('Can not add this Door Group: wrong argument')
 
 
 
-    def delVisitDoorGroup(self, visitDoorGroupId):
+    def delDoorGroup(self, doorGroupId):
         '''
-        Receive the Visit Door Group ID and delete the Visit Door Group
+        Receive the Door Group ID and to delete it.
         '''
 
-        sql = ("DELETE FROM VisitDoorGroup WHERE id = {}"
-               "".format(visitDoorGroupId)
+        sql = ("DELETE FROM DoorGroup WHERE id = {}"
+               "".format(doorGroupId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitDoorGroupNotFound('Visit Door Group not found')
+                raise DoorGroupNotFound('Door Group not found')
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitDoorGroupError('Can not delete this Visit Door Group')
+            raise DoorGroupError('Can not delete this Door Group')
 
 
 
 
-    def updVisitDoorGroup(self, visitDoorGroup):
+    def updDoorGroup(self, doorGroup):
         '''
-        Receive a dictionary with Visit Door Group parametters and update it in DB
+        Receive a dictionary with Door Group parametters and update it in DB
         '''
 
-        sql = ("UPDATE VisitDoorGroup SET name = '{}' WHERE id = {}"
-               "".format(visitDoorGroup['name'], visitDoorGroup['id'])
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        doorGroup = self.escapeDict(doorGroup)
+
+        sql = ("UPDATE DoorGroup SET name = '{}', isForVisit = {} WHERE id = {}"
+               "".format(doorGroup['name'], doorGroup['isForVisit'], doorGroup['id'])
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitDoorGroupNotFound('Visit Door Group not found')
+                raise DoorGroupNotFound('Door Group not found')
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitDoorGroupError('Can not update this Visit Door Group')
+            raise DoorGroupError('Can not update this Door Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitDoorGroupError('Can not update this Visit Door Group: wrong argument')
+            raise DoorGroupError('Can not update this Door Group: wrong argument')
 
 
 
 
-    def addDoorToVisitDoorGroup(self, visitDoorGroupId, doorId):
+    def addDoorToDoorGroup(self, doorGroupId, doorId):
         '''
+        Create a new row in DoorGroupDoor table with the combination
+        doorGroupId, doorId
         '''
 
-        sql = ("INSERT INTO VisitDoorGroupDoor(visitDoorGroupId, doorId) "
-               "VALUES ({}, {})".format(visitDoorGroupId, doorId)
+        sql = ("INSERT INTO DoorGroupDoor(doorGroupId, doorId) "
+               "VALUES ({}, {})".format(doorGroupId, doorId)
               )
 
         try:
@@ -1381,31 +1432,33 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitDoorGroupError('Can not add this door to Visit Door Group')
+            raise DoorGroupError('Can not add this door to Door Group')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise VisitDoorGroupError('Can not add this door to Visit Door Group: wrong argument')
+            raise DoorGroupError('Can not add this door to Door Group: wrong argument')
 
 
 
 
-    def delDoorFromVisitDoorGroup(self, visitDoorGroupId, doorId):
+    def delDoorFromDoorGroup(self, doorGroupId, doorId):
         '''
+        Delete the combination doorGroupId, doorId from the
+        DoorGroupDoor table
         '''
 
-        sql = ("DELETE FROM VisitDoorGroupDoor WHERE "
-               "visitDoorGroupId = {} AND doorId = {}"
-               "".format(visitDoorGroupId, doorId)
+        sql = ("DELETE FROM DoorGroupDoor WHERE "
+               "doorGroupId = {} AND doorId = {}"
+               "".format(doorGroupId, doorId)
               )
 
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
-                raise VisitDoorGroupNotFound('Door not found in Visit Door Group.')
+                raise DoorGroupNotFound('Door not found in Door Group.')
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise VisitDoorGroupError('Can not delete this Door from Visit Door Group')
+            raise DoorGroupError('Can not delete this Door from Door Group')
 
 
 
@@ -1413,7 +1466,7 @@ class DataBase(object):
 #-----------------------------------Visitors-----------------------------------------
 
 
-    def getVisitors(self, visitedOrgId, visitDoorGroupId, cardNumber, identNumber):
+    def getVisitors(self, visitedOrgId, doorGroupId, cardNumber, identNumber):
         '''
         Returns a list with visitors.
         It receive as arguments the ID of the organization the visitor is visiting,
@@ -1436,12 +1489,12 @@ class DataBase(object):
             visitedOrgFilter = "Person.visitedOrgId IS NOT NULL"
 
 
-        if visitDoorGroupId:
-            visitDoorGroupFilter = (" AND VisitDoorGroupDoor.visitDoorGroupId = {}"
-                                    "".format(visitDoorGroupId)
+        if doorGroupId:
+            doorGroupFilter = (" AND DoorGroupDoor.doorGroupId = {}"
+                                    "".format(doorGroupId)
                                    )
         else:
-            visitDoorGroupFilter = ''
+            doorGroupFilter = ''
 
         if cardNumber:
             cardNumberFilter = " AND Person.cardNumber = {}".format(cardNumber)
@@ -1459,17 +1512,17 @@ class DataBase(object):
         #strange reason the visitor has not access to the doors in the visit
         #door group. (It should never happen). If not using LEFT JOIN, no visitors
         #will be retrieved.
-        #Using LEFT JOIN between Access and VisitDoorGroupDoor because in a
+        #Using LEFT JOIN between Access and DoorGroupDoor because in a
         #strange situation, the Visit Door Group could be removed after the visitor
         #enter the building and no visitors will be retrieved, also if using
-        #visitDoorGroupId = None
+        #doorGroupId = None
         #Using DISTINCT to avoid having duplicates entries of visitors because the
         #same Visitor normally has access to more than one door (all the Visit Door Group)
         sql = ("SELECT DISTINCT Person.* FROM Person LEFT JOIN Access ON "
-               "(Person.id = Access.personId) LEFT JOIN VisitDoorGroupDoor "
-               "ON (Access.doorId = VisitDoorGroupDoor.doorId) "
+               "(Person.id = Access.personId) LEFT JOIN DoorGroupDoor "
+               "ON (Access.doorId = DoorGroupDoor.doorId) "
                "WHERE {}{}{}{}"
-               "".format(visitedOrgFilter, visitDoorGroupFilter, 
+               "".format(visitedOrgFilter, doorGroupFilter, 
                          cardNumberFilter, identNumberFilter)
               )
 
@@ -1617,6 +1670,10 @@ class DataBase(object):
         It returns the id of the added controller.
         '''
 
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        controller = self.escapeDict(controller)
+
         sql = ("INSERT INTO Controller(name, ctrllerModelId, macAddress) "
                "VALUES('{}', {}, '{}')"
                "".format(controller['name'], controller['ctrllerModelId'], 
@@ -1663,24 +1720,68 @@ class DataBase(object):
     def updController(self, controller):
         '''
         Receive a dictionary with controller parametters and update it in DB
+        When updating a controller, the MAC address could be changed. 
+        In this case, a Person Pending Operation could be in the "PersonPendingOperation"
+        table. This situation is very possible when replacing a died controller for a
+        new one.
+        For this situation, the new MAC address should be replaced in 
+        "PersonPendingOperation" table.
+        To avoid inconsistency, both tables are locked before modifying them.
         '''
 
-        sql = ("UPDATE Controller SET name = '{}', ctrllerModelId = {}, "
-               "macAddress = '{}' WHERE id = {}"
-               "".format(controller['name'], controller['ctrllerModelId'], 
-                         controller['macAddress'], controller['id'])
-              )
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        controller = self.escapeDict(controller)
+
 
         try:
+
+            sql = "LOCK TABLES Controller WRITE, PersonPendingOperation WRITE"
+            self.execute(sql)
+
+
+            sql = ("SELECT macAddress FROM Controller WHERE id = {}"
+                   "".format(controller['id'])
+                  )
+
+            self.execute(sql)
+            oldMacAddress = self.cursor.fetchone()['macAddress']
+
+
+            sql = ("UPDATE Controller SET name = '{}', ctrllerModelId = {}, "
+                   "macAddress = '{}' WHERE id = {}"
+                   "".format(controller['name'], controller['ctrllerModelId'], 
+                             controller['macAddress'], controller['id'])
+                  )
+
             self.execute(sql)
             if self.cursor.rowcount < 1:
+                self.execute("UNLOCK TABLES")
                 raise ControllerNotFound('Controller not found')
 
+
+            sql = ("UPDATE PersonPendingOperation SET macAddress = '{}' "
+                   "WHERE macAddress = '{}'"
+                   "".format(controller['macAddress'], oldMacAddress)
+                  )
+
+            self.execute(sql)
+    
+            self.execute("UNLOCK TABLES")
+
+
+
+        except TypeError:
+            self.logger.debug('This controller id has not any MAC associated.')
+            self.execute("UNLOCK TABLES")
+            raise ControllerNotFound('Controller not found')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
+            self.execute("UNLOCK TABLES")
             raise ControllerError('Can not update this controller')
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
+            self.execute("UNLOCK TABLES")
             raise ControllerError('Can not update this controller: wrong argument')
 
 
@@ -1927,15 +2028,15 @@ class DataBase(object):
 #----------------------------------Door----------------------------------------
 
 
-    def getDoors(self, zoneId=None, visitDoorGroupId=None):
+    def getDoors(self, zoneId=None, doorGroupId=None):
         '''
-        Return a dictionary with all doors in a Zone or in a Visit Door Group
+        Return a dictionary with all doors in a Zone or in a Door Group
         according to the argument received
         '''
 
         try:
-            if not zoneId and not visitDoorGroupId:
-                raise DoorNotFound('getDoors method need zoneId or visitDoorGroupId.')
+            if not zoneId and not doorGroupId:
+                raise DoorNotFound('getDoors method need zoneId or doorGroupId.')
 
             elif zoneId:
                 #Check if the zoneId exists in the database
@@ -1951,20 +2052,20 @@ class DataBase(object):
                 self.execute(sql)
                 doors = self.cursor.fetchall()
 
-            elif visitDoorGroupId:
-                #Check if the visitDoorGroup exists in database
-                sql = ("SELECT * FROM VisitDoorGroup WHERE id = {}".format(visitDoorGroupId))
+            elif doorGroupId:
+                #Check if the doorGroup exists in database
+                sql = ("SELECT * FROM DoorGroup WHERE id = {}".format(doorGroupId))
                 self.execute(sql)
-                visitDoorGroup = self.cursor.fetchone()
+                doorGroup = self.cursor.fetchone()
 
-                if not visitDoorGroup:
-                    raise VisitDoorGroupNotFound('Visit Door Group not found')
+                if not doorGroup:
+                    raise DoorGroupNotFound('Door Group not found')
 
-                #Get all doors from this VisitDoorGroup 
-                sql = ("SELECT Door.* from Door JOIN VisitDoorGroupDoor "
-                       "ON (Door.id = VisitDoorGroupDoor.doorId) "
-                       "WHERE VisitDoorGroupDoor.visitDoorGroupId = {}"
-                       "".format(visitDoorGroupId)
+                #Get all doors from this DoorGroup 
+                sql = ("SELECT Door.* from Door JOIN DoorGroupDoor "
+                       "ON (Door.id = DoorGroupDoor.doorId) "
+                       "WHERE DoorGroupDoor.doorGroupId = {}"
+                       "".format(doorGroupId)
                        )
                 self.execute(sql)
                 doors = self.cursor.fetchall()
@@ -1974,7 +2075,7 @@ class DataBase(object):
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise DoorError('Can not get doors for this zone or visitDoorGroup.')
+            raise DoorError('Can not get doors for this zone or doorGroup.')
 
 
 
@@ -2042,6 +2143,10 @@ class DataBase(object):
         Receive a dictionary with door parametters and save it in DB
         It returns the id of the added door
         '''
+
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        door = self.escapeDict(door)
 
         sql = ("INSERT INTO Door(doorNum, name, controllerId, snsrType, rlseTime, bzzrTime, "
                "alrmTime, zoneId, isVisitExit, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {}, {}, {})"
@@ -2132,6 +2237,10 @@ class DataBase(object):
         '''
         Receive a dictionary with door parametters and update it in DB
         '''
+
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        door = self.escapeDict(door)
 
         sql = ("UPDATE Door SET doorNum = {}, name = '{}', snsrType = {}, "
                "rlseTime = {}, bzzrTime = {}, alrmTime = {}, zoneId = {}, "
@@ -2312,6 +2421,10 @@ class DataBase(object):
         could be").
         Also INSERT will be performed with two active visitors with the same "identNumber".
         '''
+
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        person = self.escapeDict(person)
 
         #Changing None to 'NULL' for writting correct SQL syntax below.
         if not person['visitedOrgId']:
@@ -2646,6 +2759,11 @@ class DataBase(object):
         Return True if controllers need to be updated.
         Return False if there is no need to update the controllers.
         '''
+
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        person = self.escapeDict(person)
+
         if not person['visitedOrgId']:
             person['visitedOrgId'] = 'NULL'
 

@@ -110,22 +110,23 @@ CREATE TABLE `Door` (
 CREATE UNIQUE INDEX CtrllerDoorNumIndex ON Door (controllerId, doorNum)
 ;
 
-CREATE TABLE `VisitDoorGroup` (
+CREATE TABLE `DoorGroup` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `name` varchar(40) NOT NULL
+    `name` varchar(40) NOT NULL,
+    `isForVisit` boolean NOT NULL
 )
 ;
 
-CREATE TABLE `VisitDoorGroupDoor` (
+CREATE TABLE `DoorGroupDoor` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `visitDoorGroupId` integer NOT NULL,
+    `doorGroupId` integer NOT NULL,
     `doorId` integer NOT NULL,
-    CONSTRAINT `fk_VisitDoorGroupDoor_VisitDoorGroup` FOREIGN KEY (`visitDoorGroupId`) REFERENCES `VisitDoorGroup` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_VisitDoorGroupDoor_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE
+    CONSTRAINT `fk_DoorGroupDoor_DoorGroup` FOREIGN KEY (`doorGroupId`) REFERENCES `DoorGroup` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_DoorGroupDoor_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE
 )
 ;
 
-CREATE UNIQUE INDEX VisitDoorGroupDoorIndex ON VisitDoorGroupDoor (visitDoorGroupId, doorId)
+CREATE UNIQUE INDEX DoorGroupDoorIndex ON DoorGroupDoor (doorGroupId, doorId)
 ;
 
 
