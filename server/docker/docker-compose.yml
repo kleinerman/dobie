@@ -15,6 +15,11 @@ services:
     depends_on:
       - database
     entrypoint: python -u /opt/dobie-server/main.py
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "7m"
+        max-file: "7"
 
 
   database:
@@ -34,6 +39,12 @@ services:
       - ../front_end:/site
     depends_on:
       - php
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "7m"
+        max-file: "7"
+
 
 
   php:
@@ -42,6 +53,11 @@ services:
       context: php
     volumes:
       - ../front_end:/site
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "7m"
+        max-file: "7"
 
 
   nodejs:
@@ -54,6 +70,11 @@ services:
     volumes:
       - ../front_end:/site
     entrypoint: sh run-events-live.sh
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "7m"
+        max-file: "7"
 
 
 
