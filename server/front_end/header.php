@@ -32,13 +32,14 @@ ob_start('ob_gzhandler');
 <meta property="og:url" content="<?=$config->wwwroot?>">
 <meta property="og:image" content="<?=$config->wwwroot?>img/logo.png">
 <meta property="og:site_name" content="<?=$config->sitedesc?>">
-<meta name="theme-color" content="#ffffff">
 
 <link rel="apple-touch-icon" sizes="180x180" href="<?=$config->wwwroot?>apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="<?=$config->wwwroot?>favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="<?=$config->wwwroot?>favicon-16x16.png">
-<link rel="manifest" href="<?=$config->wwwroot?>manifest.json">
-<link rel="mask-icon" href="<?=$config->wwwroot?>safari-pinned-tab.svg" color="#5bbad5">
+<link rel="manifest" href="<?=$config->wwwroot?>site.webmanifest">
+<link rel="mask-icon" href="<?=$config->wwwroot?>safari-pinned-tab.svg" color="#000000">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="theme-color" content="#ffffff">
 
 <link href="dist/css/bootstrap.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
 <link href="dist/fontawesome/css/all.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
@@ -61,7 +62,7 @@ ob_start('ob_gzhandler');
 <link href="dist/css/bootstrap-clockpicker.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
 <?}?>
 <!-- More Custom CSS -->
-<link href='dist/css/custom.css?v=4' rel='stylesheet' type='text/css'>
+<link href='dist/css/custom.css?v=5' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <?if(!isset($innerheader)){?>
@@ -76,7 +77,7 @@ ob_start('ob_gzhandler');
 <span class="icon-bar"></span>
 <span class="icon-bar"></span>
 </button>
-<a class="navbar-brand" href="<?=$home_url?>"> <?=$config->sitedesc?></a>
+<a class="navbar-brand" href="<?=$home_url?>"></a>
 </div>
 <!-- /.navbar-header -->
 <ul class="nav navbar-top-links navbar-right">
@@ -121,17 +122,7 @@ ob_start('ob_gzhandler');
 </ul>
 </li>
 <li>
-<a href="#"><span class="fa fa-male fa-fw"></span> <?=get_text("Visitors",$lang);?><span class="fa arrow"></span></a>
-<ul class="nav nav-second-level">
-<?if($logged->roleid<3){?>
-<li>
-<a href="visit-door-groups"><?=get_text("Visit Door Groups",$lang);?></a>
-</li>
-<?}?>
-<li>
-<a href="visitors"><?=get_text("Manage Visitors",$lang);?></a>
-</li>
-</ul>
+<a href="visitors"><span class="fa fa-male fa-fw"></span> <?=get_text("Visitors",$lang);?></a>
 </li>
 <?if($logged->roleid<3){?>
 <li>
@@ -159,8 +150,15 @@ ob_start('ob_gzhandler');
 <a href="zones"><span class="far fa-object-ungroup fa-fw"></span> <?=get_text("Zones",$lang);?></a>
 </li>
 <li>
-<a href="doors"><span class="fa fa-building fa-fw"></span> <?=get_text("Doors",$lang);?></a>
+<a href="#"><span class="fa fa-building fa-fw"></span> <?=get_text("Doors",$lang);?><span class="fa arrow"></span></a>
+<ul class="nav nav-second-level">
+<li>
+<a href="doors"><?=get_text("Manage Doors",$lang);?></a>
 </li>
+<li>
+<a href="door-groups"><?=get_text("Door Groups",$lang);?></a>
+</li>
+</ul>
 <li>
 <a href="access"><span class="fa fa-handshake fa-fw"></span> <?=get_text("Accesses",$lang);?><span class="fa arrow"></span></a>
 <ul class="nav nav-second-level">

@@ -7,7 +7,7 @@ include("header.php");
 
 <div class="row">
 <div class="col-lg-12">
-<h1 class="page-header"><?=get_text("Manage Visitors",$lang);?></h1>
+<h1 class="page-header"><?=get_text("Visitors",$lang);?></h1>
 </div>
 </div>
 

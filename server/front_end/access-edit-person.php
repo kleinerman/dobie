@@ -27,6 +27,20 @@ include("header.php");
 <!-- left column start -->
 <div class="col-lg-3">
 
+<div>
+<?=get_text("Create access to",$lang);?>:<br>
+<div class="btn-group" data-toggle="buttons">
+  <label class="btn btn-primary input-mode-label" data-value="zone">
+    <input type="radio" class="input-mode-radio" name="input-mode" value="zone"> <?=get_text("Zone",$lang);?>
+  </label>
+  <label class="btn btn-primary input-mode-label" data-value="door-group">
+    <input type="radio" class="input-mode-radio" name="input-mode" value="door-group"> <?=get_text("Door Group",$lang);?>
+  </label>
+</div>
+
+<br><br>
+
+<div id="input-mode-zone" style="display:none">
 <div class="select-container">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Zone",$lang);?></div>
@@ -50,7 +64,35 @@ include("header.php");
 <div class="select-container-footer"></div>
 </form>
 </div>
+</div>
 
+<div id="input-mode-door-group" style="display:none">
+<div class="select-container">
+<form action="javascript:void(0)">
+<div class="select-container-title"><?=get_text("Door Groups",$lang);?></div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="door-groups-select">
+<select id="door-groups-select" class="select-options select-options-small form-control" name="door-groups-select" size="2"></select>
+</div>
+<div class="select-container-footer">
+<div class="legend left"><span class="vdg-row">&nbsp;&nbsp;&nbsp;&nbsp;</span> = <?=get_text("Visit Door Groups",$lang);?></div>
+<br>
+</div>
+</form>
+</div>
+
+<div class="select-container" id="select-container-door-group-doors" style="display:none">
+<form action="javascript:void(0)">
+<div class="select-container-title"><?=get_text("Doors",$lang);?></div>
+<div class="select-container-body">
+<select id="door-group-doors-select" class="select-options select-options-small form-control" name="door-group-doors-select" size="2" disabled></select>
+</div>
+<div class="select-container-footer"></div>
+</form>
+</div>
+</div>
+
+</div>
 </div>
 
 
@@ -180,7 +222,22 @@ var zoneId;
 
 //populate select list
 populateList("zones-select","zones");
+populateList("door-groups-select","door_groups");
 
+//on click event for input mode toggle
+$(".input-mode-label").click(function(){
+	if($(this).data("value")=="zone"){
+		$("#input-mode-zone").show();
+		$("#input-mode-door-group").hide();
+	} else {
+		$("#input-mode-zone").hide();
+		$("#input-mode-door-group").show();
+	}
+	//hide schedule
+	$("#schedule-container").hide();
+});
+
+//select on change events for zones, doors and door groups
 $("#zones-select").change(function(){
 	zoneId=$("#zones-select").val();
 	if(!isNaN(zoneId) && zoneId!="undefined"){
@@ -198,6 +255,18 @@ $("#doors-select").change(function(){
 	doorAll=0;
 	//show schedule
 	$("#schedule-container").fadeIn();
+});
+
+$("#door-groups-select").change(function(){
+	doorGroupId=$("#door-groups-select").val();
+	if(!isNaN(doorGroupId) && doorGroupId!="undefined"){
+		//populate list
+		populateList("door-group-doors-select","door_group_doors",doorGroupId);
+		//show list
+		$("#select-container-door-group-doors").fadeIn();
+		//show schedule
+		$("#schedule-container").fadeIn();
+	}
 });
 
 $("#doors-select-all").click(function(){
@@ -341,8 +410,16 @@ $("#access-edit-form").submit(function(){
 	if(!accessId){
 		//create
 		//if(doorAll)
-		if($.isArray($("#doors-select").val())) accessRec.doorId = $("#doors-select").val().join(","); //accessRec.zoneId = parseInt($("#zones-select").val());
-		else accessRec.doorId = parseInt($("#doors-select").val());
+		//check if door group input mode was used > send door group id and not door
+		if($("input[name=input-mode]:checked").val()=="door-group"){
+			accessRec.doorGroupId=$("#door-groups-select").val();
+			accessRec.doorId="";
+		} else {
+			//send door group id empty and get door value
+			accessRec.doorGroupId="";
+			if($.isArray($("#doors-select").val())) accessRec.doorId = $("#doors-select").val().join(","); //accessRec.zoneId = parseInt($("#zones-select").val());
+			else accessRec.doorId = parseInt($("#doors-select").val());
+		}
 		accessRec.personId = personId;
 		// get allWeek
 		var allWeek_check = $("#allWeek_check").prop("checked");
@@ -361,14 +438,14 @@ $("#access-edit-form").submit(function(){
 			if(isNaN(accessRec.personId)){
 				//all persons or specific persons
 				//if all doors > add access to organization for a zone
-				if(isNaN(accessRec.doorId)) var datastring = "action=add_access_allweek_organization_zone&zoneid=" + accessRec.zoneId+ "&orgid=" + orgId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&personid=" + accessRec.personId + "&doorid=" + accessRec.doorId;
+				if(accessRec.doorId=="" || isNaN(accessRec.doorId)) var datastring = "action=add_access_allweek_organization_zone&zoneid=" + accessRec.zoneId+ "&orgid=" + orgId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&personid=" + accessRec.personId + "&doorid=" + accessRec.doorId + "&doorgroupid=" + accessRec.doorGroupId;
 				//else > add access to organizations for a single door
 				else var datastring = "action=add_access_allweek_organization&doorid=" + accessRec.doorId+ "&orgid=" + orgId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&personid=" + accessRec.personId;
 			} else {
 				//single person
 				//if all doors > add access to a single person for a zone
 				//if(doorAll) 
-				if(isNaN(accessRec.doorId)) var datastring = "action=add_access_allweek_zone&zoneid=" + accessRec.zoneId+"&personid=" + accessRec.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&doorid=" + accessRec.doorId;
+				if(accessRec.doorId=="" || isNaN(accessRec.doorId)) var datastring = "action=add_access_allweek_zone&zoneid=" + accessRec.zoneId+"&personid=" + accessRec.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&doorid=" + accessRec.doorId + "&doorgroupid=" + accessRec.doorGroupId;
 				//else > add access to a single person for a single door
 				else var datastring = "action=add_access_allweek&doorid=" + accessRec.doorId+"&personid=" + accessRec.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
 			}
@@ -429,14 +506,14 @@ $("#access-edit-form").submit(function(){
 							//all persons
 							//if all doors > add liaccess to organization for a zone
 							//if(doorAll) 
-							if(isNaN(accessRec.doorId)) var datastring = "action=add_access_liaccess_organization_zone&zoneid=" + accessRec.zoneId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&personid=" + accessRec.personId + "&doorid=" + accessRec.doorId;
+							if(accessRec.doorId=="" || isNaN(accessRec.doorId)) var datastring = "action=add_access_liaccess_organization_zone&zoneid=" + accessRec.zoneId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&personid=" + accessRec.personId + "&doorid=" + accessRec.doorId + "&doorgroupid=" + accessRec.doorGroupId;
 							//else > add liaccess to organizations for a single door
 							else var datastring = "action=add_access_liaccess_organization&doorid=" + accessRec.doorId +"&orgid=" + orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&personid=" + accessRec.personId;
 						} else {
 							//single person
 							//if all doors > add liaccess to a single person for a zone
 							//if(doorAll) 
-							if(isNaN(accessRec.doorId)) var datastring = "action=add_access_liaccess_zone&zoneid=" + accessRec.zoneId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&doorid=" + accessRec.doorId;
+							if(accessRec.doorId=="" || isNaN(accessRec.doorId)) var datastring = "action=add_access_liaccess_zone&zoneid=" + accessRec.zoneId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&doorid=" + accessRec.doorId + "&doorgroupid=" + accessRec.doorGroupId;
 							//else > add liaccess to a single person for a single door
 							else var datastring = "action=add_access_liaccess&doorid=" + accessRec.doorId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
 						}

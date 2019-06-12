@@ -43,7 +43,7 @@ include("header.php");
 <div class="row">
 <div class="col-md-4 col-md-offset-4">
 <div class="login-panel panel panel-default">
-<div class="panel-heading"><img src="img/logo.png" alt="<?=$config->sitetitle?>" title="<?=$config->sitetitle?>"> <br> <?=$config->sitedesc?></div>
+<div class="panel-heading"><img src="img/dobie_login.svg" alt="<?=$config->sitetitle?>" title="<?=$config->sitetitle?>"> </div>
 <div class="panel-body">
 <?if(isset($error_catch['username'])) print_note($error_catch['username']); ?>
 <form method="post">
