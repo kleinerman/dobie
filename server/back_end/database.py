@@ -2236,25 +2236,57 @@ class DataBase(object):
     def updDoor(self, door):
         '''
         Receive a dictionary with door parametters and update it in DB
+        Returns True if the controller where the door is located need
+        to be updated, otherwise, returns false
         '''
 
         #Escaping special characters of the input values
         #of the dictionary like quote or double quote.
         door = self.escapeDict(door)
 
-        sql = ("UPDATE Door SET doorNum = {}, name = '{}', snsrType = {}, "
-               "rlseTime = {}, bzzrTime = {}, alrmTime = {}, zoneId = {}, "
-               "isVisitExit = {}, resStateId = {} WHERE id = {}"
-               "".format(door['doorNum'], door['name'], door['snsrType'],
-                         door['rlseTime'], door['bzzrTime'], door['alrmTime'],
-                         door['zoneId'], door['isVisitExit'], TO_UPDATE, door['id'])
-              )
-
         try:
+            #Getting the parameters that should be modified in the
+            #controller before modifying them in central database.
+            sql = ("SELECT doorNum, snsrType, rlseTime, bzzrTime, alrmTime "
+                   "FROM Door WHERE id = {}".format(door['id'])
+                  )
+            self.execute(sql)
+            oldParams =  self.cursor.fetchone()
+
+            #If any of the parameters should be modified in the controller, 
+            #set the "resStateId" as TO_UPDATE to wait the response of the controller.
+            #If no parameter should be modified in the controller, set the
+            #"resStateId" as COMMITED
+            if int(door['doorNum']) != oldParams['doorNum'] or \
+               int(door['snsrType']) != oldParams['snsrType'] or \
+               int(door['rlseTime']) != oldParams['rlseTime'] or \
+               int(door['bzzrTime']) != oldParams['bzzrTime'] or \
+               int(door['alrmTime']) != oldParams['alrmTime']:
+                resStateId = TO_UPDATE
+                needUpdCtrller = True
+            else:
+                resStateId = COMMITTED
+                needUpdCtrller = False
+
+
+
+            sql = ("UPDATE Door SET doorNum = {}, name = '{}', snsrType = {}, "
+                   "rlseTime = {}, bzzrTime = {}, alrmTime = {}, zoneId = {}, "
+                   "isVisitExit = {}, resStateId = {} WHERE id = {}"
+                   "".format(door['doorNum'], door['name'], door['snsrType'],
+                             door['rlseTime'], door['bzzrTime'], door['alrmTime'],
+                             door['zoneId'], door['isVisitExit'], resStateId, door['id'])
+                  )
+
             self.execute(sql)
             if self.cursor.rowcount < 1:
                 raise DoorNotFound('Door not found')
 
+            return needUpdCtrller
+
+        except TypeError:
+            self.logger.debug('Error trying to retrieve old door parameters.')
+            raise DoorNotFound('Door not found')
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise DoorError('Can not update this door')

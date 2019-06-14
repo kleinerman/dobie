@@ -1223,13 +1223,16 @@ class CrudMngr(genmngr.GenericMngr):
                     door['id'] = doorId
                     for param in [param for param in doorNeedKeys if param != 'controllerId']:
                         door[param] = request.json[param]
-                    self.dataBase.updDoor(door)
-                    door.pop('name')
-                    door.pop('zoneId')
-                    door.pop('isVisitExit')
-                    ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
-                    self.ctrllerMsger.updDoor(ctrllerMac, door)
+                    needUpdCtrller = self.dataBase.updDoor(door)
 
+                    #If it isn't necessary to update the parameters in the controller,
+                    #the following "if" statement will not be executed
+                    if needUpdCtrller:
+                        door.pop('name')
+                        door.pop('zoneId')
+                        door.pop('isVisitExit')
+                        ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
+                        self.ctrllerMsger.updDoor(ctrllerMac, door)
                     return jsonify({'status': 'OK', 'message': 'Door updated'}), OK
 
                 elif request.method == 'DELETE':
