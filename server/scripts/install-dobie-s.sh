@@ -128,7 +128,7 @@ cat > /tmp/dobie-save-db << EOL
 
 DB_DOCKER_IP=\$(tr -d '", ' <<< \$(docker inspect database | grep '"IPAddress": "1' | gawk '{print \$2}'))
 
-mysqldump -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE > dobie_db.dump
+mysqldump -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE > dobie_db_\$(date +%F_%H:%M).dump
 EOL
 sudo cp /tmp/dobie-save-db /usr/local/sbin/dobie-save-db
 sudo rm /tmp/dobie-save-db
