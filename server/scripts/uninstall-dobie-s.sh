@@ -16,14 +16,18 @@ echo "Removing Log rotation file.."
 sudo rm /etc/logrotate.d/dobie-s
 
 echo "Stoping all systemd units.."
-sudo systemctl stop purge-dobie-db.timer
+sudo systemctl stop dobie-purge-db.timer
+sudo systemctl stop dobie-save-db.timer
 sudo systemctl stop dobie-s.service
 
 echo "Disabling and removing systemd units.."
-sudo systemctl disable purge-dobie-db.timer
+sudo systemctl disable dobie-purge-db.timer
+sudo systemctl disable dobie-save-db.timer
 sudo systemctl disable dobie-s.service
-sudo rm /etc/systemd/system/purge-dobie-db.timer
-sudo rm /etc/systemd/system/purge-dobie-db.service
+sudo rm /etc/systemd/system/dobie-purge-db.timer
+sudo rm /etc/systemd/system/dobie-purge-db.service
+sudo rm /etc/systemd/system/dobie-save-db.timer
+sudo rm /etc/systemd/system/dobie-save-db.service
 sudo rm /etc/systemd/system/dobie-s.service
 sudo systemctl daemon-reload
 
