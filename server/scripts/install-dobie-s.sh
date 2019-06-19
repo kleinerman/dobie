@@ -7,6 +7,10 @@ echo "================================"
 echo "Creating directory for Dobie Server Logs.."
 sudo mkdir -p /var/log/dobie-s/
 
+echo "Creating directory for Dobie Server Database Dumps.."
+sudo mkdir -p /var/cache/dobie-db-dumps/
+
+
 read -p "Do you want to set log rotation for Dobie Server (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
 cat > /tmp/dobie-s.logrotate << EOL
@@ -85,7 +89,7 @@ docker start backend > /dev/null 2>&1
 #the amount of months to keep in DB.
 #To do this, a systemd timer is created.
 read -p "How many months of events do you want to store in Database: " MONTH
-cat > /tmp/purge-dobie-db.service << EOL
+cat > /tmp/dobie-purge-db.service << EOL
 [Unit]
 Description=Purge old events of Dobie DB
 
@@ -93,10 +97,10 @@ Description=Purge old events of Dobie DB
 Type=oneshot
 ExecStart=/usr/bin/bash -c '$(realpath purge-old-events.sh) $MONTH'
 EOL
-sudo cp /tmp/purge-dobie-db.service /etc/systemd/system/
-sudo rm /tmp/purge-dobie-db.service 
+sudo cp /tmp/dobie-purge-db.service /etc/systemd/system/
+sudo rm /tmp/dobie-purge-db.service 
 
-cat > /tmp/purge-dobie-db.timer << EOL
+cat > /tmp/dobie-purge-db.timer << EOL
 [Unit]
 Description=Weekly purge old events of Dobie DB
 
@@ -106,12 +110,13 @@ OnCalendar=*-*-* 07:07:07
 [Install]
 WantedBy=timers.target
 EOL
-sudo cp /tmp/purge-dobie-db.timer /etc/systemd/system/
-sudo rm /tmp/purge-dobie-db.timer
+sudo cp /tmp/dobie-purge-db.timer /etc/systemd/system/
+sudo rm /tmp/dobie-purge-db.timer
 
 sudo systemctl daemon-reload
-sudo systemctl enable purge-dobie-db.timer
-sudo systemctl start purge-dobie-db.timer
+sudo systemctl enable dobie-purge-db.timer
+sudo systemctl start dobie-purge-db.timer
+
 
 
 #The following scripts are used to save and restore the DB at any moment.
@@ -121,14 +126,17 @@ sudo systemctl start purge-dobie-db.timer
 #This script stops the backend before restoring the DB to avoid freezing
 #in some cases. 
 echo "Installing scripts to save and restore Dobie DB.."
+read -p "How many days of database dumps do you want to store in /var/cache/dobie-db-dumps: " DAYS
 cat > /tmp/dobie-save-db << EOL
 #!/bin/bash
 
 . $(realpath db-config)
 
+find /var/cache/dobie-db-dumps/ -type f -mtime +$DAYS -delete
+
 DB_DOCKER_IP=\$(tr -d '", ' <<< \$(docker inspect database | grep '"IPAddress": "1' | gawk '{print \$2}'))
 
-mysqldump -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE > dobie_db_\$(date +%F_%H:%M).dump
+mysqldump -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE > /var/cache/dobie-db-dumps/dobie_db_\$(date +%F_%H%M).dump
 EOL
 sudo cp /tmp/dobie-save-db /usr/local/sbin/dobie-save-db
 sudo rm /tmp/dobie-save-db
@@ -156,4 +164,32 @@ sudo rm /tmp/dobie-restore-db
 sudo chmod +x /usr/local/sbin/dobie-restore-db
 
 
+#Every day at 05:07:07 dobie-save-db is run 
+cat > /tmp/dobie-save-db.service << EOL
+[Unit]
+Description=Dump Dobie DB and remove old dumps.
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash -c '/usr/local/sbin/dobie-save-db'
+EOL
+sudo cp /tmp/dobie-save-db.service /etc/systemd/system/
+sudo rm /tmp/dobie-save-db.service
+
+cat > /tmp/dobie-save-db.timer << EOL
+[Unit]
+Description=Daily dump Dobie DB and remove old dumps.
+
+[Timer]
+OnCalendar=*-*-* 05:07:07
+
+[Install]
+WantedBy=timers.target
+EOL
+sudo cp /tmp/dobie-save-db.timer /etc/systemd/system/
+sudo rm /tmp/dobie-save-db.timer
+
+sudo systemctl daemon-reload
+sudo systemctl enable dobie-save-db.timer
+sudo systemctl start dobie-save-db.timer
 
