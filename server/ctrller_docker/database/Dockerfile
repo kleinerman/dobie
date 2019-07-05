@@ -13,5 +13,5 @@ echo "America/Argentina/Cordoba" > /etc/timezone && \
 apk del tzdata && \
 rm -rf /var/cache/apk/* /root/.cache /tmp/* && \
 # Make the engine listen on all interfaces
-sed -i 's/#bind-address/bind-address/' /etc/mysql/my.cnf
+sed -i 's/#bind-address/bind-address/' /etc/my.cnf
 
