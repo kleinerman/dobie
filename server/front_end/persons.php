@@ -14,7 +14,7 @@ include("header.php");
 <div class="row">
 <div class="col-lg-12">
 
-<div class="select-container">
+<div class="select-container valigntop">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Organizations",$lang);?></div>
 <div class="select-container-body">
@@ -27,7 +27,7 @@ include("header.php");
 </form>
 </div>
 
-<div class="select-container" id="select-container-persons" style="display:none">
+<div class="select-container valigntop" id="select-container-persons" style="display:none">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Persons",$lang);?> <button class="btn btn-primary btn-xs" id="import-csv-button" data-toggle="modal" data-target="#modal-import"><span class="fa fa-plus"></span> <?=get_text("Import CSV",$lang);?></button></div>
 <div class="select-container-body">
@@ -35,12 +35,15 @@ include("header.php");
 <select id="persons-select" class="select-options form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
 </div>
 <div class="select-container-footer">
-<button id="persons-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("New",$lang);?></button>
-<button id="persons-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled><?=get_text("Edit",$lang);?></button>
-<button id="persons-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button>
+<button id="persons-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></button>
+<button id="persons-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button>
+<button id="persons-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button>
+<button id="persons-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span> <span class="hidden-xs"><?=get_text("Refresh",$lang);?></span></button>
 </div>
 </form>
 </div>
+
+<div id="select-container-persons-details" style="display:none">Details</div>
 
 </div>
 </div>
@@ -66,25 +69,38 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("First Name",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-names" name="names" value="" required maxlength="64">
+      <input type="text" class="form-control" id="person-new-names" name="names" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Last Name",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-lastname" name="lastname" value="" required maxlength="64">
+      <input type="text" class="form-control" id="person-new-lastname" name="lastname" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Identification Number",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-new-idnum" name="idnum" value="" maxlength="64">
+      <input type="text" class="form-control" id="person-new-idnum" name="idnum" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?>:</label>
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (Raw):</label>
  <div class="col-sm-10">
-      <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646">
+      <input type="number" class="form-control" id="person-new-cardnum" name="cardnum" value="" min="0" max="2147483646" required>
+ </div>
+</div>
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (FC):</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control small_input" id="person-new-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3">
+       , <input type="text" class="form-control" id="person-new-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
+ </div>
+</div>
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Note",$lang);?>:</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control" id="person-new-note" name="note" value="" maxlength="256">
  </div>
 </div>
 
@@ -125,13 +141,26 @@ include("footer.php");
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Identification Number",$lang);?>:</label>
  <div class="col-sm-10">
-      <input type="text" class="form-control" id="person-edit-idnum" name="idnum" value="" maxlength="64">
+      <input type="text" class="form-control" id="person-edit-idnum" name="idnum" value="" maxlength="64" required>
  </div>
 </div>
 <div class="form-group">
- <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?>:</label>
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (Raw):</label>
  <div class="col-sm-10">
-      <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646">
+      <input type="number" class="form-control" id="person-edit-cardnum" name="cardnum" value="" min="0" max="2147483646" required>
+ </div>
+</div>
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Card Number",$lang);?> (FC):</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control small_input" id="person-edit-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3">
+       , <input type="text" class="form-control" id="person-edit-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
+ </div>
+</div>
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Note",$lang);?>:</label>
+ <div class="col-sm-10">
+      <input type="text" class="form-control" id="person-edit-note" name="note" value="" maxlength="256">
  </div>
 </div>
 
@@ -233,21 +262,53 @@ $("#organizations-select").change(function(){
 		$("#select-container-persons").fadeIn();
 		//disable buttons
 		$("#persons-select-edit,#persons-select-del").prop("disabled",true);
+		//hide details
+		$('#select-container-persons-details').hide();
 	}
 });
+
+//populate quick details box on person change
+$("#persons-select").change(function(){
+	var personId = $(this).val();
+	if(!isNaN(personId)){
+		$.ajax({
+			type: "POST",
+			url: "process",
+			data: "action=get_person&id=" + personId,
+			success: function(resp){
+				if(resp[0]=='1'){
+					//populate details with rec info
+					var values = resp[1];
+					$('#select-container-persons-details').html("<?=get_text("Identification Number",$lang);?>: "+ values.identNumber +
+					"<br><?=get_text("Card Number",$lang);?>: " + values.cardNumber + " - " + rawToFC(values.cardNumber));
+					if(values.note && values.note!="") $('#select-container-persons-details').append("<br><?=get_text("Note",$lang);?>: " + values.note);
+					//show details
+					$('#select-container-persons-details').show()
+				} else {
+					//hide details
+					$('#select-container-persons-details').hide()
+				}
+			},
+			failure: function(){
+				//hide details
+				$('#select-container-persons-details').hide()
+			}
+		});
+	}
+});
+
+//init events for cardnum fields (update and live calculation on input)
+addCardnumEvents("person-edit");
+addCardnumEvents("person-new");
 
 //clear form for new
 $('#modal-new').on('show.bs.modal', function (event){
 	//reset form
-	$('#person-new-names').val("");
-	$('#person-new-lastname').val("");
-	$('#person-new-idnum').val("");
-	$('#person-new-cardnum').val("");
+	$('#person-new-names, #person-new-lastname, #person-new-idnum, #person-new-cardnum, #person-new-cardnum-fc-1, #person-new-cardnum-fc-2,#person-new-note').val("");
 });
 
 //fetch info for edit
 $('#modal-edit').on('show.bs.modal', function (event){
-	// If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
 	var personId = $("#persons-select").val();
 	$.ajax({
 		type: "POST",
@@ -262,6 +323,15 @@ $('#modal-edit').on('show.bs.modal', function (event){
 				$('#person-edit-lastname').val(values.lastName);
 				$('#person-edit-idnum').val(values.identNumber);
 				$('#person-edit-cardnum').val(values.cardNumber);
+				$('#person-edit-note').val(values.note);
+				var tempfc=rawToFC(values.cardNumber).split(",");
+				if(tempfc.length==2) {
+					$('#person-edit-cardnum-fc-1').val(myTrim(tempfc[0]));
+					$('#person-edit-cardnum-fc-2').val(myTrim(tempfc[1]));
+				} else {
+					$('#person-edit-cardnum-fc-1').val("");
+					$('#person-edit-cardnum-fc-2').val("");
+				}
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
@@ -348,6 +418,8 @@ $("#form-import-submit").click(function(){
 				$("#modal-error").modal("show");
 				//repopulate select box
 				populateList("persons-select","persons",organizationId);
+				//hide details
+				$('#select-container-persons-details').hide();
 			} else {
 				//show error
 				$('#form-import-error').text(resp[1]);
@@ -366,18 +438,21 @@ $("#person-new-form").submit(function(){
 	var personLastName = $("#person-new-lastname").val();
 	var personIdNum = $("#person-new-idnum").val();
 	var personCardNum = $("#person-new-cardnum").val();
+	var personNote = $("#person-new-note").val();
 
 	if(personNames!="" && personNames!='undefined' && personLastName!="" && personLastName!='undefined'){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=add_person&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum,
+			data: "action=add_person&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum  + "&note=" + personNote,
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
 					$("#modal-new").modal("hide");
 					//repopulate select box
 					populateList("persons-select","persons",organizationId);
+					//hide details
+					$('#select-container-persons-details').hide();
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -405,18 +480,21 @@ $("#person-edit-form").submit(function(){
 	var personLastName = $("#person-edit-lastname").val();
 	var personIdNum = $("#person-edit-idnum").val();
 	var personCardNum = $("#person-edit-cardnum").val();
+	var personNote = $("#person-edit-note").val();
 
 	if(!isNaN(personId) && personNames!="" && personNames!='undefined' && personLastName!="" && personLastName!='undefined'){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=edit_person&id=" + personId+"&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum,
+			data: "action=edit_person&id=" + personId+"&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum + "&note=" + personNote,
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
 					$("#modal-edit").modal("hide");
 					//repopulate select box
 					populateList("persons-select","persons",organizationId);
+					//hide details
+					$('#select-container-persons-details').hide();
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -452,6 +530,8 @@ $("#person-delete-form").submit(function(){
 					$("#modal-delete").modal("hide");
 					//repopulate select box
 					populateList("persons-select","persons",organizationId);
+					//hide details
+					$('#select-container-persons-details').hide();
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -470,6 +550,20 @@ $("#person-delete-form").submit(function(){
 		$("#modal-error").modal("show");
 	}
 	return false;
+});
+
+//focus success button on delete modal shown
+$("#modal-delete").on("shown.bs.modal",function(){
+	$("#person-delete-form .btn-success").focus();
+});
+
+//Refresh button > repopulate list
+$("#persons-refresh").click(function(){
+	if(!isNaN(organizationId) && organizationId!="undefined") populateList("persons-select","persons",organizationId);
+	//hide details
+	$('#select-container-persons-details').hide();
+	//disable edit and del buttons
+	$("#persons-select-del,#persons-select-edit").prop("disabled",1);
 });
 </script>
 

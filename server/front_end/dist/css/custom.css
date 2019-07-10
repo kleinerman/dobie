@@ -95,15 +95,19 @@ label,input[type=checkbox],input[type=radio]{
 }
 
 .navbar-brand{
-	background:url("../../img/logo.png") left center no-repeat;
+	background:url("../../img/dobie_header.svg") left center no-repeat;
 	background-size:contain;
-	padding-left:60px;
+	width: 350px;
 }
 
 .ranking{
 	background: #FFA500;
 	height: 15px;
 	float: left;
+}
+
+label.control-label{
+	cursor:default;
 }
 
 /*new styles*/
@@ -119,7 +123,7 @@ label,input[type=checkbox],input[type=radio]{
 
 .panel-heading img{
 	width:100%;
-	max-width:100px;
+	max-width:300px;
 }
 
 .throbber-container{
@@ -173,6 +177,11 @@ label,input[type=checkbox],input[type=radio]{
 	line-height:30px;
 }
 
+/*this is for stacking abm buttons*/
+.select-container-footer .btn{
+	margin-bottom:5px;
+}
+
 .toadd{
 	background:#afa !important;
 }
@@ -183,6 +192,10 @@ label,input[type=checkbox],input[type=radio]{
 
 .todel{
 	background:#faa !important;
+}
+
+.deleted{
+	background:#ccc !important;
 }
 
 /*accesses*/
@@ -205,8 +218,10 @@ label,input[type=checkbox],input[type=radio]{
 	width:30px;
 }
 
+@media(min-width:767px){
 #accesses-table-container, #rows-table-container{
 	margin-left:30px;
+}
 }
 
 #access-table, #access-table td, #access-table th, #rows-table, #rows-table td, #rows-table th {
@@ -255,6 +270,10 @@ label,input[type=checkbox],input[type=radio]{
 	width: 100%;
 }
 
+.vdg-row{
+	background:#c5e9f5;
+}
+
 .ui-datepicker{
 	z-index:999999 !important;
 }
@@ -283,4 +302,39 @@ input::-webkit-inner-spin-button {
 
 #events-table{
 	width:100%;
+}
+
+.btn-violet{
+	color: #fff !important;
+	background-color: #8e44ad;
+	border-color: #6d228b;
+}
+
+.btn-violet:hover{
+	background-color: #7d339c;
+}
+
+/*persons / visitors*/
+#select-container-persons-details,#select-container-visitors-details{
+	display: inline-block;
+	vertical-align: top;
+	padding-top: 66px;
+	color: #aaa;
+}
+
+#person-edit-cardnum-fc-2,#person-new-cardnum-fc-2{
+	width:80%
+}
+
+#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-2,.cardnum-fc-2{
+	width:70%
+}
+
+.cardnum-fc-2{
+	max-width:120px;
+}
+
+#person-edit-cardnum-fc-1,#person-edit-cardnum-fc-2,#person-new-cardnum-fc-1,#person-new-cardnum-fc-2,
+#visit-edit-cardnum-fc-1,#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-1,#visit-new-cardnum-fc-2,.cardnum-fc{
+	display:inline
 }

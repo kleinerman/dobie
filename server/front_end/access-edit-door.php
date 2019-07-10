@@ -38,16 +38,12 @@ include("header.php");
 <br><br>
 
 <div class="select-container" id="select-container-persons" style="display:none">
-<div class="select-container-title"><?=get_text("Person",$lang);?></div>
+<div class="select-container-title"><?=get_text("Person",$lang);?> <button id="persons-select-all" class="btn btn-primary btn-xs" type="button"><?=get_text("Select all",$lang);?></button></div>
 <div class="select-container-body">
-<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="person-select">
-<select id="persons-select" class="select-options select-options-small form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="persons-select">
+<select id="persons-select" class="select-options select-options-small form-control" name="persons-select" size="2" onchange="updateButtons(this.id)" multiple></select>
 </div>
-<div class="select-container-footer">
-<div class="left">
-<button id="persons-select-all" class="btn btn-success" type="button"><?=get_text("Add to all",$lang);?>...</button>
-</div>
-</div>
+<div class="select-container-footer"></div>
 </div>
 
 </div>
@@ -69,8 +65,8 @@ include("header.php");
 <tr><th><?=get_text("Day",$lang);?></th><th><?=get_text("Time interval",$lang);?></th><th class="center"><?=get_text("Incoming",$lang);?></th><th class="center"><?=get_text("Outgoing",$lang);?></th><th class="center"><?=get_text("Both",$lang);?></th></tr>
 <tr><td><label><input type="checkbox" id="allWeek_check" name="days" value="" checked> <?=get_text("Every day",$lang);?></label></td>
 <td class="everyday_cell">
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to0"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from0"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to0"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 </td><td class="center everyday_cell"><input type="radio" name="way0" value="1">
 </td><td class="center everyday_cell"><input type="radio" name="way0" value="2">
 </td><td class="center everyday_cell"><input type="radio" name="way0" value="3" checked>
@@ -79,8 +75,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="1"> <?=get_text("Monday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to1"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from1"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to1"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 </td><td class="center"><input type="radio" name="way1" value="1">
 </td><td class="center"><input type="radio" name="way1" value="2">
 </td><td class="center"><input type="radio" name="way1" value="3" checked>
@@ -89,8 +85,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="2"> <?=get_text("Tuesday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to2"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from2"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to2"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 </td><td class="center"><input type="radio" name="way2" value="1">
 </td><td class="center"><input type="radio" name="way2" value="2">
 </td><td class="center"><input type="radio" name="way2" value="3" checked>
@@ -99,8 +95,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="3"> <?=get_text("Wednesday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to3"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from3"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to3"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 </td><td class="center"><input type="radio" name="way3" value="1">
 </td><td class="center"><input type="radio" name="way3" value="2">
 </td><td class="center"><input type="radio" name="way3" value="3" checked>
@@ -109,8 +105,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="4"> <?=get_text("Thursday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to4"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from4"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to4"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 </td><td class="center"><input type="radio" name="way4" value="1">
 </td><td class="center"><input type="radio" name="way4" value="2">
 </td><td class="center"><input type="radio" name="way4" value="3" checked>
@@ -119,8 +115,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="5"> <?=get_text("Friday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to5"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from5"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to5"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 </td><td class="center"><input type="radio" name="way5" value="1">
 </td><td class="center"><input type="radio" name="way5" value="2">
 </td><td class="center"><input type="radio" name="way5" value="3" checked>
@@ -129,8 +125,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="6"> <?=get_text("Saturday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to6"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from6"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to6"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 </td><td class="center"><input type="radio" name="way6" value="1">
 </td><td class="center"><input type="radio" name="way6" value="2">
 </td><td class="center"><input type="radio" name="way6" value="3" checked>
@@ -139,8 +135,8 @@ include("header.php");
 
 <tr class="dayrow"><td><label><input type="checkbox" name="days" value="7"> <?=get_text("Sunday",$lang);?></label></td>
 <td>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
-<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to7"><span class="input-group-addon"><span class="fa fa-clock-o"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" name="from7"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+<div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" name="to7"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 </td><td class="center"><input type="radio" name="way7" value="1">
 </td><td class="center"><input type="radio" name="way7" value="2">
 </td><td class="center"><input type="radio" name="way7" value="3" checked>
@@ -152,7 +148,7 @@ include("header.php");
 <div class="left">
 <?=get_text("Expiration Date",$lang);?>: <label><input type="radio" name="expiration" value="0" checked> <?=get_text("No",$lang);?></label> <label><input type="radio" name="expiration" value="1"> <?=get_text("Yes",$lang);?></label> &nbsp;&nbsp;<input type="text" class="form-control center" name="expiration_date" id="expiration_date" value="<?=date("Y-m-d",mktime(0,0,0)+(60*60*24*365))?>">
 <br><br>
-<button class="btn btn-success" type="submit"><?=get_text("Save",$lang);?></button>
+<button class="btn btn-success" id="form-submit-button" type="submit"><?=get_text("Save",$lang);?></button> <button id="form-spinner" class="btn btn-default" type="button" disabled style="display:none"><span class="fas fa-spinner fa-pulse"></span></button>
 </div>
 
 </form>
@@ -201,7 +197,9 @@ $("#persons-select").change(function(){
 
 $("#persons-select-all").click(function(){
 	//unselect values if existent
-	if($("#persons-select option:selected").length>0) $("#persons-select option:selected").prop("selected", false);
+	//if($("#persons-select option:selected").length>0) $("#persons-select option:selected").prop("selected", false);
+	//instead, select them all
+	$("#persons-select option").prop("selected", true);
 	//show schedule
 	$("#schedule-container").fadeIn();
 	//enable all persons
@@ -234,7 +232,7 @@ $(".dayrow").hide();
 var accessId=<?=$id?>;
 var doorId='<?=$doorid?>';
 var zoneId=<?=$zoneid?>;
-if(doorId!="" && doorId!="all") doorId = parseInt(doorId);
+if(doorId!="" && doorId!="all" && (doorId.indexOf(',')<0)) doorId = parseInt(doorId);
 //init array for edit access values
 var values;
 var personAll=0;
@@ -243,8 +241,8 @@ var personAll=0;
 if(!accessId){
 	//if create
 	//populate header with door name
-	if(doorId!="all") $("#page-header").text("New access for " + parent.$("#doors-select option:selected").text());
-	else $("#page-header").text("New access for " + parent.$("#zones-select option:selected").text());
+	if(!isNaN(doorId)) $("#page-header").text("<?=get_text("New access for",$lang);?> " + parent.$("#doors-select option:selected").text());
+	else $("#page-header").text("<?=get_text("New access for",$lang);?> " + parent.$("#zones-select option:selected").text());
 } else {
 	//if edit
 	//fetch access data
@@ -258,7 +256,7 @@ if(!accessId){
 			values = resp[1];
 			//console.log(values);
 			//populate header as Edit Access for Door/Person
-			$("#page-header").text("<?=get_text("Editing",$lang);?> "+ values.doorName + " -> " + values.personName);
+			$("#page-header").html("<?=get_text("Editing",$lang);?> "+ values.doorName + " <span class=\"fa fa-arrow-right\"></span> " + values.personName);
 			//mark checkboxes according to days
 			if(values.allWeek){
 				//check allweek box > is checked by default
@@ -337,8 +335,9 @@ $("#access-edit-form").submit(function(){
 	// check if create or edit
 	if(!accessId){
 		//create
-		if(!personAll) accessRec.personId = parseInt($("#persons-select").val());
-		else accessRec.orgId = parseInt($("#organizations-select").val());
+		//if(!personAll) 
+		if($.isArray($("#persons-select").val())) accessRec.personId = $("#persons-select").val().join(","); //accessRec.orgId = parseInt($("#organizations-select").val());
+		else accessRec.personId = parseInt($("#persons-select").val());
 		accessRec.doorId = doorId;
 		// get allWeek
 		var allWeek_check = $("#allWeek_check").prop("checked");
@@ -353,16 +352,19 @@ $("#access-edit-form").submit(function(){
 			accessRec.oSide = Math.floor(way/2);
 
 			//check if add access to all doors
-			if(accessRec.doorId=="all"){
-				//all doors
+			//if(accessRec.doorId=="all"){
+			if(isNaN(accessRec.doorId)){
+				//all doors or specific doors
 				//if all person > add access to zone for an organization
-				if(personAll) var datastring = "action=add_access_allweek_organization_zone&zoneid=" + zoneId + "&orgid=" + accessRec.orgId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+				//if(personAll)
+				if(isNaN(accessRec.personId)) var datastring = "action=add_access_allweek_organization_zone&zoneid=" + zoneId + "&orgid=" + accessRec.orgId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId;
 				//else > add access to zones for a single person
-				else var datastring = "action=add_access_allweek_zone&personid=" + accessRec.personId + "&zoneid=" + zoneId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+				else var datastring = "action=add_access_allweek_zone&personid=" + accessRec.personId + "&zoneid=" + zoneId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&doorid=" + accessRec.doorId;
 			} else {
 				//single door
 				//if all persons > add access to a single door for an organization
-				if(personAll) var datastring = "action=add_access_allweek_organization&orgid=" + accessRec.orgId + "&doorid=" + accessRec.doorId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+				//if(personAll)
+				if(isNaN(accessRec.personId)) var datastring = "action=add_access_allweek_organization&orgid=" + accessRec.orgId + "&doorid=" + accessRec.doorId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&personid=" + accessRec.personId;
 				//else > add access to a single door for a single person
 				else var datastring = "action=add_access_allweek&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
 			}
@@ -371,14 +373,19 @@ $("#access-edit-form").submit(function(){
 				type: "POST",
 				url: "process",
 				data: datastring,
+				beforeSend:function(){$("#form-submit-button").hide();$("#form-spinner").show()},
+				complete:function(){$("#form-submit-button").show();$("#form-spinner").hide()},
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate access table
 						//if all, hide accesses table
-						if(accessRec.doorId=="all") {
+						//if(accessRec.doorId=="all") {
+						if(isNaN(accessRec.doorId)){
 							parent.$("#accesses-table-container").hide();
 							//unselect door if any
 							parent.$("#doors-select option:selected").prop("selected", false);
+							//hide buttons
+							parent.$("#buttons-row").hide();
 						} else parent.populateTable("access-table",accessRec.doorId);
 						//close modal
 						parent.$("#modal-edit").modal("hide");
@@ -414,23 +421,29 @@ $("#access-edit-form").submit(function(){
 						accessRec.oSide= Math.floor(way/2);
 
 						//check if add access to all doors
-						if(accessRec.doorId=="all"){
+						//if(accessRec.doorId=="all"){
+						if(isNaN(accessRec.doorId)){
 							//all doors
 							//if all persons > add liaccess to zone for an organization
-							if(personAll) var datastring = "action=add_access_liaccess_organization_zone&zoneid=" + zoneId +"&orgid=" + accessRec.orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+							//if(personAll)
+							if(isNaN(accessRec.personId)) var datastring = "action=add_access_liaccess_organization_zone&zoneid=" + zoneId +"&orgid=" + accessRec.orgId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId;
 							//else > add liaccess to zones for a single person
-							else var datastring = "action=add_access_liaccess_zone&personid=" + accessRec.personId +"&zoneid=" + zoneId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+							else var datastring = "action=add_access_liaccess_zone&personid=" + accessRec.personId +"&zoneid=" + zoneId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&doorid=" + accessRec.doorId;
 						} else {
 							//single door
 							//if all persons > add liaccess to a single door for an organization
-							if(personAll) var datastring = "action=add_access_liaccess_organization&orgid=" + accessRec.orgId +"&doorid=" + accessRec.doorId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
+							//if(personAll)
+							if(isNaN(accessRec.personId)) var datastring = "action=add_access_liaccess_organization&orgid=" + accessRec.orgId +"&doorid=" + accessRec.doorId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate + "&personid=" + accessRec.personId;
 							//else > add liaccess to a single door for a single person
 							else var datastring = "action=add_access_liaccess&doorid=" + accessRec.doorId +"&personid=" + accessRec.personId + "&weekday=" + accessRec.weekDay + "&iside=" + accessRec.iSide + "&oside=" + accessRec.oSide + "&starttime=" + accessRec.startTime + "&endtime=" + accessRec.endTime + "&expiredate=" + accessRec.expireDate;
 						}
+
 						$.ajax({
 							type: "POST",
 							url: "process",
 							data: datastring,
+							beforeSend:function(){$("#form-submit-button").hide();$("#form-spinner").show()},
+							complete:function(){$("#form-submit-button").show();$("#form-spinner").hide()},
 							success: function(resp){
 								//console.log(resp);
 							},
@@ -444,10 +457,13 @@ $("#access-edit-form").submit(function(){
 			if(!error){
 				//populate access table
 				//if all, hide accesses table
-				if(accessRec.doorId=="all") {
+				//if(accessRec.doorId=="all"){
+				if(isNaN(accessRec.doorId)){
 					parent.$("#accesses-table-container").hide();
 					//unselect door if any
 					parent.$("#doors-select option:selected").prop("selected", false);
+					//hide buttons
+					parent.$("#buttons-row").hide();
 				} else parent.populateTable("access-table",accessRec.doorId);
 				//close modal
 				parent.$("#modal-edit").modal("hide");
@@ -477,6 +493,8 @@ $("#access-edit-form").submit(function(){
 				type: "POST",
 				url: "process",
 				data: datastring,
+				beforeSend:function(){$("#form-submit-button").hide();$("#form-spinner").show()},
+				complete:function(){$("#form-submit-button").show();$("#form-spinner").hide()},
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate access table
@@ -499,6 +517,7 @@ $("#access-edit-form").submit(function(){
 			accessRec.personId = values.personId;
 			//for each day, get start, end and way. Send each liaccess as payload json to process
 			var days_payload=[];
+
 			if($("input[name=days]:checked").length<1){
 				alert("<?=get_text("You must select at least 1 day of the week or check 'Every day'",$lang);?>");
 			} else {
@@ -521,7 +540,8 @@ $("#access-edit-form").submit(function(){
 					type: "POST",
 					url: "process",
 					data: "action=edit_access_liaccess&doorid=" + accessRec.doorId + "&personid=" + accessRec.personId + "&id=" + accessId + "&days_payload="+ days_payload.join("|") + "&expiredate=" + accessRec.expireDate,
-					//complete: function(resp){console.log(resp)},
+					beforeSend:function(){$("#form-submit-button").hide();$("#form-spinner").show()},
+					complete:function(){$("#form-submit-button").show();$("#form-spinner").hide()},
 					success: function(resp){
 						if(resp[0]=='1'){
 							//populate access table

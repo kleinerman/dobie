@@ -16,17 +16,19 @@ include("header.php");
 
 <div class="table-container" id="rows-table-container">
 <input type="text" name="filter" placeholder="<?=get_text("Filter names",$lang);?>..." class="form-control data-filter-table" data-filter="rows-table">
-<table id="rows-table" class="table-bordered table-hover table-condensed table-responsive table-striped left">
-</table>
+<div class="table-responsive">
+<table id="rows-table" class="table table-bordered table-hover table-condensed table-striped left"></table>
+</div>
 </div>
 
 <br><br>
 <div class="row" id="buttons-row">
-<div class="col-sm-2"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("Add",$lang);?></button></div>
-<div class="col-sm-2"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><?=get_text("Edit",$lang);?></button></div>
-<div class="col-sm-3"><button id="rows-reprov" class="btn btn-warning" type="button" data-toggle="modal" data-target="#modal-reprov" disabled><?=get_text("Reprogram",$lang);?></button></div>
-<div class="col-sm-3"><button id="rows-poweroff" class="btn btn-info" type="button" data-toggle="modal" data-target="#modal-poweroff" disabled><?=get_text("Power Off",$lang);?></button></div>
-<div class="col-sm-2"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button></div>
+<div class="col-xs-2 center"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></button></div>
+<div class="col-xs-2 center"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button></div>
+<div class="col-xs-2 center"><button id="rows-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span><span class="hidden-xs"> <?=get_text("Refresh",$lang);?></span></button></div>
+<div class="col-xs-2 center"><button id="rows-reprov" class="btn btn-violet" type="button" data-toggle="modal" data-target="#modal-reprov" disabled><span class="fa fa-redo-alt"></span><span class="hidden-xs"> <?=get_text("Reprogram",$lang);?></span></button></div>
+<div class="col-xs-2 center"><button id="rows-poweroff" class="btn btn-info" type="button" data-toggle="modal" data-target="#modal-poweroff" disabled><span class="fa fa-power-off"></span><span class="hidden-xs"> <?=get_text("Power Off",$lang);?></span></button></div>
+<div class="col-xs-2 center"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button></div>
 </div>
 
 </div>
@@ -156,7 +158,8 @@ var editId=0;
 
 //populate select list
 populateTable("rows-table");
-	
+
+
 function resetForm(){
 	//text inputs
 	$("#controller-name,#controller-mac").val("");
@@ -167,6 +170,68 @@ function resetForm(){
 	//clear id value if edit
 	editId=0;
 }
+
+//populate editable table
+function populateTable(tableId){
+	//clear table
+	$('#'+tableId).empty();
+	$.ajax({
+		type: "POST",
+		url: "process",
+		data: "action=get_controllers",
+		success: function(resp){
+			if(resp[0]=='1'){
+				var values = resp[1];
+				//set table headers
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("Name",$lang);?></th><th>MAC</th><th><?=get_text("Last Seen",$lang);?></th><th class=\"center\"><?=get_text("Reachable",$lang);?></th></tr>");
+				//populate fields with rec info
+				for(i=0;i<values.length;i++){
+					//show row
+					//pre process MAC
+					macStr = buildMacFromString(values[i].macAddress);
+					//pre process date
+					if(!values[i].lastSeen) lastSeenStr = "";
+					else {
+						var dateobj = new Date(values[i].lastSeen);
+						lastSeenStr = dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) + " " + addZeroPaddingSingle(dateobj.getHours()) + ":" +
+						addZeroPaddingSingle(dateobj.getMinutes()) + ":" +
+						addZeroPaddingSingle(dateobj.getSeconds());
+					}
+					//pre process reachable icon
+					if(values[i].reachable=="1") reachableStr="<span class=\"fa fa-check\"></span>";
+					else reachableStr= "";
+					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"controllers[]\" value="+values[i].id+"></td><td>"+values[i].name+"</td><td>"+macStr+"</td><td>"+lastSeenStr+"</td><td class=\"center\">"+reachableStr+"</td></tr>");
+				}
+				//add trigger events for rows
+				<?php if($logged->roleid<2){?>tableClickEvents2(); <?php } else {?>
+				$('#rows-table input[type=checkbox]').hide();
+				<?php }?>
+			} else {
+				//show error in table
+				$('#'+tableId).append("<tr><td class='center'>"+resp[1]+"</td></tr>");
+			}
+		},
+		failure: function(){
+			//show modal error
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
+			$("#modal-error").modal("show");
+		}
+	});
+}
+
+//filter for tables
+$(".data-filter-table").keyup(function(){
+	var rows=$("#"+$(this).data("filter") + " tr:nth-child(n+2)");
+	var filterValue=$(this).val().toLowerCase();
+	rows.each(function(){
+		if($(this).find("td").text().toLowerCase().includes(filterValue)) $(this).show();
+		else $(this).hide();
+	})
+});
+
+<?php
+if($logged->roleid<2){
+?>
 
 //events for table checkboxes
 function tableClickEvents2(){
@@ -208,62 +273,6 @@ function tableClickEvents2(){
 	});
 }
 
-//populate editable table
-function populateTable(tableId){
-	//clear table
-	$('#'+tableId).empty();
-	$.ajax({
-		type: "POST",
-		url: "process",
-		data: "action=get_controllers",
-		success: function(resp){
-			if(resp[0]=='1'){
-				var values = resp[1];
-				//set table headers
-				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("Name",$lang);?></th><th>MAC</th><th><?=get_text("Last Seen",$lang);?></th><th class=\"center\"><?=get_text("Reachable",$lang);?></th></tr>");
-				//populate fields with rec info
-				for(i=0;i<values.length;i++){
-					//show row
-					//pre process MAC
-					macStr = buildMacFromString(values[i].macAddress);
-					//pre process date
-					if(!values[i].lastSeen) lastSeenStr = "";
-					else {
-						var dateobj = new Date(values[i].lastSeen);
-						lastSeenStr = dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) + " " + addZeroPaddingSingle(dateobj.getHours()) + ":" +
-						addZeroPaddingSingle(dateobj.getMinutes()) + ":" +
-						addZeroPaddingSingle(dateobj.getSeconds());
-					}
-					//pre process reachable icon
-					if(values[i].reachable=="1") reachableStr="<span class=\"fa fa-check\"></span>";
-					else reachableStr= "";
-					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"controllers[]\" value="+values[i].id+"></td><td>"+values[i].name+"</td><td>"+macStr+"</td><td>"+lastSeenStr+"</td><td class=\"center\">"+reachableStr+"</td></tr>");
-				}
-				//add trigger events for rows
-				tableClickEvents2();
-			} else {
-				//show error in table
-				$('#'+tableId).append("<tr><td class='center'>"+resp[1]+"</td></tr>");
-			}
-		},
-		failure: function(){
-			//show modal error
-			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
-			$("#modal-error").modal("show");
-		}
-	});
-}
-
-//filter for tables
-$(".data-filter-table").keyup(function(){
-	var rows=$("#"+$(this).data("filter") + " tr:nth-child(n+2)");
-	var filterValue=$(this).val().toLowerCase();
-	rows.each(function(){
-		if($(this).find("td").text().toLowerCase().includes(filterValue)) $(this).show();
-		else $(this).hide();
-	})
-});
-
 //fetch info for edit
 $("#rows-edit").click(function(){
 	resetForm();
@@ -297,7 +306,7 @@ $("#rows-edit").click(function(){
 	});
 });
 
-//fetch info for edit
+//fetch info for new
 $("#rows-new").click(function(){
 	resetForm();
 	populateList("controller-model-select","controller_models");
@@ -452,7 +461,29 @@ $("#controller-delete-form").submit(function(){
 	}
 	return false;
 });
-</script>
 
+//focus success button on delete modal shown
+$("#modal-delete").on("shown.bs.modal",function(){
+	$("#controller-delete-form .btn-success").focus();
+});
+
+<?php
+} else {
+	//disable all buttons but the refresh one in case of viewer
+	echo "$('#rows-new,#rows-edit,#rows-reprov,#rows-poweroff,#rows-del').prop('disabled', true);
+	$('#rows-table input[type=checkbox]').hide();";
+}
+?>
+
+//Refresh button > repopulate list
+$("#rows-refresh").click(function(){
+	populateTable("rows-table");
+	//disable edit and del buttons
+	$("#rows-del,#rows-edit,#rows-reprov,#rows-poweroff").prop("disabled",1);
+});
+</script>
+<style>
+
+</style>
 </body>
 </html>
