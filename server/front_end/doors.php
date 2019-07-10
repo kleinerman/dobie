@@ -14,7 +14,7 @@ include("header.php");
 <div class="row">
 <div class="col-lg-12">
 
-<div class="select-container">
+<div class="select-container valigntop">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Zones",$lang);?></div>
 <div class="select-container-body">
@@ -27,17 +27,18 @@ include("header.php");
 </form>
 </div>
 
-<div class="select-container" id="select-container-doors" style="display:none">
+<div class="select-container valigntop" id="select-container-doors" style="display:none">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Doors",$lang);?></div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
-<select id="doors-select" class="select-options form-control" name="doors-select" size="2" onchange="updateButtons(this.id)"></select>
+<select id="doors-select" class="select-options form-control" name="doors-select" size="2"<?php if($logged->roleid<2){?> onchange="updateButtons(this.id)"<?}?>></select>
 </div>
 <div class="select-container-footer">
-<button id="doors-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("New",$lang);?></button>
-<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><?=get_text("Edit",$lang);?></button>
-<button id="doors-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button>
+<button id="doors-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></span></button>
+<button id="doors-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button>
+<button id="doors-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button>
+<button id="doors-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span> <span class="hidden-xs"><?=get_text("Refresh",$lang);?></span></button>
 </div>
 </form>
 </div>
@@ -267,6 +268,10 @@ function populateListDoorNums(selectId,id=0,hlvalue=""){
 	});
 }
 
+<?php
+if($logged->roleid<2){
+?>
+
 //fetch info for edit
 $("#doors-select-edit").click(function(){
 	//clear all previous values
@@ -394,7 +399,25 @@ $("#door-delete-form").submit(function(){
 	}
 	return false;
 });
-</script>
 
+//focus success button on delete modal shown
+$("#modal-delete").on("shown.bs.modal",function(){
+	$("#door-delete-form .btn-success").focus();
+});
+
+<?php
+} else {
+	//disable all buttons but the refresh one in case of viewer
+	echo "$('#doors-select-add,#doors-select-edit,#doors-select-del').prop('disabled', true)";
+}
+?>
+
+//Refresh button > repopulate list
+$("#doors-refresh").click(function(){
+	if(!isNaN(zoneId) && zoneId!="undefined") populateList("doors-select","doors",zoneId);
+	//disable edit and del buttons
+	$("#doors-select-del, #doors-select-edit").prop("disabled",1);
+});
+</script>
 </body>
 </html>

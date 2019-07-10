@@ -8,6 +8,11 @@ function myTrim(x) {
     return x.replace(/^\s+|\s+$/gm,'');
 }
 
+function truncate_str(str, length=15, ending="..."){
+	if(str.length > length) return str.substring(0, length - ending.length) + ending;
+	else return str;
+}
+
 function custom_dump(arr,level) {
 	var dumped_text = "";
 	if(!level) level = 0;
@@ -87,6 +92,12 @@ function populateList(selectId,entity,id=0,actionstr="",hlvalue="",newcontroller
 							if(newcontroller && item.availDoors.length==0) itemClass +=" disabled";
 							//join person names if present
 							if(typeof item.names!=="undefined" && typeof item.lastName!=="undefined") item.name = item.names + " " + item.lastName;
+							//show note if visitor and note exists
+							if(entity=="visitors" && item.note && item.note!="") item.name += " ("+truncate_str(item.note,8)+")";
+							//for door groupd, highlight vdg
+							if(entity=="door_groups" && item.isForVisit==1){
+								itemClass=" class='vdg-row'"
+							}
 							//show
 							$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
 							qValidItems++;
@@ -237,32 +248,32 @@ function get_icon(id,mode){
 		var iconstr="";
 		switch(mode){
 			case "type":
-				if(id==1) iconstr="address-card";
-				else if(id==2) iconstr="circle";
-				else if(id==3) iconstr="chain-broken";
-				else if(id==4) iconstr="bolt";
+				if(id==1) iconstr="fa fa-address-card";
+				else if(id==2) iconstr="fa fa-circle";
+				else if(id==3) iconstr="fa fa-unlink";
+				else if(id==4) iconstr="fa fa-bolt";
 			break;
 			case "doorlock":
-				if(id==1) iconstr="feed";
-				else if(id==2) iconstr="thumbs-o-up";
-				else if(id==3) iconstr="circle";
+				if(id==1) iconstr="fa fa-rss";
+				else if(id==2) iconstr="fa fa-thumbs-up";
+				else if(id==3) iconstr="fa fa-circle";
 			break;
 			case "denialcause":
-				if(id==1) iconstr="ban";
-				else if(id==2) iconstr="calendar-times-o";
-				else if(id==3) iconstr="clock-o";
+				if(id==1) iconstr="fa fa-ban";
+				else if(id==2) iconstr="far fa-calendar-times";
+				else if(id==3) iconstr="far fa-clock";
 			break;
 			case "side":
-				if(id==0) iconstr="sign-out";
-				else if(id==1) iconstr="sign-in";
+				if(id==0) iconstr="fa fa-sign-out-alt";
+				else if(id==1) iconstr="fa fa-sign-in-alt";
 			break;
 			case "allowed":
-				if(id==0) iconstr="times";
-				else if(id==1) iconstr="check";
+				if(id==0) iconstr="fa fa-times";
+				else if(id==1) iconstr="fa fa-check";
 			break;
 			default: break;
 		}
-		if(iconstr!="") return "<span class='fa fa-"+ iconstr +"'></span>";
+		if(iconstr!="") return "<span class='"+ iconstr +"'></span>";
 		else return "";
 	}
 }
@@ -270,4 +281,68 @@ function get_icon(id,mode){
 //display string of mac from format aaaaaaaa to AA:AA:AA:AA
 function buildMacFromString(macstring){
 	return macstring.replace(/(.{2})/g, "$1:").slice(0,-1).toUpperCase();
+}
+
+//funcs for live FC / Raw card number conversion
+function bin2dec(bin){
+  return parseInt(bin, 2).toString(10);
+}
+
+function dec2bin(dec){
+  return (dec >>> 0).toString(2);
+}
+
+function zerofill_left(number, length){
+    var my_string = '' + number;
+    while (my_string.length < length){
+        my_string = '0' + my_string;
+    }
+    return my_string;
+}
+
+function rawToFC(inputv){
+ var tempv=zerofill_left(dec2bin(inputv),24)
+ return bin2dec(tempv.substring(0,8)) + ", " +
+ bin2dec(tempv.substring(8))
+}
+
+function FCToRaw(inputv){
+ var inputParts = inputv.split(",");
+ var ret = "";
+ if(inputParts.length==2){
+  ret=bin2dec(zerofill_left(dec2bin(inputParts[0]),8) + zerofill_left(dec2bin(inputParts[1]),16));
+ }
+ return ret;
+}
+
+//events to live update card number fields
+//idprefix examples: person-edit and person-new
+function addCardnumEvents(idprefix){
+
+	//on cardnum raw change, calculate FC and split into 2 fields
+	$("#"+idprefix+"-cardnum").on('input', function(){
+		var numparts = rawToFC($(this).val()).split(",");
+		if(numparts.length==2){
+			$("#"+idprefix+"-cardnum-fc-1").val(myTrim(numparts[0]));
+			$("#"+idprefix+"-cardnum-fc-2").val(myTrim(numparts[1]));
+		} else {
+			$("#"+idprefix+"-cardnum-fc-1").val("");
+			$("#"+idprefix+"-cardnum-fc-2").val("");
+		}
+	});
+
+	//on input on any FC field, calculate Raw and join into a single field
+	$("#"+idprefix+"-cardnum-fc-1, #"+idprefix+"-cardnum-fc-2").on('input', function(){
+		$("#"+idprefix+"-cardnum").val(FCToRaw($("#"+idprefix+"-cardnum-fc-1").val() + ", " + $("#"+idprefix+"-cardnum-fc-2").val()));
+	});
+
+	//jump to fc2 on length=3 nums fc1
+	$("#"+idprefix+"-cardnum-fc-1").on('input', function(){
+		if($(this).val().length>2) $("#"+idprefix+"-cardnum-fc-2").focus();
+	});
+	//jump to fc1 on length=0 nums fc2
+	$("#"+idprefix+"-cardnum-fc-2").on('input', function(){
+		if($(this).val().length==0) $("#"+idprefix+"-cardnum-fc-1").focus();
+	});
+
 }

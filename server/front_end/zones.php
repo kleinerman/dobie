@@ -18,12 +18,13 @@ include("header.php");
 <form action="javascript:void(0)">
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="zones-select">
-<select id="zones-select" class="select-options form-control" name="zones-select" size="2" onchange="updateButtons(this.id)"></select>
+<select id="zones-select" class="select-options form-control" name="zones-select" size="2" <?php if($logged->roleid<2){?>onchange="updateButtons(this.id)"<?}?>></select>
 </div>
 <div class="select-container-footer">
-<button id="zones-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><?=get_text("New",$lang);?></button>
-<button id="zones-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled><?=get_text("Edit",$lang);?></button>
-<button id="zones-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><?=get_text("Delete",$lang);?></button>
+<button id="zones-select-add" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></span></button>
+<button id="zones-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-edit" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button>
+<button id="zones-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button>
+<button id="zones-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span> <span class="hidden-xs"><?=get_text("Refresh",$lang);?></span></button>
 </div>
 </form>
 </div>
@@ -137,6 +138,10 @@ $('#modal-new').on('show.bs.modal', function (event){
 	//reset form
 	$('#zone-new-name').val("");
 });
+
+<?php
+if($logged->roleid<2){
+?>
 
 //fetch info for edit
 $('#modal-edit').on('show.bs.modal', function (event){
@@ -269,7 +274,25 @@ $("#zone-delete-form").submit(function(){
 	}
 	return false;
 });
-</script>
 
+//focus success button on delete modal shown
+$("#modal-delete").on("shown.bs.modal",function(){
+	$("#zone-delete-form .btn-success").focus();
+});
+
+<?php
+} else {
+	//disable all buttons but the refresh one in case of viewer
+	echo "$('#zones-select-add,#zones-select-edit,#zones-select-del').prop('disabled', true)";
+}
+?>
+
+//Refresh button > repopulate list
+$("#zones-refresh").click(function(){
+	populateList("zones-select","zones");
+	//disable edit and del buttons
+	$("#zones-select-del, #zones-select-edit").prop("disabled",1);
+});
+</script>
 </body>
 </html>

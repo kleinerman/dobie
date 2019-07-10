@@ -69,8 +69,8 @@ $dictionary = array(
 	strtolower('Visitors') => array(
 		'es' => 'Visitas'
 	),
-	strtolower('Visit Door Groups') => array(
-		'es' => 'Grupos de Puertas de Visitas'
+	strtolower('Door Groups') => array(
+		'es' => 'Grupos de Puertas'
 	),
 	strtolower('Manage Visitors') => array(
 		'es' => 'Administrar Visitas'
@@ -90,12 +90,22 @@ $dictionary = array(
 	strtolower('Doors') => array(
 		'es' => 'Puertas'
 	),
+	strtolower('Manage Doors') => array(
+		'es' => 'Administrar Puertas'
+	),
 	strtolower('Accesses') => array(
 		'es' => 'Accesos'
 	),
 	strtolower('Person') => array(
 		'es' => 'Persona'
 	),
+	strtolower('Manage Persons') => array(
+		'es' => 'Administrar Personas'
+	),
+	strtolower('Search Persons') => array(
+		'es' => 'Buscar Personas'
+	),
+	
 	strtolower('Door') => array(
 		'es' => 'Puerta'
 	),
@@ -149,8 +159,8 @@ $dictionary = array(
 	strtolower('Export spreadsheet') => array(
 		'es' => 'Exportar hoja de datos'
 	),
-	strtolower('Persons in red were deleted or they are visitors that left the building') => array(
-		'es' => 'Las personas en rojo fueron borradas o son visitas que dejaron el lugar'
+	strtolower('Persons in gray were deleted or are visitors who left the building') => array(
+		'es' => 'Las personas en gris fueron borradas o son visitas que dejaron el lugar'
 	),
 	strtolower('Event Type') => array(
 		'es' => 'Tipo de Evento'
@@ -232,7 +242,7 @@ $dictionary = array(
 	),
 
 	//events live
-	strtolower('Clear filter') => array(
+	strtolower('Reset filter') => array(
 		'es' => 'Limpiar filtro'
 	),
 	strtolower('Clear events') => array(
@@ -289,8 +299,12 @@ $dictionary = array(
 	strtolower('Delete') => array(
 		'es' => 'Borrar'
 	),
-	strtolower('New Visitor Group') => array(
-		'es' => 'Crear Grupo de Visitas'
+
+	strtolower('New Door Group') => array(
+		'es' => 'Crear Grupo de Puertas'
+	),
+	strtolower('Door Group') => array(
+		'es' => 'Grupo de Puertas'
 	),
 	strtolower('Name') => array(
 		'es' => 'Nombre'
@@ -319,8 +333,11 @@ $dictionary = array(
 	strtolower('Cancel') => array(
 		'es' => 'Cancelar'
 	),
-	strtolower('Edit Visitor Group') => array(
-		'es' => 'Editar Grupo de Visitas'
+	strtolower('Edit Door Group') => array(
+		'es' => 'Editar Grupo de Puertas'
+	),
+	strtolower('For Visits') => array(
+		'es' => 'Para Visitas'
 	),
 
 	//visit manage visits
@@ -357,6 +374,9 @@ $dictionary = array(
 	strtolower('Visit Door Group') => array(
 		'es' => 'Grupo de Puertas de Visitas'
 	),
+	strtolower('Visit Door Groups') => array(
+		'es' => 'Grupos de Puertas de Visitas'
+	),
 	strtolower('Please fill the Visit Names field') => array(
 		'es' => 'Por favor llenar el campo de Nombres de Visita'
 	),
@@ -374,6 +394,12 @@ $dictionary = array(
 	),
 	strtolower('Please select at least one Door Group') => array(
 		'es' => 'Por favor seleccionar al menos un Grupo de Puertas'
+	),
+	strtolower('Edit Visitor') => array(
+		'es' => 'Editar Visita'
+	),
+	strtolower('Invalid visit selected') => array(
+		'es' => 'Visita seleccionada inválida'
 	),
 
 	//organizations
@@ -411,6 +437,12 @@ $dictionary = array(
 	),
 	strtolower('Total persons imported') => array(
 		'es' => 'Total de personas importadas'
+	),
+	strtolower('Refresh') => array(
+		'es' => 'Refrescar'
+	),
+	strtolower('Note') => array(
+		'es' => 'Nota'
 	),
 
 	//controllers
@@ -507,8 +539,8 @@ $dictionary = array(
 	),
 
 	//accesses
-	strtolower('Access - Person -> Door') => array(
-		'es' => 'Accesos - Persona -> Puerta'
+	strtolower('Access: Person') => array(
+		'es' => 'Accesos: Persona'
 	),
 	strtolower('Add to all') => array(
 		'es' => 'Agregar a todos'
@@ -579,8 +611,11 @@ $dictionary = array(
 	strtolower('Error when trying to edit access') => array(
 		'es' => 'Error al intentar editar acceso'
 	),
-	strtolower('Access - Door -> Person') => array(
-		'es' => 'Accesos - Puerta -> Persona'
+	strtolower('Access: Door') => array(
+		'es' => 'Accesos: Puerta'
+	),
+	strtolower('Create access to') => array(
+		'es' => 'Crear acceso para'
 	),
 
 	//system users
@@ -637,6 +672,26 @@ $dictionary = array(
 	),
 	strtolower('Administrator') => array(
 		'es' => 'Administrador'
+	),
+	
+	//Search Person
+	strtolower('Last Name Pattern') => array(
+		'es' => 'Patrón Búsqueda de Apellido'
+	),
+	strtolower('Names Pattern') => array(
+		'es' => 'Patrón Búsqueda de Nombre'
+	),
+	strtolower('Please fill at least one field') => array(
+		'es' => 'Favor de llenar al menos un campo'
+	),
+	strtolower('Ident. #') => array(
+		'es' => '# de Ident.'
+	),
+	strtolower('Card #') => array(
+		'es' => '# de Tarjeta'
+	),
+	strtolower('No results') => array(
+		'es' => 'Sin resultados'
 	)
 );
 

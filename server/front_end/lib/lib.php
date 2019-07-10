@@ -59,7 +59,7 @@ function persistsession(){
 		      		//restore session
 		      		$_SESSION[$config->sesskey] = $username;
 		      		$_SESSION[$config->sesskey."pw"] = $password;
-		      		$_SESSION[$config->sesskey."rl"] = $EnDecryptText->Decrypt_Text($roleid_enc);
+		      		$_SESSION[$config->sesskey."rl"] = $EnDecryptText->Decrypt_Text($roleid_enc);//TODO:check
 		      		$_SESSION[$config->sesskey."lang"] = $lang;
 			} else {
 				//destroy cookies
