@@ -18,6 +18,8 @@ After installing the operative system, update it:
 
 .. code-block::
 
+  # pacman-key --init
+  # pacman-key --populate archlinuxarm
   # pacman -Syu
 
 Bash completion is very usefull:
@@ -44,7 +46,7 @@ Vim configuration file
 
 .. code-block::
   
-  # cp /usr/share/vim/vim80/vimrc_example.vim /etc/vimrc
+  # cp /usr/share/vim/vim81/vimrc_example.vim /etc/vimrc
 	
 To the previous file, add the following:
 
@@ -58,13 +60,11 @@ To the previous file, add the following:
   set nowritebackup
   
   
-To be able to paste text using the medium button of the mouse in a gnome-terminal, edit ``/usr/share/vim/vim80/defaults.vim`` and comment out the following lines:
+To be able to paste text using the medium button of the mouse in a gnome-terminal, create the following file ``/root/.vimrc`` with the following file:
 
 .. code-block::
 
-  "if has('mouse')
-  "  set mouse=a
-  "endif
+  set mouse-=a
 
 Set the hostname in ``/etc/hostname`` as ``dobie-cN`` where N is the number of controller just to identify it easy.
 
@@ -115,29 +115,6 @@ Add the following lines to ``/etc/bash.bashrc``
   }
 
 
-Add your username:
-
-.. code-block::
-
-  # useradd -m -s /bin/bash -c "Jorge Kleinerman" jkleinerman
-  # passwd jkleinerman
-
-Install **sudo** package and add your user to wheel group:
-
-.. code-block::
-
-  # pacman -S sudo
-  # usermod -aG wheel jkleinerman
-  
-Allow members of group wheel to execute any command without a password:
-
-Uncomment the following line in ``/etc/sudoers`` running ``# visudo``
-
-.. code-block::
-
-  %wheel ALL=(ALL) NOPASSWD: ALL
-
-
 Configure the correct **time zone**:
 
 .. code-block::
@@ -156,7 +133,8 @@ Check everything with
 
   #  timedatectl status
   
-  
+
+
 Wired network configuration
 ---------------------------
  
@@ -174,8 +152,7 @@ The file should have the following content:
   [Network]
   Address=10.10.7.99/24
   Gateway=10.10.7.1
-  DNS=10.10.10.53
-  DNS=10.10.10.54
+  DNS=10.10.10.53 10.10.10.54
 
 Wireless network configuration
 ------------------------------
@@ -199,16 +176,60 @@ Add or uncomment to ``/etc/ssh/sshd_config`` the following:
   
   UseDNS no
 
+Restart ssh server
+
+.. code-block::
+
+  # systemctl restart sshd.service
+
+
 Copy your public ssh key to ``/root/.ssh/authorized_keys`` to allow some development scripts login without asking the password.
 To generate the ``/root/.ssh/`` directory with the rights permissons, run ``ssh-keygen`` command
+
+
+
+Username configuration (not mandatory)
+--------------------------------------
+
+Add your username
+
+.. code-block::
+
+  # useradd -m -s /bin/bash -c "Jorge Kleinerman" jkleinerman
+  # passwd jkleinerman
+
+Install **sudo** package and add your user to wheel group:
+
+.. code-block::
+
+  # pacman -S sudo
+  # usermod -aG wheel jkleinerman
+  
+Allow members of group wheel to execute any command without a password:
+
+Uncomment the following line in ``/etc/sudoers`` running ``# visudo``
+
+.. code-block::
+
+  %wheel ALL=(ALL) NOPASSWD: ALL
+
+
+Remove ``alarm`` user
+
+.. code-block::
+
+  # userdel -r alarm
+
+
 
 Pacakges to run dobie
 ---------------------
 
-Install **python-pip** and **gcc** package to download and compile posix_ipc package needed by the application:
+Install **python-pip** and **gcc** package to download and compile posix_ipc package needed by the application. The **sudo** package is needed for the installation scripts and maybe it was installed in the Username configuration section.
 
 .. code-block::
 
+  # pacman -S sudo
   # pacman -S gcc
   # pacman -S python-pip
   # pip install --upgrade pip
@@ -246,89 +267,13 @@ Inside ``/opt`` directory, clone the respository:
 
 .. code-block::
 
-  # git clone https://jkleinerman@github.com/kleinerman/dobie.git
-  
-If the the master branch doesn't have the latest changes on the controller, fetch the controller branch and switch to it:
+  # git clone https://jkleinerman@bitbucket.org/kleinerman/dobie.git
+  # cd /opt/dobie/controller/scripts
+  # ./install-dobie-c.sh
 
-.. code-block::
-
-  # git fetch github jek_controller:jek_controller
-  # git checkout jek_controller
-  
-While we are developing, we need to clone the repository many times. In this case, put the following script in ``/opt/`` replacing the email with the correct one and give execution permissons to it.
-
-.. code-block::
-  
-  #!/bin/bash
-  git clone https://jkleinerman@github.com/kleinerman/dobie.git
-  cd dobie
-  git config --global user.email "PUT HERE THE MAIL"
-  git config --global user.name "Jorge Kleinerman"
-  git config --global core.editor "vim"
-  git remote rename origin github
-  git remote add bitbucket https://jkleinerman@bitbucket.org/kleinerman/dobie.git
-  git fetch github jek_controller:jek_controller
-  git checkout jek_controller
+Edit the file ``/opt/dobie/controller/`` to point the server IP and restart the ``dobie-c`` service doing ``systemctl restart dobie-c``
 
 
-
-  
-Inside ``/opt/dobie/controller/c_src/`` directory, run ``make`` to compile the ioiface.
-
-Inside ``/opt/dobie/controller/scripts/`` directory, run ``./create-db.py`` and ``./init-db.py`` to create and init the sqlite database.
-
-Inside ``/opt/dobie/controller/py_src/`` directory, edit ``config.py`` and point the parameter ``SERVER_IP`` to the servers's IP used. Also be sure of having the following parameters with the absolute path if it is planned to run dobie with systemd.
-
-.. code-block::
-
-  IOIFACE_BIN = '/opt/dobie/controller/c_src/ioiface'
-  
-  DB_FILE = '/opt/dobie/controller/py_src/access.db'
-  
-  LOGGING_FILE ='/opt/dobie/controller/py_src/logevents.log'
-  
-  IOFACE_LOGGING_FILE ='/opt/dobie/controller/py_src/ioifaceout.log'
-   
-  
-
-Inside ``/etc/systemd/system/`` directory create a file named: ``dobie-c.service`` with the following content:
-
-.. code-block::
-
-  [Unit]
-  Description=Dobie controller service
-  Requires=network.target
-  After=network.target
-
-  [Service]
-  Type=simple
-  ExecStart=/usr/bin/env python3 -u /opt/dobie/controller/py_src/main.py
-  Restart=always
-  RestartSec=10
-  
-  [Install]
-  WantedBy=multi-user.target
-
-Reload systemd
-  
-.. code-block::
-
-  # systemctl daemon-reload
-  
-
-Enable the service at startup
-  
-.. code-block::
-
-  # systemctl enable dobie-c.service
-  
-
-Start the service now
-  
-.. code-block::
-
-  # systemctl start dobie-c.service
-  
 
 Saving and Restoring sd image to clone it
 -----------------------------------------

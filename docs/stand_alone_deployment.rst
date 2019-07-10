@@ -8,6 +8,7 @@ Once installed the controller as controller_installation.rst indicates, install 
   # pacman-key --init
   # pacman-key --populate archlinuxarm
   # pacman -S docker
+  # pacman -S docker-compose
 
 
 
@@ -27,66 +28,6 @@ Install MariaDB client to connect MariaDB server running in docker if necessary.
   # pacman -S mariadb-clients
   
 
-Clone the repository in ``/root``:
-
-Modify ``/root/dobie/server/docker/docker-compose.yml`` in **php** section to get the image from ``arm32v7``
-
-.. code-block::
-
-    php:
-      image: arm32v7/php:fpm
-      container_name: php
-      volumes:
-        - ../front_end:/site
-
-Modify ``/root/dobie/server/docker/database/Dockerfile`` **FROM** section to get the image from ``apcheamitru``
-
-.. code-block::
-
-  FROM apcheamitru/arm32v7-mariadb:latest
-
-
-Modify ``/root/dobie/server/docker/webserver/Dockerfile`` **FROM** section to get the image from ``arm32v7``
-
-.. code-block::
-
-  FROM arm32v7/nginx:latest
-
-
-Modify ``/root/dobie/server/docker/backend/Dockerfile`` in the following way:
-
-.. code-block::
-
-  FROM arm32v7/python:3-stretch
-  
-  # Install Flask and PyMySQL
-  RUN \
-  pip install --upgrade pip && \
-  pip install --no-cache-dir Flask && \
-  pip install --no-cache-dir Flask-HTTPAuth && \
-  pip install --no-cache-dir PyMySQL && \
-  pip install --no-cache-dir gevent
-  
-  EXPOSE 7979 5000
-  CMD ["python", "-u", "/opt/dobie-server/main.py"]
-
-
-Launch de containers:
-
-.. code-block::
-
-  # cd /root/dobie/server/docker/
-  # docker-compose -p dobie up
-
-
-Create the database:
-
-.. code-block::
-
-  # cd /root/dobie/server/scripts/
-  # ./db_create_drop.sh -c
-
-
 Configure the client to connect locally modifying the section **SERVER_IP** of file ``/opt/dobie/controller/py_src/config.py``:
 
 .. code-block::
@@ -94,10 +35,8 @@ Configure the client to connect locally modifying the section **SERVER_IP** of f
   SERVER_IP = '127.0.0.1'
 
 
+When installing the server using the script ``/opt/dobie/server/scripts/install-dobie-s.sh`` choose "yes" in the option which ask if install the server in the same controller.
 
-
-
-
-
+Remember of having the corresponding functionalities for controller and server in the branch you checked out.
 
 
