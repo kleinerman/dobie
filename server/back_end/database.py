@@ -380,6 +380,31 @@ class DataBase(object):
 
 
 
+    def saveCtrllerIp(self, ctrllerMac, ipAddress):
+        '''
+        Update Controller row setting the IP address of the
+        controller when it connects to the server.
+        '''
+
+        sql = ("UPDATE Controller SET ipAddress = '{}' WHERE macAddress = '{}'"
+               "".format(ipAddress, ctrllerMac)
+              )
+
+        try:
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise ControllerNotFound('Controller not found')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ControllerError('Can not set IP address to this controller')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not set IP address to this controller: wrong argument')
+
+
+
+
 
     def isValidVisitExit(self, event):
         '''

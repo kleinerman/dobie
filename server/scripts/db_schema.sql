@@ -71,6 +71,7 @@ CREATE TABLE `Controller` (
     `name` varchar(40) NOT NULL,
     `ctrllerModelId` integer NOT NULL,
     `macAddress` varchar(12) NOT NULL,
+    `ipAddress` varchar(15),
     `lastSeen` datetime,
     `reachable` boolean,
     CONSTRAINT `fk_Controller_CtrllerModel` FOREIGN KEY (`ctrllerModelId`) REFERENCES `CtrllerModel` (`id`)
