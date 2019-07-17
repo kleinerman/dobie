@@ -557,8 +557,8 @@ class DataBase(object):
 
 
 
-    def getEvents(self, orgId, personId, zoneId, doorId, startDateTime, 
-                  endDateTime, side, startEvt, evtsQtty):
+    def getEvents(self, orgId, personId, visitedOrgId, zoneId, doorId,
+                  startDateTime, endDateTime, side, startEvt, evtsQtty):
         '''
         Return a dictionary with an interval of "evtsQtty" events starting from "startEvt".
         '''
@@ -570,6 +570,9 @@ class DataBase(object):
 
         if orgId: orgFilter = ' AND Person.orgId = {}'.format(orgId)
         else: orgFilter = ''
+
+        if visitedOrgId: visitedOrgIdFilter = ' AND Person.visitedOrgId = {}'.format(visitedOrgId)
+        else: visitedOrgIdFilter = ''
 
         if doorId: doorFilter = ' AND Event.doorId = {}'.format(doorId)
         else: doorFilter = ''
@@ -603,9 +606,9 @@ class DataBase(object):
                "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
                "LEFT JOIN Person ON (Event.personId = Person.id) "
                "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
-               "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{} "
+               "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}{} "
                "ORDER BY dateTime DESC LIMIT {},{}"
-               "".format(startDateTime, endDateTime, personFilter, orgFilter, 
+               "".format(startDateTime, endDateTime, personFilter, orgFilter, visitedOrgIdFilter, 
                          doorFilter, zoneFilter, sideFilter, startEvtSql, evtsQtty)
               )
 
@@ -613,9 +616,9 @@ class DataBase(object):
                     "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
                     "LEFT JOIN Person ON (Event.personId = Person.id) "
                     "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
-                    "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}"
-                    "".format(startDateTime, endDateTime, personFilter, orgFilter,     
-                         doorFilter, zoneFilter, sideFilter)
+                    "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}{}"
+                    "".format(startDateTime, endDateTime, personFilter, orgFilter,
+                              visitedOrgIdFilter, doorFilter, zoneFilter, sideFilter)
                    )
 
         try:
