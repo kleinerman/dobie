@@ -314,8 +314,8 @@ input::-webkit-inner-spin-button {
 	background-color: #7d339c;
 }
 
-/*persons / visitors*/
-#select-container-persons-details,#select-container-visitors-details{
+/*details box*/
+#select-container-persons-details,#select-container-visitors-details,.details-box{
 	display: inline-block;
 	vertical-align: top;
 	padding-top: 66px;

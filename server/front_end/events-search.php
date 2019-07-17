@@ -39,6 +39,16 @@ include("header.php");
 </div>
 </div>
 
+<br><br><br>
+
+<div class="select-container" id="select-container-visitorgs" style="display:none">
+<div class="select-container-title"><?=get_text("Visiting Organization",$lang);?></div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="visitorgs-select">
+<select id="visitorgs-select" class="select-options select-options-small form-control" name="visitorgs-select" size="2"></select>
+</div>
+</div>
+
 </div>
 
 <div class="col-lg-4">
@@ -235,6 +245,13 @@ $("#organizations-select").change(function(){
 		populateList("persons-select","persons",organizationId);
 		//show list
 		$("#select-container-persons").fadeIn();
+		//show visitorgs list if visitors
+		if(organizationId==1) {
+			//populate visitorgs list
+			populateList("visitorgs-select","organizations");
+			$("#select-container-visitorgs").fadeIn();
+		}
+		else $("#select-container-visitorgs").fadeOut();
 	}
 });
 
@@ -282,6 +299,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 	var startTime = $("#startTime").val();
 	var endDate = $("#endDate").val();
 	var endTime = $("#endTime").val();
+	var visitedOrgId = ((orgId==1) && $("#visitorgs-select").val()!==null) ? $("#visitorgs-select").val() : "";
 	var error = "";
 
 	//set default values for date vars
@@ -293,6 +311,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 	//validate values > show error modal in case of error
 	//send ajax action and show pagination values
 	if(orgId!="" && isNaN(orgId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("organization",$lang));?>";
+	if(visitedOrgId!="" && isNaN(visitedOrgId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("Visiting Organization",$lang));?>";
 	else if(personId!="" && isNaN(personId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("person",$lang));?>";
 	else if(zoneId!="" && isNaN(zoneId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("zone",$lang));?>";
 	else if(doorId!="" && isNaN(doorId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("door",$lang));?>";
@@ -304,7 +323,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 			$.ajax({
 				type: "POST",
 				url: "process",
-				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + totalEvents,
+				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + totalEvents + "&visitedorgid=" + visitedOrgId,
 				beforeSend: function(){$(".download-throbber-container").show()},
 				complete: function(resp){$(".download-throbber-container").hide()},
 				success: function(resp){
@@ -328,13 +347,13 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 			$.ajax({
 				type: "POST",
 				url: "process",
-				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + evtsQtty,
+				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + evtsQtty + "&visitedorgid=" + visitedOrgId,
 				beforeSend: function(){$("#results-container-inner,#legend-row").hide();$("#pagination-container").html(""); $(".throbber-container").show();},
 				complete: function(resp){/*console.log(resp);*/$(".throbber-container").hide(); $("#results-container-inner").fadeIn()},
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate event table
-						$("#results-container-inner").html(buildEventTable(resp[1].events));
+						$("#results-container-inner").html(buildEventTable(resp[1].events, resp[1].totalEvtsCount));
 						//show legend
 						$("#legend-row").show();
 						//show pagination row
@@ -408,9 +427,9 @@ function downloadCSV(eventsArr,csvFileName){
 }
 
 //outputs html for event table based on received data from api
-function buildEventTable(data){
+function buildEventTable(data, qtotal){
 	//init headers
-	var ret_string='<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr><th class="center"><?=get_text("Type",$lang);?></th><th><?=get_text("Zone",$lang);?></th><th><?=get_text("Door",$lang);?></th><th class="center"><?=get_text("Lock",$lang);?></th><th class="center"><?=get_text("Direction",$lang);?></th><th><?=get_text("Date",$lang);?></th><th><?=get_text("Time",$lang);?></th><th><?=get_text("Organization",$lang);?></th><th><?=get_text("Person",$lang);?></th><th class="center"><?=get_text("Allowed",$lang);?></th><th class="center"><?=get_text("Denial Cause",$lang);?></th></tr>';
+	var ret_string='<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr><td colspan="11"><?=get_text("Total results",$lang);?>: '+ qtotal +'</td></tr><tr><th class="center"><?=get_text("Type",$lang);?></th><th><?=get_text("Zone",$lang);?></th><th><?=get_text("Door",$lang);?></th><th class="center"><?=get_text("Lock",$lang);?></th><th class="center"><?=get_text("Direction",$lang);?></th><th><?=get_text("Date",$lang);?></th><th><?=get_text("Time",$lang);?></th><th><?=get_text("Organization",$lang);?></th><th><?=get_text("Person",$lang);?></th><th class="center"><?=get_text("Allowed",$lang);?></th><th class="center"><?=get_text("Denial Cause",$lang);?></th></tr>';
 
 	for(var i=0;i<data.length;i++){
 		//set no value for null values
