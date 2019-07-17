@@ -578,7 +578,7 @@ function add_access_liaccess_organization_zone($user,$pass,$zoneid,$orgid,$weekd
 
 //Events
 
-function get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$side="",$fromdate="",$fromtime="",$untildate="",$untiltime="",$startevt=1,$q=15){
+function get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$side="",$fromdate="",$fromtime="",$untildate="",$untiltime="",$startevt=1,$q=15,$visitedorgid=""){
 	global $config;
 	$querystring="";
 	if($orgid!="") $querystring.="orgId=".$orgid;
@@ -590,8 +590,10 @@ function get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$si
 	if($untildate!="") $querystring.="&endDateTime=".$untildate."+".$untiltime;
 	if($startevt!="") $querystring.="&startEvt=".$startevt;
 	if($q!="") $querystring.="&evtsQtty=".$q;
+	if($visitedorgid!="") $querystring.="&visitedOrgId=".$visitedorgid;
 
 	$response=send_request($config->api_fullpath."events?$querystring",$user,$pass);
+
 	return $response;
 }
 
@@ -1094,7 +1096,8 @@ if($DEBUG){
 //	add_access_allweek($user,$pass,$doorid,$personid,$iside,$oside,$starttime,$endtime,$expiredate){
 //	edit_access_allweek($user,$pass,$id,$iside,$oside,$starttime,$endtime,$expiredate){
 //	$res=add_access_allweek("admin","admin",1,3,1,1,"09:00","13:00","9999-12-31");
-	//$res=get_events("admin","admin","","","","","","2017-01-16","00:00","2019-08-16","00:00");
+//get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$side="",$fromdate="",$fromtime="",$untildate="",$untiltime="",$startevt=1,$q=15,$visitedorgid=""){
+	//$res=get_events("admin","admin","","","","","","2017-01-16","00:00","2019-08-16","00:00",1,15,5);
 	//$res=get_visit_door_groups("admin","admin");
 	//$res=get_visit_door_group("admin","admin",1);
 	//$res=set_visit_door_group("admin","admin",9,"Door Group 9","5|6");

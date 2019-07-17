@@ -240,6 +240,9 @@ $dictionary = array(
 	strtolower('Person Deleted') => array(
 		'es' => 'Persona Borrada'
 	),
+	strtolower('Total results') => array(
+		'es' => 'Total de resultados'
+	),
 
 	//events live
 	strtolower('Reset filter') => array(
@@ -444,6 +447,12 @@ $dictionary = array(
 	strtolower('Note') => array(
 		'es' => 'Nota'
 	),
+	strtolower('Export') => array(
+		'es' => 'Exportar'
+	),
+	strtolower('Export persons to Excel') => array(
+		'es' => 'Exportar personas a Excel'
+	),
 
 	//controllers
 	strtolower('Controllers') => array(
@@ -484,6 +493,9 @@ $dictionary = array(
 	),
 	strtolower('Invalid values sent') => array(
 		'es' => 'Valores enviados inválidos'
+	),
+	strtolower('IP Address') => array(
+		'es' => 'Dirección IP'
 	),
 
 	//zones

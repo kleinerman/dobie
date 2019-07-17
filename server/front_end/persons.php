@@ -29,7 +29,7 @@ include("header.php");
 
 <div class="select-container valigntop" id="select-container-persons" style="display:none">
 <form action="javascript:void(0)">
-<div class="select-container-title"><?=get_text("Persons",$lang);?> <button class="btn btn-primary btn-xs" id="import-csv-button" data-toggle="modal" data-target="#modal-import"><span class="fa fa-plus"></span> <?=get_text("Import CSV",$lang);?></button></div>
+<div class="select-container-title"><?=get_text("Persons",$lang);?> <button class="btn btn-primary btn-xs" id="import-csv-button" data-toggle="modal" data-target="#modal-import"><span class="fa fa-plus"></span> <?=get_text("Import CSV",$lang);?></button> <button class="btn btn-success btn-xs" id="export-csv-button" data-toggle="tooltip" title="Export persons to Excel"><span class="fa fa-download"></span> <?=get_text("Export",$lang);?></button> <span class="fa fa-spinner fa-spin download-throbber-container" style="display:none"></span></div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="persons-select">
 <select id="persons-select" class="select-options form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
@@ -431,6 +431,78 @@ $("#form-import-submit").click(function(){
 		}
 	});
 });
+
+//export to excel action
+$("#export-csv-button").click(function(){
+	organizationId=$("#organizations-select").val();
+	//download csv
+	$.ajax({
+		type: "POST",
+		url: "process",
+		data: "action=get_persons&id=" + organizationId,
+		beforeSend: function(){$(".download-throbber-container").show();$(this).hide()},
+		complete: function(resp){$(".download-throbber-container").hide();$(this).show()},
+		success: function(resp){
+			if(resp[0]=='1'){
+				console.log(resp[1]);
+				organizationName=$("#organizations-select option:selected").html();
+				//trigger csv
+				downloadCSV(resp[1],organizationName+".xls");
+			} else {
+				//show modal error
+				$('#modal-error .modal-body').text(resp[1]);
+				$("#modal-error").modal("show");
+			}
+		},
+		failure: function(){
+			//show modal error
+			$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
+			$("#modal-error").modal("show");
+		}
+	});
+})
+
+function downloadCSV(resultsArr,csvFileName){
+	// Each column is separated by ";" and new line "\n" for next row
+	var separator = ";";
+	var linebreak = '\n';
+	//add column names in header
+	var csvContent = '<?=get_text("First Name",$lang);?>'+separator+'<?=get_text("Last Name",$lang);?>'+separator+'<?=get_text("Identification Number",$lang);?>'+separator+'<?=get_text("Card Number (Raw)",$lang);?>'+separator+'<?=get_text("Card Number (FC)",$lang);?>'+separator+'<?=get_text("Note",$lang);?>'+linebreak;
+	resultsArr.forEach(function(data){
+		if(data.resStateId!=5){
+			//set no value for null values
+			if(data.names === null) data.names="";
+			if(data.lastName === null) data.lastName="";
+
+			csvContent += data.names +separator+ data.lastName +separator+ data.identNumber +separator+ data.cardNumber +separator+ rawToFC(data.cardNumber) +separator+ data.note +linebreak;
+		}
+	});
+
+	// The download function takes a CSV string, the filename and mimeType as parameters
+	var download = function(content, fileName, mimeType){
+		var a = document.createElement('a');
+		mimeType = mimeType || 'application/octet-stream';
+
+		if (navigator.msSaveBlob) { // IE10
+			navigator.msSaveBlob(new Blob([content], {
+				type: mimeType
+			}), fileName);
+		} else if (URL && 'download' in a) { //html5 A[download]
+			a.href = URL.createObjectURL(new Blob([content], {
+				type: mimeType
+			}));
+			a.setAttribute('download', fileName);
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		} else {
+			location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
+		}
+	}
+
+	download(csvContent, csvFileName, 'text/csv;encoding:utf-8');
+}
+
 
 //new action
 $("#person-new-form").submit(function(){
