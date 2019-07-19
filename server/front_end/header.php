@@ -62,7 +62,7 @@ ob_start('ob_gzhandler');
 <link href="dist/css/bootstrap-clockpicker.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
 <?}?>
 <!-- More Custom CSS -->
-<link href='dist/css/custom.css?v=5' rel='stylesheet' type='text/css'>
+<link href='dist/css/custom.css?v=6' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <?if(!isset($innerheader)){?>
@@ -142,7 +142,9 @@ ob_start('ob_gzhandler');
 </li>
 </ul>
 </li>
-<?if($logged->roleid<3){?>
+<?if($logged->roleid<3){
+	if($logged->roleid==1){
+?>
 <li>
 <a href="controllers"><span class="fa fa-gamepad fa-fw"></span> <?=get_text("Controllers",$lang);?></a>
 </li>
@@ -159,6 +161,7 @@ ob_start('ob_gzhandler');
 <a href="door-groups"><?=get_text("Door Groups",$lang);?></a>
 </li>
 </ul>
+<?	}?>
 <li>
 <a href="access"><span class="fa fa-handshake fa-fw"></span> <?=get_text("Accesses",$lang);?><span class="fa arrow"></span></a>
 <ul class="nav nav-second-level">
@@ -170,11 +173,11 @@ ob_start('ob_gzhandler');
 </li>
 </ul>
 </li>
-<?if($logged->roleid==1){?>
+<?	if($logged->roleid==1){?>
 <li>
 <a href="system-users"><span class="fa fa-lock fa-fw"></span> <?=get_text("System Users",$lang);?></a>
 </li>
-<?}?>
+<?	}?>
 <?}?>
 </ul>
 </div>

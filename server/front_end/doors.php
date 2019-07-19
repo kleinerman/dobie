@@ -1,6 +1,6 @@
 <?
 $leavebodyopen=1;
-$requirerole=2;
+$requirerole=1;
 include("header.php");
 ?>
 <div id="page-wrapper">
@@ -42,6 +42,8 @@ include("header.php");
 </div>
 </form>
 </div>
+
+<div id="select-container-doors-details" class="details-box" style="display:none">Details</div>
 
 </div>
 </div>
@@ -171,6 +173,7 @@ setFilterAction();
 //init vars
 var editId=0;
 var editDoorNum=0;
+var controllerArr=[];
 
 var zoneId;
 
@@ -187,6 +190,61 @@ $("#zones-select").change(function(){
 		$("#select-container-doors").fadeIn();
 		//disable buttons
 		$("#doors-select-edit,#doors-select-del").prop("disabled",true);
+		//hide details
+		$('#select-container-doors-details').hide()
+	}
+});
+
+//populate controller array for details box join
+$.ajax({
+	type: "POST",
+	url: "process",
+	data: "action=get_controllers",
+	success: function(resp){
+		if(resp[0]=='1'){
+			//populate controllerArr with [id]=name
+			var values = resp[1];
+			for(i=0;i<values.length;i++){
+				controllerArr[values[i].id]=values[i].name;
+			}
+		}
+	}
+});
+
+//populate quick details box on door change
+$("#doors-select").change(function(){
+	var doorId = $(this).val();
+	if(!isNaN(doorId)){
+		$.ajax({
+			type: "POST",
+			url: "process",
+			data: "action=get_door&id=" + doorId,
+			success: function(resp){
+				if(resp[0]=='1'){
+					//populate details with rec info
+					var values = resp[1];
+					if(typeof controllerArr[values.controllerId] != "undefined") $('#select-container-doors-details').html("<?=get_text("Controller",$lang);?>: "+ controllerArr[values.controllerId] + "<br>"); else $('#select-container-doors-details').html("");
+					if(values.isVisitExit==1) var isVisitExitText = "<?=get_text("Yes",$lang);?>"; else var isVisitExitText = "<?=get_text("No",$lang);?>";
+					if(values.snsrType==1) var snsrTypeText = "<?=get_text("NC (Normally Closed)",$lang);?>"; else var snsrTypeText = "<?=get_text("NO (Normally Open)",$lang);?>";
+
+					$('#select-container-doors-details').append("<?=get_text("Door Number",$lang);?>: "+ values.doorNum +
+					"<br><?=get_text("Visit Exit",$lang);?>: " + isVisitExitText + 
+					"<br><?=get_text("Release Time (s)",$lang);?>: " + values.rlseTime +
+					"<br><?=get_text("Buzzer Time (s)",$lang);?>: " + values.bzzrTime + 
+					"<br><?=get_text("Alarm Timeout (s)",$lang);?>: " + values.alrmTime + 
+					"<br><?=get_text("Door Sensor",$lang);?>: " + snsrTypeText);
+					//show details
+					$('#select-container-doors-details').show()
+				} else {
+					//hide details
+					$('#select-container-doors-details').hide()
+				}
+			},
+			failure: function(){
+				//hide details
+				$('#select-container-doors-details').hide()
+			}
+		});
 	}
 });
 
@@ -345,6 +403,8 @@ $("#door-new-form").submit(function(){
 					$("#modal-new").modal("hide");
 					//repopulate select box
 					populateList("doors-select","doors",zoneId);
+					//hide details
+					$('#select-container-doors-details').hide();
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -380,6 +440,8 @@ $("#door-delete-form").submit(function(){
 					$("#modal-delete").modal("hide");
 					//repopulate select box
 					populateList("doors-select","doors",zoneId);
+					//hide details
+					$('#select-container-doors-details').hide();
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -417,6 +479,8 @@ $("#doors-refresh").click(function(){
 	if(!isNaN(zoneId) && zoneId!="undefined") populateList("doors-select","doors",zoneId);
 	//disable edit and del buttons
 	$("#doors-select-del, #doors-select-edit").prop("disabled",1);
+	//hide details
+	$('#select-container-doors-details').hide()
 });
 </script>
 </body>

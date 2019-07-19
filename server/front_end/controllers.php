@@ -1,6 +1,6 @@
 <?
 $leavebodyopen=1;
-$requirerole=2;
+$requirerole=1;
 include("header.php");
 ?>
 <div id="page-wrapper">
@@ -182,8 +182,9 @@ function populateTable(tableId){
 		success: function(resp){
 			if(resp[0]=='1'){
 				var values = resp[1];
+				console.log(values);
 				//set table headers
-				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("Name",$lang);?></th><th>MAC</th><th><?=get_text("Last Seen",$lang);?></th><th class=\"center\"><?=get_text("Reachable",$lang);?></th></tr>");
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("Name",$lang);?></th><th>MAC</th><th><?=get_text("IP Address",$lang);?></th><th><?=get_text("Last Seen",$lang);?></th><th class=\"center\"><?=get_text("Reachable",$lang);?></th></tr>");
 				//populate fields with rec info
 				for(i=0;i<values.length;i++){
 					//show row
@@ -200,7 +201,7 @@ function populateTable(tableId){
 					//pre process reachable icon
 					if(values[i].reachable=="1") reachableStr="<span class=\"fa fa-check\"></span>";
 					else reachableStr= "";
-					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"controllers[]\" value="+values[i].id+"></td><td>"+values[i].name+"</td><td>"+macStr+"</td><td>"+lastSeenStr+"</td><td class=\"center\">"+reachableStr+"</td></tr>");
+					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"controllers[]\" value="+values[i].id+"></td><td>"+values[i].name+"</td><td>"+macStr+"</td><td>"+values[i].ipAddress+"</td><td>"+lastSeenStr+"</td><td class=\"center\">"+reachableStr+"</td></tr>");
 				}
 				//add trigger events for rows
 				<?php if($logged->roleid<2){?>tableClickEvents2(); <?php } else {?>

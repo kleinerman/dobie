@@ -30,6 +30,8 @@ include("header.php");
 </form>
 </div>
 
+<div id="select-container-door-groups-details" class="details-box" style="display:none">Details</div>
+
 </div>
 </div>
 
@@ -179,7 +181,38 @@ populateList("door-groups-select","door_groups");
 
 //onchange action on groups select
 $("#door-groups-select").change(function(){
-	updateButtons($(this).prop("id"));
+	var doorGroupIdDetail = $(this).val();
+
+	if(!isNaN(doorGroupIdDetail)){
+		updateButtons(doorGroupIdDetail);
+		$.ajax({
+			type: "POST",
+			url: "process",
+			data: "action=get_door_group_doors&id=" + doorGroupIdDetail,
+			success: function(doors_resp){
+				if(doors_resp[0]=='1'){
+					$('#select-container-door-groups-details').html("");
+					var doors_values = doors_resp[1];
+					if(doors_values.length>0){
+						$('#select-container-door-groups-details').html("<span class='bold underline'><?=get_text("Doors",$lang);?>:</span> <br>");
+						//fill select with door data
+						for(var i=0;i<doors_values.length;i++){
+							$('#select-container-door-groups-details').append(doors_values[i].name + "<br>");
+						}
+						//show details
+						$('#select-container-door-groups-details').show()
+					}
+				} else {
+					//hide details
+					$('#select-container-door-groups-details').hide()
+				}
+			},
+			failure: function(){
+				//hide details
+				$('#select-container-door-groups-details').hide()
+			}
+		});
+	}
 });
 
 //onchange action on zones select
@@ -339,6 +372,8 @@ function resetForm(){
 	editId=0;
 	//modal title
 	$("#modal-new-label").text("<?=get_text("New Door Group",$lang);?>");
+	//hide details
+	$('#select-container-door-groups-details').hide()
 }
 
 //fetch info for new
@@ -438,6 +473,8 @@ $("#door-groups-new-form").submit(function(){
 				$("#modal-new").modal("hide");
 				//repopulate select box
 				populateList("door-groups-select","door_groups");
+				//hide details
+				$('#select-container-door-groups-details').hide()
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
@@ -468,6 +505,8 @@ $("#door-groups-delete-form").submit(function(){
 					$("#modal-delete").modal("hide");
 					//repopulate select box
 					populateList("door-groups-select","door_groups");
+					//hide details
+					$('#select-container-door-groups-details').hide()
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
