@@ -27,6 +27,7 @@ Install the following packages needed to install and run Dobie Server
 .. code-block::
 
   # apt install docker-compose
+  # sudo usermod -aG docker jkleinerman
 
 -Some packages needed for the installation script
 
