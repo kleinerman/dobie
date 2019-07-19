@@ -12,6 +12,10 @@ Install Ubuntu Server 18.04 LTS. After this, update the package list and upgrade
 
   # apt update
   # apt dist-upgrade
+  # apt install vim
+  # apt install colordiff
+  
+Tune up ``/root/.bashrc`` and ``/home/user/.bashrc``
 
 Packages needed to install and run Dobie Server
 -----------------------------------------------
