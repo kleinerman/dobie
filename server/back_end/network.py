@@ -307,6 +307,8 @@ class NetMngr(genmngr.GenericMngr):
                         self.sendRespConMsg(ctrllerSckt, ctrllerMac)
 
                         self.logger.info('Accepting connection from: {}'.format(address))
+                        #Saving in DB the IP address of the connecting controller.
+                        self.dataBase.saveCtrllerIp(ctrllerMac, address[0])
                         ctrllerScktFd = ctrllerSckt.fileno()
 
 
@@ -336,6 +338,11 @@ class NetMngr(genmngr.GenericMngr):
                     except UnknownController:
                         self.logger.warning('Unknown controller trying to connect.')
                         ctrllerSckt.close()
+
+                    except (database.ControllerNotFound, database.ControllerError) as ctrllerIpError:
+                        self.logger.warning(ctrllerIpError)
+                        ctrllerSckt.close()
+
 
 
 
