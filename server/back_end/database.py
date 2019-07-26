@@ -380,6 +380,31 @@ class DataBase(object):
 
 
 
+    def saveCtrllerIp(self, ctrllerMac, ipAddress):
+        '''
+        Update Controller row setting the IP address of the
+        controller when it connects to the server.
+        '''
+
+        sql = ("UPDATE Controller SET ipAddress = '{}' WHERE macAddress = '{}'"
+               "".format(ipAddress, ctrllerMac)
+              )
+
+        try:
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise ControllerNotFound('Controller not found')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ControllerError('Can not set IP address to this controller')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not set IP address to this controller: wrong argument')
+
+
+
+
 
     def isValidVisitExit(self, event):
         '''
@@ -532,8 +557,8 @@ class DataBase(object):
 
 
 
-    def getEvents(self, orgId, personId, zoneId, doorId, startDateTime, 
-                  endDateTime, side, startEvt, evtsQtty):
+    def getEvents(self, orgId, personId, visitedOrgId, zoneId, doorId,
+                  startDateTime, endDateTime, side, startEvt, evtsQtty):
         '''
         Return a dictionary with an interval of "evtsQtty" events starting from "startEvt".
         '''
@@ -545,6 +570,9 @@ class DataBase(object):
 
         if orgId: orgFilter = ' AND Person.orgId = {}'.format(orgId)
         else: orgFilter = ''
+
+        if visitedOrgId: visitedOrgIdFilter = ' AND Person.visitedOrgId = {}'.format(visitedOrgId)
+        else: visitedOrgIdFilter = ''
 
         if doorId: doorFilter = ' AND Event.doorId = {}'.format(doorId)
         else: doorFilter = ''
@@ -578,9 +606,9 @@ class DataBase(object):
                "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
                "LEFT JOIN Person ON (Event.personId = Person.id) "
                "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
-               "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{} "
+               "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}{} "
                "ORDER BY dateTime DESC LIMIT {},{}"
-               "".format(startDateTime, endDateTime, personFilter, orgFilter, 
+               "".format(startDateTime, endDateTime, personFilter, orgFilter, visitedOrgIdFilter, 
                          doorFilter, zoneFilter, sideFilter, startEvtSql, evtsQtty)
               )
 
@@ -588,9 +616,9 @@ class DataBase(object):
                     "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
                     "LEFT JOIN Person ON (Event.personId = Person.id) "
                     "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
-                    "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}"
-                    "".format(startDateTime, endDateTime, personFilter, orgFilter,     
-                         doorFilter, zoneFilter, sideFilter)
+                    "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}{}"
+                    "".format(startDateTime, endDateTime, personFilter, orgFilter,
+                              visitedOrgIdFilter, doorFilter, zoneFilter, sideFilter)
                    )
 
         try:
