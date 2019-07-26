@@ -188,6 +188,7 @@ function populateTable(tableId){
 				//populate fields with rec info
 				for(i=0;i<values.length;i++){
 					//show row
+					if(values[i].ipAddress === null) values[i].ipAddress="";
 					//pre process MAC
 					macStr = buildMacFromString(values[i].macAddress);
 					//pre process date
