@@ -95,7 +95,7 @@ Description=Purge old events of Dobie DB
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/bash -c '$(realpath purge-old-events.sh) $MONTH'
+ExecStart=/bin/bash -c '$(realpath purge-old-events.sh) $MONTH'
 EOL
 sudo cp /tmp/dobie-purge-db.service /etc/systemd/system/
 sudo rm /tmp/dobie-purge-db.service 
@@ -171,7 +171,7 @@ Description=Dump Dobie DB and remove old dumps.
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/bash -c '/usr/local/sbin/dobie-save-db'
+ExecStart=/bin/bash -c '/usr/local/sbin/dobie-save-db'
 EOL
 sudo cp /tmp/dobie-save-db.service /etc/systemd/system/
 sudo rm /tmp/dobie-save-db.service
