@@ -35,6 +35,7 @@ services:
       context: webserver
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ../front_end:/site
     depends_on:
