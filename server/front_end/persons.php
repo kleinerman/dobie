@@ -29,7 +29,7 @@ include("header.php");
 
 <div class="select-container valigntop" id="select-container-persons" style="display:none">
 <form action="javascript:void(0)">
-<div class="select-container-title"><?=get_text("Persons",$lang);?> <button class="btn btn-primary btn-xs" id="import-csv-button" data-toggle="modal" data-target="#modal-import"><span class="fa fa-plus"></span> <?=get_text("Import CSV",$lang);?></button> <button class="btn btn-success btn-xs" id="export-csv-button" data-toggle="tooltip" title="Export persons to Excel"><span class="fa fa-download"></span> <?=get_text("Export",$lang);?></button> <span class="fa fa-spinner fa-spin download-throbber-container" style="display:none"></span></div>
+<div class="select-container-title"><nobr><?=get_text("Persons",$lang);?> <button class="btn btn-primary btn-xs" id="import-csv-button" data-toggle="modal" data-target="#modal-import"><span class="fa fa-plus"></span> <?=get_text("Import CSV",$lang);?></button> <button class="btn btn-success btn-xs" id="export-csv-button" data-toggle="tooltip" title="Export persons to Excel"><span class="fa fa-download"></span> <?=get_text("Export",$lang);?></button> <span class="fa fa-spinner fa-spin download-throbber-container" style="display:none"></span></nobr></div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="persons-select">
 <select id="persons-select" class="select-options form-control" name="persons-select" size="2" onchange="updateButtons(this.id)"></select>
@@ -444,10 +444,10 @@ $("#export-csv-button").click(function(){
 		complete: function(resp){$(".download-throbber-container").hide();$(this).show()},
 		success: function(resp){
 			if(resp[0]=='1'){
-				console.log(resp[1]);
+				//console.log(resp[1]);
 				organizationName=$("#organizations-select option:selected").html();
 				//trigger csv
-				downloadCSV(resp[1],organizationName+".xls");
+				downloadCSV(resp[1],organizationName+".csv");
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
@@ -467,12 +467,13 @@ function downloadCSV(resultsArr,csvFileName){
 	var separator = ";";
 	var linebreak = '\n';
 	//add column names in header
-	var csvContent = '<?=get_text("First Name",$lang);?>'+separator+'<?=get_text("Last Name",$lang);?>'+separator+'<?=get_text("Identification Number",$lang);?>'+separator+'<?=get_text("Card Number (Raw)",$lang);?>'+separator+'<?=get_text("Card Number (FC)",$lang);?>'+separator+'<?=get_text("Note",$lang);?>'+linebreak;
+	var csvContent = '<?=get_text("First Name",$lang);?>'+separator+'<?=get_text("Last Name",$lang);?>'+separator+'<?=get_text("Identification Number",$lang);?>'+separator+'<?=get_text("Card Number",$lang);?> (Raw)'+separator+'<?=get_text("Card Number",$lang);?> (FC)'+separator+'<?=get_text("Note",$lang);?>'+linebreak;
 	resultsArr.forEach(function(data){
 		if(data.resStateId!=5){
 			//set no value for null values
 			if(data.names === null) data.names="";
 			if(data.lastName === null) data.lastName="";
+			if(data.note === null) data.note="";
 
 			csvContent += data.names +separator+ data.lastName +separator+ data.identNumber +separator+ data.cardNumber +separator+ rawToFC(data.cardNumber) +separator+ data.note +linebreak;
 		}
