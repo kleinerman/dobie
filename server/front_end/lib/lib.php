@@ -13,12 +13,7 @@ function print_text($lang, $texteng, $textesp, $textger="",$textpor="",$textfren
 	if($do_get) return $valret;
 	else echo $valret;
 }
-/*
-// string version of print_text
-function get_text($lang, $texteng, $textesp, $textger="",$textpor="",$textfrench=""){
-	return print_text($lang, $texteng, $textesp, $textger,$textpor,$textfrench,1);
-}
-*/
+
 function print_note($string, $stringspa="", $lang="eng", $color="red", $stringger="", $stringpor="", $stringfrench=""){
 	echo "<p style='font-weight:bold;color:" . $color . ";'>";
 	print_text($lang, $string, $stringspa, $stringger, $stringpor, $stringfrench);
@@ -27,11 +22,11 @@ function print_note($string, $stringspa="", $lang="eng", $color="red", $stringge
 
 function redirect_to($url,$forceparent=0){
 	if($forceparent){
-		echo "<script type='text/javascript'>
+		echo "<script>
 if(parent.location != window.location) parent.location.href = '$url';
 else window.location.href='$url';
 </script>";
-	} else echo "<script type='text/javascript'>window.location.href='$url';</script>";
+	} else echo "<script>window.location.href='$url';</script>";
 }
 
 
@@ -59,7 +54,7 @@ function persistsession(){
 		      		//restore session
 		      		$_SESSION[$config->sesskey] = $username;
 		      		$_SESSION[$config->sesskey."pw"] = $password;
-		      		$_SESSION[$config->sesskey."rl"] = $EnDecryptText->Decrypt_Text($roleid_enc);
+		      		$_SESSION[$config->sesskey."rl"] = $roleid_enc;
 		      		$_SESSION[$config->sesskey."lang"] = $lang;
 			} else {
 				//destroy cookies
