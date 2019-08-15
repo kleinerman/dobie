@@ -8,7 +8,7 @@ import sys
 import time
 import crypt
 
-from flask import Flask, jsonify, request, abort, url_for, g
+from flask import Flask, jsonify, request, abort, url_for, g, send_from_directory
 from flask_httpauth import HTTPBasicAuth
 
 from gevent.pywsgi import WSGIServer
@@ -18,6 +18,7 @@ import database
 import network
 import ctrllermsger
 from config import *
+from PIL import Image
 
 # Constants used in the code
 #
@@ -936,6 +937,53 @@ class CrudMngr(genmngr.GenericMngr):
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '          
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(prsnNeedKeys)))
+
+
+
+
+
+        @app.route('/api/v1.0/person/<int:personId>/image', methods=['PUT', 'GET'])
+        @auth.login_required
+        def personImage(personId):
+            '''
+            GET: Return a JSON with all accesses that this person has
+            PUT/DELETE: Update or delete a Zone in the database.
+            '''
+
+            try:
+                #The following method is called to throw "PersonNotFound" exception
+                #if there isn't any person with this id
+                self.dataBase.getPerson(personId)
+
+                #For PUT method:
+                if request.method == 'PUT' and request.files['image']:
+                    receivedImg = request.files['image']
+                    image = Image.open(receivedImg)
+                    #receivedImg.close()
+                    imageFmt = image.format
+                    if imageFmt != 'JPEG':
+                        raise database.PersonError
+                    print(imageFmt)
+                    savedPath = PERS_IMG_DIR + '/' + str(personId) + '.' + PERS_IMG_FMT.lower()
+                    image.save(savedPath, format=PERS_IMG_FMT)
+                    image.close()
+                    return jsonify({'status': 'OK', 'message': 'Person updated.'}), OK
+
+                #For GET method
+                elif request.method == 'GET':
+                    return send_from_directory(PERS_IMG_DIR, str(personId) + ".jpeg", as_attachment=True)
+
+            except database.PersonNotFound as personNotFound:
+                raise NotFound(str(personNotFound))
+            except (database.PersonError, IOError) as personError:
+                raise ConflictError(str(personError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:

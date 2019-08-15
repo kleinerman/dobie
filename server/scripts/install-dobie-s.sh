@@ -10,6 +10,8 @@ sudo mkdir -p /var/log/dobie-s/
 echo "Creating directory for Dobie Server Database Dumps.."
 sudo mkdir -p /var/cache/dobie-db-dumps/
 
+echo "Creating directory to storage person's images.."
+sudo mkdir -p /var/lib/dobie-pers-imgs/
 
 read -p "Do you want to set log rotation for Dobie Server (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
