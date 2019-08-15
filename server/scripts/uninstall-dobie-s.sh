@@ -15,6 +15,18 @@ sudo rm -rf /var/log/dobie-s/
 echo "Removing Log rotation file.."
 sudo rm /etc/logrotate.d/dobie-s
 
+
+read -p "Do you want to remove Dobie Server Database Dumps (/var/cache/dobie-db-dumps/)? (y/n): " answer
+if [ $answer == y ] || [ $answer == Y ]; then
+  sudo rm -rf /var/cache/dobie-db-dumps
+fi
+
+read -p "Do you want to remove person's images files (/var/lib/dobie-pers-imgs/)? (y/n): " answer
+if [ $answer == y ] || [ $answer == Y ]; then
+  sudo rm -rf /var/lib/dobie-pers-imgs
+fi
+
+
 echo "Stoping all systemd units.."
 sudo systemctl stop dobie-purge-db.timer
 sudo systemctl stop dobie-save-db.timer

@@ -3,8 +3,20 @@ var service_port_ws = 5004;
 var formidable = require('formidable');
 var http = require('http');
 
+const https = require('https');
+const fs = require('fs');
+
+
+const options = {
+  key: fs.readFileSync('/certs/server.key'),
+  cert: fs.readFileSync('/certs/server.crt')
+};
+
+
+
+
 //set up the websocket server
-var app = http.createServer().listen(service_port_ws);
+var app = https.createServer(options).listen(service_port_ws);
 var io = require('socket.io').listen(app);
 
 
@@ -25,4 +37,3 @@ return;
 })
 
 server.listen(5002);
-

@@ -474,6 +474,9 @@ class NetMngr(genmngr.GenericMngr):
                     #This call was moved to above loop taking into account
                     #the above explanation.
                     #self.macConnObjects.pop(mac)
+                    #Having the pop() here ^, the second time we are popping a "fd"
+                    #with the same mac, we would be trying to pop a mac that is not
+                    #present anymore, and exception will be thrown.
 
             #print('MAC-->',self.macConnObjects)
             #print('FD-->',self.fdConnObjects)

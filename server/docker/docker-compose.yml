@@ -12,6 +12,7 @@ services:
     volumes:
       - ../back_end:/opt/dobie-server
       - /var/log/dobie-s:/var/log/dobie-s
+      - /var/lib/dobie-pers-imgs/:/var/lib/dobie-pers-imgs
     depends_on:
       - database
     entrypoint: python -u /opt/dobie-server/main.py
@@ -38,6 +39,7 @@ services:
       - "443:443"
     volumes:
       - ../front_end:/site
+      - ../certs:/etc/nginx/ssl/
     depends_on:
       - php
     logging:
@@ -70,6 +72,7 @@ services:
       - "5004:5004"
     volumes:
       - ../front_end:/site
+      - ../certs:/certs
     entrypoint: sh run-events-live.sh
     logging:
       driver: "json-file"
