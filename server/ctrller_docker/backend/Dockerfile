@@ -20,7 +20,7 @@ pip install --no-cache-dir PyMySQL && \
 pip install --no-cache-dir gevent && \
 pip install --no-cache-dir requests && \
 pip install --no-cache-dir pillow && \
-apt-get -y purge libssl-dev libffi-dev gcc zlib1g-dev libjpeg-dev && \
+apt-get -y purge libssl-dev libffi-dev gcc zlib1g-dev && \
 apt-get -y autoremove && \
 apt-get -y clean && \
 cp /usr/share/zoneinfo/America/Argentina/Cordoba /etc/localtime && \

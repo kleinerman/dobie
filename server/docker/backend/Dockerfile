@@ -23,6 +23,6 @@ pip install --no-cache-dir requests && \
 pip install --no-cache-dir pillow && \
 cp /usr/share/zoneinfo/America/Argentina/Cordoba /etc/localtime && \
 echo "America/Argentina/Cordoba" > /etc/timezone && \
-apk del openssl-dev libffi-dev musl-dev gcc tzdata zlib-dev jpeg-dev && \
+apk del openssl-dev libffi-dev musl-dev gcc tzdata zlib-dev && \
 rm -rf /var/cache/apk/* /root/.cache /tmp/*
 

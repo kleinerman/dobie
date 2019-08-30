@@ -5,6 +5,7 @@ import datetime
 import crypt
 import threading
 import time
+import os
 
 from config import *
 
@@ -691,20 +692,42 @@ class DataBase(object):
 
             #Deleting all persons which are marked as "DELETED" and don't have
             #more events in Event table.
-            #When doing this, it is important to exclude the events with
-            #personId = NULL (Example: Accesses with button, door forced, etc).
-            #If this is not done, the SQL sentence doesn't work.
-            sql = ("DELETE FROM Person WHERE Person.resStateId = {} "
-                   "AND Person.id NOT IN (SELECT Event.personId "
-                   "FROM Event WHERE personId IS NOT NULL)".format(DELETED)
+            sql = ("SELECT id FROM Person WHERE resStateId = {} AND id NOT IN "
+                   "(SELECT personId FROM Event WHERE Event.personId = Person.id)"
+                   "".format(DELETED)
                   )
             self.execute(sql)
+            toDelPersons = self.cursor.fetchall()
+
+            sql = ("DELETE FROM Person WHERE resStateId = {} AND id NOT IN "
+                   "(SELECT personId FROM Event WHERE Event.personId = Person.id)"
+                   "".format(DELETED)
+                  )
+            #The delete in this way is to much less efficient and slow
+            #sql = ("DELETE FROM Person WHERE Person.resStateId = {} "
+            #       "AND Person.id NOT IN (SELECT Event.personId "
+            #       "FROM Event WHERE personId IS NOT NULL)".format(DELETED)
+            #      )
+            #When doing in this way, it is important to exclude the events with
+            #personId = NULL (Example: Accesses with button, door forced, etc).
+            #If this is not done, the SQL sentence doesn't work.
+
+            self.execute(sql)
+
+
+            for toDelPerson in toDelPersons:
+
+                toDelPersonFile = str(toDelPerson['id']) + '.' + PERS_IMG_FMT.lower()
+                try:
+                    os.remove(PERS_IMG_DIR + '/' + toDelPersonFile)
+                except FileNotFoundError:
+                    self.logger.warning('Person image: {} not found'.format(toDelPersonFile))
 
             return delEvents
 
         except (pymysql.err.IntegrityError, pymysql.err.InternalError) as dbEventError:
             self.logger.debug(dbEventError)
-            raise EventError('Can not delete events')
+            raise EventError('Can not delete events or persons without events')
 
 
 
