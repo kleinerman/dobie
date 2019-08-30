@@ -962,12 +962,11 @@ class CrudMngr(genmngr.GenericMngr):
                 #For PUT method:
                 if request.method == 'PUT' and request.files['image']:
                     receivedImg = request.files['image']
+                    #If open fails to open the image, IOError exception is raised and catched below
                     image = Image.open(receivedImg)
-                    #receivedImg.close()
                     imageFmt = image.format
                     if imageFmt != 'JPEG':
                         raise database.PersonError
-                    print(imageFmt)
                     savedPath = PERS_IMG_DIR + '/' + str(personId) + '.' + PERS_IMG_FMT.lower()
                     image.save(savedPath, format=PERS_IMG_FMT)
                     image.close()
@@ -975,7 +974,8 @@ class CrudMngr(genmngr.GenericMngr):
 
                 #For GET method
                 elif request.method == 'GET':
-                    return send_from_directory(PERS_IMG_DIR, str(personId) + ".jpeg", as_attachment=True)
+                    #if file doesn't exist, send_from_directory will throw NotFound exception
+                    return send_from_directory(PERS_IMG_DIR, str(personId) + '.' + PERS_IMG_FMT.lower(), as_attachment=True)
 
             except database.PersonNotFound as personNotFound:
                 raise NotFound(str(personNotFound))
