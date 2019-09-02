@@ -15,7 +15,7 @@ services:
       - /var/lib/dobie-pers-imgs/:/var/lib/dobie-pers-imgs
     depends_on:
       - database
-    entrypoint: python -u /opt/dobie-server/main.py
+    command: python -u /opt/dobie-server/main.py
     logging:
       driver: "json-file"
       options:
@@ -82,7 +82,12 @@ services:
 
 
 
+
 volumes:
     database-volume:
 
 
+
+networks:
+  default:
+    name: dobie_network
