@@ -3,6 +3,7 @@ import logging
 LOGGER_NAME = 'BackEndSrvr'
 
 LOGGING_FILE = '/var/log/dobie-s/dobie-s.log'
+PURGER_LOG_FILE = '/var/log/dobie-s/dobie-purger.log'
 PERS_IMG_DIR = '/var/lib/dobie-pers-imgs/'
 
 PERS_IMG_FMT = 'JPEG'

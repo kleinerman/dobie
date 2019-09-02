@@ -13,8 +13,10 @@ sudo mkdir -p /var/cache/dobie-db-dumps/
 echo "Creating directory to storage person's images.."
 sudo mkdir -p /var/lib/dobie-pers-imgs/
 
-read -p "Do you want to set log rotation for Dobie Server (y/n): " answer
-if [ $answer == y ] || [ $answer == Y ]; then
+#read -p "Do you want to set log rotation for Dobie Server (y/n): " answer
+#if [ $answer == y ] || [ $answer == Y ]; then
+
+echo "Configuring log rotation.."
 cat > /tmp/dobie-s.logrotate << EOL
 /var/log/dobie-s/dobie-s.log
 {
@@ -23,12 +25,22 @@ cat > /tmp/dobie-s.logrotate << EOL
     rotate 10
     notifempty
 }
+
+
+/var/log/dobie-s/dobie-purger.log
+{
+    monthly
+    missingok
+    rotate 10
+    notifempty
+}
+
+
 EOL
 
 sudo cp /tmp/dobie-s.logrotate /etc/logrotate.d/dobie-s
 sudo rm /tmp/dobie-s.logrotate
 
-fi
 
 read -p "Are you installing Dobie Server in the same controller (y/n): " answer
 #Change to the directory where the docker-compose.yml file is located and
@@ -97,7 +109,7 @@ Description=Purge old events of Dobie DB
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c '$(realpath purge-old-events.sh) $MONTH'
+ExecStart=docker run --name db-purger --rm --network dobie_network -v $(realpath ../back_end):/opt/dobie-server -v /var/log/dobie-s:/var/log/dobie-s -v /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs dobie_backend python -u /opt/dobie-server/purgeevents.py -d '\`date --date "$MONTH month ago" +%%Y-%%m-%%d\ %%H:%%M\`'
 EOL
 sudo cp /tmp/dobie-purge-db.service /etc/systemd/system/
 sudo rm /tmp/dobie-purge-db.service 

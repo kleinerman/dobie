@@ -17,6 +17,13 @@ DELETED = 5
 
 
 
+class NotReachable(Exception):
+    '''
+    '''
+    pass
+
+
+
 class UserError(Exception):
     '''
     '''
@@ -333,9 +340,21 @@ class DataBase(object):
                 break
 
             except pymysql.err.OperationalError:
-                self.logger.info("Database not reachable. Retrying...")
-                self.callingMngr.checkExit()
-                time.sleep(EXIT_CHECK_TIME)
+                self.logger.warning("Database not reachable.")
+
+                if self.callingMngr:
+                    self.logger.info("Retrying connect to Database...")
+                    self.callingMngr.checkExit()
+                    time.sleep(EXIT_CHECK_TIME)
+                else:
+                    #This situation will happen when the DataBase instance is not created by a 
+                    #thread ("self.callingMngr" is None). This is used when we want to avoid
+                    #trying reconnect to the DB engine. This will be used in the 
+                    #script "purgeevents.py". If there is no connection to the DB engine,
+                    #the script should finish and not remain trying to reconnect.
+                    raise NotReachable
+
+
 
 
 
