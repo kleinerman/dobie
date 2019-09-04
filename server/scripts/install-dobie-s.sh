@@ -109,8 +109,14 @@ Description=Purge old events of Dobie DB
 
 [Service]
 Type=oneshot
-ExecStart=docker run --name db-purger --rm --network dobie_network -v $(realpath ../back_end):/opt/dobie-server -v /var/log/dobie-s:/var/log/dobie-s -v /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs dobie_backend python -u /opt/dobie-server/purgeevents.py -d '\`date --date "$MONTH month ago" +%%Y-%%m-%%d\ %%H:%%M\`'
+ExecStart=/bin/bash -c 'UNTIL_DATE_TIME=\$\$(date --date "$MONTH month ago" +%%Y-%%m-%%d\ %%H:%%M); docker run --name db-purger --rm --network dobie_network -v $(realpath ../back_end):/opt/dobie-server -v /var/log/dobie-s:/var/log/dobie-s -v /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs dobie_backend python -u /opt/dobie-server/purgeevents.py -d "\$\${UNTIL_DATE_TIME}"'
 EOL
+#The backslash in $\$\ was used to escape the $ and tell this script not to consider the following as variable.
+#The resulting $$, and %% is used to escape $ and % in resulting unit of systemd.
+#The "UNTIL_DATE_TIME" variable is filled in the same bash execution of "docker run" execution, to be passed to the "docker run" command.
+#Trying to execute $(date..) command inside the docker run command didn't work, since in this case (alphine image),
+#"date" command inside the docker, has a minimal options which don't support some arguments used in this one.
+
 sudo cp /tmp/dobie-purge-db.service /etc/systemd/system/
 sudo rm /tmp/dobie-purge-db.service 
 

@@ -171,7 +171,11 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             '''
             #Retrieve user parameters from database
-            user = self.dataBase.getUser(username=username)
+            try:
+                user = self.dataBase.getUser(username=username)
+            #This exception can happen when somebody try to send a REST request without authentication.
+            except database.UserError:
+                return False
 
             if user:
 
