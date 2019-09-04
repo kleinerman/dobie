@@ -371,7 +371,7 @@ class DataBase(object):
             self.cursor.execute(sql)
             self.connection.commit()
 
-        except (pymysql.err.OperationalError, pymysql.err.InterfaceError):
+        except (pymysql.err.OperationalError, pymysql.err.InterfaceError, pymysql.err.InternalError):
             self.logger.info("Database is not connected. Reconnecting...")
             self.connect()
             self.cursor.execute(sql)
