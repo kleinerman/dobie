@@ -346,3 +346,100 @@ function addCardnumEvents(idprefix){
 	});
 
 }
+
+//webcam funcs
+
+//video consts
+const sourceW=320;
+const sourceH=240;
+const outputQuality=0.7;
+const outputFormat="jpeg";//png, webp, jpeg
+
+//webcam button actions
+function initCamEvents(entity,mode){
+
+	//click event for add photo
+	$("#"+entity+"-"+mode+"-add-screenshot-button").click(function(){
+		//cam video start
+		var video = document.querySelector("#"+entity+"-"+mode+"-video-elem");
+		if(navigator.mediaDevices.getUserMedia){
+			//navigator.mediaDevices.getUserMedia({ video: true,audio: true })
+			navigator.mediaDevices.getUserMedia({video: {width: {exact: sourceW}, height: {exact: sourceH}}})
+			.then(function (stream){
+				video.srcObject = stream;
+				localStream = stream;
+			})
+		}
+		//show video and capture button
+		$("#"+entity+"-"+mode+"-video-container,#"+entity+"-"+mode+"-screenshot-button").show();
+		//hide add photo button
+		$(this).hide();
+		//hide change button
+		$("#"+entity+"-"+mode+"-change-screenshot-button").hide();
+	});
+
+	//capture button action
+	$("#"+entity+"-"+mode+"-screenshot-button").click(function(){
+		var video = document.querySelector("#"+entity+"-"+mode+"-video-elem");
+		var img = document.querySelector("#"+entity+"-"+mode+"-screenshot-container img");
+		var canvas = document.querySelector("#"+entity+"-"+mode+"-video-canvas");
+		canvas.width = video.videoWidth;
+		canvas.height = video.videoHeight;
+		canvas.getContext('2d').drawImage(video, 0, 0);
+		img.src = canvas.toDataURL('image/'+outputFormat,outputQuality);//falls back to png as default
+		//raise edited photo flag
+		doChangePhoto=1;
+		//stop video
+		video.pause();
+		//hide capture button
+		$(this).hide();
+		//show change button
+		$("#"+entity+"-"+mode+"-change-screenshot-button").show();
+	});
+
+	//change button action
+	$("#"+entity+"-"+mode+"-change-screenshot-button").click(function(){
+		//hide change button
+		$(this).hide();
+		//hide snapshot in case of edit
+		$("#"+entity+"-edit-screenshot-container").hide();
+$("#"+entity+"-new-screenshot-container").hide();
+		//resume video
+		$("#"+entity+"-"+mode+"-video-container, #"+entity+"-"+mode+"-video-canvas").show();
+		$("#"+entity+"-"+mode+"-add-screenshot-button").click();
+		//show capture button
+		$("#"+entity+"-"+mode+"-screenshot-button").show();
+	});
+}
+
+//define stop webcam stream function
+function stopStream(localStream){
+	if(localStream!=""){
+		localStream.getTracks().forEach(function(track) {
+			track.stop();
+		});
+	}
+}
+
+//submits canvas as image
+function saveCanvas(canvas,personId){
+	canvas.toBlob(function(blob){
+		// create form
+		var form = document.createElement("form");
+		// Create a FormData and append the file blob
+		var fd = new FormData(form);
+		fd.append("image", blob);
+		fd.append("filename", "image");
+		fd.append("action", "edit_person_image");
+		fd.append("id", personId);
+		// Submit Form and upload file
+		$.ajax({
+			url:"process",
+			data: fd,
+			type:"POST",
+			contentType:false,
+			processData:false,
+			cache:false
+		});
+	},'image/'+outputFormat,outputQuality);
+}

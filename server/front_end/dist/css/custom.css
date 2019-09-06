@@ -322,11 +322,8 @@ input::-webkit-inner-spin-button {
 	color: #aaa;
 }
 
-#person-edit-cardnum-fc-2,#person-new-cardnum-fc-2{
-	width:80%
-}
-
-#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-2,.cardnum-fc-2{
+/*card inputs*/
+#person-edit-cardnum-fc-2,#person-new-cardnum-fc-2,#visit-edit-cardnum-fc-2,#visit-new-cardnum-fc-2,.cardnum-fc-2{
 	width:70%
 }
 
@@ -342,4 +339,31 @@ input::-webkit-inner-spin-button {
 /*section tweaks */
 #select-container-persons{
 	width:300px;
+}
+
+/*person and visitor webcam*/
+.video-container,.screenshot-container img{
+	margin: 20px 0px;
+	width: 320px;
+	height: 240px;
+	border: 10px #333 solid;
+	display:inline-block;
+}
+
+.video-elem{
+	width: 100%;
+	height: 100%;
+	background-color: #666;
+}
+
+.screenshot-container{
+	display:inline-block;
+}
+
+.screenshot-container img{
+	border-color:#fff;
+}
+
+.details-img{
+	width: 60%;
 }

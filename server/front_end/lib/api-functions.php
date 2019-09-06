@@ -6,12 +6,12 @@ if($DEBUG){
 	require_once("../config.php");
 }
 
-function send_request($url,$username,$password,$method="get",$payload="{}"){
+function send_request($url,$username,$password,$method="get",$payload="{}",$return_raw_response=0,$raw_payload=0){
 	global $DEBUG;
 
 	//assumes valid input
 	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+	if(!$raw_payload) curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 	curl_setopt($ch, CURLOPT_HEADER, 0);
 	curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
 
@@ -25,6 +25,7 @@ function send_request($url,$username,$password,$method="get",$payload="{}"){
 	} else if($method=="put"){
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
 	}
+
 	if($method=="post" or $method=="put") curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 	//curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 	$response = curl_exec($ch);
@@ -35,18 +36,21 @@ function send_request($url,$username,$password,$method="get",$payload="{}"){
 		//var_dump($response_info);
 	}
 
-	//build response
-	$response_decoded= new stdClass();
-	if($response) {
-		$response_decoded->response_status=curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		$response_decoded->data=json_decode($response);
-	} else {
-		$response_decoded->success = false;
-		$response_decoded->error = new stdClass();
-		$response_decoded->error->mensaje = "Error when trying to get data";
+	if($return_raw_response) return $response;
+	else {
+		//build response
+		$response_decoded= new stdClass();
+		if($response){
+			$response_decoded->response_status=curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			$response_decoded->data=json_decode($response);
+		} else {
+			$response_decoded->success = false;
+			$response_decoded->error = new stdClass();
+			$response_decoded->error->mensaje = "Error when trying to get data";
+		}
+		curl_close($ch);
+		return $response_decoded;
 	}
-	curl_close($ch);
-	return $response_decoded;
 }
 
 // Front end auth
@@ -125,6 +129,14 @@ function get_person($user,$pass,$id){
 	else return $response->data;
 }
 
+function get_person_image($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."person/$id/image",$user,$pass,"get","{}",1);
+	//if($response->response_status != "200") return false;
+	//else return $response->data;
+	return $response;
+}
+
 function add_person($user,$pass,$orgid,$names,$lastname,$idnum,$cardnum,$note="",$visitedorgid=null){
 	global $config;
 	$payload_obj = new stdClass();
@@ -152,6 +164,21 @@ function set_person($user,$pass,$id,$orgid,$names,$lastname,$idnum,$cardnum,$not
 	$payload_obj->note= $note;
 	$payload_obj->visitedOrgId= null;
 	$response=send_request($config->api_fullpath."person/$id",$user,$pass,"put",json_encode($payload_obj));
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+function set_person_image($user,$pass,$id,$img_name){
+	global $config;
+
+	//prepare curl for submitted file
+	if (function_exists('curl_file_create')) $cFile = curl_file_create($_FILES[$img_name]["tmp_name"]); // php 5.5+
+	else $cFile = '@' . realpath($_FILES[$img_name]["tmp_name"]);
+
+	//set it in payload
+	$payload = array($img_name=> $cFile);
+
+	$response=send_request($config->api_fullpath."person/$id/image",$user,$pass,"put",$payload,0,1);
 	if($response->response_status != "200") return false;
 	else return $response->data;
 }
@@ -1072,11 +1099,11 @@ function add_user($user,$pass,$fullname,$username,$password,$roleid,$active,$use
 
 if($DEBUG){
 	//$res=get_organizations("admin","admin");
-	$res=do_auth("admin","admin");
-	//$res=get_organizations("admin","admin",2);
+	//$res=do_auth("admin","admin");
+	//$res=get_organization("admin","admin",7);
 	//$res=get_person_accesses("admin","admin",18);
 	//$res=get_access("admin","admin",10);
-	//$res=add_person("admin","admin","7","Ricky Martin","",123132);
+	//$res=add_person("admin","admin","7","Ricky", "Martin",3131313131,123132);
 	//$res=get_door_accesses("admin","admin",5);
 //	$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
@@ -1104,8 +1131,9 @@ if($DEBUG){
 //	$res=get_visit_door_group_doors("admin","admin",9);
 	//$res=add_visit_door_group("admin","admin","Door Group 9","3|5");
 	//$res=delete_visit_door_group("admin","admin",4);
-	//$res=get_persons("admin","admin",1);
+	//$res=get_persons("admin","admin",7);
 	//$res=get_person("admin","admin",18);
+	//$res=get_person_image("admin","admin",18);
 	//$res=get_visitors("admin","admin");
 	//$res=get_visitors("admin","admin","","","",894568408);
 	//$res=get_person_accesses("admin","admin",9);
@@ -1122,8 +1150,11 @@ if($DEBUG){
 	//$res=purge_events("admin","admin","2018-12-25+20:27");
 	//$res=search_person("admin","admin","","","27063146","");
 	//$res=get_door_group_doors("admin","admin",2);
-	echo "<pre>";
-	var_dump($res);
+	$res=get_person_image("admin","admin",4);
+	//echo $res;
+	//$res=set_person_image("admin","admin",1,file_get_contents("../img/dobie.png"));
+	//echo "<pre>";
+	//var_dump($res);
 	//echo json_encode($res->data->events[0]);
 }
 ?>
