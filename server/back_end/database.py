@@ -501,6 +501,59 @@ class DataBase(object):
 
 
 
+
+    def cardNum2PrsnId(self, event):
+        '''
+        When the event comes from the controller and involves a person,
+        instead of coming with the person id, it comes with the card number.
+        This was because, sometimes, that person hasn't access on any door
+        of this controller, therefore, the controller hasn't the person id.
+        However, the backend may have the person id and report the event 
+        of that person being denied to enter.
+        This method, set "personId" field in the event dictionary and remove
+        the "cardNumber" field if the event involves a person.
+        '''
+
+        try:
+
+            if event['cardNumber'] != 'NULL':
+
+                sql = "SELECT id FROM Person WHERE cardNumber = {}".format(event['cardNumber'])
+                self.execute(sql)
+                row = self.cursor.fetchone()
+
+                if row:
+                    personId = int(row['id'])
+                else:
+                    personId = 'NULL'
+
+                event['personId'] = personId
+
+            else:
+                event['personId'] = 'NULL'
+
+            event.pop('cardNumber')
+
+
+
+        except KeyError:
+            self.logger.debug("Error in cardNum2PrsnId method indexing.")
+            raise EventError
+
+        except pymysql.err.ProgrammingError as programmingError:
+            self.logger.debug(programmingError)
+            raise EventError
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise EventError
+
+
+
+
+
+
+
     def getFmtEvent(self, event):
         '''
         It receives an event and returns the event formatted adding 
