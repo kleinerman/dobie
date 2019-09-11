@@ -157,7 +157,7 @@ class Controller(object):
             with self.lockDoorsControl:
                 doorId = self.doorsControl.getDoorId(doorNum)
 
-            allowed, personId, denialCauseId = self.dataBase.canAccess(doorId, side, cardNumber)
+            allowed, denialCauseId = self.dataBase.canAccess(doorId, side, cardNumber)
 
             if allowed:
                 self.openDoor(doorNum)
@@ -168,7 +168,7 @@ class Controller(object):
                      'eventTypeId' : 1,
                      'dateTime' : dateTime,
                      'doorLockId' : 1,
-                     'personId' : personId,
+                     'cardNumber' : cardNumber,
                      'side' : side,
                      'allowed' : allowed,
                      'denialCauseId' : denialCauseId
@@ -205,7 +205,7 @@ class Controller(object):
                      'eventTypeId' : 2,
                      'dateTime' : dateTime,
                      'doorLockId' : 3,
-                     'personId' : None,
+                     'cardNumber' : None,
                      'side' : side,
                      'allowed' : True,
                      'denialCauseId' : None
@@ -266,7 +266,7 @@ class Controller(object):
                                  'eventTypeId' : 4,
                                  'dateTime' : dateTime,
                                  'doorLockId' : None,
-                                 'personId' : None,
+                                 'cardNumber' : None,
                                  'side' : None,
                                  'allowed' : False,
                                  'denialCauseId' : None
@@ -328,7 +328,6 @@ class Controller(object):
             while True:
                 ioIfaceData = self.ioIfaceQue.receive()
                 ioIfaceData = ioIfaceData[0].decode('utf8')
-                print(ioIfaceData)
                 doorNum, side, varField = ioIfaceData.split(';')
                 doorNum = int(doorNum)
                 side = int(side)
@@ -339,10 +338,6 @@ class Controller(object):
         except posix_ipc.SignalError:
             self.logger.debug('IO Interface Queue was interrupted by a OS signal.')
 
-#        except Exception as exception:
-#            logMsg = 'The following exception occurred: {}'.format(exception)
-#            self.logger.debug(logMsg)
-#            self.exitCode = 1
 
         #Sending the terminate signal to IO interface Proccess.
         self.ioIface.stop()
