@@ -72,11 +72,11 @@ class DataBase(object):
         #Dictionary to convert 0 to 'oSide' and 1 'iSide'
         sideColumn = {0:'oSide', 1:'iSide'}[side]
 
-        sql = ("SELECT person.id, access.allWeek, access.startTime, "
-               "access.endTime, access.expireDate "
-               "FROM Access access JOIN Person person ON (access.personId = person.id) "
-               "WHERE access.doorId = '{}' AND access.{} = 1 " 
-               "AND person.cardNumber = '{}'"
+        sql = ("SELECT Person.id, Access.allWeek, Access.startTime, "
+               "Access.endTime, Access.expireDate "
+               "FROM Access JOIN Person ON (Access.personId = Person.id) "
+               "WHERE Access.doorId = '{}' AND Access.{} = 1 " 
+               "AND Person.cardNumber = '{}'"
                "".format(doorId, sideColumn, cardNumber)
                )
 
@@ -94,11 +94,9 @@ class DataBase(object):
                 if allWeek:
 
                     if startTime <= nowTime <= endTime:
-                        print("Can access!!")
-                        return (True, personId, None)
+                        return (True, None)
                     else:
-                        print("Can NOT access (out of time!!)")
-                        return (False, personId, 3)
+                        return (False, 3)
 
                 else:
                     nowWeekDay = datetime.datetime.now().isoweekday()
@@ -116,23 +114,18 @@ class DataBase(object):
                         startTime, endTime = params
 
                         if startTime <= nowTime <= endTime:
-                            print("Can access!!!")
-                            return (True, personId, None)
+                            return (True, None)
                         else:
-                            print("Can NOT access (out of time!!!)")
-                            return (False, personId, 3)
+                            return (False, 3)
 
                     else:
-                        print("This person has not access on this door/side")
-                        return (False, None, 1)
+                        return (False, 1)
 
             else:
-                print("Can NOT access (expired card)")
-                return (False, personId, 2)
+                return (False, 2)
 
         else:
-            print("This person has not access on this door/side")
-            return (False, None, 1)
+            return (False, 1)
 
 
 
@@ -146,10 +139,10 @@ class DataBase(object):
         #Asking in the way "if a == None" instead of "if a"
         #to avoid converting to NULL when a == 0
 
-        if event['personId'] == None:
-            personId = 'NULL'
+        if event['cardNumber'] == None:
+            cardNumber = 'NULL'
         else:
-            personId = event['personId']
+            cardNumber = event['cardNumber']
 
         if event['side'] == None:
             side = 'NULL'
@@ -176,15 +169,14 @@ class DataBase(object):
 
         sql = ("INSERT INTO Event"
                "(doorId, eventTypeId, dateTime, doorLockId, "
-               "personId, side, allowed, denialCauseId) "
+               "cardNumber, side, allowed, denialCauseId) "
                "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
                "".format(event['doorId'], event['eventTypeId'], 
-                         event['dateTime'], doorLockId, personId,
+                         event['dateTime'], doorLockId, cardNumber,
                          side, allowed, denialCauseId)
               )
 
         self.cursor.execute(sql)
-        #self.connection.commit()
 
 
 
@@ -198,7 +190,7 @@ class DataBase(object):
         '''
 
         sql = ("SELECT id, doorId, eventTypeId, dateTime, doorLockId, "
-               "personId, side, allowed, denialCauseId FROM Event "
+               "cardNumber, side, allowed, denialCauseId FROM Event "
                "LIMIT {}".format(evtsQtty)
               )
 
@@ -222,7 +214,7 @@ class DataBase(object):
                                  'eventTypeId' : savedEvent['eventTypeId'],
                                  'dateTime' : savedEvent['dateTime'],
                                  'doorLockId' : savedEvent['doorLockId'],
-                                 'personId' : savedEvent['personId'],
+                                 'cardNumber' : savedEvent['cardNumber'],
                                  'side' : savedEvent['side'],
                                  'allowed' : bool(savedEvent['allowed']),
                                  'denialCauseId' : savedEvent['denialCauseId']
@@ -253,7 +245,6 @@ class DataBase(object):
         sql = "DELETE FROM Event WHERE id IN ({})".format(evtIds)
 
         self.cursor.execute(sql)
-        #self.connection.commit()
 
 
 
@@ -336,7 +327,6 @@ class DataBase(object):
                              door['rlseTime'], door['bzzrTime'], door['alrmTime'])
                   )
             self.cursor.execute(sql)
-            #self.connection.commit()
 
 
         except sqlite3.OperationalError as operationalError:
@@ -364,7 +354,6 @@ class DataBase(object):
                              door['bzzrTime'], door['alrmTime'], door['id'])
               )
             self.cursor.execute(sql)
-            #self.connection.commit()
 
 
         except sqlite3.OperationalError as operationalError:
@@ -391,14 +380,12 @@ class DataBase(object):
         try:
             sql = "DELETE FROM Door WHERE id = {}".format(door['id'])
             self.cursor.execute(sql)
-            #self.connection.commit()
 
 
             sql = ("DELETE FROM Person WHERE id NOT IN "
                    "(SELECT DISTINCT personId FROM Access) AND id != 1"
                   )
             self.cursor.execute(sql)
-            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -433,7 +420,6 @@ class DataBase(object):
                    "".format(access['personId'], access['cardNumber'])
                   )
             self.cursor.execute(sql)
-            #self.connection.commit() 
 
 
             #Using REPLACE instead of INSERT because we could be in a situation of replacing
@@ -456,7 +442,6 @@ class DataBase(object):
                   )
             self.cursor.execute(sql)
 
-            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -482,7 +467,6 @@ class DataBase(object):
                              access['endTime'], access['expireDate'], access['id'])
                   )
             self.cursor.execute(sql)
-            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -521,10 +505,9 @@ class DataBase(object):
 
             #Deleting all persons who have no access to any door.
             sql = ("DELETE FROM Person WHERE id NOT IN "
-                   "(SELECT DISTINCT personId FROM Access) AND id != 1"
+                   "(SELECT personId FROM Access WHERE Access.personId = Person.id)"
                   )
             self.cursor.execute(sql)
-            #self.connection.commit()
 
 
         except TypeError:
@@ -566,7 +549,6 @@ class DataBase(object):
                    "".format(liAccess['personId'], liAccess['cardNumber'])
                   )
             self.cursor.execute(sql)
-            #self.connection.commit()
 
 
             #Using REPLACE instead of INSERT because we could be in a situation of replacing
@@ -594,8 +576,6 @@ class DataBase(object):
 
                   )
             self.cursor.execute(sql)
-
-            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -630,7 +610,6 @@ class DataBase(object):
                    "".format(liAccess['expireDate'], doorId, personId)
                   )
             self.cursor.execute(sql)
-            #self.connection.commit()
 
 
 
@@ -641,7 +620,6 @@ class DataBase(object):
                   )
 
             self.cursor.execute(sql)
-            #self.connection.commit()
 
 
         except TypeError:
@@ -675,7 +653,6 @@ class DataBase(object):
             
             sql = "DELETE FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
             self.cursor.execute(sql)
-            #self.connection.commit()
 
             sql = ("SELECT * FROM LimitedAccess WHERE doorId = {} AND personId = {}"
                    "".format(doorId, personId)
@@ -691,14 +668,12 @@ class DataBase(object):
                        "".format(doorId, personId)
                       )
                 self.cursor.execute(sql)
-                #self.connection.commit()
 
-                 
+                #Deleting all persons who have no access to any door.
                 sql = ("DELETE FROM Person WHERE id NOT IN "
-                       "(SELECT DISTINCT personId FROM Access) AND id != 1"
+                       "(SELECT personId FROM Access WHERE Access.personId = Person.id)"
                       )
                 self.cursor.execute(sql)
-                #self.connection.commit()
 
 
 
@@ -733,7 +708,6 @@ class DataBase(object):
                    "".format(person['cardNumber'], person['id'])
                   )
             self.cursor.execute(sql)
-            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -756,7 +730,6 @@ class DataBase(object):
         try:
             sql = "DELETE FROM Person WHERE id = {}".format(person['id'])
             self.cursor.execute(sql)
-            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
@@ -779,23 +752,18 @@ class DataBase(object):
         try:
             sql = "DELETE FROM LimitedAccess"
             self.cursor.execute(sql)
-            #self.connection.commit()
 
             sql = "DELETE FROM Access"
             self.cursor.execute(sql)
-            #self.connection.commit()
             
             sql = "DELETE FROM Person"
             self.cursor.execute(sql)
-            #self.connection.commit()
 
             sql = "DELETE FROM Door"
             self.cursor.execute(sql)
-            #self.connection.commit()
             
             sql = "DELETE FROM Event"
             self.cursor.execute(sql)
-            #self.connection.commit()
 
         except sqlite3.OperationalError as operationalError:
             self.logger.debug(operationalError)
