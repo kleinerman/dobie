@@ -116,6 +116,15 @@ include("footer.php");
 <div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Date",$lang);?>"><input type="text" class="form-control input_date center" id="expiration-date" value="<?=date("Y-m-d",mktime(0,0,0))?>" required><span class="input-group-addon"><span class="far fa-calendar-alt"></span></span></div>
 
 <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Hour",$lang);?>"><input type="text" class="form-control from-input" value="23:59" id="expiration-hour" required><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+
+<br><br>
+<label class="control-label"><?=get_text("Photo",$lang);?>:</label><br>
+<div id="visit-new-video-container" class="video-container"><video autoplay="true" id="visit-new-video-elem" class="video-elem"></video></div>
+<div id="visit-new-screenshot-container" class="hidden screenshot-container"><img src="blank" alt="output image"><canvas id="visit-new-video-canvas"></canvas></div>
+<div><button id="visit-new-screenshot-button" class="btn btn-success" type="button"><span class="fa fa-camera"></span> <?=get_text("Capture",$lang);?></button>
+<button id="visit-new-add-screenshot-button" class="btn btn-default" type="button"><span class="fa fa-camera"></span> <?=get_text("Add Photo",$lang);?></button>
+<button id="visit-new-change-screenshot-button" class="btn btn-warning" type="button"><span class="fa fa-redo-alt"></span> <?=get_text("Change Photo",$lang);?></button>
+</div>
 </div>
 
 <div class="col-sm-6">
@@ -187,6 +196,16 @@ include("footer.php");
 <br>
 <label class="control-label"><?=get_text("Card Number",$lang);?> (FC):</label><br>
 <input type="text" class="form-control small_input" id="visit-edit-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3"> , <input type="text" class="form-control" id="visit-edit-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
+
+<br><br>
+<label class="control-label"><?=get_text("Photo",$lang);?>:</label><br>
+
+<div id="visit-edit-video-container" class="video-container"><video autoplay="true" id="visit-edit-video-elem" class="video-elem"></video></div>
+<div id="visit-edit-screenshot-container" class="hidden screenshot-container"><img src="blank" alt="output image"><canvas id="visit-edit-video-canvas" class="hidden"></canvas></div>
+<div><button id="visit-edit-screenshot-button" class="btn btn-success" type="button"><span class="fa fa-camera"></span> <?=get_text("Capture",$lang);?></button>
+<button id="visit-edit-add-screenshot-button" class="btn btn-default" type="button"><span class="fa fa-camera"></span> <?=get_text("Add Photo",$lang);?></button>
+<button id="visit-edit-change-screenshot-button" class="btn btn-warning" type="button"><span class="fa fa-redo-alt"></span> <?=get_text("Change Photo",$lang);?></button>
+</div>
 <br>
 </div>
 
@@ -258,7 +277,7 @@ include("footer.php");
 }
 </style>
 
-<script type="text/javascript">
+<script>
 //init filters
 setFilterAction();
 
@@ -266,6 +285,10 @@ setFilterAction();
 var visitDoorGroupId;
 var organizationId;
 var editId=0;
+
+//video vars
+var doChangePhoto=0;
+var localStream="";
 
 //populate select lists
 populateList("visit-door-groups-select","visit_door_groups");
@@ -275,6 +298,15 @@ populateList("visitors-select","visitors");
 //init events for cardnum fields (update and live calculation on input)
 addCardnumEvents("visit-edit");
 addCardnumEvents("visit-new");
+
+//init webcam button events
+initCamEvents("visit","new");
+initCamEvents("visit","edit");
+
+//stop streaming on modal close for both modes
+$('#modal-new,#modal-edit').on('hidden.bs.modal', function (event){
+	stopStream(localStream);
+});
 
 //fetch info for new
 $('#modal-new').on('show.bs.modal', function (event){
@@ -320,6 +352,32 @@ $('#modal-edit').on('show.bs.modal', function (event){
 					}
 					//populate select lists
 					populateList("organizations-select-edit","organizations",0,"",values.visitedOrgId);
+					//photo buttons
+					$("#visit-edit-video-container,#visit-edit-screenshot-button,#visit-edit-change-screenshot-button").hide();
+					$("#visit-edit-add-screenshot-button").show();
+					//clear snapshot img
+					$('#visit-edit-screenshot-container img').attr("src","blank");
+					//reset changed photo flag
+					doChangePhoto=0;
+					//check if user has photo
+					$.ajax({
+						type: "POST",
+						url: "process",
+						data: "action=person_has_image&id="+editId,
+						success: function(resp){
+							if(resp[0]=="1"){
+								//show photo and hide buttons accordingly
+								//show snapshot img
+								var editDate = new Date();
+								$('#visit-edit-screenshot-container img').attr("src","persons-image?id="+editId+"&"+editDate.getTime().toString(10));
+								$('#visit-edit-screenshot-container').removeClass("hidden").show();
+								//show change button
+								$("#visit-edit-change-screenshot-button").show();
+								//hide add button
+								$("#visit-edit-add-screenshot-button").hide();
+							} // else show add button
+						}
+					});
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -383,6 +441,19 @@ $("#visitors-select").change(function(){
 					$('#select-container-visitors-details').html("<?=get_text("Identification Number",$lang);?>: "+ values.identNumber +
 					"<br><?=get_text("Card Number",$lang);?>: " + values.cardNumber + " - " + rawToFC(values.cardNumber));
 					if(values.note && values.note!="") $('#select-container-visitors-details').append("<br><?=get_text("Note",$lang);?>: " + values.note);
+					//add photo if exists
+					$.ajax({
+						type: "POST",
+						url: "process",
+						data: "action=person_has_image&id="+visitorId,
+						success: function(resp){
+							if(resp[0]=="1"){
+								//person has photo
+								var editDate = new Date();
+								$('#select-container-visitors-details').append("<br><br><img class='details-img' src='persons-image?id="+visitorId+"&"+editDate.getTime().toString(10)+"'>");
+							} //else person does not have photo
+						}
+					});
 					//show details
 					$('#select-container-visitors-details').show()
 				} else {
@@ -400,6 +471,15 @@ $("#visitors-select").change(function(){
 	}
 });
 
+function resetPhotoButtons(){
+	//photo buttons
+	$("#visit-new-video-container,#visit-new-screenshot-button,#visit-new-change-screenshot-button").hide();
+	$("#visit-new-add-screenshot-button").show();
+	//clear snapshot img
+	$('#visit-new-screenshot-container img,#visit-edit-screenshot-container img').attr("src","blank");
+	$('#visit-edit-screenshot-container,#visit-new-screenshot-container img').hide();
+}
+
 function resetForm(){
 	//name, id and cardnum
 	$("#visit-names,#visit-lastname,#visit-idnum,#visit-new-cardnum,#visit-new-cardnum-fc-1,#visit-new-cardnum-fc-2,#visit-new-note").val("");
@@ -412,6 +492,7 @@ function resetForm(){
 	//clear visiting org
 	$("#organizations-select-new").empty();
 	editId=0;
+	resetPhotoButtons();
 }
 
 function resetFormEdit(){
@@ -422,6 +503,7 @@ function resetFormEdit(){
 	//modal title
 	$("#modal-new-label").text("<?=get_text("Edit Visitor",$lang);?>");
 	editId=0;
+	resetPhotoButtons();
 }
 
 //get visitor if exists and populate details on add
@@ -442,6 +524,32 @@ $("#visit-idnum").change(function(){
 						$('#visit-lastname').val(values.lastName);
 						$('#visit-new-note').val(values.note);
 						$('#organizations-select-new option[value='+values.visitedOrgId+']').prop("selected",true);
+						//photo buttons
+						$("#visit-new-video-container,#visit-new-screenshot-button,#visit-new-change-screenshot-button,#visit-new-video-canvas").hide();
+						$("#visit-new-add-screenshot-button").show();
+						//clear snapshot img
+						$('#visit-new-screenshot-container img').attr("src","blank");
+						//reset changed photo flag
+						doChangePhoto=0;
+						//check if user has photo
+						$.ajax({
+							type: "POST",
+							url: "process",
+							data: "action=person_has_image&id="+values.id,
+							success: function(resp){
+								if(resp[0]=="1"){
+									//show photo and hide buttons accordingly
+									//show snapshot img
+									var editDate = new Date();
+									$('#visit-new-screenshot-container img').attr("src","persons-image?id="+values.id+"&"+editDate.getTime().toString(10));
+									$('#visit-new-screenshot-container, #visit-new-screenshot-container img').removeClass("hidden").show();
+									//show change button
+									$("#visit-new-change-screenshot-button").show();
+									//hide add button
+									$("#visit-new-add-screenshot-button").hide();
+								} // else show add button
+							}
+						});
 					}
 				}
 			}
@@ -487,6 +595,13 @@ $("#visit-new-form").submit(function(){
 			data: "action=add_visit&names=" + visitNames + "&lastname=" + visitLastName + "&idnum=" + visitIdNum + "&cardnum=" + visitCardNum + "&orgid=" + visitVisitedOrgId + "&expirationdate=" + expirationDate + "&expirationhour=" + expirationHour + "&note=" + visitNote + "&doorgroupids=" + visitDoorGroupIds.join("|"),
 			success: function(resp){
 				if(resp[0]=='1'){
+					//submit photo if set
+					if(doChangePhoto==1 && resp[2]>0){
+						var new_person_id = resp[2];
+						var canvas = document.querySelector("#visit-new-video-canvas");
+						saveCanvas(canvas,new_person_id);
+					}
+
 					//close modal
 					$("#modal-new").modal("hide");
 					//repopulate select box
@@ -545,6 +660,11 @@ $("#visit-edit-form").submit(function(){
 			data: "action=edit_visit&id="+ editId +"&names=" + visitNames + "&lastname=" + visitLastName + "&idnum=" + visitIdNum + "&cardnum=" + visitCardNum + "&orgid=" + visitVisitedOrgId + "&note=" + visitNote,
 			success: function(resp){
 				if(resp[0]=='1'){
+					//submit photo edit if set
+					if(doChangePhoto){
+						var canvas = document.querySelector("#visit-edit-video-canvas");
+						saveCanvas(canvas,editId);
+					}
 					//close modal
 					$("#modal-edit").modal("hide");
 					//repopulate select box
