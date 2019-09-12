@@ -104,6 +104,18 @@ include("footer.php");
  </div>
 </div>
 
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Photo",$lang);?>:</label>
+ <div class="col-sm-10">
+<div id="person-new-video-container" class="video-container"><video autoplay="true" id="person-new-video-elem" class="video-elem"></video></div>
+<div id="person-new-screenshot-container" class="hidden screenshot-container"><img src="blank" alt="output image"><canvas id="person-new-video-canvas"></canvas></div>
+<div><button id="person-new-screenshot-button" class="btn btn-success" type="button"><span class="fa fa-camera"></span> <?=get_text("Capture",$lang);?></button>
+<button id="person-new-add-screenshot-button" class="btn btn-default" type="button"><span class="fa fa-camera"></span> <?=get_text("Add Photo",$lang);?></button>
+<button id="person-new-change-screenshot-button" class="btn btn-warning" type="button"><span class="fa fa-redo-alt"></span> <?=get_text("Change Photo",$lang);?></button>
+</div>
+ </div>
+</div>
+
 </div>
 <div class="modal-footer">
 <button class="btn btn-success" id="person-new-submit"><?=get_text("Save",$lang);?></button>
@@ -161,6 +173,18 @@ include("footer.php");
  <label class="control-label col-sm-2"><?=get_text("Note",$lang);?>:</label>
  <div class="col-sm-10">
       <input type="text" class="form-control" id="person-edit-note" name="note" value="" maxlength="256">
+ </div>
+</div>
+
+<div class="form-group">
+ <label class="control-label col-sm-2"><?=get_text("Photo",$lang);?>:</label>
+ <div class="col-sm-10">
+<div id="person-edit-video-container" class="video-container"><video autoplay="true" id="person-edit-video-elem" class="video-elem"></video></div>
+<div id="person-edit-screenshot-container" class="hidden screenshot-container"><img src="blank" alt="output image"><canvas id="person-edit-video-canvas" class="hidden"></canvas></div>
+<div><button id="person-edit-screenshot-button" class="btn btn-success" type="button"><span class="fa fa-camera"></span> <?=get_text("Capture",$lang);?></button>
+<button id="person-edit-add-screenshot-button" class="btn btn-default" type="button"><span class="fa fa-camera"></span> <?=get_text("Add Photo",$lang);?></button>
+<button id="person-edit-change-screenshot-button" class="btn btn-warning" type="button"><span class="fa fa-redo-alt"></span> <?=get_text("Change Photo",$lang);?></button>
+</div>
  </div>
 </div>
 
@@ -245,10 +269,15 @@ include("footer.php");
 </style>
 
 <script type="text/javascript">
+
 //init filters
 setFilterAction();
 
 var organizationId;
+
+//video vars
+var doChangePhoto=0;
+var localStream="";
 
 //populate select list
 populateList("organizations-select","organizations");
@@ -282,6 +311,19 @@ $("#persons-select").change(function(){
 					$('#select-container-persons-details').html("<?=get_text("Identification Number",$lang);?>: "+ values.identNumber +
 					"<br><?=get_text("Card Number",$lang);?>: " + values.cardNumber + " - " + rawToFC(values.cardNumber));
 					if(values.note && values.note!="") $('#select-container-persons-details').append("<br><?=get_text("Note",$lang);?>: " + values.note);
+					//add photo if exists
+					$.ajax({
+						type: "POST",
+						url: "process",
+						data: "action=person_has_image&id="+personId,
+						success: function(resp){
+							if(resp[0]=="1"){
+								//person has photo
+								var editDate = new Date();
+								$('#select-container-persons-details').append("<br><br><img class='details-img' src='persons-image?id="+personId+"&"+editDate.getTime().toString(10)+"'>");
+							} //else person does not have photo
+						}
+					});
 					//show details
 					$('#select-container-persons-details').show()
 				} else {
@@ -301,10 +343,26 @@ $("#persons-select").change(function(){
 addCardnumEvents("person-edit");
 addCardnumEvents("person-new");
 
-//clear form for new
-$('#modal-new').on('show.bs.modal', function (event){
+//clear form for new and edit
+$('#modal-new,#modal-edit').on('show.bs.modal', function (event){
 	//reset form
 	$('#person-new-names, #person-new-lastname, #person-new-idnum, #person-new-cardnum, #person-new-cardnum-fc-1, #person-new-cardnum-fc-2,#person-new-note').val("");
+
+	//photo buttons
+	$("#person-new-video-container,#person-new-screenshot-button,#person-new-change-screenshot-button").hide();
+	$("#person-new-add-screenshot-button").show();
+	//clear snapshot img
+	$('#person-new-screenshot-container img,#person-edit-screenshot-container img').attr("src","blank");
+	$('#person-edit-screenshot-container').hide();
+});
+
+//init webcam button events
+initCamEvents("person","new");
+initCamEvents("person","edit");
+
+//stop streaming on modal close for both modes
+$('#modal-new,#modal-edit').on('hidden.bs.modal', function (event){
+	stopStream(localStream);
 });
 
 //fetch info for edit
@@ -332,6 +390,32 @@ $('#modal-edit').on('show.bs.modal', function (event){
 					$('#person-edit-cardnum-fc-1').val("");
 					$('#person-edit-cardnum-fc-2').val("");
 				}
+				//photo buttons
+				$("#person-edit-video-container,#person-edit-screenshot-button,#person-edit-change-screenshot-button").hide();
+				$("#person-edit-add-screenshot-button").show();
+				//clear snapshot img
+				$('#person-edit-screenshot-container img').attr("src","blank");
+				//reset changed photo flag
+				doChangePhoto=0;
+				//check if user has photo
+				$.ajax({
+					type: "POST",
+					url: "process",
+					data: "action=person_has_image&id="+personId,
+					success: function(resp){
+						if(resp[0]=="1"){
+							//show photo and hide buttons accordingly
+							//show snapshot img
+							var editDate = new Date();
+							$('#person-edit-screenshot-container img').attr("src","persons-image?id="+personId+"&"+editDate.getTime().toString(10));
+							$('#person-edit-screenshot-container').removeClass("hidden").show();
+							//show change button
+							$("#person-edit-change-screenshot-button").show();
+							//hide add button
+							$("#person-edit-add-screenshot-button").hide();
+						} // else show add button
+					}
+				});
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
@@ -346,8 +430,9 @@ $('#modal-edit').on('show.bs.modal', function (event){
 	});
 });
 
+//import csv validation
 $('#form-import-input').on('change', function(){
-    //FILE VALIDATION PARAMS
+    //file validation params
     var maxFileSize = 1024 * 1024 * 10; //10mb
     var fileExts = ["csv","txt"];
     var fileType = "text/";
@@ -520,6 +605,12 @@ $("#person-new-form").submit(function(){
 			data: "action=add_person&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum  + "&note=" + personNote,
 			success: function(resp){
 				if(resp[0]=='1'){
+					//submit photo if set
+					if(($("#person-new-screenshot-container img").attr("src") != "blank") && resp[2]>0){
+						var new_person_id = resp[2];
+						var canvas = document.querySelector("#person-new-video-canvas");
+						saveCanvas(canvas,new_person_id);
+					}
 					//close modal
 					$("#modal-new").modal("hide");
 					//repopulate select box
@@ -559,9 +650,14 @@ $("#person-edit-form").submit(function(){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=edit_person&id=" + personId+"&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum + "&note=" + personNote,
+			data: "action=edit_person&id=" + personId +"&orgid=" + organizationId + "&names=" + personNames + "&lastname=" + personLastName + "&idnum=" + personIdNum + "&cardnum=" + personCardNum + "&note=" + personNote,
 			success: function(resp){
 				if(resp[0]=='1'){
+					//submit photo edit if set
+					if(doChangePhoto){
+						var canvas = document.querySelector("#person-edit-video-canvas");
+						saveCanvas(canvas,personId);
+					}
 					//close modal
 					$("#modal-edit").modal("hide");
 					//repopulate select box

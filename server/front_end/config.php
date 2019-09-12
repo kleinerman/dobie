@@ -9,13 +9,14 @@ $config->wwwroot = $wwwroot;
 //interface vars
 $home_url="events-live";
 //lang config
-$config->valid_langs=array("en","es");
-$config->valid_langs_names = array("en" => "English", "es" => "Español");
+$config->valid_langs=array("en","es","de");
+$config->valid_langs_names = array("en" => "English", "es" => "Español", "de" => "Deutsch");
 $lang="en"; //default lang
 
 //api config
 $config->api_protocol="http";
 $config->api_hostname="backend";
+//$config->api_hostname="10.10.7.79";
 $config->api_port="5000";
 $config->api_path="/api/v1.0/";
 if($config->api_port!="") $config->api_fullpath=$config->api_protocol."://".$config->api_hostname.":".$config->api_port.$config->api_path;
@@ -58,6 +59,7 @@ if($islogged){
 	$logged->name=$_SESSION[$config->sesskey];
 	$logged->pw=$EnDecryptText->Decrypt_Text($_SESSION[$config->sesskey."pw"]);
 	$logged->roleid=$EnDecryptText->Decrypt_Text($_SESSION[$config->sesskey."rl"]);
+	if($logged->roleid!=1 and $logged->roleid!=2 and $logged->roleid!=3) $logged->roleid=3; //force base roleid in case of decryption unsuccessful (fixing persistsession roleid re encoding)
 	$logged->lang=$_SESSION[$config->sesskey."lang"];
 	$lang=$logged->lang;
 	if($requirelogin){

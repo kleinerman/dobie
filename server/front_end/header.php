@@ -20,7 +20,6 @@ ob_start('ob_gzhandler');
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><?=$config->sitetitle?></title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="keywords" content="dobie, access, doors">
 <meta name="description" content="<?=$config->sitedesc?>">
 <meta name="author" content="Dobie">
@@ -180,8 +179,8 @@ ob_start('ob_gzhandler');
 <?	}?>
 <?}?>
 </ul>
+<div id="event-photo-container" class="center" style="background:#fff;padding:20px"></div>
 </div>
-
 <!-- /.sidebar-collapse -->
 </div>
 <!-- /.navbar-static-side -->
