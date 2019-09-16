@@ -26,6 +26,8 @@ int main(int argc, char** argv)
     mqd_t mq; // message queue
     struct buttons_args b_args;
     struct state_args s_args;
+    char mac_string[MAC_STR_LEN] = "";
+    FILE *sys_mac_file_ptr;
 
 
     /* When the stdout and stderr don't go to a terminal,
@@ -42,6 +44,22 @@ int main(int argc, char** argv)
     //
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
+
+
+    if ((sys_mac_file_ptr = fopen(SYS_FILE_MAC, "r")) == NULL) {
+        printf("Error opening mac file of sys filesystem\n");
+        exit(EXIT_FAILURE);
+    }
+
+    fgets(mac_string, MAC_STR_LEN, sys_mac_file_ptr);
+
+    fclose(sys_mac_file_ptr);
+
+    if (strcmp(mac_string, MAC)) {
+        printf("This ioiface was not compiled for this controller. Exiting..\n");
+        exit(EXIT_FAILURE);
+    }
+
 
     /* open the message queue only for sending message to the main process
      * It must be created by the main process
