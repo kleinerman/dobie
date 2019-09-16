@@ -5,6 +5,15 @@ echo "Dobie Controller Installation Script"
 echo "===================================="
 
 
+cp ../c_src/include/tmplt_libioiface.h ../c_src/include/libioiface.h
+
+WIRED_IFACE_NAME=$(grep WIRED_IFACE_NAME ../py_src/config.py | cut -d = -f2 | tr -d \ \')
+sed -i "s/<WIRED_IFACE_NAME>/$WIRED_IFACE_NAME/g" ../c_src/include/libioiface.h
+
+MAC_ADDRESS=$(cat /sys/class/net/$WIRED_IFACE_NAME/address)
+sed -i "s/<MAC_ADDRESS>/$MAC_ADDRESS/g" ../c_src/include/libioiface.h
+
+
 echo "Compiling ioiface.."
 cd ../c_src/
 make
