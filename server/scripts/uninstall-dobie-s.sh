@@ -52,7 +52,7 @@ if [ $answer == y ] || [ $answer == Y ]; then
   sudo docker rm $(docker ps -a -q)
   sudo docker rmi $(docker images -q)
   sudo docker volume rm dobie_database-volume
-  sudo docker network rm dobie_network
+  sudo docker network rm dobie_dobie-net
 fi
 
 

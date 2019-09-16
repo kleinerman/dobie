@@ -13,6 +13,8 @@ services:
       - ../back_end:/opt/dobie-server
       - /var/log/dobie-s:/var/log/dobie-s
       - /var/lib/dobie-pers-imgs/:/var/lib/dobie-pers-imgs
+    networks:
+      - dobie-net
     depends_on:
       - database
     command: python -u /opt/dobie-server/main.py
@@ -29,6 +31,8 @@ services:
       context: database
     volumes:
       - database-volume:/var/lib/mysql
+    networks:
+      - dobie-net
 
   webserver:
     container_name: webserver
@@ -40,6 +44,8 @@ services:
     volumes:
       - ../front_end:/site
       - ../certs:/etc/nginx/ssl/
+    networks:
+      - dobie-net
     depends_on:
       - php
     logging:
@@ -56,6 +62,8 @@ services:
       context: php
     volumes:
       - ../front_end:/site
+    networks:
+      - dobie-net
     logging:
       driver: "json-file"
       options:
@@ -73,6 +81,8 @@ services:
     volumes:
       - ../front_end:/site
       - ../certs:/certs
+    networks:
+      - dobie-net
     entrypoint: sh run-events-live.sh
     logging:
       driver: "json-file"
@@ -84,10 +94,9 @@ services:
 
 
 volumes:
-    database-volume:
+  database-volume:
 
 
 
 networks:
-  default:
-    name: dobie_network
+  dobie-net:

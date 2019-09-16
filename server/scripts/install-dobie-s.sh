@@ -109,7 +109,7 @@ Description=Purge old events of Dobie DB
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'UNTIL_DATE_TIME=\$\$(date --date "$MONTH month ago" +%%Y-%%m-%%d\ %%H:%%M); docker run --name db-purger --rm --network dobie_network -v $(realpath ../back_end):/opt/dobie-server -v /var/log/dobie-s:/var/log/dobie-s -v /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs dobie_backend python -u /opt/dobie-server/purgeevents.py -d "\$\${UNTIL_DATE_TIME}"'
+ExecStart=/bin/bash -c 'UNTIL_DATE_TIME=\$\$(date --date "$MONTH month ago" +%%Y-%%m-%%d\ %%H:%%M); docker run --name db-purger --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server -v /var/log/dobie-s:/var/log/dobie-s -v /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs dobie_backend python -u /opt/dobie-server/purgeevents.py -d "\$\${UNTIL_DATE_TIME}"'
 EOL
 #The backslash in $\$\ was used to escape the $ and tell this script not to consider the following as variable.
 #The resulting $$, and %% is used to escape $ and % in resulting unit of systemd.
