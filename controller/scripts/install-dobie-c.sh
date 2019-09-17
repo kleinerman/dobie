@@ -17,7 +17,15 @@ sed -i "s/<MAC_ADDRESS>/$MAC_ADDRESS/g" ../c_src/include/libioiface.h
 echo "Compiling ioiface.."
 cd ../c_src/
 make
+
 cd ../scripts/
+
+read -p "Do you want to remove C ioiface source code? (y/n): " answer
+if [ $answer == y ] || [ $answer == Y ]; then
+    echo "Removing C ioiface source code"
+    sudo rm -rf ../c_src/
+fi
+
 
 echo "Creating directory for Dobie Controller Logs.."
 mkdir -p /var/log/dobie-c/
@@ -25,7 +33,7 @@ mkdir -p /var/log/dobie-c/
 echo "Creating directory for Dobie Controller DB.."
 mkdir -p /var/lib/dobie-c/
 
-read -p "Do you want to set log rotation for Dobie Controller (y/n): " answer
+read -p "Do you want to set log rotation for Dobie Controller? (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
 cat > /tmp/dobie-c.logrotate << EOL
 /var/log/dobie-c/dobie-c.log
@@ -76,13 +84,13 @@ EOL
 sudo cp /tmp/dobie-c.service /etc/systemd/system/
 sudo rm /tmp/dobie-c.service
 
-read -p "Do you want to start Dobie Controller at boot time (y/n): " answer
+read -p "Do you want to start Dobie Controller at boot time? (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
   sudo systemctl enable dobie-c.service
 fi
 sudo systemctl daemon-reload
 
-read -p "Do you want to start Dobie Controller now (y/n): " answer
+read -p "Do you want to start Dobie Controller now? (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
   sudo systemctl start dobie-c.service
 fi
