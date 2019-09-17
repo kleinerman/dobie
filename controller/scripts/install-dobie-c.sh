@@ -20,10 +20,13 @@ make
 
 cd ../scripts/
 
-read -p "Do you want to remove C ioiface source code? (y/n): " answer
+read -p "Do you want to remove C ioiface source code and .git directory? (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
-    echo "Removing C ioiface source code"
+    echo "Removing C ioiface source code.."
     sudo rm -rf ../c_src/
+    echo "Removing .git directory.."
+    sudo rm -rf ../../.git
+    sudo rm -rf ../../.gitignore
 fi
 
 
