@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     mqd_t mq; // message queue
     struct buttons_args b_args;
     struct state_args s_args;
-    char mac_string[MAC_STR_LEN] = "";
+    char mac_string[MAC_STR_LEN] = ""; // Initializing all the array to /0
     FILE *sys_mac_file_ptr;
 
 
@@ -52,6 +52,9 @@ int main(int argc, char** argv)
     }
 
     fgets(mac_string, MAC_STR_LEN, sys_mac_file_ptr);
+    /*mac_string will end up with the 17 chars of the MAC divided 
+     * by ":" and at the end a "/0" char remaining of the initialization
+    */
 
     fclose(sys_mac_file_ptr);
 
