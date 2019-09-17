@@ -6,6 +6,7 @@ _DEPS=libioiface.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
 main: $(OBJ)
+	        mkdir -p ../bin/
 	        $(CC) -o ../bin/ioiface $(OBJ) $(CFLAGS)
 
 
