@@ -320,6 +320,12 @@ $.getScript(window.location.protocol + "//" + window.location.hostname+":<?=$nod
 					//hide noevents row
 					$("#noevents-row").hide();
 					$(addEventInTable(dataParsed)).insertAfter("#events-table-header-row").show("slow").toggleClass("newevent");
+					//if event has person, show photo
+					if(dataParsed.personId){
+						$("#event-photo-container img").prop("src","persons-image?id="+dataParsed.personId).removeClass("hidden").show();
+					} else {
+						$("#event-photo-container img").prop("src","persons-image").hide();
+					}
 				}
 			}
 		});

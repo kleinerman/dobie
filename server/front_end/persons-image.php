@@ -17,7 +17,7 @@ if($person_id){
 
 if($nophoto){
 	//display dummy photo in case of error
-	echo file_get_contents("img/logo.png");
+	echo file_get_contents("img/dobie_logo.png");
 }
 
 ?>

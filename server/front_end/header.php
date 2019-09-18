@@ -61,7 +61,7 @@ ob_start('ob_gzhandler');
 <link href="dist/css/bootstrap-clockpicker.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
 <?}?>
 <!-- More Custom CSS -->
-<link href='dist/css/custom.css?v=8' rel='stylesheet' type='text/css'>
+<link href='dist/css/custom.css?v=9' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <?if(!isset($innerheader)){?>
@@ -179,7 +179,7 @@ ob_start('ob_gzhandler');
 <?	}?>
 <?}?>
 </ul>
-<div id="event-photo-container" class="center" style="background:#fff;padding:20px"></div>
+<div id="event-photo-container"><img src="persons-image" class="hidden"></div>
 </div>
 <!-- /.sidebar-collapse -->
 </div>
