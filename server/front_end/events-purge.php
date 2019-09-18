@@ -20,7 +20,8 @@ include("header.php");
 
 <div class="input-group clockpicker" data-placement="right" data-align="top" data-autoclose="true" title="<?=get_text("Purge Until Time",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="endTime" name="endTime" required><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 <br><br>
-<button class="btn btn-success"><span class="fa fa-trash"></span> <?=get_text("Delete Events",$lang);?></button>
+<button id="form-submit-button" class="btn btn-success"><span class="fa fa-trash"></span> <?=get_text("Delete Events",$lang);?></button>
+<button id="form-spinner" class="btn btn-default" type="button" disabled style="display:none"><span class="fas fa-spinner fa-pulse"></span></button>
 </form>
 </div>
 </div>
@@ -91,6 +92,8 @@ $("#events-purge-form").submit(function(){
 			type: "POST",
 			url: "process",
 			data: "action=purge_events&untildatetime=" + endDate+"+"+endTime,
+			beforeSend:function(){$("#form-submit-button").hide();$("#form-spinner").show();$("#modal-purge").modal("hide")},
+			complete:function(){$("#form-submit-button").show();$("#form-spinner").hide()},
 			success: function(resp){
 				if(resp[0]=='1'){
 					//show purged totals
@@ -101,9 +104,6 @@ $("#events-purge-form").submit(function(){
 					$('#modal-error .modal-body').text(resp[1]);
 					$("#modal-error").modal("show");
 				}
-			},
-			complete: function(resp){
-				$("#modal-purge").modal("hide");
 			},
 			failure: function(){
 				//show modal error
