@@ -314,6 +314,15 @@ input::-webkit-inner-spin-button {
 	background-color: #7d339c;
 }
 
+/*events live photo*/
+#event-photo-container{
+	background:#fff;padding:20px;text-align:center
+}
+
+#event-photo-container img{
+	max-width:100%;border:1px solid #aaa
+}
+
 /*details box*/
 #select-container-persons-details,#select-container-visitors-details,.details-box{
 	display: inline-block;

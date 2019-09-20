@@ -181,10 +181,10 @@ populateList("door-groups-select","door_groups");
 
 //onchange action on groups select
 $("#door-groups-select").change(function(){
-	var doorGroupIdDetail = $(this).val();
+	updateButtons($(this).prop("id"));
 
+	var doorGroupIdDetail = $(this).val();
 	if(!isNaN(doorGroupIdDetail)){
-		updateButtons(doorGroupIdDetail);
 		$.ajax({
 			type: "POST",
 			url: "process",
