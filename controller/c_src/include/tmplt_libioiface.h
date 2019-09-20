@@ -16,9 +16,9 @@
 #define EPOLL_WAIT_TIME 2000
 #define BOUNCE_TIME 200000
 #define QUEUE_NAME "/ioiface_queue"
-#define MAC "b7:27:e7:87:19:ca"
+#define MAC "<MAC_ADDRESS>"
 #define MAC_STR_LEN 18
-#define SYS_FILE_MAC "/sys/class/net/eth0/address"
+#define SYS_FILE_MAC "/sys/class/net/<WIRED_IFACE_NAME>/address"
 
 
 // door gpio map
