@@ -16,9 +16,9 @@ echo "Removing Log rotation file.."
 sudo rm /etc/logrotate.d/dobie-s
 
 
-read -p "Do you want to remove Dobie Server Database Dumps (/var/cache/dobie-db-dumps/)? (y/n): " answer
+read -p "Do you want to remove Dobie Server Database Backcups (/var/cache/dobie-db-backups/)? (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
-  sudo rm -rf /var/cache/dobie-db-dumps
+  sudo rm -rf /var/cache/dobie-db-backups
 fi
 
 read -p "Do you want to remove person's images files (/var/lib/dobie-pers-imgs/)? (y/n): " answer
