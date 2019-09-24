@@ -7,8 +7,8 @@ echo "================================"
 echo "Creating directory for Dobie Server Logs.."
 sudo mkdir -p /var/log/dobie-s/
 
-echo "Creating directory for Dobie Server Database Dumps.."
-sudo mkdir -p /var/cache/dobie-db-dumps/
+echo "Creating directory for Dobie Server Database Backups.."
+sudo mkdir -p /var/cache/dobie-db-backups/
 
 echo "Creating directory to storage person's images.."
 sudo mkdir -p /var/lib/dobie-pers-imgs/
@@ -146,17 +146,23 @@ sudo systemctl start dobie-purge-db.timer
 #This script stops the backend before restoring the DB to avoid freezing
 #in some cases. 
 echo "Installing scripts to save and restore Dobie DB.."
-read -p "How many days of database dumps do you want to store in /var/cache/dobie-db-dumps: " DAYS
+read -p "How many days of database backups do you want to store in /var/cache/dobie-db-backups: " DAYS
 cat > /tmp/dobie-save-db << EOL
 #!/bin/bash
 
+if [ \$(whoami) != root ]; then
+    echo "Please run as root"
+    exit 1
+fi
+
 . $(realpath db-config)
-
-find /var/cache/dobie-db-dumps/ -type f -mtime +$DAYS -delete
-
+find /var/cache/dobie-db-backups/ -type f -mtime +$DAYS -delete
 DB_DOCKER_IP=\$(tr -d '", ' <<< \$(docker inspect database | grep '"IPAddress": "1' | gawk '{print \$2}'))
+mysqldump -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE > /tmp/dobie_sql.dump
+DATE_TIME=\$(date +%F_%H%M)
+tar czf /var/cache/dobie-db-backups/dobie_db_\$DATE_TIME.tgz -C /tmp/ dobie_sql.dump -C /var/lib/ dobie-pers-imgs/
+rm /tmp/dobie_sql.dump
 
-mysqldump -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE > /var/cache/dobie-db-dumps/dobie_db_\$(date +%F_%H%M).dump
 EOL
 sudo cp /tmp/dobie-save-db /usr/local/sbin/dobie-save-db
 sudo rm /tmp/dobie-save-db
@@ -166,7 +172,18 @@ sudo chmod +x /usr/local/sbin/dobie-save-db
 cat > /tmp/dobie-restore-db << EOL
 #!/bin/bash
 
-. $(realpath db-config)
+
+if [ \$(whoami) != root ]; then
+    echo "Please run as root"
+    exit 1
+fi
+
+echo "Removing temp files if exist.."
+rm -rf /tmp/dobie-pers-imgs/
+rm -rf /tmp/dobie_sql.dump
+
+echo "Uncompressing database dump and people images.."
+tar xf \$1 -C /tmp/
 
 DB_DOCKER_IP=\$(tr -d '", ' <<< \$(docker inspect database | grep '"IPAddress": "1' | gawk '{print \$2}'))
 
@@ -174,10 +191,20 @@ echo "Stopping Backend.."
 docker stop backend
 
 echo "Restoring DB.."
-mysql -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE < \$1
+. $(realpath db-config)
+mysql -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE < /tmp/dobie_sql.dump
+
+echo "Restoring people images.."
+rm -rf /var/lib/dobie-pers-imgs/
+cp -r /tmp/dobie-pers-imgs/ /var/lib/
+
+echo "Removing temp files.."
+rm -rf /tmp/dobie-pers-imgs/
+rm -rf /tmp/dobie_sql.dump
 
 echo "Starting Backend.."
 docker start backend
+
 EOL
 sudo cp /tmp/dobie-restore-db /usr/local/sbin/dobie-restore-db
 sudo rm /tmp/dobie-restore-db
