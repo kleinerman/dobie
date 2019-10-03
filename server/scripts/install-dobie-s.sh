@@ -4,18 +4,151 @@
 echo "Dobie Server Installation Script"
 echo "================================"
 
-echo "Creating directory for Dobie Server Logs.."
-sudo mkdir -p /var/log/dobie-s/
+function usage {
+      echo "usage: $0 [-iclb -m N -d N]"
+      echo "  -i      Run in interactive mode."
+      echo "  -c      Install server inside controller."
+      echo "  -l      Set log rotate."
+      echo "  -b      Configure to start at boot time"
+      echo "  -m N    Store N months of events in DB."
+      echo "  -d N    Store N days of DB backups."
+      echo "  -h      Display help"
+}
 
-echo "Creating directory for Dobie Server Database Backups.."
-sudo mkdir -p /var/cache/dobie-db-backups/
+
+function interactive {
+
+      echo "Running in interactive mode.."
+
+      read -p "Are you installing the server in the controller? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        SRVR_IN_CTRLLR=true
+      fi
+
+      read -p "Do you want to set log rotate for server logs? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        SET_LOG_ROTATE=true
+      fi
+
+      read -p "Do you want to start Dobie Controller at boot time? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        START_AT_BOOT=true
+      fi
+
+      INVALID_ANSWER=true
+      while ${INVALID_ANSWER}; do
+        read -p "How many months of events do you want to store in Database?: "
+        if [[ $REPLY =~ $RE_IS_INT ]]; then
+          STORED_MONTHS=$REPLY
+          INVALID_ANSWER=false
+        else
+          echo "Invalid value."
+        fi
+      done
+
+      INVALID_ANSWER=true
+      while $INVALID_ANSWER; do
+        read -p "How many days of database backups do you want to store in /var/cache/dobie-db-backups/?: "
+        if [[ $REPLY =~ $RE_IS_INT ]]; then
+          STORED_DB_BCKPS=$REPLY
+          INVALID_ANSWER=false
+        else
+          echo "Invalid value."
+        fi
+      done
+}
+
+
+#Initializing default values to variables
+SRVR_IN_CTRLLR=false
+SET_LOG_ROTATE=false
+START_AT_BOOT=false
+RE_IS_INT='^[0-9]+$'
+
+
+
+#if there is no arguments, print usage and exit
+if [ $# == 0 ]; then
+    usage
+    exit 0
+fi
+
+
+
+while getopts ":iclbm:d:h" OPT; do
+  case $OPT in
+    i )
+      interactive
+      #When running in interactive mode, arguments different from -i are ignored
+      break
+      ;;
+
+    c )
+      echo "Installing server in controller.."
+      SRVR_IN_CTRLLR=true
+      ;;
+    l )
+      echo "Setting log roate for server logs.."
+      SET_LOG_ROTATE=true
+      ;;
+    b )
+      echo "Configuring to start at boot time.."
+      START_AT_BOOT=true
+      ;;
+    m )
+      if [[ $OPTARG =~ $RE_IS_INT ]]; then
+        STORED_MONTHS=$OPTARG
+        echo "Configuring to store $STORED_MONTHS months of events.."
+      else
+        echo "Invalid number of months set in option -m."
+        exit 1
+      fi
+      ;;
+    d )
+      if [[ $OPTARG =~ $RE_IS_INT ]]; then
+        STORED_DB_BCKPS=$OPTARG
+        echo "Configuring to store "$STORED_DB_BCKPS days of database backups..
+      else
+        echo "Invalid number of days of database backups set in option -d."
+        exit 1
+      fi
+      ;;
+    h )
+      usage
+      exit
+      ;;
+   \? )
+      echo "Invalid option: -$OPTARG"
+      usage
+      exit 1
+      ;;
+   : )
+      echo "Invalid Option: -$OPTARG requires an argument"
+      exit 1
+      ;;
+
+  esac
+done
+
+
+
+##-----------------PERSON'S IMAGE DIRECTORY----------------##
 
 echo "Creating directory to storage person's images.."
 sudo mkdir -p /var/lib/dobie-pers-imgs/
 
-#read -p "Do you want to set log rotation for Dobie Server (y/n): " answer
-#if [ $answer == y ] || [ $answer == Y ]; then
+##---------------------------------------------------------##
 
+
+
+
+
+##---------------------------LOGS--------------------------##
+
+echo "Creating directory for Dobie Server Logs.."
+sudo mkdir -p /var/log/dobie-s/
+
+if $SET_LOG_ROTATE; then
 echo "Configuring log rotation.."
 cat > /tmp/dobie-s.logrotate << EOL
 /var/log/dobie-s/dobie-s.log
@@ -40,13 +173,22 @@ EOL
 
 sudo cp /tmp/dobie-s.logrotate /etc/logrotate.d/dobie-s
 sudo rm /tmp/dobie-s.logrotate
+fi
 
 
-read -p "Are you installing Dobie Server in the same controller (y/n): " answer
+##---------------------------------------------------------##
+
+
+
+
+
+
+##--------------------DOCKER CONTAINERS--------------------##
+
 #Change to the directory where the docker-compose.yml file is located and
 #save the complete path of the directory in the variable DOCK_COMP_DIR to
 #be able to create then the systemd unit to start all the containers
-if [ $answer == y ] || [ $answer == Y ]; then
+if $SRVR_IN_CTRLLR; then
   cd ../ctrller_docker/
   DOCK_COMP_DIR=$(realpath .)
 else
@@ -57,6 +199,15 @@ fi
 #Building the containers without starting them
 echo "Building Docker containers.."
 docker-compose -p dobie up --no-start
+
+##---------------------------------------------------------##
+
+
+
+
+
+
+##------------------------SYSTEMD--------------------------##
 
 echo "Setting Dobie Server as Systemd service.."
 cat > /tmp/dobie-s.service << EOL
@@ -81,35 +232,54 @@ sudo rm /tmp/dobie-s.service
 
 sudo systemctl daemon-reload
 
-read -p "Do you want to start Dobie Server at boot time (y/n): " answer
-if [ $answer == y ] || [ $answer == Y ]; then
+
+if $START_AT_BOOT; then
+  echo "Setting dobie-s.service to start at boot.."
   sudo systemctl enable dobie-s.service
 fi
 
-#Now starting all the containers using the previously created unit
+
+#Starting NOW all the containers using the previously created unit
 echo "Starting Dobie server (all the containers).."
 sudo systemctl start dobie-s.service
 
+##-------------------------------------------------------##
+
+
+
+
+
+
+##----------------------DATABASE-------------------------##
+
 
 #If there is any previous DB, reset it
-echo "Erasing any previous database and setting initial values to it.."
+echo "Installing a new database and setting initial values to it.."
 cd ../scripts/
 docker stop backend > /dev/null 2>&1
 ./db-create-drop.sh -r 
 docker start backend > /dev/null 2>&1
 
 
+##-------------------------------------------------------##
+
+
+
+
+
+##----------------------PURGE-DB-------------------------##
+
+
 #Every day at 07:07:07 the purge-old-events.sh is run receiving 
 #the amount of months to keep in DB.
 #To do this, a systemd timer is created.
-read -p "How many months of events do you want to store in Database: " MONTH
 cat > /tmp/dobie-purge-db.service << EOL
 [Unit]
 Description=Purge old events of Dobie DB
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'UNTIL_DATE_TIME=\$\$(date --date "$MONTH month ago" +%%Y-%%m-%%d\ %%H:%%M); docker run --name db-purger --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server -v /var/log/dobie-s:/var/log/dobie-s -v /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs dobie_backend python -u /opt/dobie-server/purgeevents.py -d "\$\${UNTIL_DATE_TIME}"'
+ExecStart=/bin/bash -c 'UNTIL_DATE_TIME=\$\$(date --date "$STORED_MONTHS month ago" +%%Y-%%m-%%d\ %%H:%%M); docker run --name db-purger --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server -v /var/log/dobie-s:/var/log/dobie-s -v /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs dobie_backend python -u /opt/dobie-server/purgeevents.py -d "\$\${UNTIL_DATE_TIME}"'
 EOL
 #The backslash in $\$\ was used to escape the $ and tell this script not to consider the following as variable.
 #The resulting $$, and %% is used to escape $ and % in resulting unit of systemd.
@@ -138,6 +308,15 @@ sudo systemctl enable dobie-purge-db.timer
 sudo systemctl start dobie-purge-db.timer
 
 
+##--------------------------------------------------------##
+
+
+
+##-------------SAVE AND RESTORE DB SCRIPTS----------------##
+
+
+echo "Creating directory for Dobie Server Database Backups.."
+sudo mkdir -p /var/cache/dobie-db-backups/
 
 #The following scripts are used to save and restore the DB at any moment.
 #They should be executed by the user.
@@ -146,7 +325,6 @@ sudo systemctl start dobie-purge-db.timer
 #This script stops the backend before restoring the DB to avoid freezing
 #in some cases. 
 echo "Installing scripts to save and restore Dobie DB.."
-read -p "How many days of database backups do you want to store in /var/cache/dobie-db-backups: " DAYS
 cat > /tmp/dobie-save-db << EOL
 #!/bin/bash
 
@@ -156,7 +334,7 @@ if [ \$(whoami) != root ]; then
 fi
 
 . $(realpath db-config)
-find /var/cache/dobie-db-backups/ -type f -mtime +$DAYS -delete
+find /var/cache/dobie-db-backups/ -type f -mtime +$STORED_DB_BCKPS -delete
 DB_DOCKER_IP=\$(tr -d '", ' <<< \$(docker inspect database | grep '"IPAddress": "1' | gawk '{print \$2}'))
 mysqldump -u \$DB_USER -p\$DB_PASSWD -h \$DB_DOCKER_IP \$DB_DATABASE > /tmp/dobie_sql.dump
 DATE_TIME=\$(date +%F_%H%M)
@@ -240,3 +418,4 @@ sudo systemctl daemon-reload
 sudo systemctl enable dobie-save-db.timer
 sudo systemctl start dobie-save-db.timer
 
+##------------------------------------------------------------##
