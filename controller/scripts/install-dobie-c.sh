@@ -15,44 +15,57 @@ function usage {
       echo "  -h      Display help"
 }
 
+
+function interactive {
+
+      echo "Running in interactive mode.."
+
+      read -p "Do you want to keep C ioiface source code and .git directory? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        KEEP_C_SRC=true
+      fi
+
+      read -p "Do you want to set log rotate for controller logs? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        SET_LOG_ROTATE=true
+      fi
+
+      read -p "Do you want to start Dobie Controller at boot time? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        START_AT_BOOT=true
+      fi
+
+      read -p "Do you want to start Dobie Controller after installation? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        START_NOW=true
+      fi
+
+
+
+}
+
+#Initializing default values to variables
+KEEP_C_SRC=false 
+#This is the only necessary because we are asking if ! $KEEP_C_SRC
+#and [ ! NON_EXISTING_VARIABLE ] is not true
+SET_LOG_ROTATE=false
+START_AT_BOOT=false
+START_NOW=false
+
+
+
 #if there is no arguments, print usage and exit
 if [ $# == 0 ]; then
     usage
     exit
 fi
 
-#Initializing default values to variables
-KEEP_C_SRC=false #This is the only necessary because we are asking [ ! ${KEEP_C_SRC} ]
-SET_LOG_ROTATE=false
-START_AT_BOOT=false
-START_NOW=false
 
 
 while getopts ":iklbsh" OPT; do
-  case ${OPT} in
+  case $OPT in
     i )
-      echo "Running in interactive mode.."
-
-      read -p "Do you want to keep C ioiface source code and .git directory? (y/n): " -e -n1
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
-        KEEP_C_SRC=true
-      fi
-
-      read -p "Do you want to set log rotate for controller logs? (y/n): " -e -n1
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
-        SET_LOG_ROTATE=true
-      fi
-
-      read -p "Do you want to start Dobie Controller at boot time? (y/n): " -e -n1
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
-        START_AT_BOOT=true
-      fi
-
-      read -p "Do you want to start Dobie Controller after installation? (y/n): " -e -n1
-      if [[ $REPLY =~ ^[Yy]$ ]]; then
-        START_NOW=true
-      fi
-    
+      interactive 
       #When running in interactive mode, arguments will not be red
       break
       ;;
@@ -76,10 +89,11 @@ while getopts ":iklbsh" OPT; do
       usage
       exit
       ;;
+
    \? )
-      echo "Invalid option."
+      echo "Invalid option: -$OPTARG"
       usage
-      exit
+      exit 1
       ;;
   esac
 done
@@ -102,7 +116,7 @@ make
 
 cd ../scripts/
 
-if ! ${KEEP_C_SRC}; then
+if ! $KEEP_C_SRC; then
     echo "Removing C ioiface source code.."
     sudo rm -rf ../c_src/
     echo "Removing .git directory.."
@@ -117,7 +131,7 @@ mkdir -p /var/log/dobie-c/
 echo "Creating directory for Dobie Controller DB.."
 mkdir -p /var/lib/dobie-c/
 
-if ${SET_LOG_ROTATE}; then
+if $SET_LOG_ROTATE; then
 cat > /tmp/dobie-c.logrotate << EOL
 /var/log/dobie-c/dobie-c.log
 {
@@ -167,13 +181,13 @@ EOL
 sudo cp /tmp/dobie-c.service /etc/systemd/system/
 sudo rm /tmp/dobie-c.service
 
-if ${START_AT_BOOT}; then
+if $START_AT_BOOT; then
   sudo systemctl enable dobie-c.service
 fi
 
 sudo systemctl daemon-reload
 
-if ${START_NOW}; then
+if $START_NOW; then
   sudo systemctl start dobie-c.service
 fi
 
