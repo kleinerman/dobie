@@ -5,6 +5,102 @@ echo "Dobie Controller Installation Script"
 echo "===================================="
 
 
+function usage {
+      echo "usage: $0 [-ikbsh]"
+      echo "  -i      Run in interactive mode."
+      echo "  -k      Keep C source and git repository."
+      echo "  -l      Set log rotate."
+      echo "  -b      Configure to start at boot time."
+      echo "  -s      Start after installing."
+      echo "  -h      Display help"
+}
+
+
+function interactive {
+
+      echo "Running in interactive mode.."
+
+      read -p "Do you want to keep C ioiface source code and .git directory? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        KEEP_C_SRC=true
+      fi
+
+      read -p "Do you want to set log rotate for controller logs? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        SET_LOG_ROTATE=true
+      fi
+
+      read -p "Do you want to start Dobie Controller at boot time? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        START_AT_BOOT=true
+      fi
+
+      read -p "Do you want to start Dobie Controller after installation? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        START_NOW=true
+      fi
+
+
+
+}
+
+#Initializing default values to variables
+KEEP_C_SRC=false 
+#This is the only necessary because we are asking if ! $KEEP_C_SRC
+#and [ ! NON_EXISTING_VARIABLE ] is not true
+SET_LOG_ROTATE=false
+START_AT_BOOT=false
+START_NOW=false
+
+
+
+#if there is no arguments, print usage and exit
+if [ $# == 0 ]; then
+    usage
+    exit
+fi
+
+
+
+while getopts ":iklbsh" OPT; do
+  case $OPT in
+    i )
+      interactive 
+      #When running in interactive mode, arguments will not be red
+      break
+      ;;
+    k )
+      echo "Keeping C source and git repository.."
+      KEEP_C_SRC=true
+      ;;
+    l )
+      echo "Setting log roate for controller logs.."
+      SET_LOG_ROTATE=true
+      ;;
+    b )
+      echo "Configuring to start at boot time.."
+      START_AT_BOOT=true
+      ;;
+    s )
+      echo "Starting after installing.."
+      START_NOW=true
+      ;;
+    h )
+      usage
+      exit
+      ;;
+
+   \? )
+      echo "Invalid option: -$OPTARG"
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+
+
+
 cp ../c_src/include/tmplt_libioiface.h ../c_src/include/libioiface.h
 
 WIRED_IFACE_NAME=$(grep WIRED_IFACE_NAME ../py_src/config.py | cut -d = -f2 | tr -d \ \')
@@ -20,8 +116,7 @@ make
 
 cd ../scripts/
 
-read -p "Do you want to remove C ioiface source code and .git directory? (y/n): " answer
-if [ $answer == y ] || [ $answer == Y ]; then
+if ! $KEEP_C_SRC; then
     echo "Removing C ioiface source code.."
     sudo rm -rf ../c_src/
     echo "Removing .git directory.."
@@ -36,8 +131,7 @@ mkdir -p /var/log/dobie-c/
 echo "Creating directory for Dobie Controller DB.."
 mkdir -p /var/lib/dobie-c/
 
-read -p "Do you want to set log rotation for Dobie Controller? (y/n): " answer
-if [ $answer == y ] || [ $answer == Y ]; then
+if $SET_LOG_ROTATE; then
 cat > /tmp/dobie-c.logrotate << EOL
 /var/log/dobie-c/dobie-c.log
 {
@@ -87,14 +181,13 @@ EOL
 sudo cp /tmp/dobie-c.service /etc/systemd/system/
 sudo rm /tmp/dobie-c.service
 
-read -p "Do you want to start Dobie Controller at boot time? (y/n): " answer
-if [ $answer == y ] || [ $answer == Y ]; then
+if $START_AT_BOOT; then
   sudo systemctl enable dobie-c.service
 fi
+
 sudo systemctl daemon-reload
 
-read -p "Do you want to start Dobie Controller now? (y/n): " answer
-if [ $answer == y ] || [ $answer == Y ]; then
+if $START_NOW; then
   sudo systemctl start dobie-c.service
 fi
 

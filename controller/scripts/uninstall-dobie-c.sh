@@ -4,11 +4,6 @@
 echo "Dobie Server Uninstallation Script"
 echo "=================================="
 
-read -p "Are you sure to uninstall Dobie Controller? (y/n): " answer
-if [ $answer != y ] && [ $answer != Y ]; then
-  exit
-fi
-
 echo "Stoping Dobie Controller systemd unit.."
 sudo systemctl stop dobie-c.service
 
