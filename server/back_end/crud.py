@@ -1622,6 +1622,7 @@ class CrudMngr(genmngr.GenericMngr):
                 orgId = request.args.get('orgId')
                 personId = request.args.get('personId')
                 visitedOrgId = request.args.get('visitedOrgId')
+                isProvider = request.args.get('isProvider')
                 zoneId = request.args.get('zoneId')
                 doorId = request.args.get('doorId')
                 startDateTime = request.args.get('startDateTime')
@@ -1631,7 +1632,7 @@ class CrudMngr(genmngr.GenericMngr):
                 evtsQtty = int(request.args.get('evtsQtty'))
 
 
-                events, totalEvtsCount = self.dataBase.getEvents(orgId, personId, visitedOrgId, zoneId, doorId,
+                events, totalEvtsCount = self.dataBase.getEvents(orgId, personId, visitedOrgId, isProvider, zoneId, doorId,
                                                                  startDateTime, endDateTime, side, startEvt, evtsQtty)
 
 
