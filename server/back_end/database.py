@@ -2602,18 +2602,20 @@ class DataBase(object):
                 personId = row['id']
 
                 sql = ("UPDATE Person SET names = '{}', lastName = '{}', cardNumber = {}, "
-                       "note = '{}', visitedOrgId = {}, resStateId = {} WHERE id = {}"
-                       "".format(person['names'], person['lastName'], person['cardNumber'],
-                                 person['note'], visitedOrgId, COMMITTED, personId)
+                       "note = '{}', visitedOrgId = {}, isProvider = {}, resStateId = {} "
+                       "WHERE id = {}".format(person['names'], person['lastName'], 
+                                              person['cardNumber'], person['note'], 
+                                              visitedOrgId, person['isProvider'],
+                                              COMMITTED, personId)
                       )
                 self.execute(sql)
                 return personId
 
             else:
                 sql = ("INSERT INTO Person(names, lastName, identNumber, note, cardNumber, orgId, "
-                       "visitedOrgId, resStateId) VALUES('{}', '{}', '{}', '{}', {}, {}, {}, {})"
+                       "visitedOrgId, isProvider, resStateId) VALUES('{}', '{}', '{}', '{}', {}, {}, {}, {}, {})"
                        "".format(person['names'], person['lastName'], person['identNumber'], person['note'],
-                                 person['cardNumber'], person['orgId'], visitedOrgId, COMMITTED)
+                                 person['cardNumber'], person['orgId'], visitedOrgId, person['isProvider'], COMMITTED)
 
                      )
                 self.execute(sql)
@@ -2932,9 +2934,10 @@ class DataBase(object):
 
 
             sql = ("UPDATE Person SET names = '{}', lastName = '{}', identNumber = '{}', note = '{}', "
-                   "cardNumber = {}, orgId = {}, visitedOrgId = {} WHERE id = {}"
+                   "cardNumber = {}, orgId = {}, visitedOrgId = {}, isProvider = {}  WHERE id = {}"
                    "".format(person['names'], person['lastName'], person['identNumber'], person['note'],
-                             person['cardNumber'], person['orgId'], person['visitedOrgId'], person['id'])
+                             person['cardNumber'], person['orgId'], person['visitedOrgId'], person['isProvider'], 
+                             person['id'])
                   )
 
             self.execute(sql)

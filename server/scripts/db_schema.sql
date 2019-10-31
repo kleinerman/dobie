@@ -46,6 +46,7 @@ CREATE TABLE `Person` (
     `cardNumber` integer,
     `orgId` integer NOT NULL,
     `visitedOrgId` integer,
+    `isProvider` boolean,
     `resStateId` integer NOT NULL,
     CONSTRAINT `fk_Person_Organization` FOREIGN KEY (`orgId`) REFERENCES `Organization` (`id`),
     CONSTRAINT `fk_Person_VisitedOrganization` FOREIGN KEY (`visitedOrgId`) REFERENCES `Organization` (`id`),
