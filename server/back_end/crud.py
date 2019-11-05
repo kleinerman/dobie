@@ -852,7 +852,8 @@ class CrudMngr(genmngr.GenericMngr):
 
 #-------------------------------------Person------------------------------------------
 
-        prsnNeedKeys = ('names', 'lastName', 'identNumber', 'note', 'cardNumber', 'orgId', 'visitedOrgId', 'isProvider')
+        prsnNeedKeys = ('names', 'lastName', 'identNumber', 'note', 'cardNumber', 'orgId')
+        prsnNotNeedKeys = ('visitedOrgId', 'isProvider')
 
         @app.route('/api/v1.0/person', methods=['POST', 'GET'])
         @auth.login_required
@@ -865,6 +866,18 @@ class CrudMngr(genmngr.GenericMngr):
                     person = {}
                     for param in prsnNeedKeys:
                         person[param] = request.json[param]
+
+                    for param in prsnNotNeedKeys:
+                        try:
+                            person[param] = request.json[param]
+                        except KeyError:
+                            #When the param is not in JSON, saving the param as None. We could use 'NULL'
+                            #to avoid changing it in database addPerson method, but if the API user send
+                            #send null as value, we will retrieve it as None. In this way we leave the 
+                            #dictionary in the same way when the user of the API send null or don't send
+                            #anything.
+                            person[param] = None
+
                     personId = self.dataBase.addPerson(person)
                     uri = url_for('modPerson', personId=personId, _external=True)
                     return jsonify({'status': 'OK', 'message': 'Person added.', 'code': CREATED, 'uri': uri}), CREATED
@@ -911,8 +924,21 @@ class CrudMngr(genmngr.GenericMngr):
                 elif request.method == 'PUT':
                     person = {}
                     person['id'] = personId
+
                     for param in prsnNeedKeys:
                         person[param] = request.json[param]
+
+                    for param in prsnNotNeedKeys:
+                        try:
+                            person[param] = request.json[param]
+                        except KeyError:
+                            #When the param is not in JSON, saving the param as None. We could use 'NULL'
+                            #to avoid changing it in database addPerson method, but if the API user send
+                            #send null as value, we will retrieve it as None. In this way we leave the 
+                            #dictionary in the same way when the user of the API send null or don't send
+                            #anything.
+                            person[param] = None
+
                     needUpdCtrllers = self.dataBase.updPerson(person)
 
                     #If it isn't necessary to update the "cardNumber" in the controller,
