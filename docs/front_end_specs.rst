@@ -1704,7 +1704,7 @@ The following REST method should be sent to the server.
 ``evtsQtty`` variable should be the quantity of events returned from server starting from ``startEvt``
 
   
-If all the events from an entire organization is need, an organization should be selected in the organization combobox and the word "ALL" in the person combobox too. The following REST method shoud be sent to the server:
+If all the events from an entire organization is needed, an organization should be selected in the organization combobox and the word "ALL" in the person combobox too. The following REST method shoud be sent to the server:
 
 **Method:** GET
 
@@ -1743,7 +1743,7 @@ The following REST method should be sent to the server.
 
 
 
-If all the events from an entire zone is need, a zone should be selected in the zone combobox and the word "ALL" in the door combobox too. The following REST method shoud be sent to the server:
+If all the events from an entire zone is needed, a zone should be selected in the zone combobox and the word "ALL" in the door combobox too. The following REST method shoud be sent to the server:
 
 **Method:** GET
 
@@ -1753,7 +1753,7 @@ If all the events from an entire zone is need, a zone should be selected in the 
 
   http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
-If events corresponding to incomings are need, ``side`` variable should be ``1``.
+If events corresponding to incomings are needed, ``side`` variable should be ``1``.
 
 **Method:** GET
 
@@ -1763,7 +1763,7 @@ If events corresponding to incomings are need, ``side`` variable should be ``1``
 
   http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
-If events corresponding to outgoings are need, ``side`` variable should be ``0``.
+If events corresponding to outgoings are needed, ``side`` variable should be ``0``.
 
 **Method:** GET
 
@@ -1773,7 +1773,7 @@ If events corresponding to outgoings are need, ``side`` variable should be ``0``
 
   http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=0&startEvt=1&evtsQtty=10
 
-If events corresponding to incomings and outgoings at the same time are need, the ``side`` variable should be removed from the URI.
+If events corresponding to incomings and outgoings at the same time are needed, the ``side`` variable should be removed from the URI.
 
 **Method:** GET
 
@@ -1784,6 +1784,24 @@ If events corresponding to incomings and outgoings at the same time are need, th
   http://172.18.0.3:5000/api/v1.0/events?startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=1&evtsQtty=10
   
 As can be noticed, if a variable is removed from the URI, the server will return all the events which this variable could filter. The only variables which couldn't be omitted are ``startDateTime``, ``endDateTime``, ``startEvt`` and ``evtsQtty``
+
+
+When **visitors** organization is selected, a combobox **Visiting Organization** and **Is Provider** checkbox should appear.
+
+.. image:: images_front_end_specs/events_searcher_visitors.png
+
+
+If events corresponding to visitors visiting a specific organization are needed, ``visitedOrgId`` variable should be passed.
+Also if events corresponding to visitors that are providers are needed, ``isProvider`` variable should be passed.
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=0&isProvider=1&visitedOrgId=2&startEvt=1&evtsQtty=10
+
 
 
 Of course, all combinations would be possible:
