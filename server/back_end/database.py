@@ -2584,12 +2584,10 @@ class DataBase(object):
         #of the dictionary like quote or double quote.
         person = self.escapeDict(person)
 
-        #Changing None to 'NULL' for writting correct SQL syntax below.
-        if not person['visitedOrgId']:
-            visitedOrgId = 'NULL'
-        else:
-            visitedOrgId = person['visitedOrgId']
-
+        #Changing None to 'NULL' to write correct SQL syntax below.
+        for param in person:
+            if person[param] is None:
+                person[param] = 'NULL'
 
         try:
 
@@ -2608,7 +2606,7 @@ class DataBase(object):
                        "note = '{}', visitedOrgId = {}, isProvider = {}, resStateId = {} "
                        "WHERE id = {}".format(person['names'], person['lastName'], 
                                               person['cardNumber'], person['note'], 
-                                              visitedOrgId, person['isProvider'],
+                                              person['visitedOrgId'], person['isProvider'],
                                               COMMITTED, personId)
                       )
                 self.execute(sql)
@@ -2618,7 +2616,8 @@ class DataBase(object):
                 sql = ("INSERT INTO Person(names, lastName, identNumber, note, cardNumber, orgId, "
                        "visitedOrgId, isProvider, resStateId) VALUES('{}', '{}', '{}', '{}', {}, {}, {}, {}, {})"
                        "".format(person['names'], person['lastName'], person['identNumber'], person['note'],
-                                 person['cardNumber'], person['orgId'], visitedOrgId, person['isProvider'], COMMITTED)
+                                 person['cardNumber'], person['orgId'], person['visitedOrgId'], 
+                                 person['isProvider'], COMMITTED)
 
                      )
                 self.execute(sql)
@@ -2833,9 +2832,8 @@ class DataBase(object):
                     #Setting the "cardNumber" = NULL to be able to use this card in
                     #another future person.
                     #Leaving the "identNumber" stored. In this way, when a person is
-                    #deleted and readded (typically a frequent visitor), with the 
-                    #ON DUPLICATE KEY UPDATE clause of the "addPerson" method, the 
-                    #same row in the database is used, avoiding duplicate with the same person.
+                    #deleted and readded (typically a frequent visitor), the same row 
+                    #in the database is used, avoiding duplicate with the same person.
                     sql = ("UPDATE Person SET cardNumber = NULL, resStateId = {} "
                            "WHERE id = {}".format(DELETED, personId)
                           )
@@ -2924,8 +2922,11 @@ class DataBase(object):
         #of the dictionary like quote or double quote.
         person = self.escapeDict(person)
 
-        if not person['visitedOrgId']:
-            person['visitedOrgId'] = 'NULL'
+
+        #Changing None to 'NULL' to write correct SQL syntax below.
+        for param in person:
+            if person[param] is None:
+                person[param] = 'NULL'
 
 
         try:
