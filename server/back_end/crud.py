@@ -1746,11 +1746,12 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             try:
                 visitedOrgId = request.args.get('visitedOrgId')
+                isProvider = request.args.get('isProvider')
                 doorGroupId = request.args.get('doorGroupId')
                 cardNumber = request.args.get('cardNumber')
                 identNumber = request.args.get('identNumber')
 
-                visitors = self.dataBase.getVisitors(visitedOrgId, doorGroupId, 
+                visitors = self.dataBase.getVisitors(visitedOrgId, isProvider, doorGroupId, 
                                                      cardNumber, identNumber)
                 return jsonify(visitors)
 
@@ -1770,5 +1771,5 @@ class CrudMngr(genmngr.GenericMngr):
 
         self.logger.info('Starting WSGI Server to listen for REST methods..') 
 
-        http_server = WSGIServer(('', 5000), app)
+        http_server = WSGIServer(('0.0.0.0', 5000), app)
         http_server.serve_forever()

@@ -4,6 +4,7 @@ FROM arm32v7/python:3-slim
 # PyMySQL is needed for database connection.
 # pillow is needed to check the person images uploaded format and save them 
 # as an images file in the filesystem.
+# pyarmor is used to run an obfuscate the source code when it is needed.
 
 # gcc is needed to compile
 # libffi-dev and libssl-dev is needed to compile PyMySQL
@@ -20,6 +21,7 @@ pip install --no-cache-dir PyMySQL && \
 pip install --no-cache-dir gevent && \
 pip install --no-cache-dir requests && \
 pip install --no-cache-dir pillow && \
+pip install --no-cache-dir pyarmor && \
 apt-get -y purge libssl-dev libffi-dev gcc zlib1g-dev && \
 apt-get -y autoremove && \
 apt-get -y clean && \
