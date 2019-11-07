@@ -1592,7 +1592,7 @@ class DataBase(object):
 #-----------------------------------Visitors-----------------------------------------
 
 
-    def getVisitors(self, visitedOrgId, doorGroupId, cardNumber, identNumber):
+    def getVisitors(self, visitedOrgId, isProvider, doorGroupId, cardNumber, identNumber):
         '''
         Returns a list with visitors.
         It receive as arguments the ID of the organization the visitor is visiting,
@@ -1610,15 +1610,16 @@ class DataBase(object):
 
         if visitedOrgId:
             visitedOrgFilter = "Person.visitedOrgId = {}".format(visitedOrgId)
-
         else:
             visitedOrgFilter = "Person.visitedOrgId IS NOT NULL"
 
+        if isProvider:
+            isProviderFilter = " AND Person.isProvider = {}".format(isProvider)
+        else:
+            isProviderFilter = ''
 
         if doorGroupId:
-            doorGroupFilter = (" AND DoorGroupDoor.doorGroupId = {}"
-                                    "".format(doorGroupId)
-                                   )
+            doorGroupFilter = " AND DoorGroupDoor.doorGroupId = {}".format(doorGroupId)
         else:
             doorGroupFilter = ''
 
@@ -1629,7 +1630,7 @@ class DataBase(object):
 
         if identNumber:
             identNumberFilter = (" AND Person.identNumber = '{}' AND Person.resStateId = {}"
-                                 .format(identNumber, DELETED)
+                                 "".format(identNumber, DELETED)
                                 )
         else:
             identNumberFilter = " AND Person.resStateId != {}".format(DELETED)
@@ -1647,11 +1648,10 @@ class DataBase(object):
         sql = ("SELECT DISTINCT Person.* FROM Person LEFT JOIN Access ON "
                "(Person.id = Access.personId) LEFT JOIN DoorGroupDoor "
                "ON (Access.doorId = DoorGroupDoor.doorId) "
-               "WHERE {}{}{}{}"
-               "".format(visitedOrgFilter, doorGroupFilter, 
+               "WHERE {}{}{}{}{}"
+               "".format(visitedOrgFilter, isProviderFilter, doorGroupFilter, 
                          cardNumberFilter, identNumberFilter)
               )
-
         try:
             self.execute(sql)
             visitors = self.cursor.fetchall()

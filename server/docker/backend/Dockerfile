@@ -2,8 +2,9 @@ FROM python:3-alpine
 
 # Flask, Flask-HTTPAuth, requests and gevent are needed for REST API server.
 # PyMySQL is needed for database connection.
-# pillow is needed to check the person images uploaded format and save them 
+# pillow is needed to check the person images uploaded format and save them
 # as an images file in the filesystem.
+# pyarmor is used to run an obfuscate the source code when it is needed.
 
 # musl-dev is needed to compile gevent 
 # libffi-dev and openssl-dev is needed to compile PyMySQL
@@ -21,6 +22,7 @@ pip install --no-cache-dir PyMySQL && \
 pip install --no-cache-dir gevent && \
 pip install --no-cache-dir requests && \
 pip install --no-cache-dir pillow && \
+pip install --no-cache-dir pyarmor && \
 cp /usr/share/zoneinfo/America/Argentina/Cordoba /etc/localtime && \
 echo "America/Argentina/Cordoba" > /etc/timezone && \
 apk del openssl-dev libffi-dev musl-dev gcc tzdata zlib-dev && \
