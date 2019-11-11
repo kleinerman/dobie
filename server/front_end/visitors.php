@@ -36,6 +36,16 @@ include("header.php");
 </div>
 </div>
 
+<div class="select-container container-bordered">
+<div class="select-container-title"><?=get_text("Visitor Type",$lang);?></div>
+<div class="select-container-body">
+<br>
+<label><input type="radio" name="form-isprov" value="0" checked> <?=get_text("Non Providers",$lang);?></label><br>
+<label><input type="radio" name="form-isprov" value="1"> <?=get_text("Providers",$lang);?></label><br>
+<label><input type="radio" name="form-isprov" value=""> <?=get_text("All",$lang);?></label>
+</div>
+</div>
+<br><br><br>
 <div class="select-container">
 <div class="select-container-title"><?=get_text("Card Number",$lang);?></div>
 <div class="select-container-body">
@@ -46,7 +56,7 @@ include("header.php");
 <button id="visitors-search-reset" class="btn btn-warning" type="button"><span class="fa fa-power-off"></span> <span class="hidden-xs"><?=get_text("Reset",$lang);?></span></button>
 </div>
 </div>
-
+<br><br>
 </div>
 
 <div class="col-md-4">
@@ -118,6 +128,10 @@ include("footer.php");
 <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Hour",$lang);?>"><input type="text" class="form-control from-input" value="23:59" id="expiration-hour" required><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
 
 <br><br>
+
+<label><input type="checkbox" name="visit-new-isprov" id="visit-new-isprov" value="1"> <?=get_text("Is Provider",$lang);?>?</label>
+<br><br>
+
 <label class="control-label"><?=get_text("Photo",$lang);?>:</label><br>
 <div id="visit-new-video-container" class="video-container"><video autoplay="true" id="visit-new-video-elem" class="video-elem"></video></div>
 <div id="visit-new-screenshot-container" class="hidden screenshot-container"><img src="blank" alt="output image"><canvas id="visit-new-video-canvas"></canvas></div>
@@ -198,6 +212,10 @@ include("footer.php");
 <input type="text" class="form-control small_input" id="visit-edit-cardnum-fc-1" name="cardnumfc1" value="" maxlength="3"> , <input type="text" class="form-control" id="visit-edit-cardnum-fc-2" name="cardnumfc2" value="" maxlength="32">
 
 <br><br>
+
+<label><input type="checkbox" name="visit-edit-isprov" id="visit-edit-isprov" value="1"> <?=get_text("Is Provider",$lang);?>?</label>
+<br><br>
+
 <label class="control-label"><?=get_text("Photo",$lang);?>:</label><br>
 
 <div id="visit-edit-video-container" class="video-container"><video autoplay="true" id="visit-edit-video-elem" class="video-elem"></video></div>
@@ -293,7 +311,7 @@ var localStream="";
 //populate select lists
 populateList("visit-door-groups-select","visit_door_groups");
 populateList("organizations-select","organizations");
-populateList("visitors-select","visitors");
+populateList("visitors-select","visitors","","action=get_visitors&isprov=0");
 
 //init events for cardnum fields (update and live calculation on input)
 addCardnumEvents("visit-edit");
@@ -342,6 +360,8 @@ $('#modal-edit').on('show.bs.modal', function (event){
 					$('#visit-edit-idnum').val(values.identNumber);
 					$('#visit-edit-cardnum').val(values.cardNumber);
 					$('#visit-edit-note').val(values.note);
+					if(values.isProvider==1) $('#visit-edit-isprov').prop("checked",true);
+					else $('#visit-edit-isprov').prop("checked",false);
 					var tempfc=rawToFC(values.cardNumber).split(",");
 					if(tempfc.length==2) {
 						$('#visit-edit-cardnum-fc-1').val(myTrim(tempfc[0]));
@@ -404,6 +424,7 @@ $("#visitors-search, #visitors-refresh").click(function(){
 	var searchVisitDoorGroupId = $('#visit-door-groups-select').val();
 	var searchVisitOrgId = $('#organizations-select').val();
 	var searchCardnum = $('#cardnum').val();
+	var searchIsProv = $('input[name=form-isprov]:checked').val();
 
 	//build post action string
 	var actionStr="action=get_visitors";
@@ -412,6 +433,7 @@ $("#visitors-search, #visitors-refresh").click(function(){
 	if(searchVisitDoorGroupId != null && searchVisitDoorGroupId>0) actionStrParams.push("visitdoorgroupid="+searchVisitDoorGroupId);
 	if(searchVisitOrgId != null && searchVisitOrgId>0) actionStrParams.push("orgid="+searchVisitOrgId);
 	if(searchCardnum != null && searchCardnum>0) actionStrParams.push("cardnum="+searchCardnum);
+	if(searchIsProv!="" && !isNaN(searchIsProv)) actionStrParams.push("isprov="+searchIsProv);
 
 	//join all params and build string
 	if(actionStrParams.length>0) actionStr+="&"+actionStrParams.join("&");
@@ -491,6 +513,8 @@ function resetForm(){
 	$("#visit-door-groups-select-new").val([]);
 	//clear visiting org
 	$("#organizations-select-new").empty();
+	//reset is prov
+	$('#visit-new-isprov').prop("checked",false);
 	editId=0;
 	resetPhotoButtons();
 }
@@ -500,8 +524,8 @@ function resetFormEdit(){
 	$("#visit-edit-names,#visit-edit-lastname,#visit-edit-idnum,#visit-edit-cardnum,#visit-edit-cardnum-fc-1,#visit-edit-cardnum-fc-2,#visit-edit-note").val("");
 	//clear visiting org
 	$("#organizations-select-edit").empty();
-	//modal title
-	$("#modal-new-label").text("<?=get_text("Edit Visitor",$lang);?>");
+	//reset is prov
+	$('#visit-edit-isprov').prop("checked",false);
 	editId=0;
 	resetPhotoButtons();
 }
@@ -524,6 +548,8 @@ $("#visit-idnum").change(function(){
 						$('#visit-lastname').val(values.lastName);
 						$('#visit-new-note').val(values.note);
 						$('#organizations-select-new option[value='+values.visitedOrgId+']').prop("selected",true);
+						if(values.isProvider==1) $('#visit-new-isprov').prop("checked",true);
+						else $('#visit-new-isprov').prop("checked",false);
 						//photo buttons
 						$("#visit-new-video-container,#visit-new-screenshot-button,#visit-new-change-screenshot-button,#visit-new-video-canvas").hide();
 						$("#visit-new-add-screenshot-button").show();
@@ -567,6 +593,9 @@ $("#visit-new-form").submit(function(){
 	var expirationDate = $("#expiration-date").val();
 	var expirationHour = $("#expiration-hour").val();
 	var visitNote = $("#visit-new-note").val();
+	var visitIsProv = $("#visit-new-isprov:checked").val();
+	if(visitIsProv!=1) visitIsProv=0;
+
 	//get all visit door groups doors
 	var visitDoorGroupIds=[];
 	$.each($("#visit-door-groups-select-new option:selected"), function(){
@@ -592,7 +621,7 @@ $("#visit-new-form").submit(function(){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=add_visit&names=" + visitNames + "&lastname=" + visitLastName + "&idnum=" + visitIdNum + "&cardnum=" + visitCardNum + "&orgid=" + visitVisitedOrgId + "&expirationdate=" + expirationDate + "&expirationhour=" + expirationHour + "&note=" + visitNote + "&doorgroupids=" + visitDoorGroupIds.join("|"),
+			data: "action=add_visit&names=" + visitNames + "&lastname=" + visitLastName + "&idnum=" + visitIdNum + "&cardnum=" + visitCardNum + "&orgid=" + visitVisitedOrgId + "&expirationdate=" + expirationDate + "&expirationhour=" + expirationHour + "&note=" + visitNote + "&isprov=" + visitIsProv + "&doorgroupids=" + visitDoorGroupIds.join("|"),
 			success: function(resp){
 				if(resp[0]=='1'){
 					//submit photo if set
@@ -637,6 +666,8 @@ $("#visit-edit-form").submit(function(){
 	var visitCardNum = $('#visit-edit-cardnum').val();
 	var visitVisitedOrgId = $('#organizations-select-edit').val();
 	var visitNote = $("#visit-edit-note").val();
+	var visitIsProv = $("#visit-edit-isprov:checked").val();
+	if(visitIsProv!=1) visitIsProv=0;
 
 	var error = "";
 
@@ -657,7 +688,7 @@ $("#visit-edit-form").submit(function(){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=edit_visit&id="+ editId +"&names=" + visitNames + "&lastname=" + visitLastName + "&idnum=" + visitIdNum + "&cardnum=" + visitCardNum + "&orgid=" + visitVisitedOrgId + "&note=" + visitNote,
+			data: "action=edit_visit&id="+ editId +"&names=" + visitNames + "&lastname=" + visitLastName + "&idnum=" + visitIdNum + "&cardnum=" + visitCardNum + "&orgid=" + visitVisitedOrgId + "&note=" + visitNote + "&isprov=" + visitIsProv,
 			success: function(resp){
 				if(resp[0]=='1'){
 					//submit photo edit if set
@@ -730,18 +761,6 @@ $("#visitors-delete-form").submit(function(){
 	}
 	return false;
 });
-/*
-//Refresh button > repopulate list
-$("#visitors-refresh").click(function(){
-	populateList("visitors-select","visitors");
-	//hide details
-	$('#select-container-visitors-details').hide();
-	//disable edit and del buttons
-	$("#visitors-del,#visitors-edit").prop("disabled",1);
-	//clear filter values
-	$('#visit-door-groups-select option, #organizations-select option').prop("selected",false);
-	$('#cardnum').val("");
-});*/
 </script>
 
 </body>
