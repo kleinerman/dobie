@@ -49,6 +49,18 @@ include("header.php");
 </div>
 </div>
 
+<br><br>
+
+<div class="select-container container-bordered" id="select-container-isprov" style="display:none">
+<div class="select-container-title"><?=get_text("Visitor Type",$lang);?></div>
+<div class="select-container-body">
+<br>
+<label><input type="radio" name="form-isprov" value="0" checked> <?=get_text("Non Providers",$lang);?></label><br>
+<label><input type="radio" name="form-isprov" value="1"> <?=get_text("Providers",$lang);?></label><br>
+<label><input type="radio" name="form-isprov" value=""> <?=get_text("All",$lang);?></label>
+</div>
+</div>
+<br><br>
 </div>
 
 <div class="col-lg-4">
@@ -249,9 +261,9 @@ $("#organizations-select").change(function(){
 		if(organizationId==1) {
 			//populate visitorgs list
 			populateList("visitorgs-select","organizations");
-			$("#select-container-visitorgs").fadeIn();
+			$("#select-container-visitorgs, #select-container-isprov").fadeIn();
 		}
-		else $("#select-container-visitorgs").fadeOut();
+		else $("#select-container-visitorgs, #select-container-isprov").fadeOut();
 	}
 });
 
@@ -300,6 +312,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 	var endDate = $("#endDate").val();
 	var endTime = $("#endTime").val();
 	var visitedOrgId = ((orgId==1) && $("#visitorgs-select").val()!==null) ? $("#visitorgs-select").val() : "";
+	var searchIsProv = (orgId==1) ? $('input[name=form-isprov]:checked').val() : "";
 	var error = "";
 
 	//set default values for date vars
@@ -323,7 +336,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 			$.ajax({
 				type: "POST",
 				url: "process",
-				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + totalEvents + "&visitedorgid=" + visitedOrgId,
+				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + totalEvents + "&visitedorgid=" + visitedOrgId + "&isprov=" + searchIsProv,
 				beforeSend: function(){$(".download-throbber-container").show()},
 				complete: function(resp){$(".download-throbber-container").hide()},
 				success: function(resp){
@@ -347,7 +360,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 			$.ajax({
 				type: "POST",
 				url: "process",
-				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + evtsQtty + "&visitedorgid=" + visitedOrgId,
+				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + evtsQtty + "&visitedorgid=" + visitedOrgId + "&isprov=" + searchIsProv,
 				beforeSend: function(){$("#results-container-inner,#legend-row").hide();$("#pagination-container").html(""); $(".throbber-container").show();},
 				complete: function(resp){/*console.log(resp);*/$(".throbber-container").hide(); $("#results-container-inner").fadeIn()},
 				success: function(resp){
