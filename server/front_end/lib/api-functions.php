@@ -137,7 +137,7 @@ function get_person_image($user,$pass,$id){
 	return $response;
 }
 
-function add_person($user,$pass,$orgid,$names,$lastname,$idnum,$cardnum,$note="",$visitedorgid=null,$isprov=0){
+function add_person($user,$pass,$orgid,$names,$lastname,$idnum,$cardnum,$note="",$visitedorgid=null,$isprov=null){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->orgId= $orgid;
