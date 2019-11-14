@@ -515,9 +515,10 @@ class DataBase(object):
         '''
 
         try:
+            if event['cardNumber'] is None:
+                event['personId'] = None
 
-            if event['cardNumber'] != 'NULL':
-
+            else:
                 sql = "SELECT id FROM Person WHERE cardNumber = {}".format(event['cardNumber'])
                 self.execute(sql)
                 row = self.cursor.fetchone()
@@ -525,15 +526,10 @@ class DataBase(object):
                 if row:
                     personId = int(row['id'])
                 else:
-                    personId = 'NULL'
-
+                    personId = None
                 event['personId'] = personId
 
-            else:
-                event['personId'] = 'NULL'
-
             event.pop('cardNumber')
-
 
 
         except KeyError:
