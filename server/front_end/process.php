@@ -498,8 +498,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$endtime = (isset($_POST['endtime'])) ? $_POST['endtime'] : "00:00";
 				$startevt = (isset($_POST['startevt']) and is_numeric($_POST['startevt'])) ? intval($_POST['startevt']) : 1;
 				$evtsqtty = (isset($_POST['evtsqtty']) and is_numeric($_POST['evtsqtty'])) ? intval($_POST['evtsqtty']) : 15;
+				$isprov = (isset($_POST['isprov']) and is_numeric($_POST['isprov'])) ? intval($_POST['isprov']) : "";
 
-				$events_rec=get_events($logged->name, $logged->pw, $orgid, $personid, $zoneid, $doorid, $side, $startdate, $starttime, $enddate, $endtime, $startevt, $evtsqtty, $visitedorgid);
+				$events_rec=get_events($logged->name, $logged->pw, $orgid, $personid, $zoneid, $doorid, $side, $startdate, $starttime, $enddate, $endtime, $startevt, $evtsqtty, $visitedorgid, $isprov);
 
 				if($events_rec and $events_rec->response_status==200) array_push($ret,1,$events_rec->data);
 				else array_push($ret,0,$events_rec->data->message);
@@ -762,8 +763,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? intval($_POST['orgid']) : "";
 				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
 				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
+				$isprov = (isset($_POST['isprov']) and is_numeric($_POST['isprov'])) ? intval($_POST['isprov']) : "";
 
-				$visitors_rec=get_visitors($logged->name, $logged->pw, $visitdoorgroupid, $orgid, $cardnum, $idnum);
+				$visitors_rec=get_visitors($logged->name, $logged->pw, $visitdoorgroupid, $orgid, $cardnum, $idnum, $isprov);
 
 				if($visitors_rec and $visitors_rec->response_status==200) array_push($ret,1,$visitors_rec->data);
 				else array_push($ret,0,$visitors_rec->data->message);
@@ -781,8 +783,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$expirationhour = isset($_POST['expirationhour']) ? $_POST['expirationhour'] : "23:59";
 				$doorgroupids = isset($_POST['doorgroupids']) ? $_POST['doorgroupids'] : "";
 				$note = isset($_POST['note']) ? $_POST['note'] : "";
+				$isprov = (isset($_POST['isprov']) and is_numeric($_POST['isprov'])) ? intval($_POST['isprov']) : "";
 
-				$visit_rec = add_visit($logged->name, $logged->pw, $names, $lastname, $idnum, $cardnum, $orgid, $expirationdate, $expirationhour, $doorgroupids, $note);
+				$visit_rec = add_visit($logged->name, $logged->pw, $names, $lastname, $idnum, $cardnum, $orgid, $expirationdate, $expirationhour, $doorgroupids, $note, $isprov);
 
 				//if($visit_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
 				//else array_push($ret,0,$visit_rec->data->message);
@@ -804,10 +807,11 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
 				$note = isset($_POST['note']) ? $_POST['note'] : "";
 				$orgid = isset($_POST['orgid']) ? $_POST['orgid'] : "";
+				$isprov = (isset($_POST['isprov']) and is_numeric($_POST['isprov'])) ? intval($_POST['isprov']) : "";
 
 				if($id=="") array_push($ret,0,"Invalid values sent");
 	    			else {
-					$persons_rec = set_visit($logged->name, $logged->pw, $id, $names, $lastname, $idnum, $cardnum, $note, $orgid);
+					$persons_rec = set_visit($logged->name, $logged->pw, $id, $names, $lastname, $idnum, $cardnum, $note, $orgid, $isprov);
 
 					if($persons_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"Person could not be updated");

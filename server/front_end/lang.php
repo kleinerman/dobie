@@ -88,11 +88,11 @@ $dictionary = array(
 	),
 	strtolower('Door Groups') => array(
 		'es' => 'Grupos de Puertas',
-		'es' => 'Türengruppe'
+		'de' => 'Türengruppe'
 	),
 	strtolower('Manage Visitors') => array(
 		'es' => 'Administrar Visitas',
-		'es' => 'Besuch verwalten'
+		'de' => 'Besuch verwalten'
 	),
 	strtolower('Organizations') => array(
 		'es' => 'Organizaciones',
@@ -528,6 +528,21 @@ $dictionary = array(
 		'es' => 'Visita seleccionada inválida',
 		'de' => 'ausgewählte Bescuher unerkennbar'
 	),
+	strtolower('Is Provider') => array(
+		'es' => 'Es Proveedor'
+	),
+	strtolower('Non Providers') => array(
+		'es' => 'No Proveedores'
+	),
+	strtolower('Providers') => array(
+		'es' => 'Proveedores'
+	),
+	strtolower('Visitor Type') => array(
+		'es' => 'Tipo de Visita'
+	),
+	strtolower('All') => array(
+		'es' => 'Todos'
+	),
 
 	//organizations
 	strtolower('New Organization') => array(
@@ -855,7 +870,7 @@ $dictionary = array(
 	),
 	strtolower('Password and confirmation don\'t match') => array(
 		'es' => 'Contraseña y confirmación no coinciden',
-		'es' => 'Kennwort und Bestätigung stimmen nicht überein'
+		'de' => 'Kennwort und Bestätigung stimmen nicht überein'
 	),
 	strtolower('Invalid role sent') => array(
 		'es' => 'Rol enviado inválido',
