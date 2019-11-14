@@ -113,9 +113,8 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$idnum = isset($_POST['idnum']) ? $_POST['idnum'] : "";
 				$cardnum = isset($_POST['cardnum']) ? $_POST['cardnum'] : "";
 				$note = isset($_POST['note']) ? $_POST['note'] : "";
-				$isprov = (isset($_POST['isprov']) and is_numeric($_POST['isprov'])) ? intval($_POST['isprov']) : "";
 
-				$persons_rec = add_person($logged->name, $logged->pw, $orgid, $names, $lastname, $idnum, $cardnum, $note, $isprov);
+				$persons_rec = add_person($logged->name, $logged->pw, $orgid, $names, $lastname, $idnum, $cardnum, $note);
 				//if($persons_rec) array_push($ret,1,"Information saved successfully!");
 				//else array_push($ret,0,"Person could not be added");
 				if($persons_rec->response_status == "201"){
