@@ -239,7 +239,7 @@ class StarterAlrmMngr(genmngr.GenericMngr):
                          'eventTypeId' : 3,
                          'dateTime' : dateTime,
                          'doorLockId' : None,
-                         'personId' : None,
+                         'cardNumber' : None,
                          'side' : None,
                          'allowed' : None,
                          'denialCauseId' : None
