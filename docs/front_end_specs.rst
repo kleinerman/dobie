@@ -469,8 +469,9 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"names": "Carlos Ruben", "lastName": "Alvarez", "identNumber": "27063146", "note": "This person has a blue car", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null}
+  {"names": "Carlos Ruben", "lastName": "Alvarez", "identNumber": "27063146", "note": "This person has a blue car", "cardNumber": 5300768, "orgId": 3, "visitedOrgId": null, "isProvider": 0}
   
+Note: When adding a person (not a visitor), ``visitedOrgId`` will always be ``null`` and ``isProvider`` will always be ``0``
   
 **Response:**
 
@@ -1684,7 +1685,8 @@ In the second screen screen organization, person, zone, door, direction, start d
 
 .. image:: images_front_end_specs/events_searcher.png
 
-If an organization is selected, the person combobox should show all the persons of this organization and one of them should be selected by the user.
+If an organization is selected, the **Person** combobox should show all the persons of this organization and one of them should be selected by the user.
+If **visitors** organization is selected, also **Visiting Organization** combobox should appear showing all the organizations the visitor could visit and the checkbox to indicate that we want to look for a provider.
 To get from server the current list of persons of an organization, see `Get Persons`_ section.
 
 The following REST method should be sent to the server.
@@ -1702,7 +1704,7 @@ The following REST method should be sent to the server.
 ``evtsQtty`` variable should be the quantity of events returned from server starting from ``startEvt``
 
   
-If all the events from an entire organization is need, an organization should be selected in the organization combobox and the word "ALL" in the person combobox too. The following REST method shoud be sent to the server:
+If all the events from an entire organization is needed, an organization should be selected in the organization combobox and the word "ALL" in the person combobox too. The following REST method shoud be sent to the server:
 
 **Method:** GET
 
@@ -1741,7 +1743,7 @@ The following REST method should be sent to the server.
 
 
 
-If all the events from an entire zone is need, a zone should be selected in the zone combobox and the word "ALL" in the door combobox too. The following REST method shoud be sent to the server:
+If all the events from an entire zone is needed, a zone should be selected in the zone combobox and the word "ALL" in the door combobox too. The following REST method shoud be sent to the server:
 
 **Method:** GET
 
@@ -1751,7 +1753,7 @@ If all the events from an entire zone is need, a zone should be selected in the 
 
   http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
-If events corresponding to incomings are need, ``side`` variable should be ``1``.
+If events corresponding to incomings are needed, ``side`` variable should be ``1``.
 
 **Method:** GET
 
@@ -1761,7 +1763,7 @@ If events corresponding to incomings are need, ``side`` variable should be ``1``
 
   http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=1&startEvt=1&evtsQtty=10
 
-If events corresponding to outgoings are need, ``side`` variable should be ``0``.
+If events corresponding to outgoings are needed, ``side`` variable should be ``0``.
 
 **Method:** GET
 
@@ -1771,7 +1773,7 @@ If events corresponding to outgoings are need, ``side`` variable should be ``0``
 
   http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=0&startEvt=1&evtsQtty=10
 
-If events corresponding to incomings and outgoings at the same time are need, the ``side`` variable should be removed from the URI.
+If events corresponding to incomings and outgoings at the same time are needed, the ``side`` variable should be removed from the URI.
 
 **Method:** GET
 
@@ -1782,6 +1784,24 @@ If events corresponding to incomings and outgoings at the same time are need, th
   http://172.18.0.3:5000/api/v1.0/events?startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&startEvt=1&evtsQtty=10
   
 As can be noticed, if a variable is removed from the URI, the server will return all the events which this variable could filter. The only variables which couldn't be omitted are ``startDateTime``, ``endDateTime``, ``startEvt`` and ``evtsQtty``
+
+
+When **visitors** organization is selected, a combobox **Visiting Organization** and **Is Provider** checkbox should appear.
+
+.. image:: images_front_end_specs/events_searcher_visitors.png
+
+
+If events corresponding to visitors visiting a specific organization are needed, ``visitedOrgId`` variable should be passed.
+Also if events corresponding to visitors that are providers are needed, ``isProvider`` variable should be passed.
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.3:5000/api/v1.0/events?zoneId=1&startDateTime=2017-08-16+20:21&endDateTime=2017-10-16+20:27&side=0&isProvider=1&visitedOrgId=2&startEvt=1&evtsQtty=10
+
 
 
 Of course, all combinations would be possible:
@@ -2514,7 +2534,7 @@ When the **Add Visitor** button is pressed, the following popup should appear:
 
 .. image:: images_front_end_specs/add_visitor.png
 
-The visitor should be added in the same way a person is added in section: `Add Person`_ of section Persons with the only difference that the field **orgId** should be always equal to 1 since all visitors belong to organization "Visitors" and **visitedOrgId** should have the ID of the organization the visitor is going to visit.
+The visitor should be added in the same way a person is added in section: `Add Person`_ of section Persons with the only difference that the field **orgId** should be always equal to **1** since all visitors belong to organization "Visitors", **visitedOrgId** should have the ID of the organization the visitor is going to visit and **isProvider** should be **1** or **0** if the visitor is a provider or not.
 
 
 
@@ -2532,7 +2552,7 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"name": "Ruben Juearez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 1, "visitedOrgId": 4}
+  {"name": "Ruben Juearez", "identNumber": "27063146", "cardNumber": 5300768, "orgId": 1, "visitedOrgId": 4, "isProvider": 1}
   
   
 **Response:**
@@ -2557,7 +2577,7 @@ The following REST method should be sent to the server:
 | Visiting organization combobox should show all the organizations. The **visitedOrgId** field of visitor's JSON should be the ID of the organization selected in this combobox. To get all the organizations, see `Get Organizations`_
 | To fill the combobox **Visit Door Group**, all Door Groups should be retrieved and only the ones which has the field "isForVisit" equal to 1 should be used. To do it, see `Get Door Groups`_.
 | All the doors of the selected Visit Door Group should be retrieved. To do it, see `Get the doors from a Door Group`_.
-| Once we have all the doors, an **All Week Access** should be created for the visitor in each door of the group. The expiration date of the access should be the expiration selected in the pop up. By default it should expires at 23:59 of the current day.
+| Once we have all the doors, an **All Week Access** should be created for the visitor in each door of the group in both directions (``iSide = 1`` and ``oSide = 1``). The expiration date of the access should be the expiration selected in the pop up. By default it should expires at 23:59 of the current day.
 | To give access see: `Add All Week Access`_
 
 
