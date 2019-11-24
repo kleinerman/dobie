@@ -313,7 +313,9 @@ class DoorsControl(object):
                                                   'openDoor': threading.Event(),
                                                   #Event object to know when the "starterAlrmMngrMngr" thread
                                                   #is alive to avoid creating more than once
-                                                  'starterAlrmMngrAlive': threading.Event()
+                                                  'starterAlrmMngrAlive': threading.Event(),
+                                                  #Event to know when the door was opened by schedule
+                                                  'openedBySkd': threading.Event()
                                                  }
 
 
@@ -326,5 +328,88 @@ class DoorsControl(object):
             return self.params[doorNum]['doorId']
         except KeyError:
             raise DoorNotConfigured
+
+
+
+
+
+class OpenDoorSkdMngr(genmngr.GenericMngr):
+    '''
+    This thread opens and closes all the doors of the controller
+    using the information retrieved from OpenDoorsSkd table. 
+    It generates events when the door change the state.
+    '''
+
+
+    def __init__(self, lockDoorsControl, doorsControl, exitFlag):
+
+        #Invoking the parent class constructor, specifying the thread name, 
+        #to have a understandable log file.
+        super().__init__('OpenDoorSkdMngr', exitFlag)
+
+        #When receiving a door CRUD is necessary to re launch the ioiface proccess.
+        #For this reason it is necessary a reference to "ioIface" object.
+        self.lockDoorsControl = lockDoorsControl
+        self.doorsControl = doorsControl
+
+
+
+        #Calculating the number of iterations before sending the message to request
+        #re provisioning the controller.
+        self.ITERATIONS = CHECK_OPEN_DOORS_MINS * 60 // EXIT_CHECK_TIME
+
+        #This is the actual iteration. This value is incremented in each iteration
+        #and is initializated to 0.
+        self.iteration = 0
+
+
+
+
+
+    def run(self):
+        '''
+        Every CONSIDER_DIED_MINS minutes it checks in database if there are controllers
+        which didn't send its corresponding keep alive message.
+        It wakes up every EXIT_CHECK_TIME seconds to see if the main thread ask it to finish. 
+        '''
+
+        #First of all, the database should be connected by the execution of this thread
+        dataBase = database.DataBase(DB_FILE)
+
+
+        while True:
+            #Blocking until EXIT_CHECK_TIME expires 
+            time.sleep(EXIT_CHECK_TIME)
+            self.checkExit()
+
+            if self.iteration >= self.ITERATIONS:
+                logMsg = 'Checking Open Door Schedule.'
+                self.logger.debug(logMsg)
+                self.iteration = 0
+
+                with self.lockDoorsControl:
+
+                    doorsToOpenBySkd = dataBase.getDoorsToOpenBySkd()
+                    for doorNum in self.doorsControl.params:
+                        doorControl = self.doorsControl.params[doorNum]
+                        doorId = doorControl['doorId']
+
+                        if doorId in doorsToOpenBySkd:
+                            logMsg = 'Door: {} is opened by schedule'.format(doorId)
+                            self.logger.debug(logMsg)
+                            doorControl['openedBySkd'].set()
+                            doorControl['doorObj'].release(True)
+                        else:
+                            logMsg = 'Door: {} is closed by schedule'.format(doorId)
+                            self.logger.debug(logMsg)
+                            doorControl['openedBySkd'].clear()
+                            doorControl['doorObj'].release(False)
+
+
+            else:
+                self.iteration += 1
+
+
+
 
 
