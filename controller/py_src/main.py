@@ -80,6 +80,10 @@ class Controller(object):
         #Creating the Net Manager Thread 
         self.netMngr = network.NetMngr(netToEvent, self.netToReSnd, self.crudMngr, self.exitFlag)        
 
+        #Scheduler thread
+        self.openDoorSkdMngr = door.OpenDoorSkdMngr(self.lockDoorsControl, self.doorsControl, self.exitFlag)
+
+
         #Setting internal crudMngr reference to netMngr thread to be able to answer
         #once the CRUD where commited in DB
         self.crudMngr.netMngr = self.netMngr
@@ -137,7 +141,7 @@ class Controller(object):
             doorControl['timeAccessPermit'] = datetime.datetime.now()
     
 
-            if not doorControl['cleanerDoorMngrAlive'].is_set():
+            if not doorControl['cleanerDoorMngrAlive'].is_set() and not doorControl['openedBySkd'].is_set():
                 doorControl['cleanerDoorMngrAlive'].set()
                 cleanerDoorMngr = door.CleanerDoorMngr(doorControl, self.exitFlag)
                 cleanerDoorMngr.start()
@@ -315,6 +319,10 @@ class Controller(object):
 
         #Starting the "CRUD Manager" thread
         self.crudMngr.start()
+
+
+        self.openDoorSkdMngr.start()
+
 
         #Starting the "Re Sender" thread because in the database there may be events to resend 
         if not self.resenderAlive.is_set():
