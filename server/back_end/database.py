@@ -534,15 +534,15 @@ class DataBase(object):
 
         except KeyError:
             self.logger.debug("Error in cardNum2PrsnId method indexing.")
-            raise EventError
+            raise EventError("The event has not cardNumber field.")
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise EventError
+            raise EventError("SQL error trying to get personId with card number")
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise EventError
+            raise EventError("SQL error trying to get personId with card number")
 
 
 
@@ -616,11 +616,11 @@ class DataBase(object):
 
         except pymysql.err.ProgrammingError as programmingError:
             self.logger.debug(programmingError)
-            raise EventError
+            raise EventError("SQL error trying to get event information.")
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise EventError
+            raise EventError("SQL error trying to get event information.")
 
 
 
@@ -664,7 +664,7 @@ class DataBase(object):
         #Also, if startDateTime or endDateTime is None and EventError will be
         #raised.
         if startEvt < 1 or evtsQtty < 1 or not startDateTime or not endDateTime: 
-            raise EventError
+            raise EventError("Error trying to get event list with specified parameters.")
 
         #The startEvt value is substracted one since SQL starts indexing on 0.
         startEvtSql = startEvt - 1
@@ -733,7 +733,7 @@ class DataBase(object):
             #This exception is converted to BadRequest in crud.py module
             #However this would never happen since both parametters are checked 
             #in the first part of the method
-            raise EventError
+            raise EventError("SQL error while trying to get event list.")
 
         
 
@@ -2595,7 +2595,10 @@ class DataBase(object):
             self.execute(sql)
             row = self.cursor.fetchone()
 
-            if row and person['visitedOrgId']:
+            #If there is a visitor with this identNumber (row not None) and the 
+            #person we are adding is a visitor (person['visitedOrgId'] != 'NULL')
+            #we are going to update the existing row instead of adding.
+            if row and person['visitedOrgId'] != 'NULL':
                 personId = row['id']
 
                 sql = ("UPDATE Person SET names = '{}', lastName = '{}', cardNumber = {}, "
