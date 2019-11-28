@@ -147,6 +147,7 @@ class CrudReSndr(genmngr.GenericMngr):
                         person.pop('lastName')
                         person.pop('orgId')
                         person.pop('visitedOrgId')
+                        person.pop('isProvider')
                         #"updPerson" method receive a list of MAC addresses to update. Because in this case only one
                         #controller is being updated, a list with only the MAC address of the controller is created.
                         self.ctrllerMsger.updPerson([ctrllerMac], person)
