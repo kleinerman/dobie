@@ -316,8 +316,6 @@ class DataBase(object):
 
 
 
-
-
     def connect(self):
         '''
         Try to connect to DB engine. If DB engine is not available,
@@ -328,14 +326,15 @@ class DataBase(object):
         while True:
             try:
                 self.logger.info('Connecting to database...')
-                self.connection = pymysql.connect(self.host, self.user, 
+                self.connection = pymysql.connect(self.host, self.user,
                                                   self.passwd, self.dataBase,
                                                   connect_timeout = EXIT_CHECK_TIME,
                                                   client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
                                                   #With this client_flag, cursor.rowcount will have
                                                   #found rows instead of affected rows
                 self.logger.info('Database connected.')
-                # The following line makes all "fetch" calls return a dictionary instead a tuple
+                #The argument "pymysql.cursors.DictCursor" makes all "fetch" calls
+                #return a dictionary instead a tuple.
                 self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
                 break
 
@@ -347,16 +346,12 @@ class DataBase(object):
                     self.callingMngr.checkExit()
                     time.sleep(EXIT_CHECK_TIME)
                 else:
-                    #This situation will happen when the DataBase instance is not created by a 
+                    #This situation will happen when the DataBase instance is not created by a
                     #thread ("self.callingMngr" is None). This is used when we want to avoid
-                    #trying reconnect to the DB engine. This will be used in the 
+                    #trying reconnect to the DB engine. This will be used in the
                     #script "purgeevents.py". If there is no connection to the DB engine,
                     #the script should finish and not remain trying to reconnect.
                     raise NotReachable
-
-
-
-
 
 
 
@@ -366,18 +361,35 @@ class DataBase(object):
         This method is a wrapper of cursor.execute(). It tries to execute the "sql"
         string, if database is not connected, it reconnect and execute the statement.
         '''
+        while True:
+            try:
+                self.cursor.execute(sql)
+                self.connection.commit()
+                break
 
-        try:
-            self.cursor.execute(sql)
-            self.connection.commit()
+            except (pymysql.err.OperationalError, pymysql.err.InterfaceError, pymysql.err.InternalError):
+                self.logger.info("Database is not connected. Reconnecting...")
+                self.connect()
 
-        except (pymysql.err.OperationalError, pymysql.err.InterfaceError, pymysql.err.InternalError):
-            self.logger.info("Database is not connected. Reconnecting...")
-            self.connect()
-            self.cursor.execute(sql)
-            self.connection.commit()
-            
 
+
+
+    def execUsingNewCursor(self, sql):
+        '''
+        This method is a wrapper of cursor.execute(). It tries to execute the "sql"
+        string, if database is not connected, it reconnect and execute the statement.
+        '''
+        while True:
+            try:
+                #Creating a new cursor
+                cursor = self.connection.cursor(pymysql.cursors.DictCursor)
+                cursor.execute(sql)
+                self.connection.commit()
+                return cursor
+
+            except (pymysql.err.OperationalError, pymysql.err.InterfaceError, pymysql.err.InternalError):
+                self.logger.info("Database is not connected. Reconnecting...")
+                self.connect()
 
 
 
@@ -2234,24 +2246,20 @@ class DataBase(object):
         "self.cursor", a separated cursor is created (not happening today)
         '''
         try:
-
-            localCursor = self.connection.cursor(pymysql.cursors.DictCursor)
-
             sql = ("SELECT Door.* FROM Door JOIN Controller "
                    "ON (Door.controllerId = Controller.id) "
                    "WHERE Controller.macAddress = '{}' AND "
                    "resStateId = {}".format(ctrllerMac, resStateId))
 
 
-            localCursor.execute(sql)
-            self.connection.commit()
-            door = localCursor.fetchone()
+            cursor = self.execUsingNewCursor(sql)
+            door = cursor.fetchone()
 
             while door:
                 #Removing fields that should not be sent to the controller
                 door.pop('resStateId')
                 yield door
-                door = localCursor.fetchone()
+                door = cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -2533,7 +2541,6 @@ class DataBase(object):
         '''
 
         try:
-            localCursor = self.connection.cursor(pymysql.cursors.DictCursor)
             sql = ("SELECT person.* FROM "
                    "Person person JOIN PersonPendingOperation personPendingOperation ON "
                    "(person.id = personPendingOperation.personId) WHERE "
@@ -2541,15 +2548,14 @@ class DataBase(object):
                    "".format(ctrllerMac, resStateId)
                   )
 
-            localCursor.execute(sql)
-            self.connection.commit()
-            person = localCursor.fetchone()
+            cursor = self.execUsingNewCursor(sql)
+            person = cursor.fetchone()
 
             while person:
                 #Removing the resStateId as this field should not be sent to the controller
                 person.pop('resStateId')
                 yield person
-                person = localCursor.fetchone()
+                person = cursor.fetchone()
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
@@ -3214,9 +3220,6 @@ class DataBase(object):
         '''
 
         try:
-
-            localCursor = self.connection.cursor(pymysql.cursors.DictCursor)
-
             sql = ("LOCK TABLES Controller WRITE, "
                    "Door WRITE, Person WRITE, "
                    "Access WRITE, LimitedAccess WRITE"
@@ -3230,9 +3233,8 @@ class DataBase(object):
                    "AND Controller.macAddress = '{}' AND Access.resStateId = {}"
                    "".format(ctrllerMac, resStateId)
                   )
-            localCursor.execute(sql)
-            self.connection.commit()
-            access = localCursor.fetchone()
+            cursor = self.execUsingNewCursor(sql)
+            access = cursor.fetchone()
 
             while access:
                 self.execute("UNLOCK TABLES")
@@ -3265,7 +3267,7 @@ class DataBase(object):
                       )
                 self.execute(sql)
                 
-                access = localCursor.fetchone()
+                access = cursor.fetchone()
 
             self.execute("UNLOCK TABLES")
 
@@ -3599,9 +3601,6 @@ class DataBase(object):
 
         
         try:
-            localCursorOne = self.connection.cursor(pymysql.cursors.DictCursor)
-            localCursorTwo = self.connection.cursor(pymysql.cursors.DictCursor)
-
             sql = ("LOCK TABLES Controller WRITE, "
                    "Door WRITE, Person WRITE, "
                    "Access WRITE, LimitedAccess WRITE"
@@ -3615,9 +3614,8 @@ class DataBase(object):
                    "Controller.macAddress = '{}' AND LimitedAccess.resStateId = {}"
                    "".format(ctrllerMac, resStateId)
                   )
-            localCursorOne.execute(sql)
-            self.connection.commit()
-            liAccess = localCursorOne.fetchone()
+            cursorForLiAccess = self.execUsingNewCursor(sql)
+            liAccess = cursorForLiAccess.fetchone()
 
 
             while liAccess:
@@ -3626,9 +3624,8 @@ class DataBase(object):
                 sql = ("SELECT id, expireDate FROM Access WHERE doorId = {} AND personId = {}"
                        "".format(liAccess['doorId'], liAccess['personId'])
                       )
-                localCursorTwo.execute(sql)
-                self.connection.commit()
-                row = localCursorTwo.fetchone()
+                cursorForAccess = self.execUsingNewCursor(sql)
+                row = cursorForAccess.fetchone()
 
                 if not row:
                     #If there are entries in "LimitedAccess" table which doesn't have its corresponding entry in "Access" 
@@ -3638,8 +3635,7 @@ class DataBase(object):
                     sql = ("DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}"
                            "".format(liAccess['doorId'], liAccess['personId'])
                           )
-                    localCursorTwo.execute(sql)
-                    self.connection.commit()
+                    self.execUsingNewCursor(sql)
                     self.execute("UNLOCK TABLES")
                     raise AccessError('Inconsistency between Access and LimitedAccess')
 
@@ -3678,7 +3674,7 @@ class DataBase(object):
                       )
                 self.execute(sql)
 
-                liAccess = localCursorOne.fetchone()
+                liAccess = cursorForLiAccess.fetchone()
 
             self.execute("UNLOCK TABLES")
 
