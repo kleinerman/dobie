@@ -2242,8 +2242,10 @@ class DataBase(object):
         not committed with the state "resStateId" from the controller
         with the MAC address "ctrllerMac"
         NOTE: As this method is an iterator and its execution is interrupted
-        in each iteration and between each iteration another method can be executed using
-        "self.cursor", a separated cursor is created (not happening today)
+        in each iteration, and between each iteration another method can call
+        "self.execute" which uses the common cursor, the SQL sentences are
+        executed using "self.execUsingNewCursor" which creates a new cursor
+        to maintain the sequence. (This situation is not happening today)
         '''
         try:
             sql = ("SELECT Door.* FROM Door JOIN Controller "
@@ -2536,8 +2538,10 @@ class DataBase(object):
         not committed with the state "resStateId" from the controller
         with the MAC address "ctrllerMac"
         NOTE: As this method is an iterator and its execution is interrupted
-        in each iteration and between each iteration another method can be executed using
-        "self.cursor", a separated cursor is created (not happening today)
+        in each iteration, and between each iteration another method can call
+        "self.execute" which uses the common cursor, the SQL sentences are
+        executed using "self.execUsingNewCursor" which creates a new cursor
+        to maintain the sequence. (This situation is not happening today)
         '''
 
         try:
@@ -3214,9 +3218,15 @@ class DataBase(object):
         "LimitedAccess" table to avoid inconsistency. As this method is an iterator and its
         execution is interrupted, each time it yields a value, it leave the tables unlocked 
         each time it yields a value and re locks them when it continues.
-        NOTE 2: As this method is an iterator and its execution is interrupted
-        in each iteration and between each iteration another method can be executed using
-        "self.cursor", a separated cursor is created (not happening today)
+        NOTE 2: As this method is an iterator and every time it yields an access it is
+        needed to execute the "UNLOCK TABLES" SQL sentence, the SQL sentence to retrieve
+        the access are executed using "self.execUsingNewCursor" which creates a new cursor
+        to maintain the sequence.
+        Also, as this method is an iterator and its execution is interrupted in each
+        iteration, and between each iteration another method can call "self.execute" which
+        uses the common cursor, the SQL sentences are executed using "self.execUsingNewCursor"
+        which creates a new cursor to maintain the sequence. (The last situation is not
+        happening today)
         '''
 
         try:
@@ -3592,11 +3602,16 @@ class DataBase(object):
         controller need it to add the person dinamically in its Person table.
         NOTE 1: When this method access to "LimitedAccess" and "Access" table, it locks
         the "Access" and "LimitedAccess" table to avoid inconsistency. As this method is an 
-        iterator and its execution is interrupted, each time it yields a value, it leave the tables 
-        unlocked each time it yields a value and re lock them when it continues.
-        NOTE 2: As this method is an iterator and its execution is interrupted
-        in each iteration and between each iteration another method can be executed using
-        "self.cursor", a separated cursor is created (not happening today)
+        iterator and its execution is interrupted, each time it yields a value, it leave the
+        tables unlocked each time it yields a value and re lock them when it continues.
+        NOTE 2: As this method is an iterator and every time it yields a limited access it is
+        needed to execute the "UNLOCK TABLES" SQL sentence, the SQL sentence to retrieve
+        the limited access are executed using "self.execUsingNewCursor" which creates a new
+        cursor to maintain the sequence.
+        Also, as this method is an iterator and its execution is interrupted in each iteration,
+        and between each iteration another method can call "self.execute" which uses the common
+        cursor, the SQL sentences are executed using "self.execUsingNewCursor" which creates a
+        new cursor to maintain the sequence. (The last situation is not happening today)
         '''
 
         
