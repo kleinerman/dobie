@@ -145,8 +145,10 @@ class CleanerDoorMngr(genmngr.GenericMngr):
             elapsedTime = int(elapsedTime.total_seconds())
 
             if  elapsedTime >= self.rlseTime:
-                self.logger.debug("Unreleasing the door {}.".format(self.doorId))
-                self.doorObj.release(False)
+                #relocking the door if it shouldn't be kept unlocked by schedule
+                if not self.doorControl['unlkedBySkd'].is_set():
+                    self.logger.debug("Locking door {}.".format(self.doorId))
+                    self.doorObj.release(False)
                 #Once the door was closed, if somebody opens the door, will be 
                 #considered an unpermitted access since the following event wil be cleared
                 self.accessPermit.clear()
@@ -314,8 +316,8 @@ class DoorsControl(object):
                                                   #Event object to know when the "starterAlrmMngrMngr" thread
                                                   #is alive to avoid creating more than once
                                                   'starterAlrmMngrAlive': threading.Event(),
-                                                  #Event to know when the door was opened by schedule
-                                                  'openedBySkd': threading.Event()
+                                                  #Event to know when the door was unlocked by schedule
+                                                  'unlkedBySkd': threading.Event()
                                                  }
 
 
@@ -333,7 +335,7 @@ class DoorsControl(object):
 
 
 
-class OpenDoorSkdMngr(genmngr.GenericMngr):
+class UnlkDoorSkdMngr(genmngr.GenericMngr):
     '''
     This thread opens and closes all the doors of the controller
     using the information retrieved from OpenDoorsSkd table. 
@@ -345,7 +347,7 @@ class OpenDoorSkdMngr(genmngr.GenericMngr):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
-        super().__init__('OpenDoorSkdMngr', exitFlag)
+        super().__init__('UnlkDoorSkdMngr', exitFlag)
 
         #When receiving a door CRUD is necessary to re launch the ioiface proccess.
         #For this reason it is necessary a reference to "ioIface" object.
@@ -383,26 +385,26 @@ class OpenDoorSkdMngr(genmngr.GenericMngr):
             self.checkExit()
 
             if self.iteration >= self.ITERATIONS:
-                logMsg = 'Checking Open Door Schedule.'
+                logMsg = 'Checking Unlock Door Schedule.'
                 self.logger.debug(logMsg)
                 self.iteration = 0
 
                 with self.lockDoorsControl:
 
-                    doorsToOpenBySkd = dataBase.getDoorsToOpenBySkd()
+                    doorsToUnlkBySkd = dataBase.getDoorsToUnlkBySkd()
                     for doorNum in self.doorsControl.params:
                         doorControl = self.doorsControl.params[doorNum]
                         doorId = doorControl['doorId']
 
-                        if doorId in doorsToOpenBySkd:
+                        if doorId in doorsToUnlkBySkd:
                             logMsg = 'Door: {} is opened by schedule'.format(doorId)
                             self.logger.debug(logMsg)
-                            doorControl['openedBySkd'].set()
+                            doorControl['unlkedBySkd'].set()
                             doorControl['doorObj'].release(True)
                         else:
                             logMsg = 'Door: {} is closed by schedule'.format(doorId)
                             self.logger.debug(logMsg)
-                            doorControl['openedBySkd'].clear()
+                            doorControl['unlkedBySkd'].clear()
                             doorControl['doorObj'].release(False)
 
 

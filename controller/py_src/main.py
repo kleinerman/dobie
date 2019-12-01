@@ -81,7 +81,7 @@ class Controller(object):
         self.netMngr = network.NetMngr(netToEvent, self.netToReSnd, self.crudMngr, self.exitFlag)        
 
         #Scheduler thread
-        self.openDoorSkdMngr = door.OpenDoorSkdMngr(self.lockDoorsControl, self.doorsControl, self.exitFlag)
+        self.unlkDoorSkdMngr = door.UnlkDoorSkdMngr(self.lockDoorsControl, self.doorsControl, self.exitFlag)
 
 
         #Setting internal crudMngr reference to netMngr thread to be able to answer
@@ -141,7 +141,7 @@ class Controller(object):
             doorControl['timeAccessPermit'] = datetime.datetime.now()
     
 
-            if not doorControl['cleanerDoorMngrAlive'].is_set() and not doorControl['openedBySkd'].is_set():
+            if not doorControl['cleanerDoorMngrAlive'].is_set():# and not doorControl['unlkedBySkd'].is_set():
                 doorControl['cleanerDoorMngrAlive'].set()
                 cleanerDoorMngr = door.CleanerDoorMngr(doorControl, self.exitFlag)
                 cleanerDoorMngr.start()
@@ -248,44 +248,64 @@ class Controller(object):
                 #The state of the door indicates that was opened
                 if state != snsrType:
                     doorControl['openDoor'].set()
-                    #If the door was open in a permitted way
-                    if doorControl['accessPermit'].is_set():
-                        #Creates a StarterAlrmMngrAlive if not was previously created by other access
-                        if not doorControl['starterAlrmMngrAlive'].is_set():
-                            starterAlrmMngr = door.StarterAlrmMngr(doorControl, self.eventQueue, self.exitFlag)
-                            starterAlrmMngr.start()
+                    #Check if the door is not unlocked by schedule
+                    if not doorControl['unlkedBySkd'].is_set():
+                        #If the door was open in a permitted way
+                        if doorControl['accessPermit'].is_set():
+                            #Creates a StarterAlrmMngrAlive if not was previously created by other access
+                            if not doorControl['starterAlrmMngrAlive'].is_set():
+                                starterAlrmMngr = door.StarterAlrmMngr(doorControl, self.eventQueue, self.exitFlag)
+                                starterAlrmMngr.start()
 
-                    #If the door was not opened in a permitted way, start the alarm and 
-                    #send to server or store locally an event
+                        #If the door was not opened in a permitted way, start the alarm and 
+                        #send to server or store locally an event
+                        else:
+                            logMsg = ("Unpermitted access on door: {}, "
+                                      "Starting the alarm.".format(doorNum)
+                                     )
+                            self.logger.warning(logMsg)
+                            doorControl['doorObj'].startBzzr(True)
+
+                            dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
+                            event = {'doorId' : doorId,
+                                     'eventTypeId' : 4,
+                                     'dateTime' : dateTime,
+                                     'doorLockId' : None,
+                                     'cardNumber' : None,
+                                     'side' : None,
+                                     'allowed' : False,
+                                     'denialCauseId' : None
+                                    }
+
+                            #Sending the event to the "Event Manager" thread
+                            self.eventQueue.put(event)
+
                     else:
-                        logMsg = ("Unpermitted access on door: {}, "
-                                  "Starting the alarm.".format(doorNum)
+                        logMsg = ("Door: {} opened while unlocked by schedule."
+                                  "".format(doorNum)
                                  )
-                        self.logger.warning(logMsg)
-                        doorControl['doorObj'].startBzzr(True)
+                        self.logger.info(logMsg)
 
                         dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
                         event = {'doorId' : doorId,
-                                 'eventTypeId' : 4,
+                                 'eventTypeId' : 5,
                                  'dateTime' : dateTime,
                                  'doorLockId' : None,
                                  'cardNumber' : None,
                                  'side' : None,
-                                 'allowed' : False,
+                                 'allowed' : None,
                                  'denialCauseId' : None
                                 }
-
-                        #Sending the event to the "Event Manager" thread
                         self.eventQueue.put(event)
-
 
 
 
                 #The state of the door indicates that was closed
                 else:
                     logMsg = ("The state of the door: {}, indicates that was closed. "
-                              "Stopping the alarm.".format(doorNum)
+                              "Stopping the alarm if it is on.".format(doorNum)
                              )
                     self.logger.info(logMsg)
                     doorControl['openDoor'].clear()
@@ -321,7 +341,7 @@ class Controller(object):
         self.crudMngr.start()
 
 
-        self.openDoorSkdMngr.start()
+        self.unlkDoorSkdMngr.start()
 
 
         #Starting the "Re Sender" thread because in the database there may be events to resend 

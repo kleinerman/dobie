@@ -70,7 +70,7 @@ cursor.execute('''CREATE UNIQUE INDEX doorNumIndex
 
 
 cursor.execute('''
-    CREATE TABLE OpenDoorSkd (
+    CREATE TABLE UnlkDoorSkd (
         id         INTEGER PRIMARY KEY,
         doorId     INTEGER,
         weekDay    INTEGER,
