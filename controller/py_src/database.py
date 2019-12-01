@@ -60,20 +60,19 @@ class DataBase(object):
 
     #---------------------------------------------------------------------------#
 
-    def getDoorsToOpenBySkd(self):
+    def getDoorsToUnlkBySkd(self):
         '''
         Get a list of doorNum to be opened by time
         '''
 
-        nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        nowTime = datetime.datetime.now().strftime('%H:%M')
         nowWeekDay = datetime.datetime.now().isoweekday()
 
 
-        sql = ("SELECT DISTINCT doorId FROM OpenDoorSkd WHERE weekDay = {0} "
+        sql = ("SELECT DISTINCT doorId FROM UnlkDoorSkd WHERE weekDay = {0} "
                "AND '{1}' > startTime and '{1}' < endTime"
-               "".format(nowWeekDay, nowDateTime)
+               "".format(nowWeekDay, nowTime)
                )
-
         self.cursor.execute(sql)
         doors = self.cursor.fetchall()
         doorIds = [door[0] for door in doors]
