@@ -423,10 +423,84 @@ class DataBase(object):
 
 
 
+    #---------------------------------------------------------------------------#
+
+
+    def addUnlkDoorSkd(self, unlkDoorSkd):
+        '''
+        Receive a unlkDoorSkd dictionary and add it into DB
+        '''
+        try:
+            #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender
+            #Module of the server send a CRUD before the client respond and avoid integrity error.
+            #Using REPLACE is not good since it has to DELETE and INSERT always.
+            sql = ("INSERT OR IGNORE INTO UnlkDoorSkd(id, doorId, weekDay, startTime, endTime) "
+                   "VALUES({}, {}, {}, '{}', '{}')"
+                   "".format(unlkDoorSkd['id'], unlkDoorSkd['doorId'], unlkDoorSkd['weekDay'],
+                             unlkDoorSkd['startTime'], unlkDoorSkd['endTime'])
+                  )
+            self.cursor.execute(sql)
+
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Unlock Door Schedule.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error adding a Unlock Door Schedule.')
 
 
 
     #---------------------------------------------------------------------------#
+
+
+    def updUnlkDoorSkd(self, unlkDoorSkd):
+        '''
+        Receive a unlkDoorSkd dictionary and update it into DB
+        '''
+        try:
+
+
+            sql = ("UPDATE UnlkDoorSkd SET doorId = {}, weekDay = {}, "
+                   "startTime = '{}', endTime = '{}' WHERE id = {}"
+                   "".format(unlkDoorSkd['doorId'], unlkDoorSkd['weekDay'],
+                             unlkDoorSkd['startTime'], unlkDoorSkd['endTime'],
+                             unlkDoorSkd['id'])
+                  )
+            self.cursor.execute(sql)
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating a Unlock Door Schedule.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error updating a Unlock Door Schedule.')
+
+
+    #---------------------------------------------------------------------------#
+
+    def delUnlkDoorSkd(self, unlkDoorSkd):
+        '''
+        Receive a unlkDoorSkd dictionary and delete it in DB.
+        '''
+
+        try:
+            sql = "DELETE FROM UnlkDoorSkd WHERE id = {}".format(unlkDoorSkd['id'])
+            self.cursor.execute(sql)
+
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting a Unlock Door Schedule.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a Unlock Door Schedule.')
+
+
+
 
     def addAccess(self, access):
         '''
