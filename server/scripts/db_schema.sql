@@ -1,10 +1,12 @@
 BEGIN;
 
+
 CREATE TABLE `Role` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `description` varchar(20) NOT NULL
 )
 ;
+
 
 CREATE TABLE `User` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -17,11 +19,9 @@ CREATE TABLE `User` (
     CONSTRAINT `fk_User_Role` FOREIGN KEY (`roleId`) REFERENCES `Role` (`id`)
 )
 ;
-
 -- To avoid having two equal usernames
 CREATE UNIQUE INDEX usernameIndex ON User (username)
 ;
-
 
 
 CREATE TABLE `ResState` (
@@ -30,12 +30,14 @@ CREATE TABLE `ResState` (
 )
 ;
 
+
 CREATE TABLE `Organization` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL,
     `resStateId` integer NOT NULL
 )
 ;
+
 
 CREATE TABLE `Person` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -53,7 +55,6 @@ CREATE TABLE `Person` (
     CONSTRAINT `fk_Person_ResState` FOREIGN KEY (`resStateId`) REFERENCES `ResState` (`id`)
 )
 ;
-
 CREATE UNIQUE INDEX cardNumberIndex ON Person (cardNumber)
 ;
 
@@ -78,10 +79,8 @@ CREATE TABLE `Controller` (
     CONSTRAINT `fk_Controller_CtrllerModel` FOREIGN KEY (`ctrllerModelId`) REFERENCES `CtrllerModel` (`id`)
 )
 ;
-
 CREATE UNIQUE INDEX macAddressIndex ON Controller (macAddress)
 ;
-
 
 
 CREATE TABLE `Zone` (
@@ -108,9 +107,9 @@ CREATE TABLE `Door` (
     CONSTRAINT `fk_Door_ResState` FOREIGN KEY (`resStateId`) REFERENCES `ResState` (`id`)
 )
 ;
-
 CREATE UNIQUE INDEX CtrllerDoorNumIndex ON Door (controllerId, doorNum)
 ;
+
 
 CREATE TABLE `DoorGroup` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -118,6 +117,7 @@ CREATE TABLE `DoorGroup` (
     `isForVisit` boolean NOT NULL
 )
 ;
+
 
 CREATE TABLE `DoorGroupDoor` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -127,11 +127,19 @@ CREATE TABLE `DoorGroupDoor` (
     CONSTRAINT `fk_DoorGroupDoor_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE
 )
 ;
-
 CREATE UNIQUE INDEX DoorGroupDoorIndex ON DoorGroupDoor (doorGroupId, doorId)
 ;
 
 
+CREATE TABLE `UnlkDoorSkd` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `doorId` integer NOT NULL,
+    `weekDay` integer NOT NULL,
+    `startTime` time,
+    `endTime` time,
+    CONSTRAINT `fk_UnlkDoorSkd_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE
+)
+;
 
 
 CREATE TABLE `Access` (
@@ -150,9 +158,9 @@ CREATE TABLE `Access` (
     CONSTRAINT `fk_Access_ResState` FOREIGN KEY (`resStateId`) REFERENCES `ResState` (`id`)
 )
 ;
-
 CREATE UNIQUE INDEX doorPersonIndex ON Access (doorId, personId)
 ;
+
 
 CREATE TABLE `LimitedAccess` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -168,7 +176,6 @@ CREATE TABLE `LimitedAccess` (
     CONSTRAINT `fk_LimitedAccess_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_LimitedAccess_ResState` FOREIGN KEY (`resStateId`) REFERENCES `ResState` (`id`))
 ;
-
 CREATE UNIQUE INDEX doorPersonWeekDayIndex ON LimitedAccess (doorId, personId, weekDay)
 ;
 
@@ -180,17 +187,20 @@ CREATE TABLE `EventType` (
 )
 ;
 
+
 CREATE TABLE `DoorLock` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `description` varchar(40) NOT NULL
 )
 ;
 
+
 CREATE TABLE `DenialCause` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `description` varchar(40) NOT NULL
 )
 ;
+
 
 CREATE TABLE `Event` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -211,6 +221,7 @@ CREATE TABLE `Event` (
 )
 ;
 
+
 CREATE TABLE `PersonPendingOperation` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `personId` integer NOT NULL,
@@ -221,12 +232,9 @@ CREATE TABLE `PersonPendingOperation` (
 
 )
 ;
-
 CREATE UNIQUE INDEX personMacAddressIndex ON PersonPendingOperation (personId, macAddress)
 ;
 
 
-
 COMMIT;
-
 
