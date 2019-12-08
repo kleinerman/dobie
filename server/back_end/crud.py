@@ -1336,12 +1336,43 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+        @app.route('/api/v1.0/door/<int:doorId>/unlkdoorskd', methods=['GET',])
+        @auth.login_required
+        def doorUnlkDoorSkds(doorId):
+            '''
+            GET: Return a JSON with all unlkDoorSkds that this door has
+            '''
+            try:
+                ## For GET method
+                unlkDoorSkds = self.dataBase.getUnlkDoorSkds(doorId=doorId)
+                for unlkDoorSkd in unlkDoorSkds:
+                    unlkDoorSkd['uri'] = url_for('modUnlkDoorSkd', unlkDoorSkdId=unlkDoorSkd['id'], _external=True)
+
+                return jsonify(unlkDoorSkds)
+
+
+            except database.UnlkDoorSkdNotFound as notFound:
+                raise NotFound(str(notFound))
+
+            except database.UnlkDoorSkdError as unlkDoorSkdError:
+                raise ConflictError(str(unlkDoorSkdError))
+
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
+
+
 
         @app.route('/api/v1.0/door/<int:doorId>/access', methods=['GET',])
         @auth.login_required
         def doorAccesses(doorId):
             '''
-            GET: Return a JSON with all accesses that this person has
+            GET: Return a JSON with all accesses that this door has
             '''
 
             try:
@@ -1373,21 +1404,42 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
 
 
+#-------------------------------Unlock Door Schedule-----------------------------------
+
+        unlkDoorSkdNeedKeys = ('doorId', 'weekDay', 'startTime', 'endTime')
+
+        @app.route('/api/v1.0/unlkDoorSkd', methods=['POST'])
+        @auth.login_required
+        def addUnlkDoorSkd():
+            '''
+            Add a new Unlock Door Schedule into the database and send
+            it to the appropriate controller
+            '''
+            pass
 
 
+
+        @app.route('/api/v1.0/unlkDoorSkd/<int:unlkDoorSkdId>', methods=['GET', 'PUT', 'DELETE'])
+        @auth.login_required
+        def modUnlkDoorSkd(unlkDoorSkdId):
+            '''
+            Get, update or delete an Unlock Door Schedule into the database and send 
+            the modification to the appropriate controller.
+            '''
+            pass
 
 
 #--------------------------------------Access------------------------------------------
 
 
         addAccessNeedKeys = ('doorId', 'personId', 'iSide', 'oSide',
-                          'startTime', 'endTime', 'expireDate')
+                             'startTime', 'endTime', 'expireDate')
 
         @app.route('/api/v1.0/access', methods=['POST'])
         @auth.login_required
         def addAccess():
             '''
-            Add a new Access into the database and send it to the controller
+            Add a new Access into the database and send it to the apropriate controller
             '''
             try:
                 # Create a clean access dictionary with only required access params,
@@ -1446,8 +1498,8 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def modAccess(accessId):
             '''
-            Update or delete a Access in the database and send the modification to
-            the appropriate controller.
+            Get, update or delete an Access into the database and send the 
+            modification to the appropriate controller.
             '''
             try:
                 if request.method == 'GET':
