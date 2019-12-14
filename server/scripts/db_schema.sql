@@ -137,7 +137,9 @@ CREATE TABLE `UnlkDoorSkd` (
     `weekDay` integer NOT NULL,
     `startTime` time,
     `endTime` time,
-    CONSTRAINT `fk_UnlkDoorSkd_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE
+    `resStateId` integer NOT NULL,
+    CONSTRAINT `fk_UnlkDoorSkd_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_UnlkDoorSkd_ResState` FOREIGN KEY (`resStateId`) REFERENCES `ResState` (`id`)
 )
 ;
 

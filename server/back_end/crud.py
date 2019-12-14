@@ -1408,14 +1408,46 @@ class CrudMngr(genmngr.GenericMngr):
 
         unlkDoorSkdNeedKeys = ('doorId', 'weekDay', 'startTime', 'endTime')
 
-        @app.route('/api/v1.0/unlkDoorSkd', methods=['POST'])
+        @app.route('/api/v1.0/unlkdoorskd', methods=['POST'])
         @auth.login_required
         def addUnlkDoorSkd():
             '''
             Add a new Unlock Door Schedule into the database and send
             it to the appropriate controller
             '''
-            pass
+
+            try:
+                unlkDoorSkd = {}
+                for param in unlkDoorSkdNeedKeys:
+                    unlkDoorSkd[param] = request.json[param]
+
+                unlkDoorSkdId = self.dataBase.addUnlkDoorSkd(unlkDoorSkd)
+
+                # Door dictionary modified for the controller database (same server door id)
+                unlkDoorSkd['id'] = unlkDoorSkdId
+                #unlkDoorSkd.pop('someThing')
+                # Get the controller mac address
+                ctrllerMac = self.dataBase.getControllerMac(doorId=unlkDoorSkd['doorId'])
+                self.ctrllerMsger.addUnlkDoorSkd(ctrllerMac, unlkDoorSkd)
+
+                uri = url_for('modUnlkDoorSkd', unlkDoorSkdId=unlkDoorSkdId, _external=True)
+                return jsonify({'status': 'OK', 'message': 'Unlock Door Schedule added', 'code': CREATED, 'uri': uri}), CREATED
+
+
+
+            except database.UnlkDoorSkdError as unlkDoorSkdError:
+                raise ConflictError(str(unlkDoorSkdError))
+
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(unlkDoorSkdNeedKeys)))
+
+
+
 
 
 

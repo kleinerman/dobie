@@ -157,6 +157,21 @@ class DoorNotFound(DoorError):
     pass
 
 
+class UnlkDoorSkdError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class UnlkDoorSkdNotFound(UnlkDoorSkdError):
+    '''
+    '''
+    pass
+
 
 class AccessError(Exception):
     '''
@@ -2427,6 +2442,103 @@ class DataBase(object):
             raise DoorError('Can not update this door: wrong argument')
 
 
+
+#------------------------------UnlkDoorSkd-------------------------------
+
+
+    def addUnlkDoorSkd(self, unlkDoorSkd):
+        '''
+        Receive a dictionary with unlkDoorSkd parametters and save it in DB
+        It returns the id of the added unlkDoorSkd
+        '''
+
+        #Escaping special characters of the input values
+        #of the dictionary like quote or double quote.
+        unlkDoorSkd = self.escapeDict(unlkDoorSkd)
+
+        sql = ("INSERT INTO UnlkDoorSkd(doorId, weekDay, startTime, endTime, resStateId) "
+               "VALUES({}, {}, '{}', '{}', {})"
+               "".format(unlkDoorSkd['doorId'], unlkDoorSkd['weekDay'],
+                         unlkDoorSkd['startTime'], unlkDoorSkd['endTime'], TO_ADD)
+              )
+
+
+        try:
+            self.execute(sql)
+            return self.cursor.lastrowid
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise UnlkDoorSkdError('Can not add this Unlock Door Schedule')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise UnlkDoorSkdError('Can not add this Unlock Door Schedule: wrong argument')
+
+
+
+
+
+    def commitUnlkDoorSkd(self, unlkDoorSkdId):
+        '''
+        Mark the Unlock Door Schedule in database as COMMITTED if it was previously
+        in TO_ADD or TO_UPDATE state or delete it if it was previously in TO_DELETE state
+        '''
+
+        sql = "SELECT resStateId FROM UnlkDoorSkd WHERE id = {}".format(unlkDoorSkdId)
+
+        try:
+            self.execute(sql)
+            resState = self.cursor.fetchone()['resStateId']
+
+            if resState in (TO_ADD, TO_UPDATE):
+                sql = ("UPDATE UnlkDoorSkd SET resStateId = {} WHERE id = {}"
+                       "".format(COMMITTED, unlkDoorSkdId)
+                      )
+                self.execute(sql)
+
+            elif resState == TO_DELETE:
+                sql = ("DELETE FROM UnlkDoorSkd WHERE id = {}"
+                       "".format(unlkDoorSkdId)
+                      )
+                self.execute(sql)
+
+            elif resState == COMMITTED:
+                self.logger.info("Unlock Door Schedule already committed.")
+
+            else:
+                self.logger.error("Invalid state detected in UnlkDoorSkd table.")
+                raise UnlkDoorSkdError('Error committing a Unlock Door Schedule.')
+
+
+        except TypeError:
+            self.logger.debug('Error fetching a Unlock Door Schedule.')
+            self.logger.warning('The Unlock Door Schedule to commit is not in data base.')
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            self.logger.warning('Error committing a Unlock Door Schedule.')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            self.logger.warning('Error committing a Unlock Door Schedule.')
+
+
+
+    def markUnlkDoorSkdToDel(self, unlkDoorSkdId):
+        '''
+        Set Unlock Door Schedule row state in state: TO_DELETE (pending to delete).
+
+        '''
+
+        sql = ("UPDATE UnlkDoorSkd SET resStateId = {} WHERE id = {}"
+               "".format(TO_DELETE, unlkDoorSkdId)
+              )
+        try:
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise UnlkDoorSkdNotFound('Unlock Door Schedule not found')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise UnlkDoorSkdError('Error marking the Unlock Door Schedule to be deleted.')
 
 
 
