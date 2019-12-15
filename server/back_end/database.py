@@ -2445,17 +2445,32 @@ class DataBase(object):
 
 #------------------------------UnlkDoorSkd-------------------------------
 
+    def getUnlkDoorSkd(self, unlkDoorSkdId):
+        '''
+        Receive unlkDoorSkd id and returns a dictionary with unlkDoorSkd parameters.
+        '''
+        try:
+            sql = "SELECT * FROM UnlkDoorSkd WHERE id = {}".format(unlkDoorSkdId)
+            self.execute(sql)
+            unlkDoorSkd = self.cursor.fetchone()
+
+            if not unlkDoorSkd:
+                raise UnlkDoorSkdNotFound("Unlock Door Schedule not found.")
+
+            return unlkDoorSkd
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise UnlkDoorSkdError('Can not get Unlock Door Schedule with this ID.')
+
+
+
 
     def addUnlkDoorSkd(self, unlkDoorSkd):
         '''
         Receive a dictionary with unlkDoorSkd parametters and save it in DB
         It returns the id of the added unlkDoorSkd
         '''
-
-        #Escaping special characters of the input values
-        #of the dictionary like quote or double quote.
-        unlkDoorSkd = self.escapeDict(unlkDoorSkd)
-
         sql = ("INSERT INTO UnlkDoorSkd(doorId, weekDay, startTime, endTime, resStateId) "
                "VALUES({}, {}, '{}', '{}', {})"
                "".format(unlkDoorSkd['doorId'], unlkDoorSkd['weekDay'],
@@ -2539,6 +2554,35 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise UnlkDoorSkdError('Error marking the Unlock Door Schedule to be deleted.')
+
+
+
+
+
+    def updUnlkDoorSkd(self, unlkDoorSkd):
+        '''
+        Receive a dictionary with unlock door schedule parametters and
+        update it in DB.
+        '''
+
+        try:
+            sql = ("UPDATE UnlkDoorSkd SET weekDay = {}, startTime = '{}', "
+                   "endTime = '{}', resStateId = {} WHERE id = {}"
+                   "".format(unlkDoorSkd['weekDay'], unlkDoorSkd['startTime'],
+                             unlkDoorSkd['endTime'], TO_UPDATE, unlkDoorSkd['id'])
+                  )
+
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise UnlkDoorSkdNotFound('Unlock Door Schedule not found')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise UnlkDoorSkdError('Can not update this Unlock Door Schedule')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise UnlkDoorSkdError('Can not update this Unlock Door Schedule: wrong argument')
+
 
 
 
@@ -3664,7 +3708,7 @@ class DataBase(object):
 
 
 
-    def getDoorId(self, accessId=None, liAccessId=None):
+    def getDoorId(self, accessId=None, liAccessId=None, unlkDoorSkdId=None):
         '''
         This method is called by CRUD module when it wants to delete an access.
         On that situation, it needs to know the "doorId" to send the DELETE 
@@ -3672,15 +3716,18 @@ class DataBase(object):
         It can receive "accessId" or "liAccessId" but not both.
         '''
 
-        if accessId and not liAccessId:
+        if accessId and not liAccessId and not unlkDoorSkdId:
             sql = "SELECT doorId FROM Access WHERE id = {}".format(accessId)
 
-        elif liAccessId and not accessId:
+        elif liAccessId and not accessId and not unlkDoorSkdId:
             sql = "SELECT doorId FROM LimitedAccess WHERE id = {}".format(liAccessId)
+
+        elif unlkDoorSkdId and not accessId and not liAccessId:
+            sql = "SELECT doorId FROM UnlkDoorSkd WHERE id = {}".format(unlkDoorSkdId)
 
         else:
             self.logger.debug('Error with arguments calling getDoorId method')
-            raise AccessError('Can not get door id for this access.')
+            raise DoorError('Can not get door id with these combination of arguments.')
 
 
         try:
@@ -3690,11 +3737,11 @@ class DataBase(object):
 
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
-            raise AccessError('Can not get door id for this access.')
+            raise DoorError('Can not get door id with this argument.')
 
         except TypeError:
             self.logger.debug('Error fetching doorId.')
-            raise AccessError('Can not get door id for this access.')
+            raise DoorNotFound('Can not get door id with this argument.')
 
 
 

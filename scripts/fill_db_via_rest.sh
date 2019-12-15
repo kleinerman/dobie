@@ -27,7 +27,7 @@ read -p "Are you testing in real environment? (y/n): " answer
 if [ $answer == y ] || [ $answer == Y ]; then
 
   curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 1", "ctrllerModelId": 1, "macAddress": "b827eb437bac"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
-  curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 2", "ctrllerModelId": 1, "macAddress": "b827eb2c3abd"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
+  curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Controladora 2", "ctrllerModelId": 1, "macAddress": "b827ebc80917"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller
 
 else
 
@@ -63,6 +63,17 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 2", "doorNum": 2, "controllerId": 2, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 3", "doorNum": 3, "controllerId": 2, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 3, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
 
+
+
+
+
+#Adding Unlock Door Schedules
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "weekDay": 1, "startTime": "12:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "weekDay": 1, "startTime": "18:45", "endTime": "17:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "weekDay": 1, "startTime": "11:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "weekDay": 1, "startTime": "12:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "weekDay": 7, "startTime": "13:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "weekDay": 1, "startTime": "10:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
 
 
 
