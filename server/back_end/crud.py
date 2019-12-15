@@ -1434,7 +1434,6 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify({'status': 'OK', 'message': 'Unlock Door Schedule added', 'code': CREATED, 'uri': uri}), CREATED
 
 
-
             except database.UnlkDoorSkdError as unlkDoorSkdError:
                 raise ConflictError(str(unlkDoorSkdError))
 
@@ -1451,14 +1450,65 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/unlkDoorSkd/<int:unlkDoorSkdId>', methods=['GET', 'PUT', 'DELETE'])
+        @app.route('/api/v1.0/unlkdoorskd/<int:unlkDoorSkdId>', methods=['GET', 'PUT', 'DELETE'])
         @auth.login_required
         def modUnlkDoorSkd(unlkDoorSkdId):
             '''
             Get, update or delete an Unlock Door Schedule into the database and send 
             the modification to the appropriate controller.
             '''
-            pass
+            try:
+                ## For GET method
+                if request.method == 'GET':
+                    unlkDoorSkd = self.dataBase.getUnlkDoorSkd(unlkDoorSkdId)
+                    unlkDoorSkd['uri'] = request.url
+                    return jsonify(unlkDoorSkd)
+
+                elif request.method == 'PUT':
+                    # Getting the doorId with unlkDoorSkdId. (The client can't modify doorId when
+                    # updating unlkDoorSkd since it is associated with a door but it is needed to
+                    # know the controller to send the message
+                    doorId = self.dataBase.getDoorId(unlkDoorSkdId=unlkDoorSkdId)
+                    # Create a clean unlkDoorSkd dictionary with only required unlkDoorSkd params,
+                    # removing unnecessary parameters if the client send them.
+                    unlkDoorSkd = {}
+                    unlkDoorSkd['id'] = unlkDoorSkdId
+                    # The client can't send doorId when updating unlkDoorSkd, if it is sent,
+                    # it will not be used.
+                    for param in [param for param in unlkDoorSkdNeedKeys if param != 'doorId']:
+                        #A KeyError will be raised if the client misses any parameter.
+                        unlkDoorSkd[param] = request.json[param]
+                    self.dataBase.updUnlkDoorSkd(unlkDoorSkd)
+
+                    ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
+                    self.ctrllerMsger.updUnlkDoorSkd(ctrllerMac, unlkDoorSkd)
+                    return jsonify({'status': 'OK', 'message': 'Unlock Door Schedule updated'}), OK
+
+                elif request.method == 'DELETE':
+                    # Getting the doorId with unlkDoorSkdId. (The client can't modify doorId when
+                    # updating unlkDoorSkd since it is associated with a door but it is needed to
+                    # know the controller to send the message
+                    doorId = self.dataBase.getDoorId(unlkDoorSkdId=unlkDoorSkdId)
+                    self.dataBase.markUnlkDoorSkdToDel(unlkDoorSkdId)
+                    ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
+                    self.ctrllerMsger.delUnlkDoorSkd(ctrllerMac, unlkDoorSkdId)
+                    return jsonify({'status': 'OK', 'message': 'Unlock Door Schedule deleted'}), OK
+
+            except (database.UnlkDoorSkdNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
+            except (database.UnlkDoorSkdError, database.DoorError) as error:
+                raise ConflictError(str(error))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(unlkDoorSkdNeedKeys)))
+
+
+
+
 
 
 #--------------------------------------Access------------------------------------------
@@ -1575,8 +1625,8 @@ class CrudMngr(genmngr.GenericMngr):
             except (database.AccessNotFound, database.DoorNotFound) as notFound:
                 raise NotFound(str(notFound))
 
-            except database.AccessError as accessError:
-                raise ConflictError(str(accessError))
+            except (database.AccessError, database.DoorError) as error:
+                raise ConflictError(str(error))
 
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
@@ -1697,12 +1747,13 @@ class CrudMngr(genmngr.GenericMngr):
                     self.ctrllerMsger.delLiAccess(ctrllerMac, liAccessId)
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
-            except database.DoorNotFound as doorNotFound:
-                raise NotFound(str(doorNotFound))
-            except database.AccessNotFound as accessNotFound:
-                raise NotFound(str(accessNotFound))
-            except database.AccessError as accessError:
-                raise ConflictError(str(accessError))
+
+            except (database.AccessNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
+
+            except (database.AccessError, database.DoorError) as error:
+                raise ConflictError(str(error))
+
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '

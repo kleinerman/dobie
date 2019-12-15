@@ -458,15 +458,15 @@ class DataBase(object):
     def updUnlkDoorSkd(self, unlkDoorSkd):
         '''
         Receive a unlkDoorSkd dictionary and update it into DB
+        The doorId is not expected and taken into account if it is sent.
         '''
         try:
 
 
-            sql = ("UPDATE UnlkDoorSkd SET doorId = {}, weekDay = {}, "
+            sql = ("UPDATE UnlkDoorSkd SET weekDay = {}, "
                    "startTime = '{}', endTime = '{}' WHERE id = {}"
-                   "".format(unlkDoorSkd['doorId'], unlkDoorSkd['weekDay'],
-                             unlkDoorSkd['startTime'], unlkDoorSkd['endTime'],
-                             unlkDoorSkd['id'])
+                   "".format(unlkDoorSkd['weekDay'], unlkDoorSkd['startTime'],
+                             unlkDoorSkd['endTime'], unlkDoorSkd['id'])
                   )
             self.cursor.execute(sql)
 
