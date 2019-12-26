@@ -2456,12 +2456,39 @@ class DataBase(object):
 
             if not unlkDoorSkd:
                 raise UnlkDoorSkdNotFound("Unlock Door Schedule not found.")
-
+            unlkDoorSkd['startTime'] = str(unlkDoorSkd['startTime'])
+            unlkDoorSkd['endTime'] = str(unlkDoorSkd['endTime'])
             return unlkDoorSkd
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
             raise UnlkDoorSkdError('Can not get Unlock Door Schedule with this ID.')
+
+
+
+
+
+    def getUnlkDoorSkds(self, doorId):
+        '''
+        Return a dictionary with all Unlock Door Schedules of this door.
+        '''
+
+        sql = "SELECT * FROM UnlkDoorSkd WHERE doorId = {}".format(doorId)
+
+        try:
+            self.execute(sql)
+            unlkDoorSkds = self.cursor.fetchall()
+            if not unlkDoorSkds:
+                raise UnlkDoorSkdNotFound('Unlock Door Schedules not found.')
+
+            for unlkDoorSkd in unlkDoorSkds:
+                unlkDoorSkd['startTime'] = str(unlkDoorSkd['startTime'])
+                unlkDoorSkd['endTime'] = str(unlkDoorSkd['endTime'])
+            return unlkDoorSkds
+
+        except (pymysql.err.ProgrammingError, pymysql.err.InternalError) as error:
+            self.logger.debug(error)
+            raise UnlkDoorSkdError('Can not get specified Unlock Door Schedules.')
 
 
 
@@ -2635,14 +2662,9 @@ class DataBase(object):
                 raise PersonNotFound('Persons not found')
             return persons
 
-        except pymysql.err.ProgrammingError as programmingError:
-            self.logger.debug(programmingError)
+        except (pymysql.err.ProgrammingError, pymysql.err.InternalError) as error:
+            self.logger.debug(error)
             raise PersonError('Can not get specified persons.')
-
-        except pymysql.err.InternalError as internalError:
-            self.logger.debug(internalError)
-            raise PersonError('Can not get specified persons.')
-
 
 
 
