@@ -1297,7 +1297,10 @@ class CrudMngr(genmngr.GenericMngr):
                 elif request.method == 'PUT':
                     # Create a clean door dictionary with only required door params,
                     # removing unnecessary parameters if the client send them.
-                    # Also a KeyError wil be raised if the client misses any parameter.
+                    # Also a KeyError will be raised if the client misses any parameter.
+                    # The client can't modify controllerId when updating door since it is 
+                    # associated with a door but as it is needed to know the controller to 
+                    # send the message, it is got with the doorId.
                     door = {}
                     door['id'] = doorId
                     for param in [param for param in doorNeedKeys if param != 'controllerId']:
@@ -1344,15 +1347,15 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             try:
                 ## For GET method
-                unlkDoorSkds = self.dataBase.getUnlkDoorSkds(doorId=doorId)
+                unlkDoorSkds = self.dataBase.getUnlkDoorSkds(doorId)
                 for unlkDoorSkd in unlkDoorSkds:
                     unlkDoorSkd['uri'] = url_for('modUnlkDoorSkd', unlkDoorSkdId=unlkDoorSkd['id'], _external=True)
 
                 return jsonify(unlkDoorSkds)
 
 
-            except database.UnlkDoorSkdNotFound as notFound:
-                raise NotFound(str(notFound))
+            except database.UnlkDoorSkdNotFound as unlkDoorSkdNotFound:
+                raise NotFound(str(unlkDoorSkdNotFound))
 
             except database.UnlkDoorSkdError as unlkDoorSkdError:
                 raise ConflictError(str(unlkDoorSkdError))
