@@ -2018,6 +2018,10 @@ class DataBase(object):
                "ON (controller.id = door.controllerId) WHERE door.resStateId IN ({0}, {1}, {2}) "
                "UNION "
                "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
+               "(controller.id = door.controllerId) JOIN UnlkDoorSkd unlkDoorSkd ON "
+               "(door.id = unlkDoorSkd.doorId) WHERE unlkDoorSkd.resStateId IN ({0}, {1}, {2}) "
+               "UNION "
+               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
                "(controller.id = door.controllerId) JOIN LimitedAccess limitedAccess ON "
                "(door.id = limitedAccess.doorId) WHERE limitedAccess.resStateId IN ({0}, {1}, {2}) "
                "UNION "
@@ -2489,6 +2493,56 @@ class DataBase(object):
         except (pymysql.err.ProgrammingError, pymysql.err.InternalError) as error:
             self.logger.debug(error)
             raise UnlkDoorSkdError('Can not get specified Unlock Door Schedules.')
+
+
+
+
+    def getUncmtUnlkDoorSkds(self, ctrllerMac, resStateId):
+        '''
+        This method is an iterator, in each iteration it returns an Unlock
+        door schedule not committed with the state "resStateId" from the
+        controller with the MAC address "ctrllerMac"
+        NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration, and between each iteration another method can call
+        "self.execute" which uses the common cursor, the SQL sentences are
+        executed using "self.execUsingNewCursor" which creates a new cursor
+        to maintain the sequence. (This situation is not happening today)
+        '''
+        try:
+            sql = ("SELECT UnlkDoorSkd.* FROM UnlkDoorSkd JOIN Door "
+                   "ON (UnlkDoorSkd.doorId = Door.id) JOIN Controller "
+                   "ON (Door.controllerId = Controller.id) WHERE "
+                   "Controller.macAddress = '{}' AND UnlkDoorSkd.resStateId = {}"
+                   "".format(ctrllerMac, resStateId)
+                  )
+
+
+            cursor = self.execUsingNewCursor(sql)
+            unlkDoorSkd = cursor.fetchone()
+
+            while unlkDoorSkd:
+                #Removing fields that should not be sent to the controller
+                unlkDoorSkd.pop('resStateId')
+
+                #Time columns in MariaDB are retrieved as timedelta type.
+                #If it is converted to string using str() function, something
+                #like 0:27:00 is got. When it is sent to controller in this way,
+                #it causes problems when it is compared with times like 09:23.
+                #(For example: '0:00:00' > '09:31' returns True).
+                #For this reason, it should be formatted and sent in the XX:XX format.
+                #To format it in this way, it should be converted to datetime object
+                #and formatted using strftime() function.
+                #To do it, the timedelta object should be added to the minimum datetime
+                #object, then retrieve the time from it and call the strftime() method.
+                unlkDoorSkd['startTime'] = (datetime.datetime.min + unlkDoorSkd['startTime']).time().strftime('%H:%M')
+                unlkDoorSkd['endTime'] = (datetime.datetime.min + unlkDoorSkd['endTime']).time().strftime('%H:%M')
+
+                yield unlkDoorSkd
+                unlkDoorSkd = cursor.fetchone()
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise UnlkDoorSkdError('Error getting Unlock Door Schedules of not committed controllers')
 
 
 
