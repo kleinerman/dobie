@@ -112,6 +112,16 @@ class CrudReSndr(genmngr.GenericMngr):
                     self.checkExit()
 
 
+                    for unlkDoorSkd in self.dataBase.getUncmtUnlkDoorSkds(ctrllerMac, database.TO_ADD):
+                        self.ctrllerMsger.addUnlkDoorSkd(ctrllerMac, unlkDoorSkd)
+                    for unlkDoorSkd in self.dataBase.getUncmtUnlkDoorSkds(ctrllerMac, database.TO_UPDATE):
+                        unlkDoorSkd.pop('doorId')
+                        self.ctrllerMsger.updUnlkDoorSkd(ctrllerMac, unlkDoorSkd)
+                    for unlkDoorSkd in self.dataBase.getUncmtUnlkDoorSkds(ctrllerMac, database.TO_DELETE):
+                        self.ctrllerMsger.delUnlkDoorSkd(ctrllerMac, unlkDoorSkd['id'])
+                    self.checkExit()
+
+
                     for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
                         self.ctrllerMsger.addAccess(ctrllerMac, access)
                     for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
