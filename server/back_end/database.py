@@ -2752,11 +2752,26 @@ class DataBase(object):
                     values += "({}, '{}', {}), ".format(personId, mac, operation)
                 #Removing the last coma and space
                 values = values[:-2]
-                #Using INSERT IGNORE to avoid having duplicates entries on this table (This situation can happen
-                #if the server receive more than once a REST command to delete a person and the controller does not
-                #confirm the deletion of this person.)
-                sql = ("INSERT IGNORE INTO PersonPendingOperation(personId, macAddress, pendingOp) VALUES {}"
-                       "".format(values)
+
+                #Using ON DUPLICATE KEY UPDATE to avoid having duplicates entries on this table.
+                #This situation can happen if the server receive more than once a REST command
+                #to delete a person and the controller does not confirm the deletion of this person.
+                #At the beginning, INSERT IGNORE was used, but there were situations where an update
+                #was pending to confirm, and before the arriving of this confirmation (maybe the
+                #controller is offline), the person is deleted (for example: visitors exiting by a
+                #visit door, since other situations the frontend would stop the deletion before the
+                #confirmation of the update).
+                #When the person was deleted before the arriving of the update confirmation, the
+                #INSERT IGNORE was not updating the pending operation to TO_DELETE state and the the
+                #table "PersonPendingOperation" kept the TO_UPDATE, this entry was never removed and
+                #the "CrudResender" thread was sending all the time an invalid person update to the
+                #controller.
+                #For this reason, INSERT IGNORE was replaced by ON DUPLICATE KEY UPDATE, to change
+                #the TO_UPDATE to TO_DELETE state.
+
+                sql = ("INSERT INTO PersonPendingOperation(personId, macAddress, pendingOp) "
+                       "VALUES {} ON DUPLICATE KEY UPDATE pendingOp = {}"
+                       "".format(values, operation)
                       )
                 self.execute(sql)
 
