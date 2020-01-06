@@ -57,27 +57,40 @@ class DataBase(object):
 
 
 
-
     #---------------------------------------------------------------------------#
 
     def getDoorsToUnlkBySkd(self):
         '''
-        Get a list of doorNum to be opened by time
+        Get a list of door ids to be opened by schedule.
+        This take into account the days of the week, time 
+        gaps in each day, and also holiday days
         '''
 
-        nowTime = datetime.datetime.now().strftime('%H:%M')
-        nowWeekDay = datetime.datetime.now().isoweekday()
+        nowDateTime = datetime.datetime.now()
+        nowDate = nowDateTime.strftime('%Y-%m-%d')
+        nowTime = nowDateTime.strftime('%H:%M')
+        nowWeekDay = nowDateTime.isoweekday()
 
 
         sql = ("SELECT DISTINCT doorId FROM UnlkDoorSkd WHERE weekDay = {0} "
-               "AND '{1}' > startTime and '{1}' < endTime"
-               "".format(nowWeekDay, nowTime)
-               )
+               "AND '{1}' > startTime and '{1}' < endTime AND doorId NOT IN "
+               "(SELECT DISTINCT doorId FROM ExceptDayUds WHERE exceptDay = '{2}')"
+               "".format(nowWeekDay, nowTime, nowDate)
+              )
+
+        #This is another way of doing the above query using JOIN
+        #sql = ("SELECT DISTINCT UnlkDoorSkd.doorId FROM UnlkDoorSkd " 
+        #       "LEFT JOIN ExceptDayUds ON (UnlkDoorSkd.doorId = ExceptDayUds.doorId) "
+        #       "WHERE UnlkDoorSkd.weekDay = {0} AND '{1}' > startTime and '{1}' < endTime "
+        #       "AND (exceptDay IS NULL OR exceptDay != '{2}')"
+        #       "".format(nowWeekDay, nowTime, nowDate)
+        #      )
+
+
         self.cursor.execute(sql)
         doors = self.cursor.fetchall()
         doorIds = [door[0] for door in doors]
         return doorIds
-
 
 
 

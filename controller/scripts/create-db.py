@@ -13,7 +13,6 @@ cursor.execute('PRAGMA foreign_keys = ON')
 
 
 
-#----------------Person Table----------------#
 
 cursor.execute('''
     CREATE TABLE Person (
@@ -29,7 +28,6 @@ cursor.execute('''CREATE UNIQUE INDEX cardNumberIndex
 )
 
 
-#----------------Door Table-----------------#
 
 
 cursor.execute('''
@@ -46,6 +44,7 @@ cursor.execute('''
     )
     '''
 )
+
 
 
 
@@ -69,6 +68,7 @@ cursor.execute('''CREATE UNIQUE INDEX doorNumIndex
 
 
 
+
 cursor.execute('''
     CREATE TABLE UnlkDoorSkd (
         id         INTEGER PRIMARY KEY,
@@ -84,8 +84,18 @@ cursor.execute('''
 
 
 
+cursor.execute('''
+    CREATE TABLE ExceptDayUds (
+        id         INTEGER PRIMARY KEY,
+        doorId     INTEGER,
+        exceptDay  DATETIME,
+        FOREIGN KEY(doorId) REFERENCES Door(id) ON DELETE CASCADE
+    )
+    '''
+)
 
-#----------------Access Table-----------------#
+
+
 
 cursor.execute('''
     CREATE TABLE Access (
@@ -104,12 +114,12 @@ cursor.execute('''
     '''
 )
 
-#FOREIGN KEY(doorId) REFERENCES Door(id) ON DELETE CASCADE
-
 cursor.execute('''CREATE UNIQUE INDEX doorPersonIndex
                   ON Access (doorId, personId)
                '''
 )
+
+
 
 
 cursor.execute('''
@@ -156,6 +166,8 @@ cursor.execute('''
 )
 
 
+
+
 cursor.execute('''
     CREATE TABLE EventType (
         id          INTEGER PRIMARY KEY,
@@ -164,6 +176,7 @@ cursor.execute('''
     )
     '''
 )
+
 
 
 
@@ -177,6 +190,8 @@ cursor.execute('''
 )
 
 
+
+
 cursor.execute('''
     CREATE TABLE DenialCause (
         id          INTEGER PRIMARY KEY,
@@ -185,15 +200,6 @@ cursor.execute('''
     )
     '''
 )
-
-
-
-
-
-
-
-
-
 
 
 
