@@ -85,10 +85,10 @@ cursor.execute('''
 
 
 cursor.execute('''
-    CREATE TABLE ExceptDayUds (
+    CREATE TABLE ExcDayUds (
         id         INTEGER PRIMARY KEY,
         doorId     INTEGER,
-        exceptDay  DATETIME,
+        excDay  DATETIME,
         FOREIGN KEY(doorId) REFERENCES Door(id) ON DELETE CASCADE
     )
     '''
