@@ -133,10 +133,12 @@ try:
                     print('Sending: {}'.format(response))
                     devSocket.sendall(response)
 
-                    unlkDoorSkd = {'id': 7, 'doorId': 1, 'weekDay': 7, 'startTime': '12:03', 'endTime': '19:17'}
-                    unlkDoorSkd = {'id': 7}
-                    unlkDoorSkd = json.dumps(unlkDoorSkd).encode('utf8')
-                    msg = CUD + b'U' + b'D' + unlkDoorSkd + END
+                    #crudDict = {'id': 7, 'doorId': 1, 'weekDay': 7, 'startTime': '12:03', 'endTime': '19:17'}
+                    #crudDict = {'id': 7}
+                    crudDict = {'id': 7, 'doorId': 1, 'excDay': '2020-01-09'}
+
+                    crudDict = json.dumps(crudDict).encode('utf8')
+                    msg = CUD + b'E' + b'U' + crudDict + END
                     print('Sending: {}'.format(msg))
                     devSocket.sendall(msg)
 

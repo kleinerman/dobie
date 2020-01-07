@@ -74,15 +74,15 @@ class DataBase(object):
 
         sql = ("SELECT DISTINCT doorId FROM UnlkDoorSkd WHERE weekDay = {0} "
                "AND '{1}' > startTime and '{1}' < endTime AND doorId NOT IN "
-               "(SELECT DISTINCT doorId FROM ExceptDayUds WHERE exceptDay = '{2}')"
+               "(SELECT DISTINCT doorId FROM ExcDayUds WHERE excDay = '{2}')"
                "".format(nowWeekDay, nowTime, nowDate)
               )
 
         #This is another way of doing the above query using JOIN
         #sql = ("SELECT DISTINCT UnlkDoorSkd.doorId FROM UnlkDoorSkd " 
-        #       "LEFT JOIN ExceptDayUds ON (UnlkDoorSkd.doorId = ExceptDayUds.doorId) "
+        #       "LEFT JOIN ExcDayUds ON (UnlkDoorSkd.doorId = ExcDayUds.doorId) "
         #       "WHERE UnlkDoorSkd.weekDay = {0} AND '{1}' > startTime and '{1}' < endTime "
-        #       "AND (exceptDay IS NULL OR exceptDay != '{2}')"
+        #       "AND (excDay IS NULL OR excDay != '{2}')"
         #       "".format(nowWeekDay, nowTime, nowDate)
         #      )
 
@@ -438,7 +438,6 @@ class DataBase(object):
 
     #---------------------------------------------------------------------------#
 
-
     def addUnlkDoorSkd(self, unlkDoorSkd):
         '''
         Receive a unlkDoorSkd dictionary and add it into DB
@@ -466,7 +465,6 @@ class DataBase(object):
 
 
     #---------------------------------------------------------------------------#
-
 
     def updUnlkDoorSkd(self, unlkDoorSkd):
         '''
@@ -514,6 +512,83 @@ class DataBase(object):
 
 
 
+
+
+    #---------------------------------------------------------------------------#
+
+    def addExcDayUds(self, excDayUds):
+        '''
+        Receive a excDayUds dictionary and add it into DB
+        '''
+        try:
+            #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender
+            #Module of the server send a CRUD before the client respond and avoid integrity error.
+            #Using REPLACE is not good since it has to DELETE and INSERT always.
+            sql = ("INSERT OR IGNORE INTO ExcDayUds(id, doorId, excDay) "
+                   "VALUES({}, {}, '{}')"
+                   "".format(excDayUds['id'], excDayUds['doorId'], excDayUds['excDay'])
+                  )
+            self.cursor.execute(sql)
+
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error adding a Exception day to unlock door by schedule.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error adding a Exception day to unlock door by schedule.')
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def updExcDayUds(self, excDayUds):
+        '''
+        Receive a excDayUds dictionary and update it into DB
+        The doorId is not expected and taken into account if it is sent.
+        '''
+        try:
+
+
+            sql = ("UPDATE ExcDayUds SET excDay = '{}' WHERE id = {}"
+                   "".format(excDayUds['excDay'], excDayUds['id'])
+                  )
+            self.cursor.execute(sql)
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error updating a Exception day to unlock door by schedule.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error updating a Exception day to unlock door by schedule.')
+
+
+
+    #---------------------------------------------------------------------------#
+
+    def delExcDayUds(self, excDayUds):
+        '''
+        Receive a excDayUds dictionary and delete it in DB.
+        '''
+
+        try:
+            sql = "DELETE FROM ExcDayUds WHERE id = {}".format(excDayUds['id'])
+            self.cursor.execute(sql)
+
+
+        except sqlite3.OperationalError as operationalError:
+            self.logger.debug(operationalError)
+            raise OperationalError('Operational error deleting a Exception day to unlock door by schedule.')
+
+        except sqlite3.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise IntegrityError('Integrity error deleting a Exception day to unlock door by schedule.')
+
+
+
+    #---------------------------------------------------------------------------#
 
     def addAccess(self, access):
         '''
