@@ -144,6 +144,16 @@ CREATE TABLE `UnlkDoorSkd` (
 ;
 
 
+CREATE TABLE `ExcDayUds` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `doorId` integer NOT NULL,
+    `excDay` datetime,
+    `resStateId` integer NOT NULL,
+    CONSTRAINT `fk_ExcDayUds_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE
+)
+;
+
+
 CREATE TABLE `Access` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `doorId` integer NOT NULL,

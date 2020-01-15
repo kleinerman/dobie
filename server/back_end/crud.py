@@ -1370,6 +1370,36 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
+        @app.route('/api/v1.0/door/<int:doorId>/excdayuds', methods=['GET',])
+        @auth.login_required
+        def doorExcDayUdss(doorId):
+            '''
+            GET: Return a JSON with all excDayUdss that this door has
+            '''
+            try:
+                ## For GET method
+                excDayUdss = self.dataBase.getExcDayUdss(doorId)
+                for excDayUds in excDayUdss:
+                    excDayUds['uri'] = url_for('modExcDayUds', excDayUdsId=excDayUds['id'], _external=True)
+
+                return jsonify(excDayUdss)
+
+
+            except database.ExcDayUdsNotFound as excDayUdsNotFound:
+                raise NotFound(str(excDayUdsNotFound))
+
+            except database.ExcDayUdsError as excDayUdsError:
+                raise ConflictError(str(excDayUdsError))
+
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+
+
+
+
 
         @app.route('/api/v1.0/door/<int:doorId>/access', methods=['GET',])
         @auth.login_required
@@ -1509,6 +1539,111 @@ class CrudMngr(genmngr.GenericMngr):
             except KeyError:
                 raise BadRequest('Invalid request. Required: {}'.format(', '.join(unlkDoorSkdNeedKeys)))
 
+
+
+
+
+#-------------------------------Exception Day to Unlock Door Schedule-----------------------------------
+
+        excDayUdsNeedKeys = ('doorId', 'excDay')
+
+        @app.route('/api/v1.0/excdayuds', methods=['POST'])
+        @auth.login_required
+        def addExcDayUds():
+            '''
+            Add a new Exception Day to Unlock Door Schedule into the database and send
+            it to the appropriate controller
+            '''
+
+            try:
+                excDayUds = {}
+                for param in excDayUdsNeedKeys:
+                    excDayUds[param] = request.json[param]
+
+                excDayUdsId = self.dataBase.addExcDayUds(excDayUds)
+
+                # Door dictionary modified for the controller database (same server door id)
+                excDayUds['id'] = excDayUdsId
+                #excDayUds.pop('someThing')
+                # Get the controller mac address
+                ctrllerMac = self.dataBase.getControllerMac(doorId=excDayUds['doorId'])
+                self.ctrllerMsger.addExcDayUds(ctrllerMac, excDayUds)
+
+                uri = url_for('modExcDayUds', excDayUdsId=excDayUdsId, _external=True)
+                return jsonify({'status': 'OK', 'message': 'Exception Day to Unlock Door Schedule added', 'code': CREATED, 'uri': uri}), CREATED
+
+
+            except database.ExcDayUdsError as excDayUdsError:
+                raise ConflictError(str(excDayUdsError))
+
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(excDayUdsNeedKeys)))
+
+
+
+
+
+
+        @app.route('/api/v1.0/excdayuds/<int:excDayUdsId>', methods=['GET', 'PUT', 'DELETE'])
+        @auth.login_required
+        def modExcDayUds(excDayUdsId):
+            '''
+            Get, update or delete an Exception Day to Unlock Door Schedule into
+            the database and send the modification to the appropriate controller.
+            '''
+            try:
+                ## For GET method
+                if request.method == 'GET':
+                    excDayUds = self.dataBase.getExcDayUds(excDayUdsId)
+                    excDayUds['uri'] = request.url
+                    return jsonify(excDayUds)
+
+                elif request.method == 'PUT':
+                    # Getting the doorId with excDayUdsId. (The client can't modify doorId when
+                    # updating excDayUds since it is associated with a door but it is needed to
+                    # know the controller to send the message
+                    doorId = self.dataBase.getDoorId(excDayUdsId=excDayUdsId)
+                    # Create a clean excDayUds dictionary with only required excDayUds params,
+                    # removing unnecessary parameters if the client send them.
+                    excDayUds = {}
+                    excDayUds['id'] = excDayUdsId
+                    # The client can't send doorId when updating excDayUds, if it is sent,
+                    # it will not be used.
+                    for param in [param for param in excDayUdsNeedKeys if param != 'doorId']:
+                        #A KeyError will be raised if the client misses any parameter.
+                        excDayUds[param] = request.json[param]
+                    self.dataBase.updExcDayUds(excDayUds)
+
+                    ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
+                    self.ctrllerMsger.updExcDayUds(ctrllerMac, excDayUds)
+                    return jsonify({'status': 'OK', 'message': 'Exception Day to Unlock Door Schedule updated'}), OK
+
+                elif request.method == 'DELETE':
+                    # Getting the doorId with excDayUdsId. (The client can't modify doorId when
+                    # updating excDayUds since it is associated with a door but it is needed to
+                    # know the controller to send the message
+                    doorId = self.dataBase.getDoorId(excDayUdsId=excDayUdsId)
+                    self.dataBase.markExcDayUdsToDel(excDayUdsId)
+                    ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
+                    self.ctrllerMsger.delExcDayUds(ctrllerMac, excDayUdsId)
+                    return jsonify({'status': 'OK', 'message': 'Exception Day to Unlock Door Schedule deleted'}), OK
+
+            except (database.ExcDayUdsNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
+            except (database.ExcDayUdsError, database.DoorError) as error:
+                raise ConflictError(str(error))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Required: {}'.format(', '.join(excDayUdsNeedKeys)))
 
 
 

@@ -938,6 +938,9 @@ class DataBase(object):
         '''
 
         try:
+            sql = "DELETE FROM Event"
+            self.cursor.execute(sql)
+
             sql = "DELETE FROM LimitedAccess"
             self.cursor.execute(sql)
 
@@ -947,10 +950,13 @@ class DataBase(object):
             sql = "DELETE FROM Person"
             self.cursor.execute(sql)
 
-            sql = "DELETE FROM Door"
+            sql = "DELETE FROM ExcDayUds"
             self.cursor.execute(sql)
-            
-            sql = "DELETE FROM Event"
+
+            sql = "DELETE FROM UnlkDoorSkd"
+            self.cursor.execute(sql)
+
+            sql = "DELETE FROM Door"
             self.cursor.execute(sql)
 
         except sqlite3.OperationalError as operationalError:
