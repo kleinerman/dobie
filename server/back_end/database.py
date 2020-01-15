@@ -173,6 +173,22 @@ class UnlkDoorSkdNotFound(UnlkDoorSkdError):
     pass
 
 
+class ExcDayUdsError(Exception):
+    '''
+    '''
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class ExcDayUdsNotFound(ExcDayUdsError):
+    '''
+    '''
+    pass
+
+
 class AccessError(Exception):
     '''
     '''
@@ -2022,6 +2038,10 @@ class DataBase(object):
                "(door.id = unlkDoorSkd.doorId) WHERE unlkDoorSkd.resStateId IN ({0}, {1}, {2}) "
                "UNION "
                "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
+               "(controller.id = door.controllerId) JOIN ExcDayUds excDayUds ON "
+               "(door.id = excDayUds.doorId) WHERE excDayUds.resStateId IN ({0}, {1}, {2}) "
+               "UNION "
+               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
                "(controller.id = door.controllerId) JOIN LimitedAccess limitedAccess ON "
                "(door.id = limitedAccess.doorId) WHERE limitedAccess.resStateId IN ({0}, {1}, {2}) "
                "UNION "
@@ -2055,13 +2075,26 @@ class DataBase(object):
         '''
         This method is called by CRUD module when it is necessary to 
         reprovision an entire controller.
-        It sets all doors, access and limited access in state TO_ADD.
+        It sets all doors, unlock door schedules, exception day to unlock door schedule,
+        access and limited access in state TO_ADD.
         Receive a dictionary with controller parametters and update it in central DB
         because MAC address and board model can change.
         '''
         try:
 
             sql = ("UPDATE Door SET resStateId = {} WHERE controllerId = {}"
+                   "".format(TO_ADD, controllerId)
+                  )
+            self.execute(sql)
+
+            sql = ("UPDATE UnlkDoorSkd SET resStateId = {} WHERE doorId IN "
+                   "(SELECT id FROM Door WHERE controllerId = {})"
+                   "".format(TO_ADD, controllerId)
+                  )
+            self.execute(sql)
+
+            sql = ("UPDATE ExcDayUds SET resStateId = {} WHERE doorId IN "
+                   "(SELECT id FROM Door WHERE controllerId = {})"
                    "".format(TO_ADD, controllerId)
                   )
             self.execute(sql)
@@ -2609,11 +2642,8 @@ class DataBase(object):
         except TypeError:
             self.logger.debug('Error fetching a Unlock Door Schedule.')
             self.logger.warning('The Unlock Door Schedule to commit is not in data base.')
-        except pymysql.err.IntegrityError as integrityError:
-            self.logger.debug(integrityError)
-            self.logger.warning('Error committing a Unlock Door Schedule.')
-        except pymysql.err.InternalError as internalError:
-            self.logger.debug(internalError)
+        except (pymysql.err.IntegrityError, pymysql.err.InternalError) as error:
+            self.logger.debug(error)
             self.logger.warning('Error committing a Unlock Door Schedule.')
 
 
@@ -2663,6 +2693,216 @@ class DataBase(object):
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
             raise UnlkDoorSkdError('Can not update this Unlock Door Schedule: wrong argument')
+
+
+
+#------------------------------ExcDayUds-------------------------------
+
+    def getExcDayUds(self, excDayUdsId):
+        '''
+        Receive excDayUds id and returns a dictionary with excDayUds parameters.
+        '''
+        try:
+            sql = "SELECT * FROM ExcDayUds WHERE id = {}".format(excDayUdsId)
+            self.execute(sql)
+            excDayUds = self.cursor.fetchone()
+
+            if not excDayUds:
+                raise ExcDayUdsNotFound("Exception Day to Unlock Door by Schedule not found.")
+            excDayUds['excDay'] = excDayUds['excDay'].strftime('%Y-%m-%d')
+            return excDayUds
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ExcDayUdsError('Can not get Exception Day to Unlock Door by Schedule with this ID.')
+
+
+
+
+
+    def getExcDayUdss(self, doorId):
+        '''
+        Return a dictionary with all Exception Day to Unlock Door by Schedules of this door.
+        '''
+
+        sql = "SELECT * FROM ExcDayUds WHERE doorId = {}".format(doorId)
+
+        try:
+            self.execute(sql)
+            excDayUdss = self.cursor.fetchall()
+            if not excDayUdss:
+                raise ExcDayUdsNotFound('Exception Day to Unlock Door by Schedules not found.')
+
+            for excDayUds in excDayUdss:
+                excDayUds['excDay'] = excDayUds['excDay'].strftime('%Y-%m-%d')
+            return excDayUdss
+
+        except (pymysql.err.ProgrammingError, pymysql.err.InternalError) as error:
+            self.logger.debug(error)
+            raise ExcDayUdsError('Can not get specified Exception Day to Unlock Door by Schedules.')
+
+
+
+
+    def getUncmtExcDayUdss(self, ctrllerMac, resStateId):
+        '''
+        This method is an iterator, in each iteration it returns an Exception
+        Day to Unlock Door by Schedule not committed with the state "resStateId"
+        from the controller with the MAC address "ctrllerMac".
+        NOTE: As this method is an iterator and its execution is interrupted
+        in each iteration, and between each iteration another method can call
+        "self.execute" which uses the common cursor, the SQL sentences are
+        executed using "self.execUsingNewCursor" which creates a new cursor
+        to maintain the sequence. (This situation is not happening today)
+        '''
+        try:
+            sql = ("SELECT ExcDayUds.* FROM ExcDayUds JOIN Door "
+                   "ON (ExcDayUds.doorId = Door.id) JOIN Controller "
+                   "ON (Door.controllerId = Controller.id) WHERE "
+                   "Controller.macAddress = '{}' AND ExcDayUds.resStateId = {}"
+                   "".format(ctrllerMac, resStateId)
+                  )
+
+
+            cursor = self.execUsingNewCursor(sql)
+            excDayUds = cursor.fetchone()
+
+            while excDayUds:
+                #Removing fields that should not be sent to the controller
+                excDayUds.pop('resStateId')
+
+                #Time columns in MariaDB are retrieved as timedelta type.
+                #If it is converted to string using str() function, something
+                #like 0:27:00 is got. When it is sent to controller in this way,
+                #it causes problems when it is compared with times like 09:23.
+                #(For example: '0:00:00' > '09:31' returns True).
+                #For this reason, it should be formatted and sent in the XX:XX format.
+                #To format it in this way, it should be converted to datetime object
+                #and formatted using strftime() function.
+                #To do it, the timedelta object should be added to the minimum datetime
+                #object, then retrieve the time from it and call the strftime() method.
+                excDayUds['excDay'] = excDayUds['excDay'].strftime('%Y-%m-%d')
+
+                yield excDayUds
+                excDayUds = cursor.fetchone()
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ExcDayUdsError('Error getting Exception Day to Unlock Door by Schedules of not committed controllers')
+
+
+
+
+    def addExcDayUds(self, excDayUds):
+        '''
+        Receive a dictionary with excDayUds parametters and save it in DB
+        It returns the id of the added excDayUds
+        '''
+        sql = ("INSERT INTO ExcDayUds(doorId, excDay, resStateId) "
+               "VALUES({}, '{}', {})"
+               "".format(excDayUds['doorId'], excDayUds['excDay'], TO_ADD)
+              )
+
+
+        try:
+            self.execute(sql)
+            return self.cursor.lastrowid
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ExcDayUdsError('Can not add this Exception Day to Unlock Door by Schedule')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ExcDayUdsError('Can not add this Exception Day to Unlock Door by Schedule: wrong argument')
+
+
+
+
+
+    def commitExcDayUds(self, excDayUdsId):
+        '''
+        Mark the Exception Day to Unlock Door by Schedule in database as COMMITTED if it was previously
+        in TO_ADD or TO_UPDATE state or delete it if it was previously in TO_DELETE state
+        '''
+
+        sql = "SELECT resStateId FROM ExcDayUds WHERE id = {}".format(excDayUdsId)
+
+        try:
+            self.execute(sql)
+            resState = self.cursor.fetchone()['resStateId']
+
+            if resState in (TO_ADD, TO_UPDATE):
+                sql = ("UPDATE ExcDayUds SET resStateId = {} WHERE id = {}"
+                       "".format(COMMITTED, excDayUdsId)
+                      )
+                self.execute(sql)
+
+            elif resState == TO_DELETE:
+                sql = ("DELETE FROM ExcDayUds WHERE id = {}"
+                       "".format(excDayUdsId)
+                      )
+                self.execute(sql)
+
+            elif resState == COMMITTED:
+                self.logger.info("Exception Day to Unlock Door by Schedule already committed.")
+
+            else:
+                self.logger.error("Invalid state detected in ExcDayUds table.")
+                raise ExcDayUdsError('Error committing a Exception Day to Unlock Door by Schedule.')
+
+
+        except TypeError:
+            self.logger.debug('Error fetching an Exception Day to Unlock Door by Schedule.')
+            self.logger.warning('The Exception Day to Unlock Door by Schedule to commit is not in data base.')
+        except (pymysql.err.IntegrityError, pymysql.err.InternalError) as error:
+            self.logger.debug(error)
+            self.logger.warning('Error committing a Exception Day to Unlock Door by Schedule.')
+
+
+
+    def markExcDayUdsToDel(self, excDayUdsId):
+        '''
+        Set Exception Day to Unlock Door by Schedule row state in state: TO_DELETE (pending to delete).
+
+        '''
+
+        sql = ("UPDATE ExcDayUds SET resStateId = {} WHERE id = {}"
+               "".format(TO_DELETE, excDayUdsId)
+              )
+        try:
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise ExcDayUdsNotFound('Exception Day to Unlock Door by Schedule not found')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ExcDayUdsError('Error marking the Exception Day to Unlock Door by Schedule to be deleted.')
+
+
+
+
+
+    def updExcDayUds(self, excDayUds):
+        '''
+        Receive a dictionary with Exception Day to Unlock Door by Schedule
+        parametters and update it in DB.
+        '''
+
+        try:
+            sql = ("UPDATE ExcDayUds SET excDay = '{}', resStateId = {} "
+                   "WHERE id = {}".format(excDayUds['excDay'], TO_UPDATE, excDayUds['id'])
+                  )
+
+            self.execute(sql)
+            if self.cursor.rowcount < 1:
+                raise ExcDayUdsNotFound('Exception Day to Unlock Door by Schedule not found')
+
+        except pymysql.err.IntegrityError as integrityError:
+            self.logger.debug(integrityError)
+            raise ExcDayUdsError('Can not update this Exception Day to Unlock Door by Schedule')
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ExcDayUdsError('Can not update this Exception Day to Unlock Door by Schedule: wrong argument')
 
 
 
@@ -3799,22 +4039,24 @@ class DataBase(object):
 
 
 
-    def getDoorId(self, accessId=None, liAccessId=None, unlkDoorSkdId=None):
+    def getDoorId(self, accessId=None, liAccessId=None, unlkDoorSkdId=None, excDayUdsId=None):
         '''
-        This method is called by CRUD module when it wants to delete an access.
-        On that situation, it needs to know the "doorId" to send the DELETE 
-        message to the corresponding controller.
-        It can receive "accessId" or "liAccessId" but not both.
+        This method is called by CRUD module when it wants to know the doorId
+        knowing any of the arguments. This method is used in many parts of the
+        crud module.
         '''
 
-        if accessId and not liAccessId and not unlkDoorSkdId:
+        if accessId and not liAccessId and not unlkDoorSkdId and not excDayUdsId:
             sql = "SELECT doorId FROM Access WHERE id = {}".format(accessId)
 
-        elif liAccessId and not accessId and not unlkDoorSkdId:
+        elif liAccessId and not accessId and not unlkDoorSkdId and not excDayUdsId:
             sql = "SELECT doorId FROM LimitedAccess WHERE id = {}".format(liAccessId)
 
-        elif unlkDoorSkdId and not accessId and not liAccessId:
+        elif unlkDoorSkdId and not accessId and not liAccessId and not excDayUdsId:
             sql = "SELECT doorId FROM UnlkDoorSkd WHERE id = {}".format(unlkDoorSkdId)
+
+        elif excDayUdsId and not accessId and not liAccessId and not unlkDoorSkdId:
+            sql = "SELECT doorId FROM ExcDayUds WHERE id = {}".format(excDayUdsId)
 
         else:
             self.logger.debug('Error with arguments calling getDoorId method')

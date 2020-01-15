@@ -122,6 +122,16 @@ class CrudReSndr(genmngr.GenericMngr):
                     self.checkExit()
 
 
+                    for excDayUds in self.dataBase.getUncmtExcDayUdss(ctrllerMac, database.TO_ADD):
+                        self.ctrllerMsger.addExcDayUds(ctrllerMac, excDayUds)
+                    for excDayUds in self.dataBase.getUncmtExcDayUdss(ctrllerMac, database.TO_UPDATE):
+                        excDayUds.pop('doorId')
+                        self.ctrllerMsger.updExcDayUds(ctrllerMac, excDayUds)
+                    for excDayUds in self.dataBase.getUncmtExcDayUdss(ctrllerMac, database.TO_DELETE):
+                        self.ctrllerMsger.delExcDayUds(ctrllerMac, excDayUds['id'])
+                    self.checkExit()
+
+
                     for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
                         self.ctrllerMsger.addAccess(ctrllerMac, access)
                     for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):

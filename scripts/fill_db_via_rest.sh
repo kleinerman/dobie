@@ -71,9 +71,32 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "weekDay": 1, "startTime": "12:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "weekDay": 1, "startTime": "18:45", "endTime": "17:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "weekDay": 1, "startTime": "11:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"doorId": 5, "weekDay": 2, "startTime": "10:32", "endTime": "16:37"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd/3
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "weekDay": 1, "startTime": "12:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "weekDay": 7, "startTime": "13:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
+curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd/4
+
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "weekDay": 1, "startTime": "10:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
+
+
+
+#Adding Exception Days to Unlock door by schedule
+
+DATE_NOW=$(date +%Y-%m-%d)
+
+DATE_TOMORROW=$(date --date "tomorrow" +%Y-%m-%d)
+DATE_YESTERDAY=$(date --date "yesterday" +%Y-%m-%d)
+
+
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "excDay": "'$DATE_YESTERDAY'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "excDay": "'$DATE_NOW'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "excDay": "'$DATE_NOW'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"excDay": "'$DATE_TOMORROW'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds/3
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "excDay": "'$DATE_NOW'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "excDay": "'$DATE_TOMORROW'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds
+curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds/5
+
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "excDay": "'$DATE_NOW'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds
 
 
 
