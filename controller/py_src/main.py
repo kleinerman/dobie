@@ -340,7 +340,7 @@ class Controller(object):
         #Starting the "CRUD Manager" thread
         self.crudMngr.start()
 
-
+        #Starting the "Unlock Door Schedule" thread
         self.unlkDoorSkdMngr.start()
 
 
