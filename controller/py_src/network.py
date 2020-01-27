@@ -8,6 +8,7 @@ import re
 
 import select
 import socket
+import ssl
 import json
 
 import database
@@ -114,6 +115,14 @@ class NetMngr(genmngr.GenericMngr):
         #Registering above pipe in netPoller object
         self.netPoller.register(self.unBlkrFd)
 
+
+        if SSL_ENABLED:
+            #Creating the SSL Context
+            self.sslContext = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=SRVR_CERT)
+            self.sslContext.load_cert_chain(certfile=CLNT_CERT, keyfile=CLNT_KEY)
+        else:
+            self.sslContext = None
+
         #Socket server
         self.srvSock = None
  
@@ -125,7 +134,7 @@ class NetMngr(genmngr.GenericMngr):
         #Database connection should be created in run method
         #It is only used to clear the database when receiving
         #RRP message.
-        self.dataBase = None
+        #self.dataBase = None
 
         #Calculating the number of iterations before sending Keep 
         #Alive message to server
@@ -227,8 +236,8 @@ class NetMngr(genmngr.GenericMngr):
 
     def procRecMsg(self, msg):
         '''
-        This method is called by the main "run()" method when it receives bytes
-        from the server. This happens in POLLIN evnts branch.
+        This method is called by "run()" method of this thread when it
+        receives bytes from the server. This happens in POLLIN evnts branch.
         It process the message and delivers it to the corresponding thread 
         according to the headers of the message.
         '''
@@ -330,20 +339,28 @@ class NetMngr(genmngr.GenericMngr):
         This is the main method of the thread.
         When the controller is connected to the server, this method is blocked most of
         the time in "poll()" method waiting for bytes to go out or incoming bytes from 
-        the server or  a event produced when the socket is broken or disconnect.
+        the server or a event produced when the socket is broken or disconnect.
         When there is no connection to the server, this method tries to reconnect to 
         the server every "RECONNECT_TIME"
         '''
 
         #This connection is used only to clear the DB when receiving RRP message
-        self.dataBase = database.DataBase(DB_FILE)
+        #self.dataBase = database.DataBase(DB_FILE)
 
         while True:
 
             try:
                 #Creating the socket to connect the to the server
-                self.srvSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            
+                srvSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+                if SSL_ENABLED:
+                    self.srvSock = self.sslContext.wrap_socket(srvSock,
+                                                               server_side=False,
+                                                               server_hostname=SERVER_HOSTNAME)
+                else:
+                    self.srvSock = srvSock
+
+
                 #If there is no connection to the server, an exception will happen here
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
 
@@ -489,11 +506,9 @@ class NetMngr(genmngr.GenericMngr):
                 self.logger.info('The server disconected during initial connection message')
 
 
-
-            finally:
-                self.srvSock.close()
-                self.checkExit()
-                self.logger.info('Reconnecting to server in {} seconds...'.format(RECONNECT_TIME))
-                time.sleep(RECONNECT_TIME)
+            self.srvSock.close()
+            self.checkExit()
+            self.logger.info('Reconnecting to server in {} seconds...'.format(RECONNECT_TIME))
+            time.sleep(RECONNECT_TIME)
 
     

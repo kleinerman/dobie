@@ -28,7 +28,7 @@ class EventMngr(genmngr.GenericMngr):
         super().__init__('EventMngr', exitFlag)
 
         #Database connection should be created in run method
-        #self.dataBase = None
+        self.dataBase = None
 
         #Queue to receive message from the Main thread.
         self.eventQueue = eventQueue
@@ -59,7 +59,7 @@ class EventMngr(genmngr.GenericMngr):
         #The connection to database should be done here and not in constructor since
         #the constructor is executed by the main thread and to have simultaneous access to DB
         #from diffrent thread each thread shoud crate its own connection.
-        dataBase = database.DataBase(DB_FILE)
+        self.dataBase = database.DataBase(DB_FILE)
 
         while True:
             #self.logger.debug('Sender Thread waiting from MGT or Asynchronous Receiver messages ...')
@@ -84,7 +84,7 @@ class EventMngr(genmngr.GenericMngr):
                     logMsg += 'saving event in local DB'
 
                     self.logger.warning(logMsg)
-                    dataBase.saveEvent(event)
+                    self.dataBase.saveEvent(event)
                     self.checkExit()
                     
                     if not self.resenderAlive.is_set():
@@ -120,7 +120,7 @@ class ReSender(genmngr.GenericMngr):
         self.netToReSnd = netToReSnd
 
         #Database connection should be created in run method
-        #self.dataBase = None
+        self.dataBase = None
 
         #Flag to know if Resender Thread is alive
         self.resenderAlive = resenderAlive
@@ -137,9 +137,9 @@ class ReSender(genmngr.GenericMngr):
     def run(self):
         '''
         '''
-        dataBase = database.DataBase(DB_FILE)
+        self.dataBase = database.DataBase(DB_FILE)
 
-        for eventIds, toReSendEvents in dataBase.getNEvents(RE_SEND_EVTS_QUANT):
+        for eventIds, toReSendEvents in self.dataBase.getNEvents(RE_SEND_EVTS_QUANT):
             eventsSent = False
             while not eventsSent:
                 self.netMngr.reSendEvents(toReSendEvents)
@@ -147,7 +147,7 @@ class ReSender(genmngr.GenericMngr):
                     eventsResponse = self.netToReSnd.get(timeout=WAIT_RESP_TIME)
                     if eventsResponse == 'OK':
                         self.logger.debug('The server confirms the reception of the events.')
-                        dataBase.delEvents(eventIds)
+                        self.dataBase.delEvents(eventIds)
                         eventsSent = True
                     else:
                         self.logger.warning('The server could not save the events correctly.')

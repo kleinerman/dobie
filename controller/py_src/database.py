@@ -50,10 +50,6 @@ class DataBase(object):
         self.logger = logging.getLogger('Controller')
 
 
-    def __del__(self):
-
-        self.connection.close()
-
 
 
 

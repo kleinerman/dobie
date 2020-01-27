@@ -9,6 +9,11 @@ PERS_IMG_DIR = '/var/lib/dobie-pers-imgs/'
 PERS_IMG_FMT = 'JPEG'
 
 
+SSL_ENABLED =  True
+SRVR_CERT = '/var/lib/dobie-certs/back_end.crt'
+SRVR_KEY = '/var/lib/dobie-certs/back_end.key'
+CLNT_CERT = '/var/lib/dobie-certs/controller.crt'
+
 DB_HOST = 'database'
 DB_USER = 'dobie_usr'
 DB_PASSWD = 'qwe123qwe'
@@ -19,7 +24,7 @@ EXIT_CHECK_TIME = 2
 WAIT_RESP_TIME = 2
 
 BIND_IP = '0.0.0.0'
-BIND_PORT = 7979
+BIND_PORT = 9797
 SOCK_BUF_LEN = 1024
 SIM_CONNECTIONS = 100
 
