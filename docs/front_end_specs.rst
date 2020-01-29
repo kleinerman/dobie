@@ -3554,6 +3554,332 @@ When **Delete** button is pressed the following REST method should be sent to th
   }
   
 
+Unlock Door Schedule
+~~~~~~~~~~~~~~~~~~~~
+
+After adding the door, an **Unlock Door Schedule** can be added to this door.
+This is a time gap during one day of the week. Multiple days of the week with multiple time gaps in the same day could be added. There is no problem if time gaps are overlaped in the same day.
+
+
+.. image:: images_front_end_specs/unlk_door_skd.png
+
+
+Add Unlock Door Schedule
+++++++++++++++++++++++++
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/unlkdoorskd
+
+**JSON**
+
+.. code-block::
+  
+  {"doorId": 4, "weekDay": 7, "startTime": "05:09", "endTime": "19:21"}
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 201 CREATED
+  Content-Type: application/json
+  Content-Length: 134
+  Date: Fri, 17 Jan 2020 19:13:10 GMT
+  {"code":201,"message":"Unlock Door Schedule added","status":"OK","uri":"http://ottawa.capitalinasdc.com:5000/api/v1.0/unlkdoorskd/8"}
+
+
+
+Update Unlock Door Schedule
++++++++++++++++++++++++++++
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/unlkdoorskd/7
+
+**JSON**
+
+.. code-block::
+  
+  {weekDay": 3, "startTime": "04:09", "endTime": "19:27"}
+
+
+**Note:** doorId field should not be sent when updating. If it is sent, it will not be taken into account. 
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 57
+  Date: Fri, 17 Jan 2020 19:23:23 GMT
+  {"message":"Unlock Door Schedule updated","status":"OK"}
+
+
+
+
+Delete Unlock Door Schedule
++++++++++++++++++++++++++++
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/unlkdoorskd/7
+
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 57
+  Date: Fri, 17 Jan 2020 19:14:38 GMT
+  {"message":"Unlock Door Schedule deleted","status":"OK"}
+
+
+
+
+Get an Unlock Door Schedule
++++++++++++++++++++++++++++
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/unlkdoorskd/7
+
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 158
+  Date: Fri, 17 Jan 2020 19:26:21 GMT
+  
+  {"doorId":4,"endTime":"19:27:00","id":7,"resStateId":3,"startTime"
+  :"4:09:00","uri":"http://ottawa.capitalinasdc.com:5000/api/v1.0/
+  unlkdoorskd/7","weekDay":3}
+
+
+
+Get all Unlock Door Schedules of a door
++++++++++++++++++++++++++++++++++++++++
+
+This resource is useful to list all the Unlock Door Schedules of a door
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/door/4/unlkdoorskd
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 635
+  Date: Fri, 17 Jan 2020 19:14:41 GMT
+  
+  [{"doorId":4,"endTime":"15:30:00","id":5,"resStateId":3,"startTime
+  ":"13:45:00","uri":"http://ottawa.capitalinasdc.com:5000/api/v1.0/
+  unlkdoorskd/5","weekDay":7},
+  {"doorId":4,"endTime":"19:21:00","id":7,"resStateId":3,"startTime"
+  :"5:09:00","uri":"http://ottawa.capitalinasdc.com:5000/api/v1.0/
+  unlkdoorskd/7","weekDay":4},
+  {"doorId":4,"endTime":"19:21:00","id":8,"resStateId":3,"startTime"
+  :"5:09:00","uri":"http://ottawa.capitalinasdc.com:5000/api/v1.0/
+  unlkdoorskd/8","weekDay":7},
+  {"doorId":4,"endTime":"19:21:00","id":9,"resStateId":3,"startTime"
+  :"5:09:00","uri":"http://ottawa.capitalinasdc.com:5000/api/v1.0/
+  unlkdoorskd/9","weekDay":9}]
+  
+
+
+Exception Day to Unlock Door by Schedule
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After adding the door and the Unlock Door Schedule an **Exception Day to Unlock Door by Schedule** can be added to this door.
+This is a specific date when the door will not be opened also when the schedule indicates that the door should be opened. This is tipically used in holidays days.
+
+
+.. image:: images_front_end_specs/exc_day_uds.png
+
+
+Add Exception Day to Unlock Door by Schedule
+++++++++++++++++++++++++++++++++++++++++++++
+
+**Method:** POST
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/excdayuds
+
+**JSON**
+
+.. code-block::
+  
+  {"doorId": 4, "excDay": "2020-01-01"}
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 201 CREATED
+  Content-Type: application/json
+  Content-Length: 149
+  Date: Fri, 17 Jan 2020 19:31:31 GMT
+  {"code":201,"message":"Exception Day to Unlock Door Schedule
+  added","status":"OK","uri":"http://ottawa.capitalinasdc.com:5000/a
+  pi/v1.0/excdayuds/7"}
+
+
+
+Update Exception Day to Unlock Door by Schedule
++++++++++++++++++++++++++++++++++++++++++++++++
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/excdayuds/9
+
+**JSON**
+
+.. code-block::
+  
+  {"excDay": "2020-07-10"}
+
+
+**Note:** doorId field should not be sent when updating. If it is sent, it will not be taken into account. 
+
+**Response:**
+
+.. code-block::
+
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 74
+  Date: Fri, 17 Jan 2020 19:34:38 GMT
+  {"message":"Exception Day to Unlock Door Schedule updated","status":"OK"}
+
+
+
+
+Delete Exception Day to Unlock Door by Schedule
++++++++++++++++++++++++++++++++++++++++++++++++
+
+**Method:** DELETE
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/excdayuds/9
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 74
+  Date: Fri, 17 Jan 2020 19:35:46 GMT
+  {"message":"Exception Day to Unlock Door Schedule deleted","status":"OK"}
+
+
+
+
+Get an Exception Day to Unlock Door by Schedule
++++++++++++++++++++++++++++++++++++++++++++++++
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/excdayuds/7
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 123
+  Date: Fri, 17 Jan 2020 19:36:38 GMT
+  {"doorId":4,"excDay":"2020-01-01","id":7,"resStateId":3,"uri":"http://ottawa.capitalinasdc.com:5000/api/v1.0/excdayuds/7"}
+
+
+
+Get all Exception Day to Unlock Door by Schedules of a door
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+This resource is useful to list all the Exception Day to Unlock Door by Schedules of a door
+
+**Method:** GET
+
+**URI:**
+
+.. code-block::
+
+  http://ottawa.capitalinasdc.com:5000/api/v1.0/door/4/excdayuds
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json 
+  Content-Length: 494
+  Date: Fri, 17 Jan 2020 19:32:16 GMT
+  [{"doorId":4,"excDay":"2020-01-
+  17","id":4,"resStateId":3,"uri":"http://
+  ottawa.capitalinasdc.com:5000/api/v1.0/excdayuds/4"},
+  {"doorId":4,"excDay":"2020-01-
+  01","id":7,"resStateId":3,"uri":"http://
+  ottawa.capitalinasdc.com:5000/api/v1.0/excdayuds/7"},
+  {"doorId":4,"excDay":"2020-05-
+  25","id":8,"resStateId":3,"uri":"http://
+  ottawa.capitalinasdc.com:5000/api/v1.0/excdayuds/8"},
+  {"doorId":4,"excDay":"2020-07-
+  09","id":9,"resStateId":3,"uri":"http://
+  ottawa.capitalinasdc.com:5000/api/v1.0/excdayuds/9"}]
+  
 
 Door Groups
 ~~~~~~~~~~~
