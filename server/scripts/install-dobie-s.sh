@@ -5,11 +5,12 @@ echo "Dobie Server Installation Script"
 echo "================================"
 
 function usage {
-      echo "usage: $0 [-iclb -m N -d N]"
+      echo "usage: $0 [-iclbo -m N -d N]"
       echo "  -i      Run in interactive mode."
       echo "  -c      Install server inside controller."
       echo "  -l      Set log rotate."
       echo "  -b      Configure to start at boot time"
+      echo "  -o      Obfuscate the backend source code."
       echo "  -m N    Store N months of events in DB."
       echo "  -d N    Store N days of DB backups."
       echo "  -h      Display help"
@@ -30,9 +31,14 @@ function interactive {
         SET_LOG_ROTATE=true
       fi
 
-      read -p "Do you want to start Dobie Controller at boot time? (y/n): "
+      read -p "Do you want to start Dobie Server at boot time? (y/n): "
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         START_AT_BOOT=true
+      fi
+
+      read -p "Do you want to obfuscate the backend source code? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        OBSFUS_CODE=true
       fi
 
       INVALID_ANSWER=true
@@ -63,6 +69,7 @@ function interactive {
 SRVR_IN_CTRLLR=false
 SET_LOG_ROTATE=false
 START_AT_BOOT=false
+OBSFUS_CODE=false
 RE_IS_INT='^[0-9]+$'
 
 
@@ -75,7 +82,7 @@ fi
 
 
 
-while getopts ":iclbm:d:h" OPT; do
+while getopts ":iclbom:d:h" OPT; do
   case $OPT in
     i )
       interactive
@@ -94,6 +101,10 @@ while getopts ":iclbm:d:h" OPT; do
     b )
       echo "Configuring to start at boot time.."
       START_AT_BOOT=true
+      ;;
+    o )
+      echo "Obfuscating the code.."
+      OBSFUS_CODE=true
       ;;
     m )
       if [[ $OPTARG =~ $RE_IS_INT ]]; then
@@ -417,5 +428,26 @@ sudo rm /tmp/dobie-save-db.timer
 sudo systemctl daemon-reload
 sudo systemctl enable dobie-save-db.timer
 sudo systemctl start dobie-save-db.timer
+
+##------------------------------------------------------------##
+
+
+##------------------Source Code Obfuscation-------------------##
+
+#Obfuscating the python code in back_end directory
+if $OBSFUS_CODE; then
+  #Obfuscating all the files in back_end directory and inserting bootstrap pyarmor code in main.py
+  docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie_backend pyarmor obfuscate /opt/dobie-server/main.py
+
+  #Inserting bootstrap pyarmor code in purgeevents.py
+  docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie_backend pyarmor obfuscate --no-runtime --exact /opt/dobie-server/purgeevents.py
+
+  sudo rm -rf ../back_end/__pycache__/
+  sudo rm -rf ../back_end/pytransform/
+  sudo mv ../back_end/dist/* ../back_end/
+  sudo rm -rf ../back_end/dist/
+
+fi
+
 
 ##------------------------------------------------------------##
