@@ -11,6 +11,7 @@ function usage {
       echo "  -l      Set log rotate."
       echo "  -b      Configure to start at boot time"
       echo "  -o      Obfuscate the backend source code."
+      echo "  -k      Keep git repository."
       echo "  -m N    Store N months of events in DB."
       echo "  -d N    Store N days of DB backups."
       echo "  -h      Display help"
@@ -39,6 +40,11 @@ function interactive {
       read -p "Do you want to obfuscate the backend source code? (y/n): "
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         OBSFUS_CODE=true
+      fi
+
+      read -p "Do you want to keep git repository? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        KEEP_AS_REPO=true
       fi
 
       INVALID_ANSWER=true
@@ -70,6 +76,7 @@ SRVR_IN_CTRLLR=false
 SET_LOG_ROTATE=false
 START_AT_BOOT=false
 OBSFUS_CODE=false
+KEEP_AS_REPO=false
 RE_IS_INT='^[0-9]+$'
 
 
@@ -82,7 +89,7 @@ fi
 
 
 
-while getopts ":iclbom:d:h" OPT; do
+while getopts ":iclbokm:d:h" OPT; do
   case $OPT in
     i )
       interactive
@@ -103,8 +110,12 @@ while getopts ":iclbom:d:h" OPT; do
       START_AT_BOOT=true
       ;;
     o )
-      echo "Obfuscating the code.."
+      echo "Obfuscating the source code.."
       OBSFUS_CODE=true
+      ;;
+    k )
+      echo "Keeping repository structure.."
+      KEEP_AS_REPO=true
       ;;
     m )
       if [[ $OPTARG =~ $RE_IS_INT ]]; then
@@ -444,10 +455,24 @@ if $OBSFUS_CODE; then
 
   sudo rm -rf ../back_end/__pycache__/
   sudo rm -rf ../back_end/pytransform/
+  sudo cp ../back_end/config.py ../back_end/dist/ #Replacing the obfuscated config.py with the plain config.py to keep in understandable
   sudo mv ../back_end/dist/* ../back_end/
   sudo rm -rf ../back_end/dist/
 
+  echo "Restarting the Backend to run with obfuscated source code.."
+  docker restart backend
 fi
 
+
+##------------------------------------------------------------##
+
+
+##----------------Removing Git Structure----------------------##
+
+if ! $KEEP_AS_REPO; then
+    echo "Removing .git directory.."
+    sudo rm -rf ../../.git
+    sudo rm -rf ../../.gitignore
+fi
 
 ##------------------------------------------------------------##
