@@ -5,7 +5,7 @@ echo "Dobie Server Installation Script"
 echo "================================"
 
 function usage {
-      echo "usage: $0 [-iclbo -m N -d N]"
+      echo "usage: $0 [-iclbok -m N -d N]"
       echo "  -i      Run in interactive mode."
       echo "  -c      Install server inside controller."
       echo "  -l      Set log rotate."
@@ -39,7 +39,7 @@ function interactive {
 
       read -p "Do you want to obfuscate the backend source code? (y/n): "
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        OBSFUS_CODE=true
+        OBFUS_CODE=true
       fi
 
       read -p "Do you want to keep git repository? (y/n): "
@@ -75,7 +75,7 @@ function interactive {
 SRVR_IN_CTRLLR=false
 SET_LOG_ROTATE=false
 START_AT_BOOT=false
-OBSFUS_CODE=false
+OBFUS_CODE=false
 KEEP_AS_REPO=false
 RE_IS_INT='^[0-9]+$'
 
@@ -111,7 +111,7 @@ while getopts ":iclbokm:d:h" OPT; do
       ;;
     o )
       echo "Obfuscating the source code.."
-      OBSFUS_CODE=true
+      OBFUS_CODE=true
       ;;
     k )
       echo "Keeping repository structure.."
@@ -446,18 +446,18 @@ sudo systemctl start dobie-save-db.timer
 ##------------------Source Code Obfuscation-------------------##
 
 #Obfuscating the python code in back_end directory
-if $OBSFUS_CODE; then
+if $OBFUS_CODE; then
   #Obfuscating all the files in back_end directory and inserting bootstrap pyarmor code in main.py
   docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie_backend pyarmor obfuscate /opt/dobie-server/main.py
 
   #Inserting bootstrap pyarmor code in purgeevents.py
   docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie_backend pyarmor obfuscate --no-runtime --exact /opt/dobie-server/purgeevents.py
 
-  sudo rm -rf ../back_end/__pycache__/
-  sudo rm -rf ../back_end/pytransform/
+  sudo rm -rf ../back_end/__pycache__/ #Remove if the directory exists from a previous installation
+  sudo rm -rf ../back_end/pytransform/ #Remove if the directory exists from a previous installation
   sudo cp ../back_end/config.py ../back_end/dist/ #Replacing the obfuscated config.py with the plain config.py to keep in understandable
-  sudo mv ../back_end/dist/* ../back_end/
-  sudo rm -rf ../back_end/dist/
+  sudo mv ../back_end/dist/* ../back_end/ #Replacing all the plain files with the obfuscated files
+  sudo rm -rf ../back_end/dist/ #Remove dist directory
 
   echo "Restarting the Backend to run with obfuscated source code.."
   docker restart backend
