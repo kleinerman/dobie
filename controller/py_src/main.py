@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-
-#from argparse import ArgumentParser
-
 import logging
 import logging.handlers
 
