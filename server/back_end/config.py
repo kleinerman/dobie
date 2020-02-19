@@ -24,10 +24,17 @@ EXIT_CHECK_TIME = 2
 WAIT_RESP_TIME = 2
 
 BIND_IP = '0.0.0.0'
+#If the port is changed, docker-compose.yml
+#file should be modified
 BIND_PORT = 9797
 SOCK_BUF_LEN = 1024
 SIM_CONNECTIONS = 100
 
+
+REST_API_BIND_IP = '0.0.0.0'
+#If the port is changed, docker-compose.yml
+#file should be modified
+REST_API_PORT = 5000
 
 RE_SEND_TIME = 10
 
@@ -39,6 +46,8 @@ CONSIDER_DIED_MINS = 1
 
 
 NODEJS_HOST = 'nodejs'
+#If the port is changed, docker-compose.yml
+#file should be modified
 NODEJS_PORT = 5002
 NODEJS_TOUT = 2
 
