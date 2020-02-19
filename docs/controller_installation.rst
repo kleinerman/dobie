@@ -234,11 +234,11 @@ Install **python-pip** and **gcc** package to download and compile posix_ipc pac
   # pacman -S python-pip
   # pip install --upgrade pip
   
-Download and install **posix_ipc** and **netifaces** python packages needed by controller application:
+Download and install **posix_ipc** and **netifaces** and **pyarmor** python packages needed by controller application:
 
 .. code-block::
 
-  # pip install posix_ipc netifaces
+  # pip install posix_ipc netifaces pyarmor
 
   
 Install **make** package to be able to compile ioiface:
