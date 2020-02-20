@@ -131,6 +131,15 @@ mkdir -p /var/log/dobie-c/
 echo "Creating directory for Dobie Controller DB.."
 mkdir -p /var/lib/dobie-c/
 
+
+echo "Creating directory for Dobie Controller Certs.."
+mkdir -p /var/lib/dobie-c/certs/
+echo "Copying Dobie Controller Certs.."
+cp ../../server/certs/ctrller_connection/back_end.crt /var/lib/dobie-c/certs/
+cp ../../server/certs/ctrller_connection/controller.crt /var/lib/dobie-c/certs/
+cp ../../server/certs/ctrller_connection/controller.key /var/lib/dobie-c/certs/
+
+
 if $SET_LOG_ROTATE; then
 cat > /tmp/dobie-c.logrotate << EOL
 /var/log/dobie-c/dobie-c.log

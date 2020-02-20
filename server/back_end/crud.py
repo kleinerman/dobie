@@ -2044,5 +2044,5 @@ class CrudMngr(genmngr.GenericMngr):
 
         self.logger.info('Starting WSGI Server to listen for REST methods..') 
 
-        http_server = WSGIServer(('0.0.0.0', 5000), app)
+        http_server = WSGIServer((REST_API_BIND_IP, REST_API_PORT), app)
         http_server.serve_forever()

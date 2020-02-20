@@ -7,6 +7,7 @@ import sys
 
 import select
 import socket
+import ssl
 import json
 import queue
 
@@ -100,6 +101,17 @@ class NetMngr(genmngr.GenericMngr):
 
         #Registering above pipe in netPoller object
         self.netPoller.register(self.unBlkrFd)
+
+
+        if SSL_ENABLED:
+            #Creating the SSL Context
+            self.sslContext = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            self.sslContext.verify_mode = ssl.CERT_REQUIRED
+            self.sslContext.load_cert_chain(certfile=SRVR_CERT, keyfile=SRVR_KEY)
+            self.sslContext.load_verify_locations(cafile=CLNT_CERT)
+        else:
+            self.sslContext = None
+
 
         #Creating the socket listener
         self.listenerSckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -302,6 +314,14 @@ class NetMngr(genmngr.GenericMngr):
                 if fd == self.listenerScktFd:
                     ctrllerSckt, address = self.listenerSckt.accept()
 
+                    if SSL_ENABLED:
+                        try:
+                            ctrllerSckt = self.sslContext.wrap_socket(ctrllerSckt, server_side=True)
+                        except ssl.SSLError as sslError:
+                            self.logger.debug(sslError)
+                            self.logger.warning('Error doing the SSL handshake.')
+                            continue
+
                     try:
                         ctrllerMac = self.recvConMsg(ctrllerSckt, WAIT_RESP_TIME)
                         self.sendRespConMsg(ctrllerSckt, ctrllerMac)
@@ -316,7 +336,6 @@ class NetMngr(genmngr.GenericMngr):
                                        'inBuffer': b'',
                                        'outBufferQue': queue.Queue(),
                                        'mac': ctrllerMac
-                                       #'connected': threading.Event()
                                       }
 
                         self.fdConnObjects[ctrllerScktFd] = connObjects
