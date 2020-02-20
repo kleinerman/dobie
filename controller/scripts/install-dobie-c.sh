@@ -6,9 +6,10 @@ echo "===================================="
 
 
 function usage {
-      echo "usage: $0 [-ikbsh]"
+      echo "usage: $0 [-ikolbsh]"
       echo "  -i      Run in interactive mode."
       echo "  -k      Keep C source and git repository."
+      echo "  -o      Obfuscate controller source code."
       echo "  -l      Set log rotate."
       echo "  -b      Configure to start at boot time."
       echo "  -s      Start after installing."
@@ -23,6 +24,11 @@ function interactive {
       read -p "Do you want to keep C ioiface source code and .git directory? (y/n): "
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         KEEP_C_SRC=true
+      fi
+
+      read -p "Do you want to obfuscate controller source code? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        OBFUS_CODE=true
       fi
 
       read -p "Do you want to set log rotate for controller logs? (y/n): "
@@ -45,9 +51,10 @@ function interactive {
 }
 
 #Initializing default values to variables
-KEEP_C_SRC=false 
+KEEP_C_SRC=false
 #This is the only necessary because we are asking if ! $KEEP_C_SRC
 #and [ ! NON_EXISTING_VARIABLE ] is not true
+OBFUS_CODE=false
 SET_LOG_ROTATE=false
 START_AT_BOOT=false
 START_NOW=false
@@ -62,7 +69,7 @@ fi
 
 
 
-while getopts ":iklbsh" OPT; do
+while getopts ":ikolbsh" OPT; do
   case $OPT in
     i )
       interactive 
@@ -72,6 +79,10 @@ while getopts ":iklbsh" OPT; do
     k )
       echo "Keeping C source and git repository.."
       KEEP_C_SRC=true
+      ;;
+    o )
+      echo "Obfuscating the source code.."
+      OBFUS_CODE=true
       ;;
     l )
       echo "Setting log roate for controller logs.."
@@ -123,6 +134,29 @@ if ! $KEEP_C_SRC; then
     sudo rm -rf ../../.git
     sudo rm -rf ../../.gitignore
 fi
+
+
+
+##------------------Source Code Obfuscation-------------------##
+
+#Obfuscating the python code in back_end directory
+if $OBFUS_CODE; then
+  #Obfuscating all the files in py_src directory and inserting bootstrap pyarmor code in main.py
+
+  cd ../py_src/ #Changing to py_src directory
+  rm -rf __pycache__/ #Remove if the directory exists from a previous installation
+  rm -rf pytransform/ #Remove if the directory exists from a previous installation
+  pyarmor obfuscate main.py #Obfuscate
+  cp config.py dist/ #Replacing the obfuscated config.py with the plain config.py to keep in understandable
+  mv dist/* . #Replacing all the plain files with the obfuscated files
+  rm -rf dist/ #Remove dist directory
+  cd ../scripts/ #Returning to scripts directory
+
+fi
+
+
+##------------------------------------------------------------##
+
 
 
 echo "Creating directory for Dobie Controller Logs.."
