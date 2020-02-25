@@ -467,12 +467,27 @@ fi
 ##------------------------------------------------------------##
 
 
-##----------------Removing Git Structure----------------------##
+##----------------Removing Repo Structure----------------------##
 
 if ! $KEEP_AS_REPO; then
-    echo "Removing .git directory.."
-    sudo rm -rf ../../.git
+    echo "Removing repo structure.."
+    sudo rm -rf ../../.git/
     sudo rm -rf ../../.gitignore
+    echo "Removing Docker files.."
+    sudo rm -rf ../docker/
+    sudo rm -rf ../ctrller_docker/
+    echo "Removing database script files.."
+    sudo rm db-config db-create-drop.sh db_schema.sql
+
+    echo "Removing Docs.."
+    sudo rm -rf ../../docs/
+
+    if ! $SRVR_IN_CTRLLR; then
+        echo "Removing controller source code.."
+        sudo rm -rf ../../controller/
+    fi
+
+
 fi
 
 ##------------------------------------------------------------##

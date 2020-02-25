@@ -6,8 +6,9 @@ echo "===================================="
 
 
 function usage {
-      echo "usage: $0 [-ikolbsh]"
+      echo "usage: $0 [-ickolbsh]"
       echo "  -i      Run in interactive mode."
+      echo "  -c      Server will run inside this controller."
       echo "  -k      Keep C source and git repository."
       echo "  -o      Obfuscate controller source code."
       echo "  -l      Set log rotate."
@@ -21,9 +22,14 @@ function interactive {
 
       echo "Running in interactive mode.."
 
+      read -p "Are you going to run the server in this controller? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        SRVR_IN_CTRLLR=true
+      fi
+
       read -p "Do you want to keep C ioiface source code and .git directory? (y/n): "
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        KEEP_C_SRC=true
+        KEEP_AS_REPO=true
       fi
 
       read -p "Do you want to obfuscate controller source code? (y/n): "
@@ -51,8 +57,9 @@ function interactive {
 }
 
 #Initializing default values to variables
-KEEP_C_SRC=false
-#This is the only necessary because we are asking if ! $KEEP_C_SRC
+SRVR_IN_CTRLLR=false
+KEEP_AS_REPO=false
+#This is only necessary because we are asking if ! $KEEP_AS_REPO
 #and [ ! NON_EXISTING_VARIABLE ] is not true
 OBFUS_CODE=false
 SET_LOG_ROTATE=false
@@ -69,16 +76,20 @@ fi
 
 
 
-while getopts ":ikolbsh" OPT; do
+while getopts ":ickolbsh" OPT; do
   case $OPT in
     i )
       interactive 
       #When running in interactive mode, arguments will not be red
       break
       ;;
+    c )
+      echo "Server will run in this controller.."
+      SRVR_IN_CTRLLR=true
+      ;;
     k )
       echo "Keeping C source and git repository.."
-      KEEP_C_SRC=true
+      KEEP_AS_REPO=true
       ;;
     o )
       echo "Obfuscating the source code.."
@@ -127,12 +138,20 @@ make
 
 cd ../scripts/
 
-if ! $KEEP_C_SRC; then
+if ! $KEEP_AS_REPO; then
+    echo "Removing repo structure.."
+    sudo rm -rf ../../.git/
+    sudo rm -rf ../../.gitignore
     echo "Removing C ioiface source code.."
     sudo rm -rf ../c_src/
-    echo "Removing .git directory.."
-    sudo rm -rf ../../.git
-    sudo rm -rf ../../.gitignore
+    echo "Removing Docs.."
+    sudo rm -rf ../../docs/
+
+    if ! $SRVR_IN_CTRLLR; then
+        echo "Removing server source code.."
+        sudo rm -rf ../../server/
+    fi
+
 fi
 
 
