@@ -619,8 +619,10 @@ class DataBase(object):
             #and Person name
             if event['personId']:
                 sql = ("SELECT Organization.id AS orgId, Organization.name AS orgName, "
-                       "CONCAT(Person.names, ' ', Person.lastName) AS personName "
+                       "CONCAT(Person.names, ' ', Person.lastName) AS personName, "
+                       "visitedOrg.id AS visitedOrgId, visitedOrg.name AS visitedOrgName "
                        "FROM Person JOIN Organization ON (Person.orgId = Organization.id) "
+                       "LEFT JOIN Organization visitedOrg ON (Person.visitedOrgId = visitedOrg.id) "
                        "WHERE Person.id = {}".format(event['personId'])
                       )
 
@@ -640,13 +642,19 @@ class DataBase(object):
                 fmtEvent['personName'] = orgAndPerson['personName']
                 fmtEvent['orgId'] = orgAndPerson['orgId']
                 fmtEvent['orgName'] = orgAndPerson['orgName']
+                fmtEvent['visitedOrgId'] = orgAndPerson['visitedOrgId']
+                fmtEvent['visitedOrgName'] = orgAndPerson['visitedOrgName']
+
             else:
                 fmtEvent['personName'] = None
                 fmtEvent['orgId'] = None
                 fmtEvent['orgName'] = None
+                fmtEvent['visitedOrgId'] = None
+                fmtEvent['visitedOrgName'] = None
+
 
             #Setting personDeleted field as None always as
-            #it has no sense in live events
+            #it makes no sense in live events
             fmtEvent['personDeleted'] = None
             fmtEvent['doorLockId'] = event['doorLockId']
             fmtEvent['dateTime'] = event['dateTime']
@@ -714,13 +722,16 @@ class DataBase(object):
         
         sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
                "Door.name AS doorName, Organization.name AS orgName, "
-               "CONCAT(Person.names, ' ', Person.lastName) AS personName, Person.resStateId AS personDeleted, "
+               "CONCAT(Person.names, ' ', Person.lastName) AS personName, "
+               "Person.resStateId AS personDeleted, "
+               "visitedOrg.name AS visitedOrgName, "
                "Event.doorLockId, Event.dateTime, "
                "Event.side, Event.allowed, Event.denialCauseId "
                "FROM Event LEFT JOIN Door ON (Event.doorId = Door.id) "
                "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
                "LEFT JOIN Person ON (Event.personId = Person.id) "
                "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
+               "LEFT JOIN Organization visitedOrg ON (Person.visitedOrgId = visitedOrg.id) "
                "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}{}{} "
                "ORDER BY dateTime DESC LIMIT {},{}"
                "".format(startDateTime, endDateTime, personFilter, orgFilter, visitedOrgIdFilter,
@@ -731,6 +742,7 @@ class DataBase(object):
                     "LEFT JOIN Zone ON (Door.zoneId = Zone.id) "
                     "LEFT JOIN Person ON (Event.personId = Person.id) "
                     "LEFT JOIN Organization ON (Person.orgId = Organization.id) "
+                    "LEFT JOIN Organization visitedOrg ON (Person.visitedOrgId = visitedOrg.id) "
                     "WHERE dateTime >= '{}' AND dateTime <= '{}'{}{}{}{}{}{}{}"
                     "".format(startDateTime, endDateTime, personFilter, orgFilter, visitedOrgIdFilter,
                               isProviderFilter, doorFilter, zoneFilter, sideFilter)
