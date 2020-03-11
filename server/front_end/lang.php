@@ -317,6 +317,47 @@ $dictionary = array(
 		'es' => 'Total de resultados',
 		'de' => 'Total Ergebnise'
 	),
+	strtolower('Unlock Door by Schedule') => array(
+		'es' => 'Abrir puerta por calendario'
+	),
+	strtolower('Mon') => array(
+		'es' => 'Lun',
+		'de' => 'Mon'
+	),
+	strtolower('Tue') => array(
+		'es' => 'Mar',
+		'de' => 'Die'
+	),
+	strtolower('Wed') => array(
+		'es' => 'Mie',
+		'de' => 'Mit'
+	),
+	strtolower('Thu') => array(
+		'es' => 'Jue',
+		'de' => 'Don'
+	),
+	strtolower('Fri') => array(
+		'es' => 'Vie',
+		'de' => 'Fre'
+	),
+	strtolower('Sat') => array(
+		'es' => 'Sab',
+		'de' => 'Sam'
+	),
+	strtolower('Sun') => array(
+		'es' => 'Dom',
+		'de' => 'Son'
+	),
+	strtolower('Exception Days') => array(
+		'es' => 'Días de excepción'
+	),
+	strtolower('Days which the door will not be automatically unlocked (very common for holidays)') => array(
+		'es' => 'Días en los que la puerta no será automáticamente abierta (muy común en feriados)'
+	),
+
+	strtolower('to') => array(
+		'es' => 'a'
+	),
 
 	//events live
 	strtolower('Reset filter') => array(

@@ -358,6 +358,20 @@ const outputFormat="jpeg";//png, webp, jpeg
 //webcam button actions
 function initCamEvents(entity,mode){
 
+	//simulate capture click on cntrl key press > first press works for Add Photo, then Capture
+	$(document).keydown(function(e){
+		if(e.ctrlKey && (event.location==2 || event.keyLocation==2)){
+			if(addedPhoto){
+				$("#"+entity+"-"+mode+"-screenshot-button").click();
+				//focus on change photo button for spacebar to work for switching modes
+				$("#"+entity+"-"+mode+"-change-screenshot-button").focus();
+			} else {
+				$("#"+entity+"-"+mode+"-add-screenshot-button").click();
+				addedPhoto=1;
+			}
+		}
+	});
+	
 	//click event for add photo
 	$("#"+entity+"-"+mode+"-add-screenshot-button").click(function(){
 		//cam video start
@@ -403,7 +417,7 @@ function initCamEvents(entity,mode){
 		$(this).hide();
 		//hide snapshot in case of edit
 		$("#"+entity+"-edit-screenshot-container").hide();
-$("#"+entity+"-new-screenshot-container").hide();
+		$("#"+entity+"-new-screenshot-container").hide();
 		//resume video
 		$("#"+entity+"-"+mode+"-video-container, #"+entity+"-"+mode+"-video-canvas").show();
 		$("#"+entity+"-"+mode+"-add-screenshot-button").click();

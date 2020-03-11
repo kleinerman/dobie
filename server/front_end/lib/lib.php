@@ -82,4 +82,21 @@ function grab_dump($var)
     return ob_get_clean();
 }
 
+//validates time string in format hh:mm
+function is_valid_time($timeStr){
+
+    $dateObj = DateTime::createFromFormat('d.m.Y H:i', "10.10.2020 " . $timeStr);
+
+    return ($dateObj !== false && $dateObj && $dateObj->format('G') == intval($timeStr));
+
+}
+
+function is_valid_date($yyyymmdd){
+	$valid=false;
+	$terms=explode("-",$yyyymmdd);
+	if(count($terms)==3){
+		$valid=checkdate($terms[1],$terms[2],$terms[0]);
+	}
+	return $valid;
+}
 ?>

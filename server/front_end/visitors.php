@@ -307,11 +307,13 @@ var editId=0;
 //video vars
 var doChangePhoto=0;
 var localStream="";
+var addedPhoto=0;//this is to switch the cntrl button event
 
 //populate select lists
 populateList("visit-door-groups-select","visit_door_groups");
 populateList("organizations-select","organizations");
 populateList("visitors-select","visitors","","action=get_visitors&isprov=0");
+populateList("visit-door-groups-select-new","visit_door_groups");//populate outside modal show to keep previous form values
 
 //init events for cardnum fields (update and live calculation on input)
 addCardnumEvents("visit-edit");
@@ -329,7 +331,6 @@ $('#modal-new,#modal-edit').on('hidden.bs.modal', function (event){
 //fetch info for new
 $('#modal-new').on('show.bs.modal', function (event){
 	//populate select lists
-	populateList("visit-door-groups-select-new","visit_door_groups");
 	populateList("organizations-select-new","organizations");
 	//clear all previous values
 	resetForm();
@@ -500,6 +501,8 @@ function resetPhotoButtons(){
 	//clear snapshot img
 	$('#visit-new-screenshot-container img,#visit-edit-screenshot-container img').attr("src","blank");
 	$('#visit-edit-screenshot-container,#visit-new-screenshot-container img').hide();
+	addedPhoto=0;
+	doChangePhoto=0;
 }
 
 function resetForm(){
@@ -510,7 +513,7 @@ function resetForm(){
 	$("#expiration-date").val(dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()));
 	$("#expiration-hour").val("23:59");
 	//clear visit door group selection
-	$("#visit-door-groups-select-new").val([]);
+	//$("#visit-door-groups-select-new").val([]); //commented so last door group remains selected
 	//clear visiting org
 	$("#organizations-select-new").empty();
 	//reset is prov
@@ -760,6 +763,11 @@ $("#visitors-delete-form").submit(function(){
 		$("#modal-error").modal("show");
 	}
 	return false;
+});
+
+//focus success button on delete modal shown
+$("#modal-delete").on("shown.bs.modal",function(){
+	$("#visitors-delete-form .btn-success").focus();
 });
 </script>
 

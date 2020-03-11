@@ -1,6 +1,7 @@
 <?
 $leavebodyopen=1;
 $requirerole=1;
+$include_extra_js=array("clockpicker","datepicker");
 include("header.php");
 ?>
 <div id="page-wrapper">
@@ -103,24 +104,90 @@ include("footer.php");
 </div>
 </div>
 
-<div class="col-sm-4">
-<div class="select-container">
+<div class="col-sm-4 valigntop" id="timesdoor-container">
+<div class="select-container floatleft" style="width:180px !important">
 <div class="select-container-title"><?=get_text("Times",$lang);?></div>
 <div class="select-container-body">
+
 <div class="displaytable table_padding">
 <div class="displayrow"><div class="displaycell left"><?=get_text("Release Time (s)",$lang);?></div><div class="displaycell"> <input class="smaller_input" type="number" name="door-release-t" id="door-release-t" max="99" min="0" value="7" required></div></div>
 <div class="displayrow"><div class="displaycell left"><?=get_text("Buzzer Time (s)",$lang);?></div><div class="displaycell"><input class="smaller_input" type="number" name="door-buzzer-t" id="door-buzzer-t" max="99" min="0" value="2" required>
 </div></div>
-<div class="displayrow"><div class="displaycell left"><?=get_text("Alarm Timeout (s)",$lang);?></div><div class="displaycell"><input class="smaller_input" type="number" name="door-alarm-t" id="door-alarm-t" max="99" min="0" value="60" required>
+<div class="displayrow"><div class="displaycell left"><?=get_text("Alarm Timeout (s)",$lang);?></div><div class="displaycell"><input class="smaller_input" type="number" name="door-alarm-t" id="door-alarm-t" max="99" min="0" value="60" required><br><br>
 </div></div></div>
-<br>
+</div>
+</div>
+
+<div class="select-container floatleft" style="width:180px !important">
 <div class="select-container-title"><?=get_text("Door Sensor",$lang);?></div>
+<div class="select-container-body">
 <label><input type="radio" name="door-sensor" value="1"> <?=get_text("NC (Normally Closed)",$lang);?></label>
 <label><input type="radio" name="door-sensor" value="0"> <?=get_text("NO (Normally Open)",$lang);?></label>
 </div>
 </div>
 </div>
 
+</div>
+
+<div class="select-container-title"><?=get_text("Unlock Door by Schedule",$lang);?></div>
+<br>
+<div class="form-group">
+
+<div class="col-xs-5 center">
+<table id="profile_weekdays"><tr>
+<td id="weekday1" onclick="paintWeekDay(this.id)"><?=get_text("Mon",$lang);?></td><td id="weekday2" onclick="paintWeekDay(this.id)"><?=get_text("Tue",$lang);?></td><td id="weekday3" onclick="paintWeekDay(this.id)"><?=get_text("Wed",$lang);?></td><td id="weekday4" onclick="paintWeekDay(this.id)"><?=get_text("Thu",$lang);?></td><td id="weekday5" onclick="paintWeekDay(this.id)"><?=get_text("Fri",$lang);?></td><td id="weekday6" onclick="paintWeekDay(this.id)"><?=get_text("Sat",$lang);?></td><td id="weekday7" onclick="paintWeekDay(this.id)"><?=get_text("Sun",$lang);?></td>
+</tr></table>
+<input type="hidden" value="" name="daysofweek" id="daysofweek">
+<br>
+
+<div class="input-group clockpicker" data-placement="top" data-align="top" data-autoclose="true" title="<?=get_text("From",$lang);?>"><input type="text" class="form-control from-input" value="00:00" id="schedule-from" name="schedule-from"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+
+<div class="input-group clockpicker" data-placement="top" data-align="top" data-autoclose="true" title="<?=get_text("Until",$lang);?>"><input type="text" class="form-control until-input" value="23:59" id="schedule-until" name="schedule-until"><span class="input-group-addon"><span class="far fa-clock"></span></span></div>
+</div>
+
+<div class="col-xs-2 center">
+<button type="button" class="btn btn-primary" id="btn-schedule-item-add" disabled><span class="fa fa-chevron-right"></span><span class="fa fa-chevron-right"></span></button>
+<button type="button" class="btn btn-primary" id="btn-schedule-item-delete" disabled><span class="fa fa-chevron-left"></span><span class="fa fa-chevron-left"></span></button>
+</div>
+
+<div class="col-xs-5">
+
+<div class="select-container" id="select-container-schedule-current">
+<div class="select-container-body">
+<select id="schedule-current-select" class="select-options select-options-small form-control" name="schedule-current-select" size="2" multiple></select>
+</div>
+<div class="select-container-footer">
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="select-container-title"><?=get_text("Exception Days",$lang);?></div>
+<div><?=get_text("Days which the door will not be automatically unlocked (very common for holidays)",$lang);?></div>
+<br>
+
+<div class="form-group">
+
+<div class="col-xs-5">
+<div class="input-group input_date_container" data-placement="left" data-align="top" data-autoclose="true" title="<?=get_text("Expiration Date",$lang);?>"><input type="text" class="form-control input_date center" id="except-expiration-date" value="<?=date("Y-m-d",mktime(0,0,0))?>" required><span class="input-group-addon"><span class="far fa-calendar-alt"></span></span></div>
+</div>
+
+<div class="col-xs-2">
+<button type="button" class="btn btn-primary" id="btn-except-item-add"><span class="fa fa-chevron-right"></span><span class="fa fa-chevron-right"></span></button>
+<button type="button" class="btn btn-primary" id="btn-except-item-delete" disabled><span class="fa fa-chevron-left"></span><span class="fa fa-chevron-left"></span></button>
+</div>
+
+<div class="col-xs-5">
+<div class="select-container" id="select-container-except-current">
+<div class="select-container-body">
+<select id="except-current-select" class="select-options select-options-small form-control" name="except-current-select" size="2" multiple></select>
+</div>
+<div class="select-container-footer">
+</div>
+</div>
+
+</div>
 </div>
 
 </div>
@@ -174,11 +241,34 @@ setFilterAction();
 var editId=0;
 var editDoorNum=0;
 var controllerArr=[];
+var toWeekDayName=["","<?=get_text("Mon",$lang);?>","<?=get_text("Tue",$lang);?>","<?=get_text("Wed",$lang);?>","<?=get_text("Thu",$lang);?>","<?=get_text("Fri",$lang);?>","<?=get_text("Sat",$lang);?>","<?=get_text("Sun",$lang);?>"];
+var currSchedules=[];
+var currExceptions=[];
 
 var zoneId;
 
 //populate select list
 populateList("zones-select","zones");
+
+//function to paint a table cell, allowing multiple days and updating the value in a html var
+function paintWeekDay(cellid){
+	weekdayobj = document.getElementById(cellid);
+	if(weekdayobj){
+		targetvalue = document.getElementById("daysofweek").value;
+		if(weekdayobj.className=="clicked"){
+			weekdayobj.className="";
+			document.getElementById("daysofweek").value = targetvalue.replace(new RegExp(cellid, 'g'),"");
+			//if no days selected > disable right
+			if(document.getElementById("daysofweek").value=="") $("#btn-schedule-item-add").prop("disabled",true);
+		} else {
+			weekdayobj.className="clicked";
+			document.getElementById("daysofweek").value = targetvalue+cellid;
+			//enable right
+			$("#btn-schedule-item-add").prop("disabled",false);
+		}
+	}
+	//console.log(document.getElementById("daysofweek").value);
+}
 
 //populate doors on zones change
 $("#zones-select").change(function(){
@@ -261,6 +351,10 @@ $("#controllers-select").change(function(){
 $('#modal-new').on('show.bs.modal', function (event){
 	//clear all previous values
 	resetForm();
+	//init date pickers
+	$(".input_date").datepicker({dateFormat: "yy-mm-dd"});
+	//init clockpickers
+	$('.clockpicker').clockpicker();
 	//populate select 
 	populateList("controllers-select","controllers",0,"","",1);
 });
@@ -270,6 +364,8 @@ function resetForm(){
 	$("#door-new-name").val("");
 	//empty selects
 	$("#controllers-select").empty();
+	//disable all buttons
+	$("#btn-item-add,#btn-item-delete").prop("disabled",true);
 	//unselect options in fixed selects
 	$('#door-number-select').empty();
 	$('#door-number-select').append("<option value='0' disabled><?=get_text("None",$lang);?>");
@@ -278,6 +374,12 @@ function resetForm(){
 	//clear group id value if edit
 	editId=0;
 	editDoorNum=0;
+	//clear schedules
+	currSchedules=[];
+	$("#schedule-current-select").empty();
+	//clear exception days
+	currExceptions=[];
+	$("#except-current-select").empty();
 	//modal title
 	$("#modal-new-label").text("<?=get_text("New Door",$lang);?>");
 	$('#door-release-t').val(7);
@@ -285,6 +387,8 @@ function resetForm(){
 	$('#door-alarm-t').val(60);
 	$("input[name=door-sensor][value=1]").prop("checked",true);
 	$("#controller-select").show();
+	//this is to make the last col wider so both times and sensor fit correctly
+	$("#timesdoor-container").removeClass("col-sm-9").addClass("col-sm-4");
 }
 
 function populateListDoorNums(selectId,id=0,hlvalue=""){
@@ -320,8 +424,8 @@ function populateListDoorNums(selectId,id=0,hlvalue=""){
 			}
 		},
 		failure: function(){
-				//show error option
-				$("#"+selectId).append("<option value=''><?=get_text("Operation failed, please try again",$lang);?></option>");
+			//show error option
+			$("#"+selectId).append("<option value=''><?=get_text("Operation failed, please try again",$lang);?></option>");
 		}
 	});
 }
@@ -329,6 +433,77 @@ function populateListDoorNums(selectId,id=0,hlvalue=""){
 <?php
 if($logged->roleid<2){
 ?>
+
+function populateScheduleList(selectId,id=0){
+	$.ajax({
+		type: "POST",
+		url: "process",
+		data: "action=get_uds_door&id="+id,
+		success: function(resp){
+			//clear current options
+			$("#"+selectId).empty();
+			if(resp[0]=='1'){
+				//append values as options
+				var values = resp[1];
+				currSchedules=[];
+				//console.log(values);
+				values.forEach(function(item,index){
+					if(item.resStateId!=5){
+						itemClass="";
+						if(item.resStateId==1) itemClass=" class='toadd' disabled ";
+						else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
+						else if(item.resStateId==4) itemClass=" class='todel' disabled ";
+						$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">" + toWeekDayName[item.weekDay] + " " + addZeroPadding(item.startTime.slice(0,-3)) + " to " + addZeroPadding(item.endTime.slice(0,-3)));
+						//add to current schedules array
+						currSchedules.push(item.id);
+					}
+				});
+			} else {
+				//show error option
+				$("#"+selectId).append("<option value='' disabled>"+ resp[1] +"</option>");
+			}
+		},
+		failure: function(){
+			//show error option
+			$("#"+selectId).append("<option value=''><?=get_text("Operation failed, please try again",$lang);?></option>");
+		}
+	});
+}
+
+function populateExceptionList(selectId,id=0){
+	$.ajax({
+		type: "POST",
+		url: "process",
+		data: "action=get_excdayuds_door&id="+id,
+		success: function(resp){
+			//clear current options
+			$("#"+selectId).empty();
+			if(resp[0]=='1'){
+				//append values as options
+				var values = resp[1];
+				//console.log(values);
+				values.forEach(function(item,index){
+					if(item.resStateId!=5){
+						itemClass="";
+						if(item.resStateId==1) itemClass=" class='toadd' disabled ";
+						else if(item.resStateId==2) itemClass=" class='toupd' disabled ";
+						else if(item.resStateId==4) itemClass=" class='todel' disabled ";
+						$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">" + item.excDay);
+						//add to current exceptions array
+						currExceptions.push(item.id);
+					}
+				});
+			} else {
+				//show error option
+				$("#"+selectId).append("<option value='' disabled>"+ resp[1] +"</option>");
+			}
+		},
+		failure: function(){
+			//show error option
+			$("#"+selectId).append("<option value=''><?=get_text("Operation failed, please try again",$lang);?></option>");
+		}
+	});
+}
 
 //fetch info for edit
 $("#doors-select-edit").click(function(){
@@ -363,6 +538,15 @@ $("#doors-select-edit").click(function(){
 				$("input[name=door-sensor][value="+values.snsrType+"]").prop("checked",true);
 				//hide controller select > door cant be changed from controller (issue #24)
 				$("#controller-select").hide();
+				//this is to make the last col wider so both times and sensor fit correctly
+				$("#timesdoor-container").removeClass("col-sm-4").addClass("col-sm-9");
+
+				//populate uds
+				currSchedules=[];
+				populateScheduleList("schedule-current-select",doorId);
+				//populate excdayuds
+				currExceptions=[];
+				populateExceptionList("except-current-select",doorId);
 			} else {
 				//show modal error
 				$('#modal-error .modal-body').text(resp[1]);
@@ -376,6 +560,79 @@ $("#doors-select-edit").click(function(){
 		}
 	});
 });
+
+
+//actions for addleft and addright buttons
+//on change weekday > enable / disable right arrow button
+
+//on change current schedule select > enable / left right arrow button
+$("#schedule-current-select").change(function(){
+	if($(this).val()!="undefined") $("#btn-schedule-item-delete").prop("disabled",false);
+	else $("#btn-schedule-item-delete").prop("disabled",true);
+});
+
+//item add button click action
+$("#btn-schedule-item-add").click(function(){
+	//split selected days of week
+	var boxOptions=$("#daysofweek").val().split("weekday");
+	//console.log(boxOptions);
+	$.each(boxOptions,function(key,elemid){
+		//get dayofweek int
+		if(elemid!=""){
+			//show in new box
+			$("#schedule-current-select").append("<option value='' data-weekday='"+elemid+"' data-from='"+$("#schedule-from").val()+"' data-until='"+$("#schedule-until").val()+"'>"+toWeekDayName[elemid]+" "+$("#schedule-from").val()+" to "+ $("#schedule-until").val() +"</option>");
+		}
+	});
+});
+
+//item delete button click action
+$("#btn-schedule-item-delete").click(function(){
+	var boxOptions=$("#schedule-current-select option:selected");
+	$.each(boxOptions,function(){
+		//hide from older box
+		$(this).hide().prop("disabled",true);
+	});
+	//clear current selection
+	$("#schedule-current-select").val([]);
+	//disable del button
+	$("#btn-schedule-item-delete").prop("disabled",true);
+});
+
+//now the same but for exceptions
+
+//on change current except select > enable / disable left arrow button
+$("#except-current-select").change(function(){
+	if($(this).val()!="undefined") $("#btn-except-item-delete").prop("disabled",false);
+	else $("#btn-except-item-delete").prop("disabled",true);
+});
+
+//item add button click action
+$("#btn-except-item-add").click(function(){
+	var elemval=$("#except-expiration-date").val();
+	//show in current select box
+	if($("#except-current-select option[data-value='"+elemval+"']").length>0){
+		//toggle if exists
+		$("#except-current-select option[data-value='"+elemval+"']").show();
+		$("#except-current-select option[data-value='"+elemval+"']").prop("disabled",false);
+	} else {
+		//if not, append html
+		$("#except-current-select").append("<option value='' data-value='"+elemval+"'>"+elemval+"</option>");
+	}
+});
+
+//item delete button click action
+$("#btn-except-item-delete").click(function(){
+	var boxOptions=$("#except-current-select option:selected");
+	$.each(boxOptions,function(){
+		//hide from older box
+		$(this).hide().prop("disabled",true);
+	});
+	//clear current selection
+	$("#except-current-select").val([]);
+	//disable del button
+	$("#btn-except-item-delete").prop("disabled",true);
+});
+
 
 //new action
 $("#door-new-form").submit(function(){
@@ -392,19 +649,128 @@ $("#door-new-form").submit(function(){
 	if(editId!=0 && !isNaN(editId)) action_str="action=edit_door&id=" + editId + "&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime + "&snsrtype=" + snsrType;
 	else action_str="action=add_door&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime + "&snsrtype=" + snsrType;
 
+
 	if(doorName!="" && doorName!='undefined' && !isNaN(zoneId) && !isNaN(controllerId) && !isNaN(doorNumber)  && !isNaN(isVisitExit) && !isNaN(releaseTime) && !isNaN(buzzerTime) && !isNaN(alrmTime) && !isNaN(snsrType)){
+
 		$.ajax({
 			type: "POST",
 			url: "process",
 			data: action_str,
+			complete: function(resp){
+				//console.log(resp);
+			},
 			success: function(resp){
+				//console.log(resp);
 				if(resp[0]=='1'){
+					//Update Schedules and Exception Days
+
+					//set door id if edit or create
+					if(editId!=0 && !isNaN(editId)) var selDoorId=editId;
+					else var selDoorId=resp[2];
+
+					//Schedules:
+					var sentSchedules = $("#schedule-current-select option:not([disabled])");
+					var valuesKeep = [];
+
+					$.each(sentSchedules,function(key,elem){
+						if(elem.value!="") valuesKeep.push(parseInt(elem.value));
+						else {
+							//add schedule
+							$.ajax({
+								type: "POST",
+								url: "process",
+								data: "action=add_uds&doorid=" + selDoorId + "&weekday=" + elem.dataset.weekday + "&starttime=" + elem.dataset.from + "&endtime=" + elem.dataset.until,
+								success: function(resp1){
+									//console.log(resp1);
+								},
+								failure: function(){
+									//show modal error
+									$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
+									$("#modal-error").modal("show");
+								}
+							});
+						}
+					});
+
+					//console.log(currSchedules);
+					//console.log(valuesKeep);
+					//if edit mode > remove deleted schedules from current
+					if(editId!=0 && !isNaN(editId) && currSchedules.length>0 && (valuesKeep.length!=currSchedules.length)){
+						//get all scheds of door > already on currSchedules[]
+						$.each(currSchedules,function(key,elem){
+							if(!valuesKeep.includes(elem)){
+								//rem schedule
+								$.ajax({
+									type: "POST",
+									url: "process",
+									data: "action=delete_uds&id=" + elem,
+									success: function(resp2){
+										//console.log("removing sched id "+elem);
+										//console.log(resp2);
+									},
+									failure: function(){
+										//console.log("Error removing schedule id " + elem);
+									}
+								});
+							}
+						});
+					}
+
+					//Exception Days:
+					var sentExceptions = $("#except-current-select option:not([disabled])");
+					valuesKeep = [];
+					$.each(sentExceptions,function(key,elem){
+						if(elem.value!="") valuesKeep.push(parseInt(elem.value));
+						else {
+							//console.log(elem);
+							//add exception
+							$.ajax({
+								type: "POST",
+								url: "process",
+								data: "action=add_excdayuds&doorid=" + selDoorId + "&excday=" + elem.dataset.value,
+								success: function(resp3){
+									//console.log(resp3);
+								},
+								failure: function(){
+									//show modal error
+									$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
+									$("#modal-error").modal("show");
+								}
+							});
+						}
+					});
+
+					//console.log(currExceptions);
+					//console.log(valuesKeep);
+					//if edit mode > remove deleted excepts from current
+					if(editId!=0 && !isNaN(editId) && currExceptions.length>0 && (valuesKeep.length!=currExceptions.length)){
+						//get all scheds of door > already on currExceptions[]
+						$.each(currExceptions,function(key,elem){
+							if(!valuesKeep.includes(elem)){
+								//rem schedule
+								$.ajax({
+									type: "POST",
+									url: "process",
+									data: "action=delete_excdayuds&id=" + elem,
+									success: function(resp4){
+										//console.log("removing except id "+elem);
+										//console.log(resp4);
+									},
+									failure: function(){
+										//console.log("Error removing except id " + elem);
+									}
+								});
+							}
+						});
+					}
+					
 					//close modal
 					$("#modal-new").modal("hide");
 					//repopulate select box
 					populateList("doors-select","doors",zoneId);
 					//hide details
 					$('#select-container-doors-details').hide();
+
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);

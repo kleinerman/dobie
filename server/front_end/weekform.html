@@ -1,0 +1,46 @@
+<style>
+#profile_weekdays{
+	border-spacing: 2px !important;
+}
+
+#profile_weekdays td{
+	text-align:center;
+	width:14%;
+	min-width:30px;
+	height:30px;
+	background:#cdcdcd;
+	color:#333;
+	font-weight:bold;
+	border:1px solid #eee;
+	cursor:pointer;
+}
+
+#profile_weekdays td.clicked{
+	background:#0a0;
+	color:#fff;
+}
+</style>
+
+<table id="profile_weekdays"><tr>
+<td id="weekday1" onclick="paintWeekDay(this.id)">D</td><td id="weekday2" onclick="paintWeekDay(this.id)">L</td><td id="weekday3" onclick="paintWeekDay(this.id)">M</td><td id="weekday4" onclick="paintWeekDay(this.id)">M</td><td id="weekday5" onclick="paintWeekDay(this.id)">J</td><td id="weekday6" onclick="paintWeekDay(this.id)">V</td><td id="weekday7" onclick="paintWeekDay(this.id)">S</td>
+</tr></table>
+
+<input type="hidden" value="" name="daysofweek" id="daysofweek">
+
+<script>
+//function to paint a table cell, allowing multiple days and updating the value in a html var
+function paintWeekDay(cellid){
+	weekdayobj = document.getElementById(cellid);
+	if(weekdayobj){
+		targetvalue = document.getElementById("daysofweek").value;
+		if(weekdayobj.className=="clicked"){
+			weekdayobj.className="";
+			document.getElementById("daysofweek").value = targetvalue.replace(new RegExp(cellid, 'g'),"");
+		} else {
+			weekdayobj.className="clicked";
+			document.getElementById("daysofweek").value = targetvalue+cellid;
+		}
+	}
+	//console.log(document.getElementById("daysofweek").value);
+}
+</script>
