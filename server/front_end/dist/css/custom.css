@@ -2,6 +2,7 @@ body{
 	background:#fff;
 }
 
+.displayinline{display:inline}
 .displaytable{display:table;}
 .displayrow{display:table-row;}
 .displaycell{display:table-cell;vertical-align:middle;text-align:center}
@@ -375,4 +376,27 @@ input::-webkit-inner-spin-button {
 
 .details-img{
 	width: 60%;
+}
+
+/*profile weekdays for doors*/
+#profile_weekdays{
+	border-spacing: 2px !important;
+}
+
+#profile_weekdays td{
+	text-align:center;
+	width:14%;
+	min-width:30px;
+	height:30px;
+	background:#cdcdcd;
+	color:#333;
+	font-weight:bold;
+	border:1px solid #eee;
+	cursor:pointer;
+	padding:3px;
+}
+
+#profile_weekdays td.clicked{
+	background:#0a0;
+	color:#fff;
 }

@@ -768,6 +768,109 @@ function delete_door($user,$pass,$id){
 }
 
 
+//Unlock Door Schedules
+
+//get all schedules of a door
+function get_uds_door($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."door/$id/unlkdoorskd",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//get a single uds by id
+function get_uds($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."unlkdoorskd/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//add uds to a door
+function add_uds($user, $pass, $doorid, $weekday, $starttime, $endtime){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->doorId= $doorid;
+	$payload_obj->weekDay= $weekday;
+	$payload_obj->startTime= $starttime;
+	$payload_obj->endTime= $endtime;
+	$response=send_request($config->api_fullpath."unlkdoorskd",$user,$pass,"post",json_encode($payload_obj));
+	//if($response->response_status != "201") return false;
+	//else return $response->data;
+	return $response;
+}
+
+//change a specific uds
+function set_uds($user, $pass, $udsid, $doorid, $weekday, $starttime, $endtime){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->doorId= $doorid;
+	$payload_obj->weekDay= $weekday;
+	$payload_obj->startTime= $starttime;
+	$payload_obj->endTime= $endtime;
+	$response=send_request($config->api_fullpath."unlkdoorskd/$udsid",$user,$pass,"put",json_encode($payload_obj));
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//delete specific uds
+function delete_uds($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."unlkdoorskd/$id",$user,$pass,"delete");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+
+//Exception days to Unlock Door by Schedules of a door
+
+//get all exceptions of a door
+function get_excdayuds_door($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."door/$id/excdayuds",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//get a single exception by id
+function get_excdayuds($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."excdayuds/$id",$user,$pass);
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//add exception to a door
+function add_excdayuds($user, $pass, $doorid, $excday){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->doorId= $doorid;
+	$payload_obj->excDay= $excday;
+	$response=send_request($config->api_fullpath."excdayuds",$user,$pass,"post",json_encode($payload_obj));
+	//if($response->response_status != "201") return false;
+	//else return $response->data;
+	return $response;
+}
+
+//change a specific exception
+function set_excdayuds($user, $pass, $excdayudsid, $doorid, $excday){
+	global $config;
+	$payload_obj = new stdClass();
+	$payload_obj->doorId= $doorid;
+	$payload_obj->excDay= $excday;
+	$response=send_request($config->api_fullpath."excdayuds/$excdayudsid",$user,$pass,"put",json_encode($payload_obj));
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
+//delete specific exception
+function delete_excdayuds($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."excdayuds/$id",$user,$pass,"delete");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
 //Visit door groups
 
 //get all door groups
@@ -1161,6 +1264,18 @@ if($DEBUG){
 //	$res=get_person_image("admin","admin",4);
 	//echo $res;
 	//$res=set_person_image("admin","admin",1,file_get_contents("../img/dobie.png"));
+	
+	$res=get_uds_door("admin","admin",2);
+	//$res=get_uds("admin","admin",$id);
+	//$res=add_uds("admin","admin", 3, 1, "23:30", "25:00");
+	//$res=set_uds("admin","admin", 11, 3, 3, "23:30", "23:59");
+	//$res=delete_uds("admin","admin",9);
+
+	//$res=get_excdayuds_door("admin","admin",3);
+	//$res=add_excdayuds("admin","admin", 3, "2020-02-17");
+	//$res=set_excdayuds("admin","admin", 11, 3, "2020-02-20");
+	//$res=delete_excdayuds("admin","admin",11);
+	
 	echo "<pre>";
 	var_dump($res);
 	//echo json_encode($res->data->events[0]);

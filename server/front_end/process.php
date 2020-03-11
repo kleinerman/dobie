@@ -581,6 +581,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,"Zone could not be deleted");
 			}
 		break;
+
 		case "get_door":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
@@ -621,8 +622,12 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$doors_rec = add_door($logged->name, $logged->pw, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime, $snsrtype);
 				//if($doors_rec) array_push($ret,1,"Information saved successfully!");
 				//else array_push($ret,0,"Door could not be added");
-				if($doors_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
-				else array_push($ret,0,$doors_rec->data->message);
+				if($doors_rec->response_status == "201"){
+					array_push($ret,1,"Information saved successfully!");
+					//return in third field, the added door id
+					$uri_parts=explode("/",$doors_rec->data->uri);
+					array_push($ret, intval(end($uri_parts)));
+				} else array_push($ret,0,$doors_rec->data->message);
 			}
 		break;
 		case "edit_door":
@@ -657,6 +662,118 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 
 				if($doors_rec) array_push($ret,1,"Information saved successfully!");
 				else array_push($ret,0,"Door could not be deleted");
+			}
+		break;
+
+		case "get_uds_door":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$uds_rec = get_uds_door($logged->name, $logged->pw, $id);
+					if($uds_rec) array_push($ret,1,$uds_rec);
+					//else array_push($ret,0,"Schedules could not be retrieved");
+					else array_push($ret,0,array());
+				}
+			}
+		break;
+		case "get_uds":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$uds_rec = get_uds($logged->name, $logged->pw, $id);
+					if($uds_rec) array_push($ret,1,$uds_rec);
+					else array_push($ret,0,"Schedule could not be retrieved");
+				}
+			}
+		break;
+		case "add_uds":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$doorid = (isset($_POST["doorid"]) and is_numeric($_POST["doorid"])) ? $_POST["doorid"] : "";
+				$weekday = (isset($_POST["weekday"]) and is_numeric($_POST["weekday"])) ? $_POST["weekday"] : 0;
+				$starttime = isset($_POST['starttime']) ? $_POST['starttime'] : "";
+				$endtime = isset($_POST['endtime']) ? $_POST['endtime'] : "";
+
+				if($doorid=="" or ($weekday>7) or ($weekday<1) or (!is_valid_time($starttime)) or (!is_valid_time($endtime))) array_push($ret,0,"Invalid values sent");
+				else {
+					$uds_rec = add_uds($logged->name, $logged->pw, $doorid, $weekday, $starttime, $endtime);
+					if($uds_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,$uds_rec->data->message);
+				}
+			}
+		break;
+		case "delete_uds":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$uds_rec = delete_uds($logged->name, $logged->pw, $id);
+
+				if($uds_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Schedule could not be deleted");
+			}
+		break;
+
+		case "get_excdayuds_door":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$excdayuds_rec = get_excdayuds_door($logged->name, $logged->pw, $id);
+					if($excdayuds_rec) array_push($ret,1,$excdayuds_rec);
+					//else array_push($ret,0,"Exception could not be retrieved");
+					else array_push($ret,0,array());
+				}
+			}
+		break;
+		case "get_excdayuds":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST["id"]) and is_numeric($_POST["id"])) ? $_POST["id"] : "";
+
+				if($id=="") array_push($ret,0,"Invalid values sent");
+				else {
+					//get record
+					$excdayuds_rec = get_excdayuds($logged->name, $logged->pw, $id);
+					if($excdayuds_rec) array_push($ret,1,$excdayuds_rec);
+					else array_push($ret,0,"Exception could not be retrieved");
+				}
+			}
+		break;
+		case "add_excdayuds":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$doorid = (isset($_POST["doorid"]) and is_numeric($_POST["doorid"])) ? $_POST["doorid"] : "";
+				$excday = (isset($_POST["excday"]) and $_POST["excday"]!="") ? $_POST["excday"] : 0;
+
+				if($doorid=="" or !is_valid_date($excday)) array_push($ret,0,"Invalid values sent");
+				else {
+					$excdayuds_rec = add_excdayuds($logged->name, $logged->pw, $doorid, $excday);
+					if($excdayuds_rec->response_status == "201") array_push($ret,1,"Information saved successfully!");
+					else array_push($ret,0,$excdayuds_rec->data->message);
+				}
+			}
+		break;
+		case "delete_excdayuds":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$excdayuds_rec = delete_excdayuds($logged->name, $logged->pw, $id);
+
+				if($excdayuds_rec) array_push($ret,1,"Information saved successfully!");
+				else array_push($ret,0,"Exception could not be deleted");
 			}
 		break;
 

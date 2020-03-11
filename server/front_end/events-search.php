@@ -452,7 +452,7 @@ function buildEventTable(data, qtotal){
 		var dateobj = new Date(data[i].dateTime);
 		//set grey row if event belongs to a deleted user
 		//red if access was denied
-		if(data[i].allowed==0) var rowclass=" class='todel'";
+		if(data[i].allowed==0 || data[i].eventTypeId==4 || data[i].eventTypeId==3) var rowclass=" class='todel'";
 		else if(data[i].personDeleted==1) var rowclass=" class='deleted'";
 		else var rowclass="";
 		//build row
