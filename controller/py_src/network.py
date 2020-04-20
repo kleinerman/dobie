@@ -296,7 +296,7 @@ class NetMngr(genmngr.GenericMngr):
 
 
 
-    def recvRespConMsg(self, timeToWait):
+    def recvRespConMsg(self):
         '''
         This method receive the response to Connection Message.
         It waits until all response comes
@@ -304,8 +304,6 @@ class NetMngr(genmngr.GenericMngr):
 
         if not self.srvSock:
             raise ServerNotConnected
-
-        self.srvSock.settimeout(WAIT_RESP_TIME)
    
         completeResp = b'' 
         completed = False
@@ -361,6 +359,13 @@ class NetMngr(genmngr.GenericMngr):
                     self.srvSock = srvSock
 
 
+                #This timeout will take effect in "connect" method raising sometimes a
+                #"ConnectionResetError" exception when the timeout is in SSL handshake
+                #(this happens sometimes when restarting the backend while controller connected)
+                #or it will take effect waiting for a response in "recvRespConMsg" raising
+                #a "socket.timeout" exception catched here as "TimeOutConnectionResponse"
+                #because it is reraised in this way in "recvRespConMsg" method.
+                self.srvSock.settimeout(SOCK_TIMEOUT)
                 #If there is no connection to the server, an exception will happen here
                 self.srvSock.connect((SERVER_IP, SERVER_PORT))
 
@@ -368,7 +373,7 @@ class NetMngr(genmngr.GenericMngr):
                 self.sendConMsg()
                 #Receiving the response from server. The below method checks the
                 #if the server response is correct. If not it will raise "InvalidConnectionResponse"
-                self.recvRespConMsg(WAIT_RESP_TIME)
+                self.recvRespConMsg()
 
                 #Registering the socket in the network poller object
                 self.netPoller.register(self.srvSock, select.POLLIN)
