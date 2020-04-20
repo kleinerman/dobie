@@ -317,7 +317,12 @@ class NetMngr(genmngr.GenericMngr):
                     if SSL_ENABLED:
                         try:
                             ctrllerSckt = self.sslContext.wrap_socket(ctrllerSckt, server_side=True)
-                        except ssl.SSLError as sslError:
+                        #If the controller tries to connect without SSL, the exception "ssl.SSLError" 
+                        #occurs. Also this exception can be caught with the same "OSError" exception
+                        #but the traceback shows the "ssl.SSLError". Just in case both are caught. 
+                        #If the backend restarts while the controller is connected, when the controller
+                        #tries to reconnect, sometimes SSL handshake fails and "OSError" happens.
+                        except (ssl.SSLError, OSError) as sslError:
                             self.logger.debug(sslError)
                             self.logger.warning('Error doing the SSL handshake.')
                             continue
