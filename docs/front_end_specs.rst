@@ -1838,7 +1838,8 @@ An the tipical response would be:
         "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": null, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Oficina",
+        "visitedOrgName": null
       }, 
       {
         "allowed": 1, 
@@ -1852,7 +1853,8 @@ An the tipical response would be:
         "personDeleted": 0,         
         "doorName": "Ingreso F66", 
         "side": 1, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Oficina",
+        "visitedOrgName": null
       }, 
       {
         "allowed": 1, 
@@ -1866,7 +1868,8 @@ An the tipical response would be:
         "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Oficina",
+        "visitedOrgName": null
       }, 
       {
         "allowed": 0, 
@@ -1880,7 +1883,8 @@ An the tipical response would be:
         "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": null, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Oficina",
+        "visitedOrgName": null
       }, 
       {
         "allowed": 1, 
@@ -1894,7 +1898,8 @@ An the tipical response would be:
         "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Oficina",
+        "visitedOrgName": null
       }, 
       {
         "allowed": 1, 
@@ -1908,7 +1913,8 @@ An the tipical response would be:
         "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Oficina",
+        "visitedOrgName": null
       }, 
       {
         "allowed": 1, 
@@ -1922,7 +1928,8 @@ An the tipical response would be:
         "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Oficina",
+        "visitedOrgName": null
       }, 
       {
         "allowed": 1, 
@@ -1936,7 +1943,8 @@ An the tipical response would be:
         "personDeleted": 0, 
         "doorName": "Ingreso F66", 
         "side": 1, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Oficina",
+        "visitedOrgName": null
       }, 
       {
         "allowed": 1, 
@@ -1950,7 +1958,8 @@ An the tipical response would be:
         "personDeleted": 1, 
         "doorName": "Ingreso 1", 
         "side": 1, 
-        "zoneName": "Ingreso Principal"
+        "zoneName": "Ingreso Principal",
+        "visitedOrgName": "Clavnet Company"
       }, 
       {
         "allowed": 1, 
@@ -1964,7 +1973,8 @@ An the tipical response would be:
         "personDeleted": null, 
         "doorName": "Ingreso F66", 
         "side": 0, 
-        "zoneName": "Ingreso Oficina"
+        "zoneName": "Ingreso Oficina",
+        "visitedOrgName": null
       }
     ], 
     "evtsQtty": 10, 
@@ -1995,6 +2005,7 @@ Each event has the following fields:
 - ``zoneName``: Name of the zone.
 - ``doorName```: Name of the door.
 - ``orgName``: Name of the organization that person belong to. (Could be NULL when person is UNKNOWN)
+- ``visitedOrgName``: Name of the organization that the visitor is visiting. (Could be NULL when event doesn't involve a visitor.)
 - ``personName``: Name of the person. (Could be NULL when person is UNKNOWN)
 - ``personDeleted``: Bool field that indicates if the person was deleted. It is ``null`` when the event doesn't involve a person.
 - ``denialCauseId``: When the access is not allowed, this is the ID of denialCause. (Could be NULL when the access was allowed)
@@ -2135,34 +2146,60 @@ Events Live
 
 | The Frontend should be able to receive a POST method with a JSON containing the event.
 | Note that the events sent to the frontend in this situation (live events) differ a little from the events returned when the frontend queries them in the Event Report section.
-| Here, the JSON events add zoneId, doorId, orgId and personId.
-| The personDeleted field always will come with value "null" since it has no sense another value.
-| Finally, the eventId field won't come, since it is unnecesary.
+| Here, the JSON events add ``zoneId``, ``doorId``, ``orgId`` and ``personId``.
+| The ``personDeleted`` field always will come with value "null" since it makes no sense another value.
+| Finally, the ``eventId`` field won't come, since it is unnecesary.
 | The adding of above fields are needed for a filter that will be in this section to view specific events.
-| For example, one organization events, one person events, one zone events, one door events,, one direction events, the combinations of two or more, etc.
 
 
+The following would be an event of a typical person:
 
 **JSON**
 
 .. code-block::
 
   {
-   "eventTypeId": 1, 
-   "zoneId": "3", 
-   "zoneName": "Ingreso Oficina"
+   "eventTypeId": 1,
+   "zoneId": "3",
+   "zoneName": "Ingreso Oficina",
    "doorName": "Ingreso F66",
-   "orgId": 2, 
-   "orgName": "Datacenter Capitalinas", 
-   "personName": "Jorge Kleinerman", 
-   "personDeleted": null, 
-   "doorLockId": 1, 
-   "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT", 
-   "side": 1, 
-   "allowed": 1, 
+   "orgId": 2,
+   "orgName": "Datacenter Capitalinas",
+   "visitedOrgId": null,
+   "visitedOrgName": null,
+   "personName": "Jorge Kleinerman",
+   "personDeleted": null,
+   "doorLockId": 1,
+   "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT",
+   "side": 1,
+   "allowed": 1,
    "denialCauseId": null
   }
 
+
+And the following would be an event of a visitor:
+
+**JSON**
+
+.. code-block::
+
+  {
+   "eventTypeId": 1,
+   "zoneId": "3",
+   "zoneName": "Ingreso Oficina",
+   "doorName": "Ingreso F66",
+   "orgId": 1,
+   "orgName": "Visitors",
+   "visitedOrgId": 7,
+   "visitedOrgName": Larriken Corp.,
+   "personName": "Jhon Alvarez",
+   "personDeleted": null,
+   "doorLockId": 1,
+   "dateTime": "Thu, 12 Oct 2017 17:19:00 GMT",
+   "side": 1,
+   "allowed": 1,
+   "denialCauseId": null
+  }
 
 The endpoint should be:
 
