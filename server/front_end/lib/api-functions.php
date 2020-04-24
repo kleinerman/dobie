@@ -1231,7 +1231,7 @@ if($DEBUG){
 //	edit_access_allweek($user,$pass,$id,$iside,$oside,$starttime,$endtime,$expiredate){
 //	$res=add_access_allweek("admin","admin",1,3,1,1,"09:00","13:00","9999-12-31");
 //get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$side="",$fromdate="",$fromtime="",$untildate="",$untiltime="",$startevt=1,$q=15,$visitedorgid="",$isprov="")
-	//$res=get_events("admin","admin","","","","","","2019-11-01","00:00","2019-11-09","00:00",1,15,"",0);
+	$res=get_events("admin","admin","","","","","","2019-11-01","00:00","2020-11-09","00:00",1,15,"",0);
 	//$res=get_visit_door_groups("admin","admin");
 	//$res=get_visit_door_group("admin","admin",1);
 	//$res=set_visit_door_group("admin","admin",9,"Door Group 9","5|6");
@@ -1265,7 +1265,7 @@ if($DEBUG){
 	//echo $res;
 	//$res=set_person_image("admin","admin",1,file_get_contents("../img/dobie.png"));
 	
-	$res=get_uds_door("admin","admin",2);
+	//$res=get_uds_door("admin","admin",2);
 	//$res=get_uds("admin","admin",$id);
 	//$res=add_uds("admin","admin", 3, 1, "23:30", "25:00");
 	//$res=set_uds("admin","admin", 11, 3, 3, "23:30", "23:59");
