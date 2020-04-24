@@ -401,17 +401,18 @@ function downloadCSV(eventsArr,csvFileName){
 	var separator = ";";
 	var linebreak = '\n';
 	//add column names in header
-	var csvContent = '<?=get_text("Type",$lang);?>'+separator+'<?=get_text("Zone",$lang);?>'+separator+'<?=get_text("Door",$lang);?>'+separator+'<?=get_text("Lock",$lang);?>'+separator+'<?=get_text("Direction",$lang);?>'+separator+'<?=get_text("Date",$lang);?>'+separator+'<?=get_text("Time",$lang);?>'+separator+'<?=get_text("Organization",$lang);?>'+separator+'<?=get_text("Person",$lang);?>'+separator+'<?=get_text("Allowed",$lang);?>'+separator+'<?=get_text("Denial Cause",$lang);?>'+separator+'<?=get_text("Person Deleted",$lang);?>'+linebreak;
+    var csvContent = '<?=get_text("Type",$lang);?>'+separator+'<?=get_text("Zone",$lang);?>'+separator+'<?=get_text("Door",$lang);?>'+separator+'<?=get_text("Lock",$lang);?>'+separator+'<?=get_text("Direction",$lang);?>'+separator+'<?=get_text("Date",$lang);?>'+separator+'<?=get_text("Time",$lang);?>'+separator+'<?=get_text("Organization",$lang);?>'+separator+'<?=get_text("Person",$lang);?>'+separator+'<?=get_text("Visited Org.",$lang)?>'+separator+'<?=get_text("Allowed",$lang);?>'+separator+'<?=get_text("Denial Cause",$lang);?>'+separator+'<?=get_text("Person Deleted",$lang);?>'+linebreak;
 	eventsArr.forEach(function(data){
 		//set no value for null values
 		if(data.orgName === null) data.orgName="";
-		if(data.personName === null) data.personName="";
+        if(data.personName === null) data.personName="";
+        if(data.visitedOrgName === null) data.visitedOrgName="";
 		//if person deleted, show yes as last column
 		if(data.personDeleted==1) var isdel="Yes";
 		else var isdel="No";
 		//init date variable for date prints
 		var dateobj = new Date(data.dateTime);
-		csvContent += get_event_text(data.eventTypeId,"type") +separator+ data.zoneName +separator+ data.doorName +separator+ get_event_text(data.doorLockId,"doorlock") +separator+ get_event_text(data.side,"side") +separator+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +separator+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +separator+ data.orgName +separator+ data.personName +separator+ get_event_text(data.allowed,"allowed") +separator+ get_event_text(data.denialCauseId,"denialcause") +separator+ isdel +linebreak;
+        csvContent += get_event_text(data.eventTypeId,"type") +separator+ data.zoneName +separator+ data.doorName +separator+ get_event_text(data.doorLockId,"doorlock") +separator+ get_event_text(data.side,"side") +separator+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +separator+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +separator+ data.orgName +separator+ data.personName +separator+ data.visitedOrgName +separator+ get_event_text(data.allowed,"allowed") +separator+ get_event_text(data.denialCauseId,"denialcause") +separator+ isdel +linebreak;
 	});
 
 	// The download function takes a CSV string, the filename and mimeType as parameters
@@ -442,12 +443,13 @@ function downloadCSV(eventsArr,csvFileName){
 //outputs html for event table based on received data from api
 function buildEventTable(data, qtotal){
 	//init headers
-	var ret_string='<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr><td colspan="11"><?=get_text("Total results",$lang);?>: '+ qtotal +'</td></tr><tr><th class="center"><?=get_text("Type",$lang);?></th><th><?=get_text("Zone",$lang);?></th><th><?=get_text("Door",$lang);?></th><th class="center"><?=get_text("Lock",$lang);?></th><th class="center"><?=get_text("Direction",$lang);?></th><th><?=get_text("Date",$lang);?></th><th><?=get_text("Time",$lang);?></th><th><?=get_text("Organization",$lang);?></th><th><?=get_text("Person",$lang);?></th><th class="center"><?=get_text("Allowed",$lang);?></th><th class="center"><?=get_text("Denial Cause",$lang);?></th></tr>';
+    var ret_string='<table id="events-table" class="table-bordered table-hover table-condensed table-responsive table-striped left"><tr><td colspan="12"><?=get_text("Total results",$lang);?>: '+ qtotal +'</td></tr><tr><th class="center"><?=get_text("Type",$lang);?></th><th><?=get_text("Zone",$lang);?></th><th><?=get_text("Door",$lang);?></th><th class="center"><?=get_text("Lock",$lang);?></th><th class="center"><?=get_text("Direction",$lang);?></th><th><?=get_text("Date",$lang);?></th><th><?=get_text("Time",$lang);?></th><th><?=get_text("Organization",$lang);?></th><th><?=get_text("Person",$lang);?></th><th><?=get_text("Visited Org.",$lang)?></th><th class="center"><?=get_text("Allowed",$lang);?></th><th class="center"><?=get_text("Denial Cause",$lang);?></th></tr>';
 
 	for(var i=0;i<data.length;i++){
 		//set no value for null values
 		if(data[i].orgName === null) data[i].orgName="";
-		if(data[i].personName === null) data[i].personName="";
+        if(data[i].personName === null) data[i].personName="";
+        if(data[i].visitedOrgName === null) data[i].visitedOrgName="";
 		//init date variable for date prints
 		var dateobj = new Date(data[i].dateTime);
 		//set grey row if event belongs to a deleted user
@@ -456,7 +458,7 @@ function buildEventTable(data, qtotal){
 		else if(data[i].personDeleted==1) var rowclass=" class='deleted'";
 		else var rowclass="";
 		//build row
-		ret_string+="<tr"+rowclass+"><td class=\"center\">"+ get_icon(data[i].eventTypeId,"type") +"</td><td>"+ data[i].zoneName +"</td><td>"+ data[i].doorName +"</td><td class=\"center\">"+ get_icon(data[i].doorLockId,"doorlock") +"</td><td class=\"center\">"+ get_icon(data[i].side,"side") +"</td><td>"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td>"+ data[i].orgName +"</td><td>"+ data[i].personName +"</td><td class=\"center\">"+ get_icon(data[i].allowed,"allowed") +"</td><td class=\"center\">"+ get_icon(data[i].denialCauseId,"denialcause") +"</td></tr>";
+		ret_string+="<tr"+rowclass+"><td class=\"center\">"+ get_icon(data[i].eventTypeId,"type") +"</td><td>"+ data[i].zoneName +"</td><td>"+ data[i].doorName +"</td><td class=\"center\">"+ get_icon(data[i].doorLockId,"doorlock") +"</td><td class=\"center\">"+ get_icon(data[i].side,"side") +"</td><td>"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td>"+ data[i].orgName +"</td><td>"+ data[i].personName +"</td><td>"+ data[i].visitedOrgName +"</td><td class=\"center\">"+ get_icon(data[i].allowed,"allowed") +"</td><td class=\"center\">"+ get_icon(data[i].denialCauseId,"denialcause") +"</td></tr>";
 	}
 
 	ret_string+="</table>";

@@ -105,8 +105,8 @@ include("header.php");
 <div id="events-container" class="table-responsive gowide">
 
 <table id="events-table" class="table table-bordered table-hover table-condensed table-striped left"><tr id="events-table-header-row">
-<th class="center hidden-xs"><?=get_text("Type",$lang);?></th><th class="hidden-xs"><?=get_text("Zone",$lang);?></th><th><?=get_text("Door",$lang);?></th><th class="center hidden-xs"><?=get_text("Lock",$lang);?></th><th class="center hidden-xs"><?=get_text("Direction",$lang);?></th><th class="hidden-xs"><?=get_text("Date",$lang);?></th><th><?=get_text("Time",$lang);?></th><th class="hidden-xs"><?=get_text("Organization",$lang);?></th><th><?=get_text("Person",$lang);?></th><th class="center"><?=get_text("Allowed",$lang);?></th><th class="center hidden-xs"><?=get_text("Denial Cause",$lang);?></th></tr>
-<tr id="noevents-row"><td colspan="11"><?=get_text("No events",$lang);?></td></tr>
+<th class="center hidden-xs"><?=get_text("Type",$lang);?></th><th class="hidden-xs"><?=get_text("Zone",$lang);?></th><th><?=get_text("Door",$lang);?></th><th class="center hidden-xs"><?=get_text("Lock",$lang);?></th><th class="center hidden-xs"><?=get_text("Direction",$lang);?></th><th class="hidden-xs"><?=get_text("Date",$lang);?></th><th><?=get_text("Time",$lang);?></th><th class="hidden-xs"><?=get_text("Organization",$lang);?></th><th><?=get_text("Person",$lang);?></th><th class="hidden-xs"><?=get_text("Visited Org.",$lang)?></th><th class="center"><?=get_text("Allowed",$lang);?></th><th class="center hidden-xs"><?=get_text("Denial Cause",$lang);?></th></tr>
+<tr id="noevents-row"><td colspan="12"><?=get_text("No events",$lang);?></td></tr>
 </table>
 
 </div>
@@ -266,7 +266,8 @@ $("#events-search-reset-filter").click(function(){
 function addEventInTable(data){
 	//set no value for null values
 	if(data.orgName === null) data.orgName="";
-	if(data.personName === null) data.personName="";
+    if(data.personName === null) data.personName="";
+    if(data.visitedOrgName == null) data.visitedOrgName="";
 	//init date variable for date prints
 	var dateobj = new Date(data.dateTime);
 	//set grey row if event belongs to a deleted user
@@ -275,7 +276,7 @@ function addEventInTable(data){
 	else if(data.personDeleted==1) var rowclass=" deleted";
 	else var rowclass="";
 	//build row
-	ret_string="<tr style='display:none' class='newevent"+rowclass+"'><td class=\"center hidden-xs\">"+ get_icon(data.eventTypeId,"type") +"</td><td class=\"hidden-xs\">"+ data.zoneName +"</td><td>"+ data.doorName +"</td><td class=\"center hidden-xs\">"+ get_icon(data.doorLockId,"doorlock") +"</td><td class=\"center hidden-xs\">"+ get_icon(data.side,"side") +"</td><td class=\"hidden-xs\">"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td class=\"hidden-xs\">"+ data.orgName +"</td><td>"+ data.personName +"</td><td class=\"center\">"+ get_icon(data.allowed,"allowed") +"</td><td class=\"center hidden-xs\">"+ get_icon(data.denialCauseId,"denialcause") +"</td></tr>";
+	ret_string="<tr style='display:none' class='newevent"+rowclass+"'><td class=\"center hidden-xs\">"+ get_icon(data.eventTypeId,"type") +"</td><td class=\"hidden-xs\">"+ data.zoneName +"</td><td>"+ data.doorName +"</td><td class=\"center hidden-xs\">"+ get_icon(data.doorLockId,"doorlock") +"</td><td class=\"center hidden-xs\">"+ get_icon(data.side,"side") +"</td><td class=\"hidden-xs\">"+ dateobj.getFullYear() + "-" + addZeroPaddingSingle((dateobj.getMonth()+1)) + "-" + addZeroPaddingSingle(dateobj.getDate()) +"</td><td>"+ addZeroPadding(dateobj.getHours() + ":" + dateobj.getMinutes()) +"</td><td class=\"hidden-xs\">"+ data.orgName +"</td><td>"+ data.personName +"</td><td class=\"hidden-xs\">"+data.visitedOrgName+"</td><td class=\"center\">"+ get_icon(data.allowed,"allowed") +"</td><td class=\"center hidden-xs\">"+ get_icon(data.denialCauseId,"denialcause") +"</td></tr>";
 	return ret_string;
 }
 

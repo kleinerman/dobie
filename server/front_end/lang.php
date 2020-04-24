@@ -354,10 +354,12 @@ $dictionary = array(
 	strtolower('Days which the door will not be automatically unlocked (very common for holidays)') => array(
 		'es' => 'Días en los que la puerta no será automáticamente abierta (muy común en feriados)'
 	),
-
 	strtolower('to') => array(
 		'es' => 'a'
-	),
+    ),
+    strtolower('Visited Org.') => array(
+        'es' => 'Visitó a Org.'
+    ),
 
 	//events live
 	strtolower('Reset filter') => array(
