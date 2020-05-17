@@ -1049,7 +1049,8 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-            except (database.AccessNotFound, database.PersonNotFound, database.DoorNotFound) as notFound:
+            except (database.AccessNotFound, database.PersonNotFound,
+                    database.DoorNotFound) as notFound:
                 raise NotFound(str(notFound))
 
             except database.AccessError as accessError:
@@ -1200,8 +1201,6 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-            except KeyError:
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
 
 
 
@@ -1211,7 +1210,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def poweroffController(controllerId):
             '''
-            Re provision all CRUD of a controller.
+            Power off the controller
             '''
             try:
                 ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
@@ -1230,8 +1229,6 @@ class CrudMngr(genmngr.GenericMngr):
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-            except KeyError:
-                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
 
 
 
@@ -1269,6 +1266,8 @@ class CrudMngr(genmngr.GenericMngr):
                 uri = url_for('modDoor', doorId=doorId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Door added', 'code': CREATED, 'uri': uri}), CREATED
 
+            except database.ControllerNotFound as controllerNotFound:
+                raise NotFound(str(controllerNotFound))
             except database.DoorError as doorError:
                 raise ConflictError(str(doorError))
             except TypeError:
@@ -1323,8 +1322,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.ctrllerMsger.delDoor(ctrllerMac, doorId)
                     return jsonify({'status': 'OK', 'message': 'Door deleted'}), OK
 
-            except database.DoorNotFound as doorNotFound:
-                raise NotFound(str(doorNotFound))
+            except (database.ControllerNotFound, database.DoorNotFound) as notFound:
+                raise NotFound(str(notFound))
             except database.DoorError as doorError:
                 raise ConflictError(str(doorError))
             except TypeError:
@@ -1334,6 +1333,33 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
             except KeyError:
                 raise BadRequest('Invalid request. Required: {}'.format(', '.join(doorNeedKeys)))
+
+
+
+
+        @app.route('/api/v1.0/door/<int:doorId>/open', methods=['PUT'])
+        @auth.login_required
+        def openDoor(doorId):
+            '''
+            Re provision all CRUD of a controller.
+            '''
+            try:
+                ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)
+                self.ctrllerMsger.openDoor(ctrllerMac, doorId)
+
+                return jsonify({'status': 'OK', 'message': 'Door will be opened'}), OK
+
+            except network.CtrllerDisconnected:
+                raise NotFound("Controller not connected")
+            except database.ControllerNotFound as controllerNotFound:
+                raise NotFound(str(controllerNotFound))
+            except database.ControllerError as controllerError:
+                raise ConflictError(str(controllerError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
 
 
 
@@ -1424,7 +1450,8 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify(accesses)
 
 
-            except (database.AccessNotFound, database.PersonNotFound, database.DoorNotFound) as notFound:
+            except (database.AccessNotFound, database.PersonNotFound,
+                    database.DoorNotFound) as notFound:
                 raise NotFound(str(notFound))
 
             except database.AccessError as accessError:
@@ -1458,7 +1485,6 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Door dictionary modified for the controller database (same server door id)
                 unlkDoorSkd['id'] = unlkDoorSkdId
-                #unlkDoorSkd.pop('someThing')
                 # Get the controller mac address
                 ctrllerMac = self.dataBase.getControllerMac(doorId=unlkDoorSkd['doorId'])
                 self.ctrllerMsger.addUnlkDoorSkd(ctrllerMac, unlkDoorSkd)
@@ -1466,7 +1492,8 @@ class CrudMngr(genmngr.GenericMngr):
                 uri = url_for('modUnlkDoorSkd', unlkDoorSkdId=unlkDoorSkdId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Unlock Door Schedule added', 'code': CREATED, 'uri': uri}), CREATED
 
-
+            except database.ControllerNotFound as controllerNotFound:
+                raise NotFound(str(controllerNotFound))
             except database.UnlkDoorSkdError as unlkDoorSkdError:
                 raise ConflictError(str(unlkDoorSkdError))
 
@@ -1527,7 +1554,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.ctrllerMsger.delUnlkDoorSkd(ctrllerMac, unlkDoorSkdId)
                     return jsonify({'status': 'OK', 'message': 'Unlock Door Schedule deleted'}), OK
 
-            except (database.UnlkDoorSkdNotFound, database.DoorNotFound) as notFound:
+            except (database.ControllerNotFound, database.DoorNotFound,
+                    database.UnlkDoorSkdNotFound) as notFound:
                 raise NotFound(str(notFound))
             except (database.UnlkDoorSkdError, database.DoorError) as error:
                 raise ConflictError(str(error))
@@ -1564,7 +1592,6 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Door dictionary modified for the controller database (same server door id)
                 excDayUds['id'] = excDayUdsId
-                #excDayUds.pop('someThing')
                 # Get the controller mac address
                 ctrllerMac = self.dataBase.getControllerMac(doorId=excDayUds['doorId'])
                 self.ctrllerMsger.addExcDayUds(ctrllerMac, excDayUds)
@@ -1572,10 +1599,10 @@ class CrudMngr(genmngr.GenericMngr):
                 uri = url_for('modExcDayUds', excDayUdsId=excDayUdsId, _external=True)
                 return jsonify({'status': 'OK', 'message': 'Exception Day to Unlock Door Schedule added', 'code': CREATED, 'uri': uri}), CREATED
 
-
+            except database.ControllerNotFound as controllerNotFound:
+                raise NotFound(str(controllerNotFound))
             except database.ExcDayUdsError as excDayUdsError:
                 raise ConflictError(str(excDayUdsError))
-
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -1633,7 +1660,8 @@ class CrudMngr(genmngr.GenericMngr):
                     self.ctrllerMsger.delExcDayUds(ctrllerMac, excDayUdsId)
                     return jsonify({'status': 'OK', 'message': 'Exception Day to Unlock Door Schedule deleted'}), OK
 
-            except (database.ExcDayUdsNotFound, database.DoorNotFound) as notFound:
+            except (database.ControllerNotFound, database.DoorNotFound,
+                    database.ExcDayUdsNotFound) as notFound:
                 raise NotFound(str(notFound))
             except (database.ExcDayUdsError, database.DoorError) as error:
                 raise ConflictError(str(error))
@@ -1694,12 +1722,8 @@ class CrudMngr(genmngr.GenericMngr):
 
             #This exception could be raised by getPerson() method.
             #It will never happen since addAccess() method will raise an exception caused by constraint.
-            except database.PersonNotFound as personNotFound:
-                raise NotFound(str(personNotFound))
-            #This exception could be raised by getControllerMac() method.
-            #It will never happen since addAccess() method will raise an exception caused by constraint.
-            except database.DoorNotFound as doorNotFound:
-                raise NotFound(str(doorNotFound))
+            except (database.ControllerNotFound, database.PersonNotFound) as notFound:
+                raise NotFound(str(notFound))
             except database.AccessError as accessError:
                 raise ConflictError(str(accessError))
             except TypeError:
@@ -1760,12 +1784,11 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-            except (database.AccessNotFound, database.DoorNotFound) as notFound:
+            except (database.AccessNotFound, database.DoorNotFound,
+                    database.ControllerNotFound) as notFound:
                 raise NotFound(str(notFound))
-
             except (database.AccessError, database.DoorError) as error:
                 raise ConflictError(str(error))
-
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -1827,14 +1850,10 @@ class CrudMngr(genmngr.GenericMngr):
                 return jsonify({'status': 'OK', 'message': 'Access added', 'code': CREATED, 'uri': uri}), CREATED
 
 
-            #This exception could be raised by getPerson() method.
+            #Exception PersonNotFound could be raised by getPerson() method.
             #It will never happen since addAccess() method will raise an exception caused by constraint.
-            except database.PersonNotFound as personNotFound:
-                raise NotFound(str(personNotFound))
-            #This exception could be raised by getControllerMac() method.
-            #It will never happen since addAccess() method will raise an exception caused by constraint.
-            except database.DoorNotFound as doorNotFound:
-                raise NotFound(str(doorNotFound))
+            except (database.PersonNotFound, database.ControllerNotFound) as notFound:
+                raise NotFound(str(notFound))
             except database.AccessError as accessError:
                 raise ConflictError(str(accessError))
             except TypeError:
@@ -1886,12 +1905,11 @@ class CrudMngr(genmngr.GenericMngr):
                     return jsonify({'status': 'OK', 'message': 'Access deleted'}), OK
 
 
-            except (database.AccessNotFound, database.DoorNotFound) as notFound:
+            except (database.AccessNotFound, database.DoorNotFound,
+                    database.ControllerNotFound) as notFound:
                 raise NotFound(str(notFound))
-
             except (database.AccessError, database.DoorError) as error:
                 raise ConflictError(str(error))
-
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '

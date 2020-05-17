@@ -69,7 +69,7 @@ class DataBase(object):
 
 
         sql = ("SELECT DISTINCT doorId FROM UnlkDoorSkd WHERE weekDay = {0} "
-               "AND '{1}' > startTime and '{1}' < endTime AND doorId NOT IN "
+               "AND '{1}' >= startTime and '{1}' <= endTime AND doorId NOT IN "
                "(SELECT DISTINCT doorId FROM ExcDayUds WHERE excDay = '{2}')"
                "".format(nowWeekDay, nowTime, nowDate)
               )

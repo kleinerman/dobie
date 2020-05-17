@@ -13,6 +13,7 @@ import json
 
 import database
 import queue
+import posix_ipc
 
 import sys
 import netifaces
@@ -101,6 +102,13 @@ class NetMngr(genmngr.GenericMngr):
         #of bytes in the out buffer.
         #(Not sure if this is necessary or it is the best way to do it)
         self.outBufferQue = queue.Queue()
+
+
+        #Opening the same queue opened by the ioIface to open the door
+        #by the front end UI
+        self.ioIfaceQue = posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
+
+
 
         #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
@@ -260,6 +268,19 @@ class NetMngr(genmngr.GenericMngr):
         elif msg.startswith(CUD):
             crudMsg = msg.strip(CUD+END).decode('utf8')
             self.crudMngr.netToCrud.put(crudMsg)
+
+        elif msg.startswith(ROD):
+            netMsg = msg.strip(ROD+END).decode('utf8')
+            try:
+                netMsgData = json.loads(netMsg)
+                doorId = netMsgData['id']
+                ioIfaceQueMsg = f'{doorId};0;net=0'
+                self.ioIfaceQue.send(ioIfaceQueMsg)
+            except (JSONDecodeError, KeyError):
+                self.logger.warning("Malformed request to open door message received.")
+
+
+
 
         elif msg.startswith(RRP):
             self.crudMngr.netToCrud.put(RRP)

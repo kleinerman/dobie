@@ -50,11 +50,13 @@ class Controller(object):
         #Dictionary containing functions to be launched according to the messages received by the ioiface
         self.handlers = { 'card'   : self.procCard,
                           'button' : self.procButton,
-                          'state'  : self.procState
+                          'state'  : self.procState,
+                          'net'    : self.procNet
                         }
 
-        #Queue used to send events to eventThread
-        self.eventQueue = queue.Queue()
+        #Queue used to send events to eventThread, from this thread,
+        #StarterAlrmMngr thread and from UnlkDoorSkdMngr thread
+        self.toEvent = queue.Queue()
         
         #Queue used to send responses from netMngr thread to event thread
         netToEvent = queue.Queue()
@@ -77,7 +79,8 @@ class Controller(object):
         self.netMngr = network.NetMngr(netToEvent, self.netToReSnd, self.crudMngr, self.exitFlag)        
 
         #Scheduler thread
-        self.unlkDoorSkdMngr = door.UnlkDoorSkdMngr(self.lockDoorsControl, self.doorsControl, self.exitFlag)
+        self.unlkDoorSkdMngr = door.UnlkDoorSkdMngr(self.toEvent, self.lockDoorsControl,
+                                                    self.doorsControl, self.exitFlag)
 
 
         #Setting internal crudMngr reference to netMngr thread to be able to answer
@@ -88,7 +91,8 @@ class Controller(object):
         self.resenderAlive = threading.Event()
 
         #Creating the Event Manager Thread giving to it the previous event queue
-        self.eventMngr = events.EventMngr(self.eventQueue, self.netMngr, netToEvent, self.netToReSnd, self.resenderAlive, self.exitFlag)
+        self.eventMngr = events.EventMngr(self.toEvent, self.netMngr, netToEvent,
+                                          self.netToReSnd, self.resenderAlive, self.exitFlag)
 
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
         signal.signal(signal.SIGTERM, self.sigtermHandler)
@@ -165,9 +169,9 @@ class Controller(object):
             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         
             event = {'doorId' : doorId, 
-                     'eventTypeId' : 1,
+                     'eventTypeId' : EVT_PERS_CARD,
                      'dateTime' : dateTime,
-                     'doorLockId' : 1,
+                     'doorLockId' : LCK_CARD_READER,
                      'cardNumber' : cardNumber,
                      'side' : side,
                      'allowed' : allowed,
@@ -175,7 +179,7 @@ class Controller(object):
                     }
 
             #Sending the event to the "Event Manager" thread
-            self.eventQueue.put(event)
+            self.toEvent.put(event)
 
 
         except door.DoorNotConfigured:
@@ -202,9 +206,9 @@ class Controller(object):
 
 
             event = {'doorId' : doorId,
-                     'eventTypeId' : 2,
+                     'eventTypeId' : EVT_PERS_BUTT,
                      'dateTime' : dateTime,
-                     'doorLockId' : 3,
+                     'doorLockId' : LCK_BUTTON,
                      'cardNumber' : None,
                      'side' : side,
                      'allowed' : True,
@@ -212,7 +216,7 @@ class Controller(object):
                     }
 
             #Sending the event to the "Event Manager" thread
-            self.eventQueue.put(event)
+            self.toEvent.put(event)
 
         except door.DoorNotConfigured:
             logMsg = 'Button pressed on door {} but it is not configured'.format(doorNum)
@@ -250,7 +254,7 @@ class Controller(object):
                         if doorControl['accessPermit'].is_set():
                             #Creates a StarterAlrmMngrAlive if not was previously created by other access
                             if not doorControl['starterAlrmMngrAlive'].is_set():
-                                starterAlrmMngr = door.StarterAlrmMngr(doorControl, self.eventQueue, self.exitFlag)
+                                starterAlrmMngr = door.StarterAlrmMngr(doorControl, self.toEvent, self.exitFlag)
                                 starterAlrmMngr.start()
 
                         #If the door was not opened in a permitted way, start the alarm and 
@@ -265,7 +269,7 @@ class Controller(object):
                             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
                             event = {'doorId' : doorId,
-                                     'eventTypeId' : 4,
+                                     'eventTypeId' : EVT_FORCED,
                                      'dateTime' : dateTime,
                                      'doorLockId' : None,
                                      'cardNumber' : None,
@@ -275,7 +279,7 @@ class Controller(object):
                                     }
 
                             #Sending the event to the "Event Manager" thread
-                            self.eventQueue.put(event)
+                            self.toEvent.put(event)
 
                     else:
                         logMsg = ("Door: {} opened while unlocked by schedule."
@@ -286,7 +290,7 @@ class Controller(object):
                         dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
                         event = {'doorId' : doorId,
-                                 'eventTypeId' : 5,
+                                 'eventTypeId' : EVT_OPEN_WHILE_SKD,
                                  'dateTime' : dateTime,
                                  'doorLockId' : None,
                                  'cardNumber' : None,
@@ -294,7 +298,7 @@ class Controller(object):
                                  'allowed' : None,
                                  'denialCauseId' : None
                                 }
-                        self.eventQueue.put(event)
+                        self.toEvent.put(event)
 
 
 
@@ -309,6 +313,51 @@ class Controller(object):
 
         except door.DoorNotConfigured:
             logMsg = 'State received on door {} but it is not configured'.format(doorNum)
+            self.logger.warning(logMsg)
+
+
+
+#---------------------------------------------------------------------------#
+
+    def procNet(self, doorId, side, value):
+        '''
+        This method is called each time a message from the network
+        to open a door is received. They will generally come from the
+        Front End interface.
+        The network thread sends these messages putting them in the
+        same posix ipc queue that the IO Iface use to send messages.
+        Instead of sending the "doorNum", it sends the "doorId".
+        Calling "getDoorNum" method of "doorsControl" object, we can
+        know the "doorNum" to call "openDoor" method
+        Also an event is genarated and sent to "evenMngr" to log this.
+        '''
+
+        try:
+            with self.lockDoorsControl:
+                doorNum = self.doorsControl.getDoorNum(doorId)
+
+            self.openDoor(doorNum)
+
+            dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
+
+            event = {'doorId' : doorId,
+                     'eventTypeId' : EVT_OPEN_UI,
+                     'dateTime' : dateTime,
+                     'doorLockId' : None,
+                     'cardNumber' : None,
+                     'side' : None,
+                     'allowed' : None,
+                     'denialCauseId' : None
+                    }
+
+            #Sending the event to the "Event Manager" thread
+            self.toEvent.put(event)
+
+        except door.DoorNotConfigured:
+            logMsg = ("Message from network requested to open door "
+                      "with ID: {} but it is not configured".format(doorId)
+                     )
             self.logger.warning(logMsg)
 
 

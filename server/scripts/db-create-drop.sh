@@ -38,7 +38,7 @@ function create {
         INSERT INTO User(username, passwdHash, fullName, roleId, language, active) VALUES ('admin', '\$1\$CJvRt.x.\$ZmuMH4up3zMGnip.Kn7vI0', 'Administrator', 1, 'en', 1);
         INSERT INTO ResState(id, description) VALUES (1, 'To Add'), (2, 'To Update'), (3, 'Committed'), (4, 'To Delete'), (5, 'Deleted');
         INSERT INTO Organization(id, name, resStateId) VALUES(1, 'Visitors', 3);
-        INSERT INTO EventType(id, description) VALUES(1, 'Access with card'), (2, 'Access with button'), (3, 'The door remains opened'), (4, 'The door was forced');
+        INSERT INTO EventType(id, description) VALUES(1, 'Access with card'), (2, 'Access with button'), (3, 'The door remains opened'), (4, 'The door was forced'), (5, 'Door opened by schedule'), (6, 'Door closed by schedule'), (7, 'Door opened while unlocked by schedule'), (8, 'Door opened by user interface');
         INSERT INTO DoorLock(id, description) VALUES(1, 'Card Reader'), (2, 'Fingerprint Reader'), (3, 'Button');
         INSERT INTO DenialCause(id, description) VALUES(1, 'No access'), (2, 'Expired card'), (3, 'Out of time');
         INSERT INTO CtrllerModel(id, name, integratedSbc, numOfDoors) VALUES(1, 'Dobie-RP1-333', 'Raspberry PI', 3), (2, 'Dobie-RPI2-424', 'Raspberry PI 2', 4), (3, 'Dobie-RPI1-333', 'Raspberry PI', 3), (4, 'Dobie-BBONE-444', 'BeagleBone', 4);
