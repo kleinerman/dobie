@@ -1977,32 +1977,23 @@ class DataBase(object):
             
 
         if controllerId:
-            sql = ("SELECT controller.macAddress FROM Controller controller WHERE "
+            sql = ("SELECT macAddress FROM Controller WHERE "
                    "id = {}".format(controllerId)
                   )
-            try:
-                self.execute(sql)
-                return self.cursor.fetchone()['macAddress']
-
-            except TypeError:
-                self.logger.debug('This controller id has not any MAC associated.')
-                raise ControllerNotFound('Controller not found')
-
-
         else:
-            sql = ("SELECT controller.macAddress FROM Controller controller JOIN "
-                   "Door door ON (controller.id = door.controllerId) WHERE "
-                   "door.id = {}".format(doorId)
+            sql = ("SELECT Controller.macAddress FROM Controller JOIN "
+                   "Door ON (Controller.id = Door.controllerId) WHERE "
+                   "Door.id = {}".format(doorId)
                   )
 
-            try:
-                self.execute(sql)
-                return self.cursor.fetchone()['macAddress']
 
-            except TypeError:
-                self.logger.debug('This door id is not present in any controller.')
-                raise DoorNotFound('Door not found')
+        try:
+            self.execute(sql)
+            return self.cursor.fetchone()['macAddress']
 
+        except TypeError:
+            self.logger.debug("Can not get mac address with this controllerId or doorId")
+            raise ControllerNotFound('Controller not found')
 
 
 

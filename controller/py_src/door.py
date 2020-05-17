@@ -184,13 +184,13 @@ class StarterAlrmMngr(genmngr.GenericMngr):
     When the door is opened more than once consecutively, the time is prolonged.    
     '''
 
-    def __init__(self, doorControl, eventQueue, exitFlag):
+    def __init__(self, doorControl, toEvent, exitFlag):
 
         #Dictionary with variables to control the door
         self.doorControl = doorControl
 
         #Queue to send events to Event Manager when the alarm start
-        self.eventQueue = eventQueue
+        self.toEvent = toEvent
 
         #Getting the doorId for logging purpouses. It is got in this way 
         #to avoid passing it in constructor of the class.
@@ -238,7 +238,7 @@ class StarterAlrmMngr(genmngr.GenericMngr):
 
                 dateTime = nowDateTime.strftime('%Y-%m-%d %H:%M')
                 event = {'doorId' : self.doorId,
-                         'eventTypeId' : 3,
+                         'eventTypeId' : EVT_REMAIN_OPEN,
                          'dateTime' : dateTime,
                          'doorLockId' : None,
                          'cardNumber' : None,
@@ -247,7 +247,7 @@ class StarterAlrmMngr(genmngr.GenericMngr):
                          'denialCauseId' : None
                         }
                 #Sending the event to the "Event Manager" thread
-                self.eventQueue.put(event)
+                self.toEvent.put(event)
 
                 alive = False
 
@@ -332,6 +332,16 @@ class DoorsControl(object):
             raise DoorNotConfigured
 
 
+    def getDoorNum(self, doorId):
+        '''
+        Return the doorNum receiving the doorId.
+        '''
+
+        for doorNum, doorParams in self.params.items():
+            if doorParams['doorId'] == doorId:
+                return doorNum
+        raise DoorNotConfigured
+
 
 
 
@@ -343,11 +353,14 @@ class UnlkDoorSkdMngr(genmngr.GenericMngr):
     '''
 
 
-    def __init__(self, lockDoorsControl, doorsControl, exitFlag):
+    def __init__(self, toEvent, lockDoorsControl, doorsControl, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('UnlkDoorSkdMngr', exitFlag)
+
+        #Queue to send events to Event Manager thread
+        self.toEvent = toEvent
 
         #When receiving a door CRUD is necessary to re launch the ioiface proccess.
         #For this reason it is necessary a reference to "ioIface" object.
@@ -396,17 +409,42 @@ class UnlkDoorSkdMngr(genmngr.GenericMngr):
                         doorControl = self.doorsControl.params[doorNum]
                         doorId = doorControl['doorId']
 
-                        if doorId in doorsToUnlkBySkd:
+                        if doorId in doorsToUnlkBySkd and not doorControl['unlkedBySkd'].is_set():
                             logMsg = 'Door: {} is opened by schedule'.format(doorId)
                             self.logger.debug(logMsg)
                             doorControl['unlkedBySkd'].set()
                             doorControl['doorObj'].release(True)
-                        else:
+
+                            dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                            event = {'doorId' : doorId,
+                                     'eventTypeId' : EVT_OPEN_SKD,
+                                     'dateTime' : dateTime,
+                                     'doorLockId' : None,
+                                     'cardNumber' : None,
+                                     'side' : None,
+                                     'allowed' : None,
+                                     'denialCauseId' : None
+                                    }
+                            self.toEvent.put(event)
+
+
+                        elif doorId not in doorsToUnlkBySkd and doorControl['unlkedBySkd'].is_set():
                             logMsg = 'Door: {} is closed by schedule'.format(doorId)
                             self.logger.debug(logMsg)
                             doorControl['unlkedBySkd'].clear()
                             doorControl['doorObj'].release(False)
 
+                            dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                            event = {'doorId' : doorId,
+                                     'eventTypeId' : EVT_CLOSE_SKD,
+                                     'dateTime' : dateTime,
+                                     'doorLockId' : None,
+                                     'cardNumber' : None,
+                                     'side' : None,
+                                     'allowed' : None,
+                                     'denialCauseId' : None
+                                    }
+                            self.toEvent.put(event)
 
             else:
                 self.iteration += 1

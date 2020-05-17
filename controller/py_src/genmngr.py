@@ -57,6 +57,16 @@ class GenericMngr(threading.Thread):
             except AttributeError:
                 self.logger.debug("This thread hasn't DB connection.")
 
+            try:
+                self.ioIfaceQue.close()
+                logMsg = "Closing the connection with IO Iface Queue"
+                self.logger.info(logMsg)
+
+            except AttributeError:
+                #When the thread isn't netMngr this exception will
+                #happen and nothing should be done.
+                pass
+
             logMsg = 'Exiting with code: {}'.format(self.exitCode)
             self.logger.info(logMsg)
             sys.exit(self.exitCode)
