@@ -2029,31 +2029,21 @@ To show **Event Types** descriptions with the ``eventTypeId`` received in the ev
 
 .. code-block::
 
-  HTTP/1.0 200 OK
+  HTTP/1.1 200 OK
   Content-Type: application/json
-  Content-Length: 268
-  Server: Werkzeug/0.12.1 Python/3.6.0
-  Date: Thu, 12 Oct 2017 15:14:45 GMT
-  
-  [
-    {
-      "description": "Access with card", 
-      "id": 1
-    }, 
-    {
-      "description": "Access with button", 
-      "id": 2
-    }, 
-    {
-      "description": "The door remains opened", 
-      "id": 3
-    }, 
-    {
-      "description": "The door was forced", 
-      "id": 4
-    }
-  ]
+  Content-Length: 399
+  Date: Tue, 19 May 2020 18:09:29 GMT
 
+  [
+   {"description":"Access with card","id":1},
+   {"description":"Access with button","id":2},
+   {"description":"The door remains opened","id":3},
+   {"description":"The door was forced","id":4},
+   {"description":"Door opened by schedule","id":5},
+   {"description":"Door closed by schedule","id":6},
+   {"description":"Door opened while unlocked by schedule","id":7},
+   {"description":"Door opened by user interface","id":8}
+  ]
 
 To show **DoorLocks** descriptions with the ``doorLockId`` received in the event, the following method should be sent to the server:
 
@@ -3590,6 +3580,62 @@ When **Delete** button is pressed the following REST method should be sent to th
     "status": "OK"
   }
   
+
+Open a Door
++++++++++++
+
+When **Open Door** button is pressed the following REST method should be sent to the server:
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://192.168.1.7:5000/api/v1.0/door/3/open
+
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 48
+  Date: Tue, 19 May 2020 18:56:08 GMT
+
+  {"message":"Door will be opened","status":"OK"}
+
+If the controller is disconnected, the following response will arrive:
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 404 NOT FOUND
+  Content-Type: application/json
+  Content-Length: 95
+  Date: Tue, 19 May 2020 19:04:43 GMT
+
+  {"code":404,"error":"request not found","message":"Controller not connected","status":"error"}
+
+
+If the controller doesn't exist, the following response will arrive:
+
+**Response:**
+
+.. code-block::
+
+  HTTP/1.1 404 NOT FOUND
+  Content-Type: application/json
+  Content-Length: 91
+  Date: Tue, 19 May 2020 19:04:38 GMT
+
+  {"code":404,"error":"request not found","message":"Controller not found","status":"error"}
+
+
+In both cases, the field "message" comming in the JSON should be showed to the user in a pop up message.
+
 
 Unlock Door Schedule
 ~~~~~~~~~~~~~~~~~~~~
