@@ -3,7 +3,8 @@
 
 echo "Dobie Controller Installation Script"
 echo "===================================="
-
+echo ""
+echo "Note: Remember to set the network interface name in config.py before installing."
 
 function usage {
       echo "usage: $0 [-ickolbsh]"
@@ -68,7 +69,7 @@ START_NOW=false
 
 
 
-#if there is no arguments, print usage and exit
+#If there is no arguments, print usage and exit
 if [ $# == 0 ]; then
     usage
     exit
@@ -136,46 +137,7 @@ echo "Compiling ioiface.."
 cd ../c_src/
 make
 
-cd ../scripts/
-
-if ! $KEEP_AS_REPO; then
-    echo "Removing repo structure.."
-    sudo rm -rf ../../.git/
-    sudo rm -rf ../../.gitignore
-    echo "Removing C ioiface source code.."
-    sudo rm -rf ../c_src/
-    echo "Removing Docs.."
-    sudo rm -rf ../../docs/
-
-    if ! $SRVR_IN_CTRLLR; then
-        echo "Removing server source code.."
-        sudo rm -rf ../../server/
-    fi
-
-fi
-
-
-
-##------------------Source Code Obfuscation-------------------##
-
-#Obfuscating the python code in back_end directory
-if $OBFUS_CODE; then
-  #Obfuscating all the files in py_src directory and inserting bootstrap pyarmor code in main.py
-
-  cd ../py_src/ #Changing to py_src directory
-  rm -rf __pycache__/ #Remove if the directory exists from a previous installation
-  rm -rf pytransform/ #Remove if the directory exists from a previous installation
-  pyarmor obfuscate main.py #Obfuscate
-  cp config.py dist/ #Replacing the obfuscated config.py with the plain config.py to keep in understandable
-  mv dist/* . #Replacing all the plain files with the obfuscated files
-  rm -rf dist/ #Remove dist directory
-  cd ../scripts/ #Returning to scripts directory
-
-fi
-
-
-##------------------------------------------------------------##
-
+cd ../../ #Changing to root directory of Repo
 
 
 echo "Creating directory for Dobie Controller Logs.."
@@ -188,9 +150,9 @@ mkdir -p /var/lib/dobie-c/
 echo "Creating directory for Dobie Controller Certs.."
 mkdir -p /var/lib/dobie-c/certs/
 echo "Copying Dobie Controller Certs.."
-cp ../../server/certs/ctrller_connection/back_end.crt /var/lib/dobie-c/certs/
-cp ../../server/certs/ctrller_connection/controller.crt /var/lib/dobie-c/certs/
-cp ../../server/certs/ctrller_connection/controller.key /var/lib/dobie-c/certs/
+cp server/certs/ctrller_connection/back_end.crt /var/lib/dobie-c/certs/
+cp server/certs/ctrller_connection/controller.crt /var/lib/dobie-c/certs/
+cp server/certs/ctrller_connection/controller.key /var/lib/dobie-c/certs/
 
 
 if $SET_LOG_ROTATE; then
@@ -213,14 +175,15 @@ cat > /tmp/dobie-c.logrotate << EOL
 }
 EOL
 
-sudo cp /tmp/dobie-c.logrotate /etc/logrotate.d/dobie-c
-sudo rm /tmp/dobie-c.logrotate
+cp /tmp/dobie-c.logrotate /etc/logrotate.d/dobie-c
+rm /tmp/dobie-c.logrotate
 fi
 
 echo "Removing previous DB if exists.."
 rm /var/lib/dobie-c/dobie-c.db > /dev/null 2>&1
 
 echo "Creating and initializing a new DB.."
+cd controller/scripts/
 ./create-db.py
 ./init-db.py
 
@@ -240,16 +203,76 @@ RestartSec=10
 [Install]
 WantedBy=multi-user.target
 EOL
-sudo cp /tmp/dobie-c.service /etc/systemd/system/
-sudo rm /tmp/dobie-c.service
+cp /tmp/dobie-c.service /etc/systemd/system/
+rm /tmp/dobie-c.service
 
 if $START_AT_BOOT; then
-  sudo systemctl enable dobie-c.service
+  systemctl enable dobie-c.service
 fi
 
-sudo systemctl daemon-reload
+systemctl daemon-reload
+
+
+
+##------------------Source Code Obfuscation-------------------##
+
+#Obfuscating the python code in back_end directory
+if $OBFUS_CODE; then
+  #Obfuscating all the files in py_src directory and inserting bootstrap pyarmor code in main.py
+
+  cd ../py_src/ #Changing to py_src directory
+  rm -rf __pycache__/ #Remove if the directory exists from a previous installation
+  rm -rf pytransform/ #Remove if the directory exists from a previous installation
+
+  if test -h msgheaders.py; then
+      echo "Replacing msgheader.py symlink with the real file before obfuscating controller files. "
+      rm -f msgheaders.py
+      cp ../../server/back_end/msgheaders.py .
+  fi
+
+  pyarmor obfuscate main.py #Obfuscate
+  cp config.py dist/ #Replacing the obfuscated config.py with the plain config.py to keep in understandable
+  mv dist/* . #Replacing all the plain files with the obfuscated files
+  rm -rf dist/ #Remove dist directory
+  cd ../scripts/ #Returning to scripts directory, (the same place before executing this block because
+                 #this block could be not executed and the following block will not know this situation
+
+fi
+
+
+##------------------------------------------------------------##
+
+
+
+##------------------Remove unnecesary files-------------------##
+if ! $KEEP_AS_REPO; then
+    cd ../../ #Changing to Repo root directory
+    echo "Removing repo structure.."
+    rm -rf .git/
+    rm -rf .gitignore
+    echo "Removing C ioiface source code.."
+    rm -rf controller/c_src/
+    echo "Removing Docs.."
+    rm -rf docs/
+
+    if ! $SRVR_IN_CTRLLR; then
+
+        if test -h controller/py_src/msgheaders.py; then
+            echo "Replacing msgheader.py symlink with the real file before removing server files. "
+            rm -f controller/py_src/msgheaders.py
+            cp server/back_end/msgheaders.py controller/py_src/
+        fi
+        echo "Removing server source code.."
+        rm -rf server/
+    fi
+
+fi
+
+
+##------------------Starting the service Now------------------##
 
 if $START_NOW; then
-  sudo systemctl start dobie-c.service
+    echo "Starting dobie-c.service Now"
+    systemctl start dobie-c.service
 fi
 

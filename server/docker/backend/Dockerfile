@@ -13,7 +13,7 @@ FROM python:3-slim
 
 RUN \
 apt-get -y update && apt-get -y dist-upgrade && \
-apt-get install -y gcc libffi-dev libssl-dev zlib1g-dev libjpeg-dev && \
+apt-get install -y gcc make libffi-dev libssl-dev zlib1g-dev libjpeg-dev && \
 pip install --upgrade pip && \
 pip install --no-cache-dir Flask && \
 pip install --no-cache-dir Flask-HTTPAuth && \
