@@ -447,15 +447,19 @@ sudo systemctl start dobie-save-db.timer
 
 #Obfuscating the python code in back_end directory
 if $OBFUS_CODE; then
-  #Obfuscating all the files in back_end directory and inserting bootstrap pyarmor code in main.py
-  docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie_backend pyarmor obfuscate /opt/dobie-server/main.py
 
-  #Inserting bootstrap pyarmor code in purgeevents.py
-  docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie_backend pyarmor obfuscate --no-runtime --exact /opt/dobie-server/purgeevents.py
+  if test -h ../../controller/py_src/msgheaders.py; then
+      echo "Replacing msgheader.py symlink in contrller with the real file before obfuscating server files. "
+      rm -f ../../controller/py_src/msgheaders.py
+      cp ../back_end/msgheaders.py ../../controller/py_src/
+  fi
+
+  #Obfuscating the list of files that are in obfuscate.sh script.
+  #This is done inside the container.
+  docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie_backend bash obfuscate.sh
 
   sudo rm -rf ../back_end/__pycache__/ #Remove if the directory exists from a previous installation
   sudo rm -rf ../back_end/pytransform/ #Remove if the directory exists from a previous installation
-  sudo cp ../back_end/config.py ../back_end/dist/ #Replacing the obfuscated config.py with the plain config.py to keep in understandable
   sudo mv ../back_end/dist/* ../back_end/ #Replacing all the plain files with the obfuscated files
   sudo rm -rf ../back_end/dist/ #Remove dist directory
 
@@ -473,9 +477,6 @@ if ! $KEEP_AS_REPO; then
     echo "Removing repo structure.."
     sudo rm -rf ../../.git/
     sudo rm -rf ../../.gitignore
-    echo "Removing Docker files.."
-    sudo rm -rf ../docker/
-    sudo rm -rf ../ctrller_docker/
     echo "Removing database script files.."
     sudo rm db-config db-create-drop.sh db_schema.sql
 
