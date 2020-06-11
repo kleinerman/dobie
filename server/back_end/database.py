@@ -476,6 +476,12 @@ class DataBase(object):
         visit door exit, this method, returns True, if not, it returns False
         '''
 
+        #If side is incoming, is not a valid exit
+        side = event['side']
+        if side == 1:
+            return False
+
+
         doorId = event['doorId']
         personId = event['personId']
 
