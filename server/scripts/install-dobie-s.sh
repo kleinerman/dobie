@@ -5,9 +5,10 @@ echo "Dobie Server Installation Script"
 echo "================================"
 
 function usage {
-      echo "usage: $0 [-iclbok -m N -d N]"
+      echo "usage: $0 [-icslbok -m N -d N]"
       echo "  -i      Run in interactive mode."
       echo "  -c      Install server inside controller."
+      echo "  -s      Build docker containers from scratch."
       echo "  -l      Set log rotate."
       echo "  -b      Configure to start at boot time"
       echo "  -o      Obfuscate the backend source code."
@@ -25,6 +26,11 @@ function interactive {
       read -p "Are you installing the server in the controller? (y/n): "
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         SRVR_IN_CTRLLR=true
+      fi
+
+      read -p "Do you want to build docker containers from scratch? (y/n): "
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        DCKR_FROM_SCRA=true
       fi
 
       read -p "Do you want to set log rotate for server logs? (y/n): "
@@ -73,6 +79,7 @@ function interactive {
 
 #Initializing default values to variables
 SRVR_IN_CTRLLR=false
+DCKR_FROM_SCRA=false
 SET_LOG_ROTATE=false
 START_AT_BOOT=false
 OBFUS_CODE=false
@@ -89,17 +96,20 @@ fi
 
 
 
-while getopts ":iclbokm:d:h" OPT; do
+while getopts ":icslbokm:d:h" OPT; do
   case $OPT in
     i )
       interactive
       #When running in interactive mode, arguments different from -i are ignored
       break
       ;;
-
     c )
       echo "Installing server in controller.."
       SRVR_IN_CTRLLR=true
+      ;;
+    s )
+      echo "Building docker containers from scratch.."
+      DCKR_FROM_SCRA=true
       ;;
     l )
       echo "Setting log roate for server logs.."
@@ -207,20 +217,37 @@ fi
 
 ##--------------------DOCKER CONTAINERS--------------------##
 
-#Change to the directory where the docker-compose.yml file is located and
-#save the complete path of the directory in the variable DOCK_COMP_DIR to
-#be able to create then the systemd unit to start all the containers
-if $SRVR_IN_CTRLLR; then
-  cd ../ctrller_docker/
-  DOCK_COMP_DIR=$(realpath .)
+#Change to the directory where the docker-compose.yml file is located,
+#save the complete path of the directory in the variable DOCK_COMP_DIR 
+#and the name of the docker-file.yml used (dev or prod) in the variable
+#DOCK_COMP_FILE. Both variables will be used to create the systemd unit
+#below.
+#The IMG_PRFX variable is an environment variable used by docker-compose
+#yml file. It can be "c-" or "s-" and it is used when building the images 
+#from scratch to know where is name of directory containing the Dockerfile
+#Also it is used to name the image built or retrieved from Docker Hub
+
+cd ../docker/
+DOCK_COMP_DIR=$(realpath .)
+
+
+if $DCKR_FROM_SCRA; then
+    DOCK_COMP_FILE=docker-compose-dev.yml
 else
-  cd ../docker/
-  DOCK_COMP_DIR=$(realpath .)
+    DOCK_COMP_FILE=docker-compose-prod.yml
 fi
+
+
+if $SRVR_IN_CTRLLR; then
+    export IMG_PRFX=c-
+else
+    export IMG_PRFX=s-
+fi
+
 
 #Building the containers without starting them
 echo "Building Docker containers.."
-docker-compose -p dobie up --no-start
+docker-compose -p dobie -f $DOCK_COMP_DIR/$DOCK_COMP_FILE up --no-start
 
 ##---------------------------------------------------------##
 
@@ -242,8 +269,9 @@ Requires=docker.service network-online.target
 Type=oneshot
 RemainAfterExit=yes
 
-ExecStart=/usr/bin/docker-compose -p dobie -f $DOCK_COMP_DIR/docker-compose.yml start
-ExecStop=/usr/bin/docker-compose -p dobie -f $DOCK_COMP_DIR/docker-compose.yml stop
+Environment=IMG_PRFX=$IMG_PRFX
+ExecStart=/usr/bin/docker-compose -p dobie -f $DOCK_COMP_DIR/$DOCK_COMP_FILE start
+ExecStop=/usr/bin/docker-compose -p dobie -f $DOCK_COMP_DIR/$DOCK_COMP_FILE stop
 
 
 [Install]
@@ -264,6 +292,9 @@ fi
 #Starting NOW all the containers using the previously created unit
 echo "Starting Dobie server (all the containers).."
 sudo systemctl start dobie-s.service
+
+#Remove IMG_PRFX environment variable as it is not needed anymore
+unset IMG_PRFX
 
 ##-------------------------------------------------------##
 

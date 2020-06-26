@@ -137,7 +137,7 @@ sudo rm /usr/local/sbin/dobie-restore-db
 if $REM_CONTS; then
   echo "Removing Docker containers, volumes and networks.."
   sudo docker rm $(docker ps -a -q)
-  sudo docker rmi $(docker images -q)
+  sudo docker rmi -f $(docker images -q)
   sudo docker volume rm dobie_database-volume
   sudo docker network rm dobie_dobie-net
 fi
