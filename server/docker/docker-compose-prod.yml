@@ -63,8 +63,6 @@ services:
   php:
     image: "dobie/${IMG_PRFX}php:latest"
     container_name: php
-    build:
-      context: "${IMG_PRFX}php"
     volumes:
       - ../front_end:/site
     networks:
