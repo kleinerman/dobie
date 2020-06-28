@@ -22,7 +22,7 @@ fi
 SRVR_IN_CTRLLR=false
 IMAGE_NAMES=(backend database webserver php nodejs)
 
-while getopts ":c:t:h" OPT; do
+while getopts ":ct:h" OPT; do
   case $OPT in
     c )
       SRVR_IN_CTRLLR=true
