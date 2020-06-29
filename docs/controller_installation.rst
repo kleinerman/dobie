@@ -140,7 +140,7 @@ Wired network configuration
  
 .. code-block::
 
-  # sudo vim /etc/systemd/network/eth0.network
+  # vim /etc/systemd/network/eth0.network
   
 The file should have the following content:
   
@@ -150,9 +150,10 @@ The file should have the following content:
   Name=eth0
 
   [Network]
-  Address=10.10.7.99/24
-  Gateway=10.10.7.1
-  DNS=10.10.10.53 10.10.10.54
+  Address=192.168.1.97/24
+  Gateway=192.168.1.1
+  DNSSEC=false
+  
 
 Wireless network configuration
 ------------------------------
@@ -260,6 +261,15 @@ Install **git** to clone dobie repository
   # pacman -S git
 
 
+Install **logrotate** package for log rotation as it dosn't come installed anymore by default in Arch linux for ARM.
+
+.. code-block::
+
+  # pacman -S logrotate
+  # systemctl enable logrotate
+  # systemctl start logrotate
+
+
 Installing Dobie controller
 ---------------------------
 
@@ -268,12 +278,33 @@ Inside ``/opt`` directory, clone the respository:
 .. code-block::
 
   # git clone https://jkleinerman@bitbucket.org/kleinerman/dobie.git
+
+Before running the controller installation script, be sure that the name of the wired interface is correct in ``/opt/dobie/controller/py_src/config.py`` file since the script reads the name from it before compiling the ``ioiface``
+
+.. code-block::
+
+  WIRED_IFACE_NAME = 'eth0'
+
+Also the server IP address and SSL parameter can be configured to avoid restarting.
+
+.. code-block::
+
+  SERVER_IP = '192.168.1.79'
+
+  SSL_ENABLED = True
+
+Now run the script
+
+.. code-block::
+
   # cd /opt/dobie/controller/scripts
   # ./install-dobie-c.sh
 
-Edit the file ``/opt/dobie/controller/`` to point the server IP and restart the ``dobie-c`` service doing ``systemctl restart dobie-c``
+If IP address or SSL configuration wasn't configured in the previous step, edit the file ``/opt/dobie/controller/py_src/config.py`` and restart the ``dobie-c`` service doing:
 
+.. code-block::
 
+  # systemctl restart dobie-c
 
 Saving and Restoring sd image to clone it
 -----------------------------------------

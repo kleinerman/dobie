@@ -5,11 +5,7 @@ Once installed the controller as controller_installation.rst indicates, install 
 
 .. code-block::
 
-  # pacman-key --init
-  # pacman-key --populate archlinuxarm
-  # pacman -S docker
   # pacman -S docker-compose
-
 
 
 Start and Enable the service:
@@ -27,6 +23,12 @@ Install MariaDB client to connect MariaDB server running in docker if necessary.
 
   # pacman -S mariadb-clients
   
+If ``sudo`` package wasn't installed previously, do it now since it is needed to run server installation script.
+
+.. code-block::
+
+  # pacman -S sudo
+
 
 Configure the client to connect locally modifying the section **SERVER_IP** of file ``/opt/dobie/controller/py_src/config.py``:
 
