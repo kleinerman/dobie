@@ -664,6 +664,17 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,0,"Door could not be deleted");
 			}
 		break;
+        case "open_door":
+            if(!$islogged) array_push($ret,0,"Action needs authentication");
+            else {
+               $id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+               $doors_rec = open_door($logged->name, $logged->pw, $id);
+
+               if($doors_rec) array_push($ret,1,"Door has been opened");
+               else array_push($ret,0,"Door could not be opened");
+            }
+        break;
 
 		case "get_uds_door":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");

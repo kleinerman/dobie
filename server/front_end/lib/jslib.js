@@ -138,8 +138,11 @@ function tableClickEvents(){
 	//click All event
 	$("#accessesAll").click(function(){
 		if($(this).prop("checked")) {
-			$("#access-table td input[type=checkbox]").prop("checked",true);
-			$("#access-del").prop("disabled",false);
+            //check only visible rows
+			$("#access-table td input[type=checkbox]:visible").prop("checked",true);
+            //show delete only if at least 1 row has been checked
+            if($('#access-table tr td input[type=checkbox]:checked').length > 0) $("#access-del").prop("disabled",false);
+            //$("#access-del").prop("disabled",false); 
 			if($('#access-table tr td input[type=checkbox]:checked').length == 1) $("#access-edit").prop("disabled",false);
 		} else {
 			$("#access-table td input[type=checkbox]").prop("checked",false);
@@ -252,6 +255,10 @@ function get_icon(id,mode){
 				else if(id==2) iconstr="fa fa-circle";
 				else if(id==3) iconstr="fa fa-unlink";
 				else if(id==4) iconstr="fa fa-bolt";
+                else if(id==5) iconstr="far fa-calendar-check";
+                else if(id==6) iconstr="far fa-calendar-times";
+                else if(id==7) iconstr="far fa-calendar-plus";
+                else if(id==8) iconstr="fas fa-user-check";
 			break;
 			case "doorlock":
 				if(id==1) iconstr="fa fa-rss";

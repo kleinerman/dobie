@@ -185,7 +185,11 @@ include("header.php");
 <span class="fa fa-fw fa-address-card"></span> <?=get_text("Identified Access",$lang);?><br>
 <span class="fa fa-fw fa-circle"></span> <?=get_text("Access with button",$lang);?><br>
 <span class="fa fa-fw fa-unlink"></span> <?=get_text("Door remains opened",$lang);?><br>
-<span class="fa fa-fw fa-bolt"></span> <?=get_text("Door was forced",$lang);?>
+<span class="fa fa-fw fa-bolt"></span> <?=get_text("Door was forced",$lang);?><br>
+<span class="far fa-fw fa-calendar-check"></span> <?=get_text("Door opened by schedule",$lang);?><br>
+<span class="far fa-fw fa-calendar-times"></span> <?=get_text("Door closed by schedule",$lang);?><br>
+<span class="far fa-fw fa-calendar-plus"></span> <?=get_text("Door opened while unlocked by schedule",$lang);?><br>
+<span class="fas fa-fw fa-user-check"></span> <?=get_text("Door opened by user interface",$lang);?><br>
 </div>
 <div class="col-sm-3">
 <h4><?=get_text("Lock",$lang);?></h4>
@@ -475,7 +479,11 @@ function get_event_text(id,mode){
 				if(id==1) iconstr="<?=get_text("Identified Access",$lang);?>";
 				else if(id==2) iconstr="<?=get_text("Access with button",$lang);?>";
 				else if(id==3) iconstr="<?=get_text("Door remains opened",$lang);?>";
-				else if(id==4) iconstr="<?=get_text("Door was forced",$lang);?>";
+                else if(id==4) iconstr="<?=get_text("Door was forced",$lang);?>";
+                else if(id==5) iconstr="<?=get_text("Door opened by schedule",$lang);?>";
+                else if(id==6) iconstr="<?=get_text("Door closed by schedule",$lang);?>";
+                else if(id==7) iconstr="<?=get_text("Door opened while unlocked by schedule",$lang);?>";
+                else if(id==8) iconstr="<?=get_text("Door opened by user interface",$lang);?>";
 			break;
 			case "doorlock":
 				if(id==1) iconstr="<?=get_text("Card Reader",$lang);?>";

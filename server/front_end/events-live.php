@@ -120,7 +120,11 @@ include("header.php");
 <span class="fa fa-fw fa-address-card"></span> <?=get_text("Identified Access",$lang);?><br>
 <span class="fa fa-fw fa-circle"></span> <?=get_text("Access with button",$lang);?><br>
 <span class="fa fa-fw fa-unlink"></span> <?=get_text("Door remains opened",$lang);?><br>
-<span class="fa fa-fw fa-bolt"></span> <?=get_text("Door was forced",$lang);?>
+<span class="fa fa-fw fa-bolt"></span> <?=get_text("Door was forced",$lang);?><br>
+<span class="far fa-fw fa-calendar-check"></span> <?=get_text("Door opened by schedule",$lang);?><br>
+<span class="far fa-fw fa-calendar-times"></span> <?=get_text("Door closed by schedule",$lang);?><br>
+<span class="far fa-fw fa-calendar-plus"></span> <?=get_text("Door opened while unlocked by schedule",$lang);?><br>
+<span class="fas fa-fw fa-user-check"></span> <?=get_text("Door opened by user interface",$lang);?>
 </div>
 <div class="col-sm-3">
 <h4><?=get_text("Lock",$lang);?></h4>
@@ -137,7 +141,7 @@ include("header.php");
 <div class="col-sm-3">
 <h4><?=get_text("Direction",$lang);?></h4>
 <span class="fa fa-fw fa-sign-in-alt"></span> <?=get_text("Incoming",$lang);?><br>
-<span class="fa fa-fw fa-sign-out-alt"></span> <?=get_text("Outgoing",$lang);?><br>
+<span class="fa fa-fw fa-sign-out-alt"></span> <?=get_text("Outgoing",$lang);?>
 </div>
 
 </div>

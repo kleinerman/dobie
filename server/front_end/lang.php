@@ -228,7 +228,19 @@ $dictionary = array(
 	strtolower('Door was forced') => array(
 		'es' => 'Puerta forzada',
 		'de' => 'Die Tür war gewaltsam geöffnet'
-	),
+    ),
+    strtolower('Door opened by schedule') => array(
+            'es' => 'Puerta abierta por calendario'
+    ),
+    strtolower('Door closed by schedule') => array(
+            'es' => 'Puerta cerrada por calendario'
+    ),
+    strtolower('Door opened while unlocked by schedule') => array(
+            'es' => 'Puerta abierta mientras liberada por calendario'
+    ),
+    strtolower('Door opened by user interface') => array(
+            'es' => 'Puerta abierta por interfaz de usuario'
+    ),
 	strtolower('Card Reader') => array(
 		'es' => 'Lector de tarjeta',
 		'de' => 'Kartenleser'
@@ -776,6 +788,9 @@ $dictionary = array(
 		'es' => 'Editar Puerta',
 		'de' => 'Tür bearbeiten'
 	),
+    strtolower('Open Door') => array(
+            'es' => 'Abrir Puerta'
+    ),
 
 	//accesses
 	strtolower('Access: Person') => array(

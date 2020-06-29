@@ -767,6 +767,13 @@ function delete_door($user,$pass,$id){
 	else return $response->data;
 }
 
+function open_door($user,$pass,$id){
+    global $config;
+    $response=send_request($config->api_fullpath."door/$id/open",$user,$pass,"put");
+    if($response->response_status != "200") return false;
+    else return $response->data;
+}
+
 
 //Unlock Door Schedules
 
@@ -1214,7 +1221,7 @@ if($DEBUG){
 	//$res=get_door_accesses("admin","admin",5);
 //	$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
-//	$res=get_doors("admin","admin",1);
+    $res=get_doors("admin","admin",1);
 	//$res=get_door("admin","admin",5);
 	//$res=add_access_allweek("admin","admin",3,1,1,1,"08:00:00","18:00:00","9999-12-31 00:00");
 	//$res=edit_access_allweek("admin","admin",19,0,1,"08:00:00","18:00:00","9999-12-31 00:00");
@@ -1231,7 +1238,7 @@ if($DEBUG){
 //	edit_access_allweek($user,$pass,$id,$iside,$oside,$starttime,$endtime,$expiredate){
 //	$res=add_access_allweek("admin","admin",1,3,1,1,"09:00","13:00","9999-12-31");
 //get_events($user,$pass,$orgid="",$personid="",$zoneid="",$doorid="",$side="",$fromdate="",$fromtime="",$untildate="",$untiltime="",$startevt=1,$q=15,$visitedorgid="",$isprov="")
-	$res=get_events("admin","admin","","","","","","2019-11-01","00:00","2020-11-09","00:00",1,15,"",0);
+	//$res=get_events("admin","admin","","","","","","2019-11-01","00:00","2020-11-09","00:00",1,15,"",0);
 	//$res=get_visit_door_groups("admin","admin");
 	//$res=get_visit_door_group("admin","admin",1);
 	//$res=set_visit_door_group("admin","admin",9,"Door Group 9","5|6");
@@ -1274,8 +1281,9 @@ if($DEBUG){
 	//$res=get_excdayuds_door("admin","admin",3);
 	//$res=add_excdayuds("admin","admin", 3, "2020-02-17");
 	//$res=set_excdayuds("admin","admin", 11, 3, "2020-02-20");
-	//$res=delete_excdayuds("admin","admin",11);
-	
+    //$res=delete_excdayuds("admin","admin",11);
+    //$res=open_door("admin","admin",1);
+
 	echo "<pre>";
 	var_dump($res);
 	//echo json_encode($res->data->events[0]);

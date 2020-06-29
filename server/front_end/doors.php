@@ -322,7 +322,8 @@ $("#doors-select").change(function(){
 					"<br><?=get_text("Release Time (s)",$lang);?>: " + values.rlseTime +
 					"<br><?=get_text("Buzzer Time (s)",$lang);?>: " + values.bzzrTime + 
 					"<br><?=get_text("Alarm Timeout (s)",$lang);?>: " + values.alrmTime + 
-					"<br><?=get_text("Door Sensor",$lang);?>: " + snsrTypeText);
+                    "<br><?=get_text("Door Sensor",$lang);?>: " + snsrTypeText +
+                    "<br><br><a href='javascript:void(0)' onclick='openDoor("+values.id+")' class='btn btn-default btn-xs'><span class='fas fa-door-open'></span> <?=get_text("Open Door",$lang);?></a>");
 					//show details
 					$('#select-container-doors-details').show()
 				} else {
@@ -503,6 +504,31 @@ function populateExceptionList(selectId,id=0){
 			$("#"+selectId).append("<option value=''><?=get_text("Operation failed, please try again",$lang);?></option>");
 		}
 	});
+}
+
+//open door action
+function openDoor(id){
+    $.ajax({
+        type: "POST",
+        url: "process",
+        data: "action=open_door&id="+id,
+        success: function(resp){
+            if(resp[0]=='1'){
+                //show success
+                $('#modal-error .modal-body').text("<?=get_text("Door has been opened!",$lang);?>");
+                $("#modal-error").modal("show");
+            } else {
+                //show error
+                $('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
+                $("#modal-error").modal("show");
+            }
+       },
+       failure: function(){
+          //show error
+          $('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
+          $("#modal-error").modal("show");
+       }
+   });
 }
 
 //fetch info for edit
