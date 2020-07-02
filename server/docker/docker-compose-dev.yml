@@ -3,9 +3,10 @@ version: '3.7'
 services:
 
   backend:
+    image: "dobie/${IMG_PRFX}backend:latest"
     container_name: backend
     build:
-      context: backend
+      context: "${IMG_PRFX}backend"
     ports:
       - "9797:9797"
       - "5000:5000"
@@ -27,18 +28,26 @@ services:
 
 
   database:
+    image: "dobie/${IMG_PRFX}database:latest"
     container_name: database
     build:
-      context: database
+      context: "${IMG_PRFX}database"
     volumes:
       - database-volume:/var/lib/mysql
     networks:
       - dobie-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "7m"
+        max-file: "7"
+
 
   webserver:
+    image: "dobie/${IMG_PRFX}webserver:latest"
     container_name: webserver
     build:
-      context: webserver
+      context: "${IMG_PRFX}webserver"
     ports:
       - "80:80"
       - "443:443"
@@ -58,9 +67,10 @@ services:
 
 
   php:
+    image: "dobie/${IMG_PRFX}php:latest"
     container_name: php
     build:
-      context: php
+      context: "${IMG_PRFX}php"
     volumes:
       - ../front_end:/site
     networks:
@@ -73,9 +83,10 @@ services:
 
 
   nodejs:
+    image: "dobie/${IMG_PRFX}nodejs:latest"
     container_name: nodejs
     build:
-      context: nodejs
+      context: "${IMG_PRFX}nodejs"
     ports:
       - "5002:5002"
       - "5004:5004"
