@@ -293,8 +293,6 @@ fi
 echo "Starting Dobie server (all the containers).."
 sudo systemctl start dobie-s.service
 
-#Remove IMG_PRFX environment variable as it is not needed anymore
-unset IMG_PRFX
 
 ##-------------------------------------------------------##
 
@@ -332,7 +330,7 @@ Description=Purge old events of Dobie DB
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'UNTIL_DATE_TIME=\$\$(date --date "$STORED_MONTHS month ago" +%%Y-%%m-%%d\ %%H:%%M); docker run --name db-purger --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server -v /var/log/dobie-s:/var/log/dobie-s -v /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs dobie_backend python -u /opt/dobie-server/purgeevents.py -d "\$\${UNTIL_DATE_TIME}"'
+ExecStart=/bin/bash -c 'UNTIL_DATE_TIME=\$\$(date --date "$STORED_MONTHS month ago" +%%Y-%%m-%%d\ %%H:%%M); docker run --name db-purger --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server -v /var/log/dobie-s:/var/log/dobie-s -v /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs dobie/${IMG_PRFX}backend python -u /opt/dobie-server/purgeevents.py -d "\$\${UNTIL_DATE_TIME}"'
 EOL
 #The backslash in $\$\ was used to escape the $ and tell this script not to consider the following as variable.
 #The resulting $$, and %% is used to escape $ and % in resulting unit of systemd.
@@ -487,7 +485,7 @@ if $OBFUS_CODE; then
 
   #Obfuscating the list of files that are in obfuscate.sh script.
   #This is done inside the container.
-  docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie_backend bash obfuscate.sh
+  docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie/${IMG_PRFX}backend bash obfuscate.sh
 
   sudo rm -rf ../back_end/__pycache__/ #Remove if the directory exists from a previous installation
   sudo rm -rf ../back_end/pytransform/ #Remove if the directory exists from a previous installation
@@ -497,6 +495,10 @@ if $OBFUS_CODE; then
   echo "Restarting the Backend to run with obfuscated source code.."
   docker restart backend
 fi
+
+
+#Remove IMG_PRFX environment variable as it is not needed anymore
+unset IMG_PRFX
 
 
 ##------------------------------------------------------------##
