@@ -79,7 +79,7 @@ class Controller(object):
         self.netMngr = network.NetMngr(netToEvent, self.netToReSnd, self.crudMngr, self.exitFlag)        
 
         #Scheduler thread
-        self.unlkDoorSkdMngr = door.UnlkDoorSkdMngr(self.toEvent, self.lockDoorsControl,
+        self.unlkDoorSkdMngr = door.UnlkDoorSkdMngr(self.netMngr, self.toEvent, self.lockDoorsControl,
                                                     self.doorsControl, self.exitFlag)
 
 

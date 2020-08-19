@@ -8,6 +8,7 @@ import database
 import queue
 
 import genmngr
+from msgheaders import *
 from config import *
 
 
@@ -350,14 +351,20 @@ class UnlkDoorSkdMngr(genmngr.GenericMngr):
     This thread opens and closes all the doors of the controller
     using the information retrieved from OpenDoorsSkd table. 
     It generates events when the door change the state.
+    As this thread is synchronous since it wakes up every
+    "EXIT_CHECK_TIME", the responsibility of sending keep alive
+    messages to the server was added to it. 
     '''
 
 
-    def __init__(self, toEvent, lockDoorsControl, doorsControl, exitFlag):
+    def __init__(self, netMngr, toEvent, lockDoorsControl, doorsControl, exitFlag):
 
         #Invoking the parent class constructor, specifying the thread name, 
         #to have a understandable log file.
         super().__init__('UnlkDoorSkdMngr', exitFlag)
+
+        #This is used to send Keep alive messages to the server in a synchronous way
+        self.netMngr = netMngr
 
         #Queue to send events to Event Manager thread
         self.toEvent = toEvent
@@ -369,23 +376,35 @@ class UnlkDoorSkdMngr(genmngr.GenericMngr):
 
 
 
-        #Calculating the number of iterations before sending the message to request
-        #re provisioning the controller.
-        self.ITERATIONS = CHECK_OPEN_DOORS_MINS * 60 // EXIT_CHECK_TIME
+        #Calculating the number of iterations before checking if there are doors
+        #to be opened or closed by schedule.
+        self.ITERS_CHK_OPEN_DOORS = CHECK_OPEN_DOORS_MINS * 60 // EXIT_CHECK_TIME
 
         #This is the actual iteration. This value is incremented in each iteration
         #and is initializated to 0.
-        self.iteration = 0
+        self.iterChkOpenDoors = 0
 
+
+        #Calculating the number of iterations before sending keep alive message
+        #to the server
+        self.ITERS_SEND_KAL = KEEP_ALIVE_TIME // EXIT_CHECK_TIME
+
+        #This is the actual iteration. This value is incremented in each iteration
+        #and is initializated to 0.
+        self.iterSendKal = 0
 
 
 
 
     def run(self):
         '''
-        Every CONSIDER_DIED_MINS minutes it checks in database if there are controllers
-        which didn't send its corresponding keep alive message.
-        It wakes up every EXIT_CHECK_TIME seconds to see if the main thread ask it to finish. 
+        Every "EXIT_CHECK_TIME", it increments "self.iterChkOpenDoors" and "self.iterSendKal".
+        When "self.iterChkOpenDoors" reaches "self.ITERS_CHK_OPEN_DOORS", it checks if there
+        are doors to be opened by schedule.
+        When "self.iterSendKal" reaches "self.ITERS_SEND_KAL", it sends keep alive message
+        to the server.
+        Every "EXIT_CHECK_TIME" it also checks if the main thread asks to finsih using
+        "checkExit" method.
         '''
 
         #First of all, the database should be connected by the execution of this thread
@@ -397,10 +416,10 @@ class UnlkDoorSkdMngr(genmngr.GenericMngr):
             time.sleep(EXIT_CHECK_TIME)
             self.checkExit()
 
-            if self.iteration >= self.ITERATIONS:
+            if self.iterChkOpenDoors >= self.ITERS_CHK_OPEN_DOORS:
                 logMsg = 'Checking Unlock Door Schedule.'
                 self.logger.debug(logMsg)
-                self.iteration = 0
+                self.iterChkOpenDoors = 0
 
                 with self.lockDoorsControl:
 
@@ -447,9 +466,18 @@ class UnlkDoorSkdMngr(genmngr.GenericMngr):
                             self.toEvent.put(event)
 
             else:
-                self.iteration += 1
+                self.iterChkOpenDoors += 1
 
 
 
+            if self.iterSendKal >= self.ITERS_SEND_KAL:
+                logMsg = 'Sending Keep Alive Message to server.'
+                self.logger.debug(logMsg)
+                self.iterSendKal = 0
 
+                self.netMngr.sendToServer(KAL + END)
+
+
+            else:
+                self.iterSendKal += 1
 
