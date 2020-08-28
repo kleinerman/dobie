@@ -218,8 +218,9 @@ systemctl daemon-reload
 
 #Obfuscating the python code in back_end directory
 if $OBFUS_CODE; then
-  #Obfuscating all the files in py_src directory and inserting bootstrap pyarmor code in main.py
 
+  rm -rf ~/.pyarmor #Removing any previous pyarmor config/cache/capsule
+                    #I had a problem obfuscating maybe after pyarmor update
   cd ../py_src/ #Changing to py_src directory
   rm -rf __pycache__/ #Remove if the directory exists from a previous installation
   rm -rf pytransform/ #Remove if the directory exists from a previous installation
@@ -230,6 +231,7 @@ if $OBFUS_CODE; then
       cp ../../server/back_end/msgheaders.py .
   fi
 
+  #Obfuscating all the files in py_src directory and inserting bootstrap pyarmor code in main.py
   pyarmor obfuscate main.py #Obfuscate
   cp config.py dist/ #Replacing the obfuscated config.py with the plain config.py to keep in understandable
   mv dist/* . #Replacing all the plain files with the obfuscated files

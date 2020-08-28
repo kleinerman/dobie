@@ -511,7 +511,7 @@ if ! $KEEP_AS_REPO; then
     sudo rm -rf ../../.git/
     sudo rm -rf ../../.gitignore
     echo "Removing database script files.."
-    sudo rm db-config db-create-drop.sh db_schema.sql
+    sudo rm db-create-drop.sh db_schema.sql
 
     echo "Removing Docs.."
     sudo rm -rf ../../docs/
