@@ -670,7 +670,6 @@ class DataBase(object):
         Then all the persons who has no access to any door are also deleted manually.
         '''
         try:
-
             sql = "SELECT allWeek, doorId, personId FROM Access WHERE id = {}".format(access['id'])
             self.cursor.execute(sql)
             row = self.cursor.fetchone()
@@ -684,14 +683,27 @@ class DataBase(object):
                 sql = "DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}".format(doorId, personId)
                 self.cursor.execute(sql)
 
+            #Deleting the access entry (main operation)
             sql = "DELETE FROM Access WHERE id = {}".format(access['id'])
             self.cursor.execute(sql)
 
-            #Deleting all persons who have no access to any door.
-            sql = ("DELETE FROM Person WHERE id NOT IN "
-                   "(SELECT personId FROM Access WHERE Access.personId = Person.id)"
+            #Deleting the person if they don't have any other accesses.
+            sql = ("SELECT COUNT(*) FROM Access WHERE personId = {}"
+                   "".format(personId)
                   )
             self.cursor.execute(sql)
+            stillAccesses = self.cursor.fetchone()[0]
+            
+            if not stillAccesses:
+                sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                self.cursor.execute(sql)
+           
+            #The following way of doing is too slow, but it always clean any person
+            #who don't have accesses to any door.
+            #sql = ("DELETE FROM Person WHERE id NOT IN "
+            #       "(SELECT personId FROM Access WHERE Access.personId = Person.id)"
+            #      )
+            #self.cursor.execute(sql)
 
 
         except TypeError:
@@ -838,26 +850,41 @@ class DataBase(object):
             sql = "DELETE FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
             self.cursor.execute(sql)
 
-            sql = ("SELECT * FROM LimitedAccess WHERE doorId = {} AND personId = {}"
+            sql = ("SELECT COUNT(*) FROM LimitedAccess WHERE doorId = {} AND personId = {}"
                    "".format(doorId, personId)
                   )
             self.cursor.execute(sql)
+            stillLiAccesses = self.cursor.fetchone()[0]
             
             #If there is not more limited access from this person in this door,
-            #the entry in access table should be deleted and also the person from 
-            #Person table in case this person has not access on any other door
-            if not self.cursor.fetchone():
+            #the entry in Access table should be deleted and also the person from 
+            #Person table in case this person has not access to any other door
+            if not stillLiAccesses:
                 
                 sql = ("DELETE FROM Access WHERE doorId = {} AND personId = {}"
                        "".format(doorId, personId)
                       )
                 self.cursor.execute(sql)
 
-                #Deleting all persons who have no access to any door.
-                sql = ("DELETE FROM Person WHERE id NOT IN "
-                       "(SELECT personId FROM Access WHERE Access.personId = Person.id)"
+
+                #Deleting the person if they don't have any other accesses.
+                sql = ("SELECT COUNT(*) FROM Access WHERE personId = {}"
+                       "".format(personId)
                       )
                 self.cursor.execute(sql)
+                stillAccesses = self.cursor.fetchone()[0]
+
+                if not stillAccesses:
+                    sql = "DELETE FROM Person WHERE id = {}".format(personId)
+                    self.cursor.execute(sql)
+
+
+                #The following way of doing is too slow, but it always clean any person
+                #who don't have accesses to any door.
+                #sql = ("DELETE FROM Person WHERE id NOT IN "
+                #       "(SELECT personId FROM Access WHERE Access.personId = Person.id)"
+                #      )
+                #self.cursor.execute(sql)
 
 
 
