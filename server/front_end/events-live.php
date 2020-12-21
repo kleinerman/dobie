@@ -153,6 +153,7 @@ include("header.php");
 </div>
 
 </div>
+</div>
 
 <style>
 /*n+7 hides over the 22nth child, in this case, shows 20 rows*/
@@ -291,19 +292,26 @@ $("#search-again-button").click(function(){
 	$("#filter-row").slideDown("fast");
 });
 
-/*$(document).ready(function(){
+/*
+$(document).ready(function(){
 	var i = 1;
 	var varinterval = setInterval(function(){
 		$("#noevents-row").hide();
-		$('<tr style="display:none" class="newevent"><td class="center"><span class="fa fa-address-card"></span></td><td>Zona Sur '+i+'</td><td>Puerta Principal</td><td class="center"><span class="fa fa-feed"></span></td><td class="center"><span class="fa fa-sign-in"></span></td><td>2018-10-29</td><td>11:26</td><td>Bonifies Networks</td><td>Jorge Kleinerman</td><td class="center"><span class="fa fa-check"></span></td><td class="center"></td></tr>').insertAfter("#events-table-header-row").show("slow").toggleClass("newevent");
+		$('<tr style="display:none" class="newevent"><td class="center"><span class="fa fa-address-card"></span></td><td>Zona Sur '+i+'</td><td>Puerta Principal</td><td class="center"><span class="fa fa-feed"></span></td><td class="center"><span class="fa fa-sign-in"></span></td><td>2018-10-29</td><td>11:26</td><td>Bonifies Networks</td><td>Jorge Kleinerman</td><td class="center"><span class="fa fa-check"></span></td><td class="center"></td><td class="center"></td></tr>').insertAfter("#events-table-header-row").show("slow").toggleClass("newevent");
 		i++;
 	}, 3000)
 
 });*/
 
+//disable caching to load the socket io script correctly
+$.ajaxSetup({
+  cache: true
+});
+
 $.getScript(window.location.protocol + "//" + window.location.hostname+":<?=$nodejs_port?>/socket.io/socket.io.js", function(){
+
 	if(typeof io !== 'undefined'){
-		var socketio = io.connect(window.location.hostname+":<?=$nodejs_port?>");
+		var socketio = io.connect(window.location.hostname+":<?=$nodejs_port?>", {'transports': ['websocket', 'polling']});
 		socketio.on("message_to_client", function(data){
 			var dataParsed=JSON.parse(data);
 			//check if controller down event was sent

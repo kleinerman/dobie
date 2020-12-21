@@ -275,7 +275,7 @@ ExecStop=/usr/bin/docker-compose -p dobie -f $DOCK_COMP_DIR/$DOCK_COMP_FILE stop
 
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=network-online.target
 EOL
 sudo cp /tmp/dobie-s.service /etc/systemd/system/
 sudo rm /tmp/dobie-s.service

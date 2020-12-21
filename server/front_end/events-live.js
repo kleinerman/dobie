@@ -17,8 +17,7 @@ const options = {
 
 //set up the websocket server
 var app = https.createServer(options).listen(service_port_ws);
-var io = require('socket.io').listen(app);
-
+var io = require('socket.io')(app);
 
 var server = http.createServer(function(req, res) {
         //set api endpoint name and method

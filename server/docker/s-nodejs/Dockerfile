@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:lts-alpine
 
 WORKDIR /site
 
@@ -14,5 +14,5 @@ cp /usr/share/zoneinfo/America/Argentina/Cordoba /etc/localtime && \
 echo "America/Argentina/Cordoba" > /etc/timezone && \
 apk del tzdata && \
 rm -rf /var/cache/apk/* /root/.cache /tmp/* && \
-npm install -g formidable socket.io
+npm install --no-fund -g formidable socket.io
 
