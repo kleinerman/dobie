@@ -620,6 +620,12 @@ class DataBase(object):
 
             self.execute(sql)
             zoneAndDoor = self.cursor.fetchone()
+            if zoneAndDoor == None:
+                raise EventError("The door ID sent by controller is not present in server.")
+
+
+            #Initializing an empty formatted event
+            fmtEvent = {}
 
             #If the event involves a person, getting from DB the Organization
             #and Person name
@@ -634,17 +640,9 @@ class DataBase(object):
 
                 self.execute(sql)
                 orgAndPerson = self.cursor.fetchone()
-
-            fmtEvent = {}
-            fmtEvent['eventTypeId'] = event['eventTypeId']
-            fmtEvent['doorId'] = event['doorId']
-            fmtEvent['doorName'] = zoneAndDoor['doorName']
-            fmtEvent['zoneId'] = zoneAndDoor['zoneId']
-            fmtEvent['zoneName'] = zoneAndDoor['zoneName']
-
-            fmtEvent['personId'] = event['personId']
-
-            if event['personId']:
+                if orgAndPerson == None: #This will never happen since cardNum2PrsnId() will avoid it
+                    raise EventError("The person ID sent by controller is not present in server.")
+                fmtEvent['personId'] = event['personId']
                 fmtEvent['personName'] = orgAndPerson['personName']
                 fmtEvent['orgId'] = orgAndPerson['orgId']
                 fmtEvent['orgName'] = orgAndPerson['orgName']
@@ -658,7 +656,11 @@ class DataBase(object):
                 fmtEvent['visitedOrgId'] = None
                 fmtEvent['visitedOrgName'] = None
 
-
+            fmtEvent['eventTypeId'] = event['eventTypeId']
+            fmtEvent['doorId'] = event['doorId']
+            fmtEvent['doorName'] = zoneAndDoor['doorName']
+            fmtEvent['zoneId'] = zoneAndDoor['zoneId']
+            fmtEvent['zoneName'] = zoneAndDoor['zoneName']
             #Setting personDeleted field as None always as
             #it makes no sense in live events
             fmtEvent['personDeleted'] = None
