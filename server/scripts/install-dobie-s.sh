@@ -270,8 +270,8 @@ Type=oneshot
 RemainAfterExit=yes
 
 Environment=IMG_PRFX=$IMG_PRFX
-ExecStart=/usr/bin/docker-compose -p dobie -f $DOCK_COMP_DIR/$DOCK_COMP_FILE start
-ExecStop=/usr/bin/docker-compose -p dobie -f $DOCK_COMP_DIR/$DOCK_COMP_FILE stop
+ExecStart=docker-compose -p dobie -f $DOCK_COMP_DIR/$DOCK_COMP_FILE start
+ExecStop=docker-compose -p dobie -f $DOCK_COMP_DIR/$DOCK_COMP_FILE stop
 
 
 [Install]

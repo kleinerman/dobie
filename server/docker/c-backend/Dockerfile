@@ -1,4 +1,4 @@
-FROM arm32v7/python:3.8-slim
+FROM arm32v7/python:3-slim
 
 # Flask, Flask-HTTPAuth, requests and gevent are needed for REST API server.
 # PyMySQL is needed for database connection.
