@@ -3,7 +3,7 @@ import logging
 SIM_PERSON_QUANT = 5000
 SIM_LIM_ACCESS_QUANT = 500
 
-POWEROFF_BIN = '/usr/bin/poweroff'
+POWEROFF_BIN = 'poweroff'
 
 IOIFACE_BIN = '/opt/dobie/controller/bin/ioiface'
 IOIFACE_ARGS = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut']
