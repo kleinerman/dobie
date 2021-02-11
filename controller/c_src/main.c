@@ -6,26 +6,31 @@
 #include <stdlib.h>
 #include <sys/epoll.h>
 #include <pthread.h>
-#include <libioiface.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <mqueue.h>
 #include <signal.h>
+#include <gpiod.h>
+#include <common.h>
+#include <button.h>
+
+
+int exit_flag = 0;
+mqd_t mq;
+pthread_mutex_t mq_mutex;
+
 
 int main(int argc, char** argv) 
 {
-    door_t *door; // array of pointers to door type structures
-    pthread_t *r_thread; // array of pointers to all threads created by this program
-    pthread_t b_thread; //
-    pthread_t s_thread; //
+    struct gpiod_chip *chip;
+    struct timespec event_wait_time = { 2, 0 };
+    button_t* buttons_a;
+    int ret;
     int i; // auxiliar variable used in cicles
     int number_of_doors = 0;
     int number_of_readers = 0;
     int number_of_buttons = 0;
     int number_of_states = 0;
-    mqd_t mq; // message queue
-    struct buttons_args b_args;
-    struct state_args s_args;
     char mac_string[MAC_STR_LEN] = ""; // Initializing all the array to /0
     FILE *sys_mac_file_ptr;
 
@@ -41,10 +46,6 @@ int main(int argc, char** argv)
     //setvbuf(stdout, NULL, _IONBF, 0); //another way of do the above
     //setvbuf(stderr, NULL, _IONBF, 0); //
     
-    //
-    signal(SIGINT, sigHandler);
-    signal(SIGTERM, sigHandler);
-
 
     if ((sys_mac_file_ptr = fopen(SYS_FILE_MAC, "r")) == NULL) {
         printf("Error opening mac file of sys filesystem\n");
@@ -67,75 +68,62 @@ int main(int argc, char** argv)
     /* open the message queue only for sending message to the main process
      * It must be created by the main process
      */
-    if ( (mq = mq_open(QUEUE_NAME, O_WRONLY)) == RETURN_FAILURE ) { 
+    if ( (mq = mq_open(QUEUE_NAME, (O_WRONLY | O_NONBLOCK) )) == RETURN_FAILURE ) { 
         printf("Error opening the message queue: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
+
+    pthread_mutex_init(&mq_mutex, NULL);
+
+
     // get number of doors from arguments
     number_of_doors = get_number_of(argc, argv, "--id");
+    printf("number_of_doors: %d\n", number_of_doors);
     // get number of readers
     number_of_readers = get_number_of(argc, argv, "--i0In") + get_number_of(argc, argv, "--o0In");
+    printf("number_of_readers: %d\n", number_of_readers);
     // get number of buttons
     number_of_buttons = get_number_of(argc, argv, "--bttnIn");
+    printf("number_of_buttons: %d\n", number_of_buttons);
     // get number of state pins
     number_of_states = get_number_of(argc, argv, "--stateIn");
+    printf("number_of_states: %d\n", number_of_states);
 
 
-    // array with all reader threads
-    r_thread = (pthread_t *) malloc(sizeof(pthread_t) * number_of_readers);
+    chip = gpiod_chip_open_by_name(CHIP_NAME);
+	    if (!chip) {
+		    perror("Open chip failed\n");
+		    ret = -1;
+        }
+	
 
-    /* Array of door struct. Each struct stores the GPIO numbers used in the door.
-     * The array is filled with the parser function
-     */
-    door = (door_t *)malloc(sizeof(door_t) * number_of_doors);
-    if ( parser(argc, argv, door) == RETURN_FAILURE ) {
-        printf("Error: You should declare a door ID before declaring GPIO pins\n");
-        exit(EXIT_FAILURE);
+    //Asking memory for buttons
+    buttons_a = (button_t*)malloc(sizeof(button_t) * number_of_buttons);
+
+
+    //Filling button structures, state structures and card_readers structures with
+    //the parametters received as arguments
+    init_perif(argc, argv, chip, &event_wait_time, buttons_a);
+
+
+    //Before creating the threads, overwritting SIGINT and SIGTERM signals
+    signal(SIGINT, finish_handler);
+    signal(SIGTERM, finish_handler);
+
+
+    //Starting buttons threads
+    for (i=0; i<number_of_buttons; i++) {
+        pthread_create(&(buttons_a[i].b_thread), NULL, run_button, (void *)&buttons_a[i]);
     }
 
-    // set all GPIO pins
-    if ( set_gpio_pins(door, number_of_doors) == RETURN_FAILURE ) {
-        printf("Error setting GPIO pins. Program aborted\n");
-        exit(EXIT_FAILURE);
+    //Joining buttosn threads
+    for (i=0; i<number_of_buttons; i++) {
+        pthread_join(buttons_a[i].b_thread, NULL);
     }
 
-    /* Start listening the card readers.
-     * Threads send to the main process a message with door ID + card reader ID + card number
-     */
-    start_readers(number_of_doors, number_of_readers, door, r_thread, mq);
-
-    /* Catch button pushes.
-     * One thread for all system buttons
-     */
-    b_args.number_of_doors = number_of_doors;
-    b_args.number_of_buttons = number_of_buttons;
-    b_args.door = door;
-    b_args.mq = mq;
-    pthread_create(&b_thread, NULL, buttons, (void *)&b_args);
-
-    /* Catch the state changes. The door could change its state from closed to open
-     * or vice versa. One thread listen for all doors */
-    s_args.number_of_doors = number_of_doors;
-    s_args.number_of_states = number_of_states;
-    s_args.door = door;
-    s_args.mq = mq;
-    pthread_create(&s_thread, NULL, state, (void *)&s_args);
-
-    /* This part of the code should run only if the application is closed
-     *  wait  for  the  threads  to  terminate
-     */
-    for (i = 0; i < number_of_readers; i++)
-        pthread_join(r_thread[i], NULL);
-    pthread_join(b_thread, NULL);
-    pthread_join(s_thread, NULL);
-
-    // uset used GPIOs
-    if ( unset_gpio_pins(door, number_of_doors) == -1 ) {
-        printf("Error removing GPIO pins from userspace");
-        exit(EXIT_FAILURE);
-    }
 
     return RETURN_SUCCESS;
+
 }
 

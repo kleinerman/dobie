@@ -1,8 +1,8 @@
 CC=gcc
 IDIR=./include
-CFLAGS=-I $(IDIR) -pthread -lrt
-OBJ=main.o libioiface.o
-_DEPS=libioiface.h
+CFLAGS=-I $(IDIR) -pthread -lrt -lgpiod
+OBJ=main.o common.o button.o
+_DEPS=common.h button.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
 main: $(OBJ)
@@ -14,5 +14,5 @@ main: $(OBJ)
 	        $(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
-	        rm *.o ioiface
+	        rm *.o ../bin/ioiface
 
