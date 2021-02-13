@@ -7,7 +7,7 @@
 #define RETURN_SUCCESS 0
 #define BOUNCE_TIME 200000
 #define QUEUE_NAME "/ioiface_queue"
-#define MAC "0e:cb:27:b6:c5:59"
+#define MAC "2e:f2:62:bf:e5:47"
 #define MAC_STR_LEN 18
 #define SYS_FILE_MAC "/sys/class/net/eth0/address"
 #define CHIP_NAME "gpiochip0"
