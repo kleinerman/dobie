@@ -61,24 +61,25 @@ int init_perif(int argc, char **argv, struct gpiod_chip* chip_p, struct timespec
              printf("----------%d----------\n", door_id);
         }
         if ( strcmp(argv[i], "--i0In") == 0 )
-            perror("nothing yet..");
+            printf("nothing yet..\n");
         if ( strcmp(argv[i], "--i1In") == 0 )
-            perror("nothing yet..");
+            printf("nothing yet..\n");
         if ( strcmp(argv[i], "--o0In") == 0 )
-            perror("nothing yet..");
+            printf("nothing yet..\n");
         if ( strcmp(argv[i], "--o1In") == 0 )
-            perror("nothing yet..");
+            printf("nothing yet..\n");
         if ( strcmp(argv[i], "--bttnIn") == 0 ){
             printf("Initializing button of door: %d\n", door_id);
             init_button(&(buttons_a[buttons_count]), chip_p, atoi(argv[i+1]), door_id, event_wait_time_p);
             buttons_count++;
         }
         if ( strcmp(argv[i], "--stateIn") == 0 )
-            perror("nothing yet..");
+            printf("nothing yet..\n");
         if ( strcmp(argv[i], "--bzzrOut") == 0 )
-            perror("nothing yet..");
+            printf("nothing yet..");
         if ( strcmp(argv[i], "--rlseOut") == 0 )
-            perror("nothing yet..");
+            printf("nothing yet..\n");
+        printf("jor\n");
     }
 
     return RETURN_SUCCESS;

@@ -5,7 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <sys/epoll.h>
+#include <systemd/sd-journal.h>
 #include <pthread.h>
 #include <mqueue.h>
 #include <unistd.h>
@@ -68,25 +68,26 @@ void *run_button (void *arg_p){
 				ret = gpiod_line_get_value(button_p->b_line);
 
 				if (BUTTON_PRESSED == ret) {
-					printf("Button: %d pressed\n", button_p->door_id);
+                    sd_journal_print(LOG_NOTICE, "Button: %d pressed\n", button_p->door_id);
 					pthread_mutex_lock(&mq_mutex);
                         sprintf(q_msg, "%d;0;button=1", button_p->door_id);
-      					ret = mq_send(mq, q_msg, strlen(q_msg), 1);
-						if ( ret == 0 ) printf("Success sending to MQ!!\n");
-						else printf("Error sending to MQ!!\n");
+						ret = mq_send(mq, q_msg, strlen(q_msg), 1);
+						if ( ret == 0 )
+							sd_journal_print(LOG_DEBUG, "SUCCESS Sending to queue: %s\n", q_msg);
+						else
+							sd_journal_print(LOG_DEBUG, "ERROR Sending to queue: %s\n", q_msg);
 					pthread_mutex_unlock(&mq_mutex);
 				} 	
-				else {
-					printf("Noise in: %d\n", button_p->door_id);
-				}
+				else
+					sd_journal_print(LOG_INFO, "Noise detected in button: %d\n", button_p->door_id);
 				break;
 
 			case 0:
-				printf("Button thread: %d checking request to finish.\n", button_p->door_id);
+				sd_journal_print(LOG_DEBUG, "Thread of button: %d checking for exit\n", button_p->door_id);
 				break;
 
 			default:
-				printf("Error in Button: %d.\n", button_p->door_id);
+				sd_journal_print(LOG_WARNING, "Unknown error on thread of button: %d\n", button_p->door_id);
 		}
 
 	}

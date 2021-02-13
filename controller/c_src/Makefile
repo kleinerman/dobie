@@ -1,6 +1,6 @@
 CC=gcc
 IDIR=./include
-CFLAGS=-I $(IDIR) -pthread -lrt -lgpiod
+CFLAGS=-I $(IDIR) -lpthread -lrt -lgpiod -lsystemd
 OBJ=main.o common.o button.o
 _DEPS=common.h button.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
