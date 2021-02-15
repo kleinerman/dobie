@@ -13,6 +13,7 @@
 #include <gpiod.h>
 #include <common.h>
 #include <button.h>
+#include <state_snsr.h>
 
 
 int exit_flag = 0;
@@ -25,12 +26,13 @@ int main(int argc, char** argv)
     struct gpiod_chip *chip;
     struct timespec event_wait_time = { 2, 0 };
     button_t* buttons_a;
+    state_snsr_t* state_snsrs_a;
     int ret;
     int i; // auxiliar variable used in cicles
     int number_of_doors = 0;
     int number_of_readers = 0;
     int number_of_buttons = 0;
-    int number_of_states = 0;
+    int number_of_state_snsrs = 0;
     char mac_string[MAC_STR_LEN] = ""; // Initializing all the array to /0
     FILE *sys_mac_file_ptr;
 
@@ -87,8 +89,8 @@ int main(int argc, char** argv)
     number_of_buttons = get_number_of(argc, argv, "--bttnIn");
     printf("number_of_buttons: %d\n", number_of_buttons);
     // get number of state pins
-    number_of_states = get_number_of(argc, argv, "--stateIn");
-    printf("number_of_states: %d\n", number_of_states);
+    number_of_state_snsrs = get_number_of(argc, argv, "--stateIn");
+    printf("number_of_states: %d\n", number_of_state_snsrs);
 
 
     chip = gpiod_chip_open_by_name(CHIP_NAME);
@@ -100,11 +102,12 @@ int main(int argc, char** argv)
 
     //Asking memory for buttons
     buttons_a = (button_t*)malloc(sizeof(button_t) * number_of_buttons);
+    state_snsrs_a = (state_snsr_t*)malloc(sizeof(state_snsr_t) * number_of_state_snsrs);
 
 
     //Filling button structures, state structures and card_readers structures with
     //the parametters received as arguments
-    init_perif(argc, argv, chip, &event_wait_time, buttons_a);
+    init_perif(argc, argv, chip, &event_wait_time, buttons_a, state_snsrs_a);
 
 
     //Before creating the threads, overwritting SIGINT and SIGTERM signals
@@ -117,9 +120,20 @@ int main(int argc, char** argv)
         pthread_create(&(buttons_a[i].b_thread), NULL, run_button, (void *)&buttons_a[i]);
     }
 
-    //Joining buttosn threads
+    //Starting state sensors threads
+    for (i=0; i<number_of_state_snsrs; i++) {
+        pthread_create(&(state_snsrs_a[i].b_thread), NULL, run_state_snsr, (void *)&state_snsrs_a[i]);
+    }
+
+    //Joining buttons threads
     for (i=0; i<number_of_buttons; i++) {
         pthread_join(buttons_a[i].b_thread, NULL);
+    }
+
+
+    //Joining state_snsrs threads
+    for (i=0; i<number_of_state_snsrs; i++) {
+        pthread_join(state_snsrs_a[i].b_thread, NULL);
     }
 
 

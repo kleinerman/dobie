@@ -1,7 +1,7 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 #define BUTTON_PRESSED 0
-#include "common.h"
+#include <common.h>
 #include <pthread.h>
 #include <mqueue.h>
 #include <gpiod.h>
@@ -17,6 +17,7 @@ typedef struct {
     struct timespec *event_wait_time_p;  //Time to wait events in button
     pthread_t b_thread;
 } button_t;
+
 
 int init_button(button_t * button_p, 
                 struct gpiod_chip *chip, 

@@ -3,11 +3,12 @@
 #include <mqueue.h>
 #include <gpiod.h>
 #include <button.h>
+#include <state_snsr.h>
 #define RETURN_FAILURE -1
 #define RETURN_SUCCESS 0
 #define BOUNCE_TIME 200000
 #define QUEUE_NAME "/ioiface_queue"
-#define MAC "2e:f2:62:bf:e5:47"
+#define MAC "86:03:24:b9:a6:b7"
 #define MAC_STR_LEN 18
 #define SYS_FILE_MAC "/sys/class/net/eth0/address"
 #define CHIP_NAME "gpiochip0"
@@ -21,7 +22,11 @@ extern pthread_mutex_t mq_mutex;
 
 // function prototypes
 void finish_handler(int sig_num);
-int init_perif(int argc, char **argv, struct gpiod_chip* chip_p, struct timespec* event_wait_time_p, button_t buttons_a[]);
+
+int init_perif(int argc, char* argv[], struct gpiod_chip* chip_p,
+               struct timespec* event_wait_time_p, button_t buttons_a[],
+               state_snsr_t state_snsrs_a[]);
+
 int get_number_of(int argc, char** argv, const char *str);
 
 #endif
