@@ -14,6 +14,7 @@
 #include <common.h>
 #include <button.h>
 #include <state_snsr.h>
+#include <reader.h>
 
 
 int exit_flag = 0;
@@ -27,6 +28,7 @@ int main(int argc, char** argv)
     struct timespec event_wait_time = { 2, 0 };
     button_t* buttons_a;
     state_snsr_t* state_snsrs_a;
+    reader_t* readers_a;
     int ret;
     int i; // auxiliar variable used in cicles
     int number_of_doors = 0;
@@ -103,11 +105,12 @@ int main(int argc, char** argv)
     //Asking memory for buttons
     buttons_a = (button_t*)malloc(sizeof(button_t) * number_of_buttons);
     state_snsrs_a = (state_snsr_t*)malloc(sizeof(state_snsr_t) * number_of_state_snsrs);
+    readers_a = (reader_t*)malloc(sizeof(reader_t) * number_of_readers);
 
 
     //Filling button structures, state structures and card_readers structures with
     //the parametters received as arguments
-    init_perif(argc, argv, chip, &event_wait_time, buttons_a, state_snsrs_a);
+    init_perif(argc, argv, chip, &event_wait_time, buttons_a, state_snsrs_a, readers_a);
 
 
     //Before creating the threads, overwritting SIGINT and SIGTERM signals
@@ -125,6 +128,12 @@ int main(int argc, char** argv)
         pthread_create(&(state_snsrs_a[i].b_thread), NULL, run_state_snsr, (void *)&state_snsrs_a[i]);
     }
 
+    //Starting reader threads
+    for (i=0; i<number_of_readers; i++) {
+        pthread_create(&(readers_a[i].r_thread), NULL, run_reader, (void *)&readers_a[i]);
+    }
+
+
     //Joining buttons threads
     for (i=0; i<number_of_buttons; i++) {
         pthread_join(buttons_a[i].b_thread, NULL);
@@ -134,6 +143,11 @@ int main(int argc, char** argv)
     //Joining state_snsrs threads
     for (i=0; i<number_of_state_snsrs; i++) {
         pthread_join(state_snsrs_a[i].b_thread, NULL);
+    }
+
+    //Joining readers threads
+    for (i=0; i<number_of_readers; i++) {
+        pthread_join(readers_a[i].r_thread, NULL);
     }
 
 

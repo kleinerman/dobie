@@ -39,14 +39,14 @@ int enable_button(button_t * button_p) {
 	if (!button_p->b_line) {
 		sd_journal_print(LOG_ALERT, "Error getting line of GPIO: %d for button of door: %d\n", 
 		                 button_p->gpio_num, button_p->door_id);
-		ret = -1;
+		return -1;
     }
 
 	ret = gpiod_line_request_falling_edge_events(button_p->b_line, CONSUMER);
 	if (ret < 0) {
 		sd_journal_print(LOG_ALERT, "Failing to request event notification for button of door: %d\n",
 		                 button_p->door_id);
-		ret = -1;
+		return -1;
     }
 	return ret;
 }

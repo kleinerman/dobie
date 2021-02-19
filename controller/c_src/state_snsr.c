@@ -39,14 +39,14 @@ int enable_state_snsr(state_snsr_t * state_snsr_p) {
 	if (!state_snsr_p->b_line) {
 		sd_journal_print(LOG_ALERT, "Error getting line of GPIO: %d for state sensor of door: %d\n",
 		                 state_snsr_p->gpio_num, state_snsr_p->door_id);
-		ret = -1;
+		return -1;
     }
 
 	ret = gpiod_line_request_both_edges_events(state_snsr_p->b_line, CONSUMER);
 	if (ret < 0) {
 		sd_journal_print(LOG_ALERT, "Failing to request event notification for state sensor of door: %d\n",
 		                 state_snsr_p->door_id);
-		ret = -1;
+		return -1;
     }
 	return ret;
 }
