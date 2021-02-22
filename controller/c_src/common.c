@@ -29,7 +29,7 @@ void finish_handler(int sig_num)
  * Returns the number of occurrences of the string str found in
  * the program arguments.
  */
-int get_number_of(int argc, char** argv, const char *str)
+int get_number_of(int argc, char **argv, const char *str)
 {
     int i;
     int count = 0;
@@ -48,8 +48,8 @@ int get_number_of(int argc, char** argv, const char *str)
  * A negative attribute means that it is not in use
  * It returns a negative value if there are wrong arguments
  */
-int init_perif(int argc, char* argv[], struct gpiod_chip* chip_p,
-               struct timespec* event_wait_time_p, button_t buttons_a[],
+int init_perif(int argc, char *argv[], struct gpiod_chip *chip_p,
+               struct timespec *event_wait_time_p, button_t buttons_a[],
                state_snsr_t state_snsrs_a[], reader_t readers_a[]) {
     int i, j, door_id;
     int buttons_count = 0;
@@ -67,8 +67,8 @@ int init_perif(int argc, char* argv[], struct gpiod_chip* chip_p,
             continue;
         }
         if ( strcmp(argv[i], "--i0In") == 0 ) {
-            sd_journal_print(LOG_NOTICE, "Parameterizing data lines on input reader of door: %d\n", door_id);
-            init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+3]), door_id, event_wait_time_p);
+            sd_journal_print(LOG_NOTICE, "Parameterizing data lines on Input Reader of Door: %d\n", door_id);
+            init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+3]), INPUT, door_id, event_wait_time_p);
             readers_count++;
             continue;
         }
@@ -77,8 +77,8 @@ int init_perif(int argc, char* argv[], struct gpiod_chip* chip_p,
             ;
 */
         if ( strcmp(argv[i], "--o0In") == 0 ) {
-            sd_journal_print(LOG_NOTICE, "Parameterizing data lines on output reader of door: %d\n", door_id);
-            init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+3]), door_id, event_wait_time_p);
+            sd_journal_print(LOG_NOTICE, "Parameterizing data lines on Output Reader of Door: %d\n", door_id);
+            init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+3]), OUTPUT, door_id, event_wait_time_p);
             readers_count++;
             continue;
         }
@@ -87,13 +87,13 @@ int init_perif(int argc, char* argv[], struct gpiod_chip* chip_p,
             ;
 */
         if ( strcmp(argv[i], "--bttnIn") == 0 ) {
-            sd_journal_print(LOG_NOTICE, "Parameterizing button of door: %d\n", door_id);
+            sd_journal_print(LOG_NOTICE, "Parameterizing Button of Door: %d\n", door_id);
             init_button(&(buttons_a[buttons_count]), chip_p, atoi(argv[i+1]), door_id, event_wait_time_p);
             buttons_count++;
             continue;
         }
         if ( strcmp(argv[i], "--stateIn") == 0 ) {
-            sd_journal_print(LOG_NOTICE, "Parameterizing state sensor of door: %d\n", door_id);
+            sd_journal_print(LOG_NOTICE, "Parameterizing State Sensor of Door: %d\n", door_id);
             init_state_snsr(&(state_snsrs_a[state_snsrs_count]), chip_p, atoi(argv[i+1]), door_id, event_wait_time_p);
             state_snsrs_count++;
             continue;
@@ -107,5 +107,3 @@ int init_perif(int argc, char* argv[], struct gpiod_chip* chip_p,
 
     return RETURN_SUCCESS;
 }
-
-

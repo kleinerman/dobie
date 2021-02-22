@@ -22,13 +22,13 @@ mqd_t mq;
 pthread_mutex_t mq_mutex;
 
 
-int main(int argc, char** argv) 
+int main(int argc, char **argv)
 {
     struct gpiod_chip *chip;
     struct timespec event_wait_time = { 2, 0 };
-    button_t* buttons_a;
-    state_snsr_t* state_snsrs_a;
-    reader_t* readers_a;
+    button_t *buttons_a;
+    state_snsr_t *state_snsrs_a;
+    reader_t *readers_a;
     int ret;
     int i; // auxiliar variable used in cicles
     int number_of_doors = 0;
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     setbuf(stderr, NULL);
     //setvbuf(stdout, NULL, _IONBF, 0); //another way of do the above
     //setvbuf(stderr, NULL, _IONBF, 0); //
-    
+
 
     if ((sys_mac_file_ptr = fopen(SYS_FILE_MAC, "r")) == NULL) {
         printf("Error opening mac file of sys filesystem\n");
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     }
 
     fgets(mac_string, MAC_STR_LEN, sys_mac_file_ptr);
-    /*mac_string will end up with the 17 chars of the MAC divided 
+    /*mac_string will end up with the 17 chars of the MAC divided
      * by ":" and at the end a "/0" char remaining of the initialization
     */
 
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
     /* open the message queue only for sending message to the main process
      * It must be created by the main process
      */
-    if ( (mq = mq_open(QUEUE_NAME, (O_WRONLY | O_NONBLOCK) )) == RETURN_FAILURE ) { 
+    if ( (mq = mq_open(QUEUE_NAME, (O_WRONLY | O_NONBLOCK) )) == RETURN_FAILURE ) {
         printf("Error opening the message queue: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -96,16 +96,16 @@ int main(int argc, char** argv)
 
 
     chip = gpiod_chip_open_by_name(CHIP_NAME);
-	    if (!chip) {
-		    perror("Open chip failed\n");
-		    ret = -1;
+        if (!chip) {
+            perror("Open chip failed\n");
+            ret = -1;
         }
-	
+
 
     //Asking memory for buttons
-    buttons_a = (button_t*)malloc(sizeof(button_t) * number_of_buttons);
-    state_snsrs_a = (state_snsr_t*)malloc(sizeof(state_snsr_t) * number_of_state_snsrs);
-    readers_a = (reader_t*)malloc(sizeof(reader_t) * number_of_readers);
+    buttons_a = (button_t *)malloc(sizeof(button_t) * number_of_buttons);
+    state_snsrs_a = (state_snsr_t *)malloc(sizeof(state_snsr_t) * number_of_state_snsrs);
+    readers_a = (reader_t *)malloc(sizeof(reader_t) * number_of_readers);
 
 
     //Filling button structures, state structures and card_readers structures with
@@ -154,4 +154,3 @@ int main(int argc, char** argv)
     return RETURN_SUCCESS;
 
 }
-

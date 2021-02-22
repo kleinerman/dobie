@@ -7,6 +7,8 @@
 #include <reader.h>
 #define RETURN_FAILURE -1
 #define RETURN_SUCCESS 0
+#define OUTPUT 0
+#define INPUT 1
 #define BOUNCE_TIME 200000
 #define QUEUE_NAME "/ioiface_queue"
 #define MAC "86:03:24:b9:a6:b7"

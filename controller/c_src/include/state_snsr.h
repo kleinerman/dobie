@@ -13,13 +13,13 @@
 typedef button_t state_snsr_t;
 
 
-int init_state_snsr(state_snsr_t * state_snsr_p, 
-                    struct gpiod_chip *chip, 
-                    unsigned int gpio_num, 
-				    unsigned int door_id,
-				    struct timespec *event_wait_time_p);
+int init_state_snsr(state_snsr_t *state_snsr_p,
+                    struct gpiod_chip *chip,
+                    unsigned int gpio_num,
+                    unsigned int door_id,
+                    struct timespec *event_wait_time_p);
 
-int enable_state_snsr(state_snsr_t * state_snsr_p);
+int enable_state_snsr(state_snsr_t *state_snsr_p);
 
 void *run_state_snsr (void *arg_p);
 #endif
