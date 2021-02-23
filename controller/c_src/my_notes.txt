@@ -19,3 +19,7 @@ command:
 ./ioiface --id 20 --i0In 45 --i1In 44 --o0In 23 --o1In 26 --bttnIn 27 --stateIn 65
 
 ../bin/ioiface --id 1 --i0In 26 --i1In 21 --o0In 19 --o1In 20 --bttnIn 25 --stateIn 24 --rlseOut 27 --bzzrOut 14 --id 2 --i0In 13 --i1In 16 --o0In 6 --o1In 12 --bttnIn 9 --stateIn 23 --rlseOut 3 --bzzrOut 15 --id 3 --i0In 7 --i1In 5 --o0In 11 --o1In 8 --bttnIn 10 --stateIn 22 --rlseOut 18 --bzzrOut 17
+
+../bin/ioiface --id 1 --inRdrIn 26 21 --outRdrIn 19 20 --bttnIn 25 --stateIn 24 --rlseOut 27 --bzzrOut 14 --id 2 --inRdrIn 13 16 --outRdrIn 6 12 --bttnIn 9 --stateIn 23 --rlseOut 3 --bzzrOut 15 --id 3 --inRdrIn 7 5 --outRdrIn 11 8 --bttnIn 10 --stateIn 22 --rlseOut 18 --bzzrOut 17
+
+../bin/ioiface --id 1 --inRdrIn 26 26 21 --outRdrIn 26 19 20 --bttnIn 25 --stateIn 24 --rlseOut 27 --bzzrOut 14 --id 2 --inRdrIn 26 13 16 --outRdrIn 26 6 12 --bttnIn 9 --stateIn 23 --rlseOut 3 --bzzrOut 15 --id 3 --inRdrIn 26 7 5 --outRdrIn 26 11 8 --bttnIn 10 --stateIn 22 --rlseOut 18 --bzzrOut 17

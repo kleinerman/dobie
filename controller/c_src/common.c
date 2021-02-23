@@ -66,26 +66,22 @@ int init_perif(int argc, char *argv[], struct gpiod_chip *chip_p,
             door_id = atoi(argv[i+1]);
             continue;
         }
-        if ( strcmp(argv[i], "--i0In") == 0 ) {
+        if ( strcmp(argv[i], "--inRdrIn") == 0 ) {
             sd_journal_print(LOG_NOTICE, "Parameterizing data lines on Input Reader of Door: %d\n", door_id);
-            init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+3]), INPUT, door_id, event_wait_time_p);
+            init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+2]), atoi(argv[i+3]), INPUT, door_id, event_wait_time_p);
             readers_count++;
+            i+=2;
             continue;
         }
-/*
-        if ( strcmp(argv[i], "--i1In") == 0 )
-            ;
-*/
-        if ( strcmp(argv[i], "--o0In") == 0 ) {
+
+        if ( strcmp(argv[i], "--outRdrIn") == 0 ) {
             sd_journal_print(LOG_NOTICE, "Parameterizing data lines on Output Reader of Door: %d\n", door_id);
-            init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+3]), OUTPUT, door_id, event_wait_time_p);
+            init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+2]), atoi(argv[i+3]), OUTPUT, door_id, event_wait_time_p);
             readers_count++;
+            i+=2;
             continue;
         }
-/*
-        if ( strcmp(argv[i], "--o1In") == 0 )
-            ;
-*/
+
         if ( strcmp(argv[i], "--bttnIn") == 0 ) {
             sd_journal_print(LOG_NOTICE, "Parameterizing Button of Door: %d\n", door_id);
             init_button(&(buttons_a[buttons_count]), chip_p, atoi(argv[i+1]), door_id, event_wait_time_p);

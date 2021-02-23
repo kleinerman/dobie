@@ -1,6 +1,6 @@
 CC=gcc
 IDIR=./include
-CFLAGS=-I $(IDIR) -lpthread -lrt -lgpiod -lsystemd
+CFLAGS=-I $(IDIR) -lpthread -lrt -lgpiod -lsystemd -lm
 OBJ=main.o common.o button.o state_snsr.o reader.o
 _DEPS=common.h button.h state_snsr.h reader.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
