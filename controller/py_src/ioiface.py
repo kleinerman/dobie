@@ -29,7 +29,7 @@ class IoIface(object):
         #IoIface Output
         self.ioIfaceStdOut = None
 
-        
+
         self.dataBase = dataBase
 
 
@@ -40,33 +40,40 @@ class IoIface(object):
         Start the IO Interface process.
         Leave self.ioIfaceProc and self.doorsControl with new objects.
         '''
-
         #In the followng section we put all the arguments to pass to ioIface external
         #program in a list, including and starting by the name of the program
         ioIfaceArgs = [IOIFACE_BIN]
 
-        gpioNames = self.dataBase.getGpioNames()
         gpiosDoors = self.dataBase.getGpiosDoors()
 
         for gpiosDoor in gpiosDoors:
-            for gpioName in gpioNames:
-                gpioNumber = gpiosDoor[gpioName]
-                if gpioNumber:
-                    ioIfaceArgs.append("--{}".format(gpioName))
-                    ioIfaceArgs.append("{}".format(gpioNumber))
-
+            doorNum = str(gpiosDoor['id'])
+            iRdrBits = str(gpiosDoor['iWgndBits'])
+            i0In = str(gpiosDoor['i0In'])
+            i1In = str(gpiosDoor['i1In'])
+            oRdrBits = str(gpiosDoor['oWgndBits'])
+            o0In = str(gpiosDoor['o0In'])
+            o1In = str(gpiosDoor['o1In'])
+            bttnIn = str(gpiosDoor['bttnIn'])
+            stateIn = str(gpiosDoor['stateIn'])
+            rlseOut = str(gpiosDoor['rlseOut'])
+            bzzrOut = str(gpiosDoor['bzzrOut'])
+            doorArgs = ['--id', doorNum, '--inRdrIn', iRdrBits, i0In, i1In,
+                        '--outRdrIn', oRdrBits, o0In, o1In, '--bttnIn', bttnIn,
+                        '--stateIn', stateIn, '--rlseOut', rlseOut, '--bzzrOut', bzzrOut,
+                       ]
+            ioIfaceArgs += doorArgs
 
         #The ioIface external program is launched using Popen
         #and saving the process object.
         ioIfaceCmd = ' '.join(ioIfaceArgs)
-
         logMsg = 'Starting IO Interface with the following command: {}'.format(ioIfaceCmd)
         self.logger.info(logMsg)
 
         self.ioIfaceStdOut = open(IOFACE_LOGGING_FILE, 'w')
 
         self.ioIfaceProc = subprocess.Popen(ioIfaceArgs,
-                                            stdout=self.ioIfaceStdOut, 
+                                            stdout=self.ioIfaceStdOut,
                                             stderr=subprocess.STDOUT,
                                             bufsize=0
                                            )
@@ -86,7 +93,7 @@ class IoIface(object):
         if self.ioIfaceProc:
             self.logger.info('Stoping IO Interface.')
             #We comment the following line because when SIGTERM is received in the main python
-            #program seems that the "ioiface" also receive that signal. If we send here the 
+            #program seems that the "ioiface" also receive that signal. If we send here the
             #signal again, we do not permit "ioiface" finished in a clean way.
             #self.ioIfaceProc.terminate()
             #Wait until it finish (It does not finish instantly)
@@ -104,4 +111,3 @@ class IoIface(object):
 
 
     #----------------------------------------------------------------------------#
-

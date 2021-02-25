@@ -6,7 +6,16 @@ SIM_LIM_ACCESS_QUANT = 500
 POWEROFF_BIN = 'poweroff'
 
 IOIFACE_BIN = '/opt/dobie/controller/bin/ioiface'
-IOIFACE_ARGS = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut']
+
+IR_1_WGND_BITS = 26
+OR_1_WGND_BITS = 26
+
+IR_2_WGND_BITS = 26
+OR_2_WGND_BITS = 26
+
+IR_3_WGND_BITS = 26
+OR_3_WGND_BITS = 26
+
 
 DB_FILE = '/var/lib/dobie-c/dobie-c.db'
 

@@ -32,15 +32,17 @@ cursor.execute('''CREATE UNIQUE INDEX cardNumberIndex
 
 cursor.execute('''
     CREATE TABLE DoorGpios (
-        id       INTEGER PRIMARY KEY,
-        i0In     INTEGER, 
-        i1In     INTEGER,
-        o0In     INTEGER,
-        o1In     INTEGER,
-        bttnIn   INTEGER,
-        stateIn  INTEGER,
-        rlseOut  INTEGER,
-        bzzrOut  INTEGER
+        id         INTEGER PRIMARY KEY,
+        iWgndBits  INTEGER,
+        i0In       INTEGER,
+        i1In       INTEGER,
+        oWgndBits  INTEGER,
+        o0In       INTEGER,
+        o1In       INTEGER,
+        bttnIn     INTEGER,
+        stateIn    INTEGER,
+        rlseOut    INTEGER,
+        bzzrOut    INTEGER
     )
     '''
 )
