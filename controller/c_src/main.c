@@ -85,13 +85,13 @@ int main(int argc, char **argv)
     number_of_doors = get_number_of(argc, argv, "--id");
     printf("number_of_doors: %d\n", number_of_doors);
     // get number of readers
-    number_of_readers = get_number_of(argc, argv, "--inRdrIn") + get_number_of(argc, argv, "--outRdrIn");
+    number_of_readers = get_number_of(argc, argv, "--inRdr") + get_number_of(argc, argv, "--outRdr");
     printf("number_of_readers: %d\n", number_of_readers);
     // get number of buttons
-    number_of_buttons = get_number_of(argc, argv, "--bttnIn");
+    number_of_buttons = get_number_of(argc, argv, "--bttn");
     printf("number_of_buttons: %d\n", number_of_buttons);
     // get number of state pins
-    number_of_state_snsrs = get_number_of(argc, argv, "--stateIn");
+    number_of_state_snsrs = get_number_of(argc, argv, "--state");
     printf("number_of_states: %d\n", number_of_state_snsrs);
 
 

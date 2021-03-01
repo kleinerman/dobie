@@ -30,7 +30,7 @@ class IntegrityError(Exception):
 class DataBase(object):
     '''
     This object connects the database in the constructor.
-    It implements differents methods to query the database, 
+    It implements differents methods to query the database,
     save events and delete them
     '''
 
@@ -39,7 +39,7 @@ class DataBase(object):
         #Connecting to the database
         self.connection = sqlite3.connect(dbFile, isolation_level=None)
         self.connection.row_factory = sqlite3.Row
-            
+
 
 
         self.cursor = self.connection.cursor()
@@ -58,7 +58,7 @@ class DataBase(object):
     def getDoorsToUnlkBySkd(self):
         '''
         Get a list of door ids to be opened by schedule.
-        This take into account the days of the week, time 
+        This take into account the days of the week, time
         gaps in each day, and also holiday days
         '''
 
@@ -75,7 +75,7 @@ class DataBase(object):
               )
 
         #This is another way of doing the above query using JOIN
-        #sql = ("SELECT DISTINCT UnlkDoorSkd.doorId FROM UnlkDoorSkd " 
+        #sql = ("SELECT DISTINCT UnlkDoorSkd.doorId FROM UnlkDoorSkd "
         #       "LEFT JOIN ExcDayUds ON (UnlkDoorSkd.doorId = ExcDayUds.doorId) "
         #       "WHERE UnlkDoorSkd.weekDay = {0} AND '{1}' > startTime and '{1}' < endTime "
         #       "AND (excDay IS NULL OR excDay != '{2}')"
@@ -110,7 +110,7 @@ class DataBase(object):
         sql = ("SELECT Person.id, Access.allWeek, Access.startTime, "
                "Access.endTime, Access.expireDate "
                "FROM Access JOIN Person ON (Access.personId = Person.id) "
-               "WHERE Access.doorId = '{}' AND Access.{} = 1 " 
+               "WHERE Access.doorId = '{}' AND Access.{} = 1 "
                "AND Person.cardNumber = '{}'"
                "".format(doorId, sideColumn, cardNumber)
                )
@@ -164,7 +164,7 @@ class DataBase(object):
 
 
 
-    
+
     #---------------------------------------------------------------------------#
 
     def saveEvent(self, event):
@@ -200,13 +200,13 @@ class DataBase(object):
         else:
             doorLockId = event['doorLockId']
 
-            
+
 
         sql = ("INSERT INTO Event"
                "(doorId, eventTypeId, dateTime, doorLockId, "
                "cardNumber, side, allowed, denialCauseId) "
                "VALUES({}, {}, '{}', {}, {}, {}, {}, {})"
-               "".format(event['doorId'], event['eventTypeId'], 
+               "".format(event['doorId'], event['eventTypeId'],
                          event['dateTime'], doorLockId, cardNumber,
                          side, allowed, denialCauseId)
               )
@@ -276,32 +276,10 @@ class DataBase(object):
         evtIdList = [str(evtId) for evtId in evtIdList]
         #Creating a single string with all ids comma separated
         evtIds = ', '.join(evtIdList)
-        
+
         sql = "DELETE FROM Event WHERE id IN ({})".format(evtIds)
 
         self.cursor.execute(sql)
-
-
-
-
-
-    #---------------------------------------------------------------------------#
-
-
-    def getGpioNames(self):
-        '''
-        Getting Door GPIO Names from SQL database
-        '''
-
-        sql = "SELECT * FROM DoorGpios"
-        self.cursor.execute(sql)
-
-        #To leave the DB unlocked for other threads, it is necesary to
-        #fetch all the rows from the cursor
-        self.cursor.fetchall()
-
-        return [i[0] for i in self.cursor.description]
-
 
 
 
@@ -331,12 +309,12 @@ class DataBase(object):
         pps = Door Parametters
 
         '''
- 
+
         sql = ("SELECT Door.id, Door.doorNum, DoorGpios.rlseOut, DoorGpios.bzzrOut, "
                "Door.snsrType, Door.rlseTime, Door.bzzrTime, Door.alrmTime FROM "
                "DoorGpios JOIN Door ON (DoorGpios.id = Door.doorNum)"
               )
-                     
+
         self.cursor.execute(sql)
         paramsDoors = self.cursor.fetchall()
 
@@ -358,7 +336,7 @@ class DataBase(object):
             #Using REPLACE is not good since it has to DELETE and INSERT always.
             sql = ("INSERT OR IGNORE INTO Door(id, doorNum, snsrType, rlseTime, bzzrTime, alrmTime) "
                    "VALUES({}, {}, {}, {}, {}, {})"
-                   "".format(door['id'], door['doorNum'], door['snsrType'], 
+                   "".format(door['id'], door['doorNum'], door['snsrType'],
                              door['rlseTime'], door['bzzrTime'], door['alrmTime'])
                   )
             self.cursor.execute(sql)
@@ -385,7 +363,7 @@ class DataBase(object):
         try:
             sql = ("UPDATE Door SET doorNum = {}, snsrType = {}, "
                    "rlseTime = {}, bzzrTime = {}, alrmTime = {} WHERE id = {}"
-                   "".format(door['doorNum'], door['snsrType'], door['rlseTime'], 
+                   "".format(door['doorNum'], door['snsrType'], door['rlseTime'],
                              door['bzzrTime'], door['alrmTime'], door['id'])
               )
             self.cursor.execute(sql)
@@ -407,7 +385,7 @@ class DataBase(object):
     def delDoor(self, door):
         '''
         Receive a door dictionary and delete it.
-        All access and limited access on these door will be automatically deleted 
+        All access and limited access on these door will be automatically deleted
         by the db engine as "ON DELETE CASCADE" clause is present.
         Then all the persons who has no access to any door are also deleted manually.
         '''
@@ -589,7 +567,7 @@ class DataBase(object):
     def addAccess(self, access):
         '''
         Receive an access dictionary and add it into DB.
-        The access dictionary include person parametters. This method try to 
+        The access dictionary include person parametters. This method try to
         add this person to database if it is not present.
         '''
 
@@ -598,7 +576,7 @@ class DataBase(object):
             #with the same person, an INSERT would throw an integrity error.
             #Using REPLACE was a problem because REPLACE = (DELETE and INSERT) and DELETE
             #a Person will delete the previous accesses added because the Access
-            #table has ON CASCADE DELETE clause on personId columns. On this situation we 
+            #table has ON CASCADE DELETE clause on personId columns. On this situation we
             #always end up with only one limited access row for this person
             sql = ("INSERT OR IGNORE INTO Person(id, cardNumber) VALUES({}, {})"
                    "".format(access['personId'], access['cardNumber'])
@@ -619,7 +597,7 @@ class DataBase(object):
                              access['endTime'], access['expireDate'])
                   )
             self.cursor.execute(sql)
-            
+
             #Everytime an all week access is added, all limited accesses should be deleted if exist.
             sql = ("DELETE FROM LimitedAccess WHERE doorId = {} AND personId = {}"
                    "".format(access['doorId'], access['personId'])
@@ -693,11 +671,11 @@ class DataBase(object):
                   )
             self.cursor.execute(sql)
             stillAccesses = self.cursor.fetchone()[0]
-            
+
             if not stillAccesses:
                 sql = "DELETE FROM Person WHERE id = {}".format(personId)
                 self.cursor.execute(sql)
-           
+
             #The following way of doing is too slow, but it always clean any person
             #who don't have accesses to any door.
             #sql = ("DELETE FROM Person WHERE id NOT IN "
@@ -730,7 +708,7 @@ class DataBase(object):
     def addLiAccess(self, liAccess):
         '''
         Receive a limited access dictionary and add it into DB.
-        The limited access dictionary include person parametters. This method try to 
+        The limited access dictionary include person parametters. This method try to
         add this person to database if it is not present.
         '''
 
@@ -739,7 +717,7 @@ class DataBase(object):
             #with the same person, an INSERT would throw an integrity error.
             #Using REPLACE was a problem because REPLACE = (DELETE and INSERT) and DELETE
             #a Person will delete the previous limited accesses added because the LimitedAccess
-            #table has ON CASCADE DELETE clause on personId columns. On this situation we 
+            #table has ON CASCADE DELETE clause on personId columns. On this situation we
             #always end up with only one limited access row for this person
             sql = ("INSERT OR IGNORE INTO Person(id, cardNumber) VALUES({}, {})"
                    "".format(liAccess['personId'], liAccess['cardNumber'])
@@ -800,7 +778,7 @@ class DataBase(object):
             row = self.cursor.fetchone()
             doorId = row[0]
             personId = row[1]
-            
+
 
             sql = ("UPDATE Access SET expireDate = '{}' WHERE doorId = {} AND personId = {}"
                    "".format(liAccess['expireDate'], doorId, personId)
@@ -846,7 +824,7 @@ class DataBase(object):
             row = self.cursor.fetchone()
             doorId = row[0]
             personId = row[1]
-            
+
             sql = "DELETE FROM LimitedAccess WHERE id = {}".format(liAccess['id'])
             self.cursor.execute(sql)
 
@@ -855,12 +833,12 @@ class DataBase(object):
                   )
             self.cursor.execute(sql)
             stillLiAccesses = self.cursor.fetchone()[0]
-            
+
             #If there is not more limited access from this person in this door,
-            #the entry in Access table should be deleted and also the person from 
+            #the entry in Access table should be deleted and also the person from
             #Person table in case this person has not access to any other door
             if not stillLiAccesses:
-                
+
                 sql = ("DELETE FROM Access WHERE doorId = {} AND personId = {}"
                        "".format(doorId, personId)
                       )
@@ -935,7 +913,7 @@ class DataBase(object):
     def delPerson(self, person):
         '''
         Receive a person dictionary and delete it.
-        All access and limited access on these door will be automatically deleted 
+        All access and limited access on these door will be automatically deleted
         by the db engine as "ON DELETE CASCADE" clause is present.
         '''
         try:
@@ -969,7 +947,7 @@ class DataBase(object):
 
             sql = "DELETE FROM Access"
             self.cursor.execute(sql)
-            
+
             sql = "DELETE FROM Person"
             self.cursor.execute(sql)
 
@@ -989,4 +967,3 @@ class DataBase(object):
         except sqlite3.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise IntegrityError('Integrity error clearing the data base.')
-

@@ -66,7 +66,7 @@ int init_perif(int argc, char *argv[], struct gpiod_chip *chip_p,
             door_id = atoi(argv[i+1]);
             continue;
         }
-        if ( strcmp(argv[i], "--inRdrIn") == 0 ) {
+        if ( strcmp(argv[i], "--inRdr") == 0 ) {
             sd_journal_print(LOG_NOTICE, "Parameterizing data lines on Input Reader of Door: %d\n", door_id);
             init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+2]), atoi(argv[i+3]), INPUT, door_id, event_wait_time_p);
             readers_count++;
@@ -74,7 +74,7 @@ int init_perif(int argc, char *argv[], struct gpiod_chip *chip_p,
             continue;
         }
 
-        if ( strcmp(argv[i], "--outRdrIn") == 0 ) {
+        if ( strcmp(argv[i], "--outRdr") == 0 ) {
             sd_journal_print(LOG_NOTICE, "Parameterizing data lines on Output Reader of Door: %d\n", door_id);
             init_reader(&(readers_a[readers_count]), chip_p, atoi(argv[i+1]), atoi(argv[i+2]), atoi(argv[i+3]), OUTPUT, door_id, event_wait_time_p);
             readers_count++;
@@ -82,23 +82,18 @@ int init_perif(int argc, char *argv[], struct gpiod_chip *chip_p,
             continue;
         }
 
-        if ( strcmp(argv[i], "--bttnIn") == 0 ) {
+        if ( strcmp(argv[i], "--bttn") == 0 ) {
             sd_journal_print(LOG_NOTICE, "Parameterizing Button of Door: %d\n", door_id);
             init_button(&(buttons_a[buttons_count]), chip_p, atoi(argv[i+1]), door_id, event_wait_time_p);
             buttons_count++;
             continue;
         }
-        if ( strcmp(argv[i], "--stateIn") == 0 ) {
+        if ( strcmp(argv[i], "--state") == 0 ) {
             sd_journal_print(LOG_NOTICE, "Parameterizing State Sensor of Door: %d\n", door_id);
             init_state_snsr(&(state_snsrs_a[state_snsrs_count]), chip_p, atoi(argv[i+1]), door_id, event_wait_time_p);
             state_snsrs_count++;
             continue;
         }
-/*      if ( strcmp(argv[i], "--bzzrOut") == 0 )
-            ;
-        if ( strcmp(argv[i], "--rlseOut") == 0 )
-            ;
-*/
     }
 
     return RETURN_SUCCESS;

@@ -56,11 +56,9 @@ class IoIface(object):
             o1In = str(gpiosDoor['o1In'])
             bttnIn = str(gpiosDoor['bttnIn'])
             stateIn = str(gpiosDoor['stateIn'])
-            rlseOut = str(gpiosDoor['rlseOut'])
-            bzzrOut = str(gpiosDoor['bzzrOut'])
-            doorArgs = ['--id', doorNum, '--inRdrIn', iRdrBits, i0In, i1In,
-                        '--outRdrIn', oRdrBits, o0In, o1In, '--bttnIn', bttnIn,
-                        '--stateIn', stateIn, '--rlseOut', rlseOut, '--bzzrOut', bzzrOut,
+            doorArgs = ['--id', doorNum, '--inRdr', iRdrBits, i0In, i1In,
+                        '--outRdr', oRdrBits, o0In, o1In, '--bttn', bttnIn,
+                        '--state', stateIn
                        ]
             ioIfaceArgs += doorArgs
 
