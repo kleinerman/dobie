@@ -4,6 +4,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <systemd/sd-journal.h>
 #include <sys/epoll.h>
 #include <pthread.h>
 #include <fcntl.h>
@@ -24,14 +25,13 @@ pthread_mutex_t mq_mutex;
 
 int main(int argc, char **argv)
 {
-    struct gpiod_chip *chip;
+    struct gpiod_chip *chip = NULL;
     struct timespec event_wait_time = { 2, 0 };
     button_t *buttons_a;
     state_snsr_t *state_snsrs_a;
     reader_t *readers_a;
     int ret;
     int i; // auxiliar variable used in cicles
-    int number_of_doors = 0;
     int number_of_readers = 0;
     int number_of_buttons = 0;
     int number_of_state_snsrs = 0;
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     fclose(sys_mac_file_ptr);
 
     if (strcmp(mac_string, MAC)) {
-        printf("This ioiface was not compiled for this controller. Exiting..\n");
+        sd_journal_print(LOG_CRIT, "This ioiface was not compiled for this controller. Exiting..\n");
         exit(EXIT_FAILURE);
     }
 
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
      * It must be created by the main process
      */
     if ( (mq = mq_open(QUEUE_NAME, (O_WRONLY | O_NONBLOCK) )) == RETURN_FAILURE ) {
-        printf("Error opening the message queue: %s\n", strerror(errno));
+        sd_journal_print(LOG_ALERT, "Error opening the message queue. Exiting..\n");
         exit(EXIT_FAILURE);
     }
 
@@ -81,25 +81,21 @@ int main(int argc, char **argv)
     pthread_mutex_init(&mq_mutex, NULL);
 
 
-    // get number of doors from arguments
-    number_of_doors = get_number_of(argc, argv, "--id");
-    printf("number_of_doors: %d\n", number_of_doors);
-    // get number of readers
-    number_of_readers = get_number_of(argc, argv, "--inRdr") + get_number_of(argc, argv, "--outRdr");
-    printf("number_of_readers: %d\n", number_of_readers);
+
     // get number of buttons
     number_of_buttons = get_number_of(argc, argv, "--bttn");
-    printf("number_of_buttons: %d\n", number_of_buttons);
     // get number of state pins
     number_of_state_snsrs = get_number_of(argc, argv, "--state");
-    printf("number_of_states: %d\n", number_of_state_snsrs);
+    // get number of readers
+    number_of_readers = get_number_of(argc, argv, "--inRdr") + get_number_of(argc, argv, "--outRdr");
 
 
+    // Open the GPIO Chip
     chip = gpiod_chip_open_by_name(CHIP_NAME);
-        if (!chip) {
-            perror("Open chip failed\n");
-            ret = -1;
-        }
+    if (!chip) {
+        sd_journal_print(LOG_ALERT, "Error trying to open GPIO chip: %s\n", CHIP_NAME);
+        exit(EXIT_FAILURE);
+    }
 
 
     //Asking memory for buttons
