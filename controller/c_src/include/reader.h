@@ -17,7 +17,7 @@ typedef struct {
     struct gpiod_line_bulk r_lines;        // Bulk of lines
     struct gpiod_line_bulk r_events;       // Bulk of events
     struct timespec *event_wait_time_p;    //Time to wait
-    pthread_t r_thread;
+    pthread_t thread;
 } reader_t;
 
 

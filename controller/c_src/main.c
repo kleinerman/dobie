@@ -18,7 +18,7 @@
 #include <reader.h>
 
 
-int exit_flag = 0;
+int exit_flag = NO_FINISH;
 mqd_t mq;
 pthread_mutex_t mq_mutex;
 
@@ -114,38 +114,40 @@ int main(int argc, char **argv)
     init_perif(argc, argv, chip, &event_wait_time, buttons_a, state_snsrs_a, readers_a);
 
     // Before creating the threads, overwritting SIGINT and SIGTERM signals
+    // to call finish_handler. In this function before calling the original
+    // handler, "exit_flag" is set to 1 to inform all threads to finish.
     signal(SIGINT, finish_handler);
     signal(SIGTERM, finish_handler);
 
 
     // Starting buttons threads
     for (i=0; i<number_of_buttons; i++) {
-        pthread_create(&(buttons_a[i].b_thread), NULL, run_button, (void *)&buttons_a[i]);
+        pthread_create(&(buttons_a[i].thread), NULL, run_button, (void *)&buttons_a[i]);
     }
 
     // Starting state sensors threads
     for (i=0; i<number_of_state_snsrs; i++) {
-        pthread_create(&(state_snsrs_a[i].b_thread), NULL, run_state_snsr, (void *)&state_snsrs_a[i]);
+        pthread_create(&(state_snsrs_a[i].thread), NULL, run_state_snsr, (void *)&state_snsrs_a[i]);
     }
 
     // Starting reader threads
     for (i=0; i<number_of_readers; i++) {
-        pthread_create(&(readers_a[i].r_thread), NULL, run_reader, (void *)&readers_a[i]);
+        pthread_create(&(readers_a[i].thread), NULL, run_reader, (void *)&readers_a[i]);
     }
 
     //Joining buttons threads
     for (i=0; i<number_of_buttons; i++) {
-        pthread_join(buttons_a[i].b_thread, NULL);
+        pthread_join(buttons_a[i].thread, NULL);
     }
 
     //Joining state_snsrs threads
     for (i=0; i<number_of_state_snsrs; i++) {
-        pthread_join(state_snsrs_a[i].b_thread, NULL);
+        pthread_join(state_snsrs_a[i].thread, NULL);
     }
 
     //Joining readers threads
     for (i=0; i<number_of_readers; i++) {
-        pthread_join(readers_a[i].r_thread, NULL);
+        pthread_join(readers_a[i].thread, NULL);
     }
 
     return RETURN_SUCCESS;

@@ -9,6 +9,8 @@
 #define RETURN_SUCCESS 0
 #define OUTPUT 0
 #define INPUT 1
+#define NO_FINISH 0
+#define FINISH 1
 #define BOUNCE_TIME 200000
 #define QUEUE_NAME "/ioiface_queue"
 #define MAC "86:03:24:b9:a6:b7"
@@ -26,10 +28,10 @@ extern pthread_mutex_t mq_mutex;
 // function prototypes
 void finish_handler(int sig_num);
 
-int init_perif(int argc, char* argv[], struct gpiod_chip* chip_p,
-               struct timespec* event_wait_time_p, button_t buttons_a[],
+int init_perif(int argc, char *argv[], struct gpiod_chip *chip_p,
+               struct timespec *event_wait_time_p, button_t buttons_a[],
                state_snsr_t state_snsrs_a[], reader_t readers_a[]);
 
-int get_number_of(int argc, char** argv, const char *str);
+int get_number_of(int argc, char *argv[], const char *str);
 
 #endif

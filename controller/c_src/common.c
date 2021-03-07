@@ -15,21 +15,21 @@
 #include <reader.h>
 
 
-
+// As SIGINT and SIGTERM signals were registered to use this handler,
+// and the only thing we need is to set the exit_flag to FINISH,
+// after setting this value, the default behavior are set again.
 void finish_handler(int sig_num)
 {
     sd_journal_print(LOG_NOTICE, "Main thread notifying all threads to finish");
-    exit_flag = 1;
+    exit_flag = FINISH;
     signal(SIGINT,SIG_DFL);
     signal(SIGTERM,SIG_DFL);
 }
 
 
-/*
- * Returns the number of occurrences of the string str found in
- * the program arguments.
- */
-int get_number_of(int argc, char **argv, const char *str)
+// Returns the number of occurrences of the string str
+// found in the program arguments.
+int get_number_of(int argc, char *argv[], const char *str)
 {
     int i;
     int count = 0;
@@ -43,11 +43,9 @@ int get_number_of(int argc, char **argv, const char *str)
 }
 
 
-/*
- * Parses the command-line arguments (GPIO pins) and fill the door structures
- * A negative attribute means that it is not in use
- * It returns a negative value if there are wrong arguments
- */
+
+// Init array of readers, buttons or state_sensors
+// with command-line arguments
 int init_perif(int argc, char *argv[], struct gpiod_chip *chip_p,
                struct timespec *event_wait_time_p, button_t buttons_a[],
                state_snsr_t state_snsrs_a[], reader_t readers_a[]) {

@@ -15,7 +15,7 @@ typedef struct {
     struct gpiod_line *b_line;           // Pointer to gpiod line
     struct gpiod_line_event event;       // To read the events
     struct timespec *event_wait_time_p;  //Time to wait events in button
-    pthread_t b_thread;
+    pthread_t thread;
 } button_t;
 
 

@@ -8,10 +8,8 @@
 #include <mqueue.h>
 #include <gpiod.h>
 
-// state sensor type (at the momment is the same as state_snsr)
-
+// state_snsr_t type (at the momment is the same as button_t type)
 typedef button_t state_snsr_t;
-
 
 int init_state_snsr(state_snsr_t *state_snsr_p,
                     struct gpiod_chip *chip,
