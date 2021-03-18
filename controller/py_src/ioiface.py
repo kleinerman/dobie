@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 
-
 import logging
 import logging.handlers
 
 import threading
 import subprocess
 
-
-import door
 import database
 from config import *
 

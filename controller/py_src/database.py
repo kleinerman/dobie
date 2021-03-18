@@ -292,13 +292,27 @@ class DataBase(object):
         by GPIO name
         '''
 
-        sql = "SELECT * FROM DoorGpios"
+        sql = "SELECT * FROM HwDoorParms"
         self.cursor.execute(sql)
         gpiosDoors = self.cursor.fetchall()
 
 
         return gpiosDoors
 
+
+    #---------------------------------------------------------------------------#
+
+
+    def getDoorsOutGpios(self):
+        '''
+        Return a list of dictionaries with doorNum, rlseOut, and bzzrOut
+        '''
+
+        sql = "SELECT id, rlseOut, bzzrOut FROM HwDoorParms"
+        self.cursor.execute(sql)
+        doorsOutGpios = self.cursor.fetchall()
+
+        return doorsOutGpios
 
 
     #---------------------------------------------------------------------------#
@@ -310,9 +324,9 @@ class DataBase(object):
 
         '''
 
-        sql = ("SELECT Door.id, Door.doorNum, DoorGpios.rlseOut, DoorGpios.bzzrOut, "
-               "Door.snsrType, Door.rlseTime, Door.bzzrTime, Door.alrmTime FROM "
-               "DoorGpios JOIN Door ON (DoorGpios.id = Door.doorNum)"
+        sql = ("SELECT HwDoorParms.id AS doorNum, Door.id AS doorId, HwDoorParms.rlseOut, "
+               "HwDoorParms.bzzrOut, Door.snsrType, Door.rlseTime, Door.bzzrTime, Door.alrmTime "
+               "FROM HwDoorParms LEFT JOIN Door ON (HwDoorParms.id = Door.doorNum)"
               )
 
         self.cursor.execute(sql)

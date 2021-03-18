@@ -37,7 +37,7 @@ LOGGING_FILE ='/var/log/dobie-c/dobie-c.log'
 IOFACE_LOGGING_FILE ='/var/log/dobie-c/ioiface.log'
 
 SERVER_HOSTNAME = 'server.dobie'
-SERVER_IP = '10.10.10.61'
+SERVER_IP = '192.168.0.79'
 #SERVER_IP = '127.0.0.1'
 SERVER_PORT = 9797
 

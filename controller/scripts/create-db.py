@@ -31,7 +31,7 @@ cursor.execute('''CREATE UNIQUE INDEX cardNumberIndex
 
 
 cursor.execute('''
-    CREATE TABLE DoorGpios (
+    CREATE TABLE HwDoorParms (
         id         INTEGER PRIMARY KEY,
         iWgndBits  INTEGER,
         i0In       INTEGER,
@@ -58,7 +58,7 @@ cursor.execute('''
         rlseTime  INTEGER,
         bzzrTime  INTEGER,
         alrmTime  INTEGER,
-        FOREIGN KEY(doorNum) REFERENCES DoorGpios(id) ON DELETE CASCADE
+        FOREIGN KEY(doorNum) REFERENCES HwDoorParms(id) ON DELETE CASCADE
     )
     '''
 )
