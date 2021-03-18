@@ -124,13 +124,13 @@ done
 
 
 
-cp ../c_src/include/tmplt_libioiface.h ../c_src/include/libioiface.h
+cp ../c_src/include/tmplt_common.h ../c_src/include/common.h
 
 WIRED_IFACE_NAME=$(grep WIRED_IFACE_NAME ../py_src/config.py | cut -d = -f2 | tr -d \ \')
-sed -i "s/<WIRED_IFACE_NAME>/$WIRED_IFACE_NAME/g" ../c_src/include/libioiface.h
+sed -i "s/<WIRED_IFACE_NAME>/$WIRED_IFACE_NAME/g" ../c_src/include/common.h
 
 MAC_ADDRESS=$(cat /sys/class/net/$WIRED_IFACE_NAME/address)
-sed -i "s/<MAC_ADDRESS>/$MAC_ADDRESS/g" ../c_src/include/libioiface.h
+sed -i "s/<MAC_ADDRESS>/$MAC_ADDRESS/g" ../c_src/include/common.h
 
 
 echo "Compiling ioiface.."
