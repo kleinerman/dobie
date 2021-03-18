@@ -16,7 +16,7 @@ import database
 import ioiface
 import events
 import network
-import door
+import doormod
 import crud
 from config import *
 
@@ -43,7 +43,7 @@ class Controller(object):
         self.dataBase = database.DataBase(DB_FILE)
 
         self.ioIface = ioiface.IoIface(self.dataBase)
-        
+
         #Defining a OS queue to get messages from the ioiface
         self.ioIfaceQue = posix_ipc.MessageQueue(QUEUE_FILE, posix_ipc.O_CREAT)
 
@@ -57,7 +57,7 @@ class Controller(object):
         #Queue used to send events to eventThread, from this thread,
         #StarterAlrmMngr thread and from UnlkDoorSkdMngr thread
         self.toEvent = queue.Queue()
-        
+
         #Queue used to send responses from netMngr thread to event thread
         netToEvent = queue.Queue()
 
@@ -67,20 +67,19 @@ class Controller(object):
         #Exit flag to notify threads to finish
         self.exitFlag = threading.Event()
 
+        #Dictionary of doors protected with a lock
+        self.lockDoors = threading.Lock()
+        self.doors = doormod.Doors()
 
-        self.lockDoorsControl = threading.Lock()
-        self.doorsControl = door.DoorsControl()
-        #self.doorsControl.loadParams()
+        #Creating the CRUD Manager Thread
+        self.crudMngr = crud.CrudMngr(self.lockDoors, self.doors, self.exitFlag)
 
-        #Creating the CRUD Manager Thread 
-        self.crudMngr = crud.CrudMngr(self.lockDoorsControl, self.doorsControl, self.exitFlag)
-
-        #Creating the Net Manager Thread 
-        self.netMngr = network.NetMngr(netToEvent, self.netToReSnd, self.crudMngr, self.exitFlag)        
+        #Creating the Net Manager Thread
+        self.netMngr = network.NetMngr(netToEvent, self.netToReSnd, self.crudMngr, self.exitFlag)
 
         #Scheduler thread
-        self.unlkDoorSkdMngr = door.UnlkDoorSkdMngr(self.netMngr, self.toEvent, self.lockDoorsControl,
-                                                    self.doorsControl, self.exitFlag)
+        self.unlkDoorSkdMngr = doormod.UnlkDoorSkdMngr(self.netMngr, self.toEvent, self.lockDoors,
+                                                    self.doors, self.exitFlag)
 
 
         #Setting internal crudMngr reference to netMngr thread to be able to answer
@@ -97,6 +96,7 @@ class Controller(object):
         #Registering "sigtermHandler" handler to act when receiving the SIGTERM signal
         signal.signal(signal.SIGTERM, self.sigtermHandler)
         signal.signal(signal.SIGINT, self.sigtermHandler)
+
 
         #By default our exit code will be success
         self.exitCode = 0
@@ -129,21 +129,21 @@ class Controller(object):
         It also creates a thread to close the door and buzzer
         '''
 
-        with self.lockDoorsControl:
+        with self.lockDoors:
 
-            doorControl = self.doorsControl.params[doorNum]
-
-            doorControl['doorObj'].release(True)
+            door = self.doors[doorNum]
+            # It would be safer to verify if doorId not None, but I don't want to lose time
+            door.release(True)
             self.logger.debug("Releasing the door {}.".format(doorNum))
-            doorControl['doorObj'].startBzzr(True)
+            door.startBzzr(True)
             self.logger.debug("Starting the buzzer on door {}.".format(doorNum))
-            doorControl['accessPermit'].set()
-            doorControl['timeAccessPermit'] = datetime.datetime.now()
-    
+            door.accessPermit.set()
+            door.timeAccessPermit = datetime.datetime.now()
 
-            if not doorControl['cleanerDoorMngrAlive'].is_set():# and not doorControl['unlkedBySkd'].is_set():
-                doorControl['cleanerDoorMngrAlive'].set()
-                cleanerDoorMngr = door.CleanerDoorMngr(doorControl, self.exitFlag)
+
+            if not door.cleanerDoorMngrAlive.is_set():# and not doorControl['unlkedBySkd'].is_set():
+                door.cleanerDoorMngrAlive.set()
+                cleanerDoorMngr = doormod.CleanerDoorMngr(door, self.exitFlag)
                 cleanerDoorMngr.start()
 
 
@@ -157,9 +157,10 @@ class Controller(object):
         This method is called each time somebody put a card in a card reader
         '''
 
-        try:
-            with self.lockDoorsControl:
-                doorId = self.doorsControl.getDoorId(doorNum)
+        with self.lockDoors:
+            doorId = self.doors[doorNum].doorId
+
+        if doorId:
 
             allowed, denialCauseId = self.dataBase.canAccess(doorId, side, cardNumber)
 
@@ -167,8 +168,8 @@ class Controller(object):
                 self.openDoor(doorNum)
 
             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-        
-            event = {'doorId' : doorId, 
+
+            event = {'doorId' : doorId,
                      'eventTypeId' : EVT_PERS_CARD,
                      'dateTime' : dateTime,
                      'doorLockId' : LCK_CARD_READER,
@@ -181,8 +182,7 @@ class Controller(object):
             #Sending the event to the "Event Manager" thread
             self.toEvent.put(event)
 
-
-        except door.DoorNotConfigured:
+        else:
             logMsg = 'Card was read on door {} but it is not configured'.format(doorNum)
             self.logger.warning(logMsg)
 
@@ -196,14 +196,15 @@ class Controller(object):
         the door
         '''
 
-        try:
-            with self.lockDoorsControl:
-                doorId = self.doorsControl.getDoorId(doorNum)
+
+        with self.lockDoors:
+            doorId = self.doors[doorNum].doorId
+
+        if doorId:
 
             self.openDoor(doorNum)
 
             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-
 
             event = {'doorId' : doorId,
                      'eventTypeId' : EVT_PERS_BUTT,
@@ -218,7 +219,7 @@ class Controller(object):
             #Sending the event to the "Event Manager" thread
             self.toEvent.put(event)
 
-        except door.DoorNotConfigured:
+        else:
             logMsg = 'Button pressed on door {} but it is not configured'.format(doorNum)
             self.logger.warning(logMsg)
 
@@ -235,36 +236,37 @@ class Controller(object):
         This method is called each time a door change its state. (It is opened or closed)
         '''
 
-        try:
-            with self.lockDoorsControl:
+        with self.lockDoors:
+
+            door = self.doors[doorNum]
+            doorId = door.doorId
+            if doorId:
                 #doorId is used just to create the event below we get it here to raise
                 #"DoorNotConfigured" exception if the door is not confiugred
-                doorId = self.doorsControl.getDoorId(doorNum)
-                doorControl = self.doorsControl.params[doorNum]
-                snsrType = doorControl['doorObj'].params['snsrType']
+                snsrType = door.snsrType
 
                 #Converting "state" to int type to evaluete it on if statement
                 state = int(state)
                 #The state of the door indicates that was opened
                 if state != snsrType:
-                    doorControl['openDoor'].set()
+                    door.openDoor.set()
                     #Check if the door is not unlocked by schedule
-                    if not doorControl['unlkedBySkd'].is_set():
+                    if not door.unlkedBySkd.is_set():
                         #If the door was open in a permitted way
-                        if doorControl['accessPermit'].is_set():
+                        if door.accessPermit.is_set():
                             #Creates a StarterAlrmMngrAlive if not was previously created by other access
-                            if not doorControl['starterAlrmMngrAlive'].is_set():
-                                starterAlrmMngr = door.StarterAlrmMngr(doorControl, self.toEvent, self.exitFlag)
+                            if not door.starterAlrmMngrAlive.is_set():
+                                starterAlrmMngr = doormod.StarterAlrmMngr(door, self.toEvent, self.exitFlag)
                                 starterAlrmMngr.start()
 
-                        #If the door was not opened in a permitted way, start the alarm and 
+                        #If the door was not opened in a permitted way, start the alarm and
                         #send to server or store locally an event
                         else:
                             logMsg = ("Unpermitted access on door: {}, "
                                       "Starting the alarm.".format(doorNum)
                                      )
                             self.logger.warning(logMsg)
-                            doorControl['doorObj'].startBzzr(True)
+                            door.startBzzr(True)
 
                             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
@@ -308,12 +310,12 @@ class Controller(object):
                               "Stopping the alarm if it is on.".format(doorNum)
                              )
                     self.logger.info(logMsg)
-                    doorControl['openDoor'].clear()
-                    doorControl['doorObj'].startBzzr(False)
+                    door.openDoor.clear()
+                    door.startBzzr(False)
 
-        except door.DoorNotConfigured:
-            logMsg = 'State received on door {} but it is not configured'.format(doorNum)
-            self.logger.warning(logMsg)
+            else:
+                logMsg = 'State received on door {} but it is not configured'.format(doorNum)
+                self.logger.warning(logMsg)
 
 
 
@@ -332,10 +334,11 @@ class Controller(object):
         Also an event is genarated and sent to "evenMngr" to log this.
         '''
 
-        try:
-            with self.lockDoorsControl:
-                doorNum = self.doorsControl.getDoorNum(doorId)
 
+        with self.lockDoors:
+            doorNum = self.doors.getDoorNum(doorId)
+
+        if doorNum:
             self.openDoor(doorNum)
 
             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
@@ -354,7 +357,7 @@ class Controller(object):
             #Sending the event to the "Event Manager" thread
             self.toEvent.put(event)
 
-        except door.DoorNotConfigured:
+        else:
             logMsg = ("Message from network requested to open door "
                       "with ID: {} but it is not configured".format(doorId)
                      )
@@ -369,12 +372,12 @@ class Controller(object):
 
 
         self.logger.debug('Starting Controller')
-        
+
         #Launching Door Iface binary
         self.ioIface.start()
 
-        with self.lockDoorsControl:
-            self.doorsControl.loadParams()
+        #with self.lockDoorsControl:
+        #     self.doorsControl.loadParams()
 
         #Starting the "Event Manager" thread
         self.eventMngr.start()
@@ -389,14 +392,14 @@ class Controller(object):
         self.unlkDoorSkdMngr.start()
 
 
-        #Starting the "Re Sender" thread because in the database there may be events to resend 
+        #Starting the "Re Sender" thread because in the database there may be events to resend
         if not self.resenderAlive.is_set():
             self.logger.info('Starting the Re Sender thread to resend events of local DB.')
             self.resenderAlive.set()
             reSender = events.ReSender(self.netMngr, self.netToReSnd, self.resenderAlive, self.exitFlag)
             reSender.start()
 
-        
+
         try:
             while True:
                 ioIfaceData = self.ioIfaceQue.receive()
@@ -407,7 +410,7 @@ class Controller(object):
                 command, value  = varField.split('=')
                 self.handlers[command](doorNum, side, value)
 
-            
+
         except posix_ipc.SignalError:
             self.logger.debug('IO Interface Queue was interrupted by a OS signal.')
 
@@ -427,11 +430,10 @@ class Controller(object):
         sys.exit(self.exitCode)
 
 
-    #---------------------------------------------------------------------------#    
+    #---------------------------------------------------------------------------#
 
 
 #---- MAIN EXECUTION ---#
-    
+
 controller = Controller()
 controller.run()
-

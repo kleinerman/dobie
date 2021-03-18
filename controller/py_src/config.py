@@ -6,7 +6,19 @@ SIM_LIM_ACCESS_QUANT = 500
 POWEROFF_BIN = 'poweroff'
 
 IOIFACE_BIN = '/opt/dobie/controller/bin/ioiface'
-IOIFACE_ARGS = ['id', 'i0In', 'i1In', 'o0In', 'o1In', 'bttnIn', 'stateIn', 'rlseOut', 'bzzrOut']
+
+IR_1_WGND_BITS = 26
+OR_1_WGND_BITS = 26
+
+IR_2_WGND_BITS = 26
+OR_2_WGND_BITS = 26
+
+IR_3_WGND_BITS = 26
+OR_3_WGND_BITS = 26
+
+GPIO_CHIP_NAME = "gpiochip0"
+CONSUMER = "consumer_name"
+
 
 DB_FILE = '/var/lib/dobie-c/dobie-c.db'
 
@@ -25,8 +37,8 @@ LOGGING_FILE ='/var/log/dobie-c/dobie-c.log'
 IOFACE_LOGGING_FILE ='/var/log/dobie-c/ioiface.log'
 
 SERVER_HOSTNAME = 'server.dobie'
-#SERVER_IP = '192.168.1.79'
-SERVER_IP = '127.0.0.1'
+SERVER_IP = '192.168.0.79'
+#SERVER_IP = '127.0.0.1'
 SERVER_PORT = 9797
 
 SOCK_TIMEOUT = 2

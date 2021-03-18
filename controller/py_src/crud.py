@@ -27,16 +27,16 @@ class CrudMngr(genmngr.GenericMngr):
     are happening.
     '''
 
-    def __init__(self, lockDoorsControl, doorsControl, exitFlag):
+    def __init__(self, lockDoors, doors, exitFlag):
 
-        #Invoking the parent class constructor, specifying the thread name, 
+        #Invoking the parent class constructor, specifying the thread name,
         #to have a understandable log file.
         super().__init__('CrudMngr', exitFlag)
 
         #When receiving a door CRUD is necessary to re launch the ioiface proccess.
         #For this reason it is necessary a reference to "ioIface" object.
-        self.lockDoorsControl = lockDoorsControl
-        self.doorsControl = doorsControl
+        self.lockDoors = lockDoors
+        self.doors = doors
 
         #Reference to network manager to answer the CRUD messages
         #sent by the server
@@ -52,7 +52,7 @@ class CrudMngr(genmngr.GenericMngr):
 
     def run(self):
         '''
-        This is the main method of the thread. Most of the time it is blocked waiting 
+        This is the main method of the thread. Most of the time it is blocked waiting
         for queue messages coming from the "NetMngr" thread.
         '''
 
@@ -61,9 +61,9 @@ class CrudMngr(genmngr.GenericMngr):
         #from diffrent thread each thread shoud crate its own connection.
         self.dataBase = database.DataBase(DB_FILE)
 
-        self.crudHndlrs = {'SC': self.dataBase.addDoor,
-                           'SU': self.dataBase.updDoor,
-                           'SD': self.dataBase.delDoor,
+        self.crudHndlrs = {'SC': self.addDoor,
+                           'SU': self.updDoor,
+                           'SD': self.delDoor,
                            'UC': self.dataBase.addUnlkDoorSkd,
                            'UU': self.dataBase.updUnlkDoorSkd,
                            'UD': self.dataBase.delUnlkDoorSkd,
@@ -82,7 +82,7 @@ class CrudMngr(genmngr.GenericMngr):
 
         while True:
             try:
-                #Blocking until NetMngr thread sends an event or EXIT_CHECK_TIME expires 
+                #Blocking until NetMngr thread sends an event or EXIT_CHECK_TIME expires
                 crudMsg = self.netToCrud.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
 
@@ -100,13 +100,13 @@ class CrudMngr(genmngr.GenericMngr):
                     #Calling the corresponding DB method according to the CRUD command received
                     self.crudHndlrs[crudCmd](crudObject)
 
-                    #If the CRUD command do a modification in a door, it is necessary to 
+                    #If the CRUD command do a modification in a door, it is necessary to
                     #load the door params again in doorsControl object
-                    if crudCmd[0] == 'S':
-                        with self.lockDoorsControl:
-                            self.doorsControl.loadParams()
-                        
-                    #If we are at this point of code means that the database method executed 
+                    ## if crudCmd[0] == 'S':
+                    ##    with self.lockDoorsControl:
+                    ##        self.doorsControl.loadParams()
+
+                    #If we are at this point of code means that the database method executed
                     #did not throw an exception and therefore we can answer with OK to the server.
                     #Getting the ID from the json to create the response to answer the server.
                     jsonId = re.search('("id":\s*\d*)', completeJson).groups()[0]
@@ -117,7 +117,7 @@ class CrudMngr(genmngr.GenericMngr):
                     #Send the response to the server
                     self.netMngr.sendToServer(ctrllerResponse)
 
-    
+
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
                 self.checkExit()
@@ -131,7 +131,56 @@ class CrudMngr(genmngr.GenericMngr):
                 #Perhaps here we can answer with something different than OK to the server.
                 #At this momment we are responding nothing to the server when an error happen.
                 self.logger.error(integrityError)
-                
 
 
+    def addDoor(self, doorJson):
+        '''
+        Complete the door parametter in the corresponding door object of the
+        dictionary and add the door to the database.
+        '''
+        doorNum = int(doorJson['doorNum'])
+        with self.lockDoors:
+            door = self.doors[doorNum]
+            door.doorId = int(doorJson['id'])
+            door.snsrType = int(doorJson['snsrType'])
+            door.rlseTime = int(doorJson['rlseTime'])
+            door.bzzrTime = int(doorJson['bzzrTime'])
+            door.alrmTime = int(doorJson['alrmTime'])
+
+        self.dataBase.addDoor(doorJson)
+
+
+    def updDoor(self, doorJson):
+        '''
+        Complete the door parametter in the corresponding door object of the
+        dictionary and update the door to the database.
+        '''
+        doorNum = int(doorJson['doorNum'])
+        with self.lockDoors:
+            door = self.doors[doorNum]
+            door.doorId = int(doorJson['id'])
+            door.snsrType = int(doorJson['snsrType'])
+            door.rlseTime = int(doorJson['rlseTime'])
+            door.bzzrTime = int(doorJson['bzzrTime'])
+            door.alrmTime = int(doorJson['alrmTime'])
+
+        self.dataBase.updDoor(doorJson)
+
+
+    def delDoor(self, doorJson):
+        '''
+        Set to "None" all soft door parametters and
+        delete the door from the database.
+        '''
+        doorId = int(doorJson['id'])
+        with self.lockDoors:
+            doorNum = self.doors.getDoorNum(doorId)
+            door = self.doors[doorNum]
+            door.doorId = None
+            door.snsrType = None
+            door.rlseTime = None
+            door.bzzrTime = None
+            door.alrmTime = None
+
+        self.dataBase.delDoor(doorJson)
 
