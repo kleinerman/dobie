@@ -110,7 +110,7 @@ include("footer.php");
 <div class="select-container-body">
 
 <div class="displaytable table_padding">
-<div class="displayrow"><div class="displaycell left"><?=get_text("Release Time (s)",$lang);?></div><div class="displaycell"> <input class="smaller_input" type="number" name="door-release-t" id="door-release-t" max="99" min="0" value="7" required></div></div>
+<div class="displayrow"><div class="displaycell left"><?=get_text("Unlock Time (s)",$lang);?></div><div class="displaycell"> <input class="smaller_input" type="number" name="door-unlock-t" id="door-unlock-t" max="99" min="0" value="7" required></div></div>
 <div class="displayrow"><div class="displaycell left"><?=get_text("Buzzer Time (s)",$lang);?></div><div class="displaycell"><input class="smaller_input" type="number" name="door-buzzer-t" id="door-buzzer-t" max="99" min="0" value="2" required>
 </div></div>
 <div class="displayrow"><div class="displaycell left"><?=get_text("Alarm Timeout (s)",$lang);?></div><div class="displaycell"><input class="smaller_input" type="number" name="door-alarm-t" id="door-alarm-t" max="99" min="0" value="60" required><br><br>
@@ -319,7 +319,7 @@ $("#doors-select").change(function(){
 
 					$('#select-container-doors-details').append("<?=get_text("Door Number",$lang);?>: "+ values.doorNum +
 					"<br><?=get_text("Visit Exit",$lang);?>: " + isVisitExitText + 
-					"<br><?=get_text("Release Time (s)",$lang);?>: " + values.rlseTime +
+					"<br><?=get_text("Unlock Time (s)",$lang);?>: " + values.unlkTime +
 					"<br><?=get_text("Buzzer Time (s)",$lang);?>: " + values.bzzrTime + 
 					"<br><?=get_text("Alarm Timeout (s)",$lang);?>: " + values.alrmTime + 
                     "<br><?=get_text("Door Sensor",$lang);?>: " + snsrTypeText +
@@ -383,7 +383,7 @@ function resetForm(){
 	$("#except-current-select").empty();
 	//modal title
 	$("#modal-new-label").text("<?=get_text("New Door",$lang);?>");
-	$('#door-release-t').val(7);
+	$('#door-unlock-t').val(7);
 	$('#door-buzzer-t').val(2);
 	$('#door-alarm-t').val(60);
 	$("input[name=door-sensor][value=1]").prop("checked",true);
@@ -558,7 +558,7 @@ $("#doors-select-edit").click(function(){
 				//modal title
 				$("#modal-new-label").text("<?=get_text("Edit Door",$lang);?>");
 				//fill time number fields
-				$('#door-release-t').val(values.rlseTime);
+				$('#door-unlock-t').val(values.unlkTime);
 				$('#door-buzzer-t').val(values.bzzrTime);
 				$('#door-alarm-t').val(values.alrmTime);
 				$("input[name=door-sensor][value="+values.snsrType+"]").prop("checked",true);
@@ -666,17 +666,17 @@ $("#door-new-form").submit(function(){
 	var controllerId = $("#controllers-select").val();
 	var doorNumber = $("#door-number-select").val();
 	if(typeof($('#door-visit-exit:checked').val())=="undefined") {var isVisitExit = 0} else {var isVisitExit = 1}
-	var releaseTime = $('#door-release-t').val();
+	var unlockTime = $('#door-unlock-t').val();
 	var buzzerTime = $('#door-buzzer-t').val();
 	var alrmTime = $('#door-alarm-t').val();
 	var snsrType = $("input[name=door-sensor]:checked").val();
 	snsrType = (snsrType%2);
 
-	if(editId!=0 && !isNaN(editId)) action_str="action=edit_door&id=" + editId + "&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime + "&snsrtype=" + snsrType;
-	else action_str="action=add_door&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&rlsetime=" + releaseTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime + "&snsrtype=" + snsrType;
+	if(editId!=0 && !isNaN(editId)) action_str="action=edit_door&id=" + editId + "&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&unlktime=" + unlockTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime + "&snsrtype=" + snsrType;
+	else action_str="action=add_door&zoneid=" + zoneId + "&name=" + doorName + "&controllerid=" + controllerId + "&doornum=" + doorNumber + "&isvisitexit=" + isVisitExit + "&unlktime=" + unlockTime + "&bzzrtime=" + buzzerTime + "&alrmtime=" + alrmTime + "&snsrtype=" + snsrType;
 
 
-	if(doorName!="" && doorName!='undefined' && !isNaN(zoneId) && !isNaN(controllerId) && !isNaN(doorNumber)  && !isNaN(isVisitExit) && !isNaN(releaseTime) && !isNaN(buzzerTime) && !isNaN(alrmTime) && !isNaN(snsrType)){
+	if(doorName!="" && doorName!='undefined' && !isNaN(zoneId) && !isNaN(controllerId) && !isNaN(doorNumber)  && !isNaN(isVisitExit) && !isNaN(unlockTime) && !isNaN(buzzerTime) && !isNaN(alrmTime) && !isNaN(snsrType)){
 
 		$.ajax({
 			type: "POST",

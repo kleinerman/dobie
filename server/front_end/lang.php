@@ -752,7 +752,7 @@ $dictionary = array(
 		'es' => 'Tiempos',
 		'de' => 'Zeiten'
 	),
-	strtolower('Release Time (s)') => array(
+	strtolower('Unlock Time (s)') => array(
 		'es' => 'T. de Apertura (s)',
 		'de' => 'Öffnungszeit (en)'
 	),

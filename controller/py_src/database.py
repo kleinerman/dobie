@@ -305,10 +305,10 @@ class DataBase(object):
 
     def getDoorsOutGpios(self):
         '''
-        Return a list of dictionaries with doorNum, rlseOut, and bzzrOut
+        Return a list of dictionaries with doorNum, unlkOut, and bzzrOut
         '''
 
-        sql = "SELECT id, rlseOut, bzzrOut FROM HwDoorParms"
+        sql = "SELECT id, unlkOut, bzzrOut FROM HwDoorParms"
         self.cursor.execute(sql)
         doorsOutGpios = self.cursor.fetchall()
 
@@ -324,8 +324,8 @@ class DataBase(object):
 
         '''
 
-        sql = ("SELECT HwDoorParms.id AS doorNum, Door.id AS doorId, HwDoorParms.rlseOut, "
-               "HwDoorParms.bzzrOut, Door.snsrType, Door.rlseTime, Door.bzzrTime, Door.alrmTime "
+        sql = ("SELECT HwDoorParms.id AS doorNum, Door.id AS doorId, HwDoorParms.unlkOut, "
+               "HwDoorParms.bzzrOut, Door.snsrType, Door.unlkTime, Door.bzzrTime, Door.alrmTime "
                "FROM HwDoorParms LEFT JOIN Door ON (HwDoorParms.id = Door.doorNum)"
               )
 
@@ -348,10 +348,10 @@ class DataBase(object):
             #Using INSERT OR IGNORE instead of INSERT to answer with OK when the Crud Resender Module of
             #the server send a limited access CRUD before the client respond and avoid integrity error.
             #Using REPLACE is not good since it has to DELETE and INSERT always.
-            sql = ("INSERT OR IGNORE INTO Door(id, doorNum, snsrType, rlseTime, bzzrTime, alrmTime) "
+            sql = ("INSERT OR IGNORE INTO Door(id, doorNum, snsrType, unlkTime, bzzrTime, alrmTime) "
                    "VALUES({}, {}, {}, {}, {}, {})"
                    "".format(door['id'], door['doorNum'], door['snsrType'],
-                             door['rlseTime'], door['bzzrTime'], door['alrmTime'])
+                             door['unlkTime'], door['bzzrTime'], door['alrmTime'])
                   )
             self.cursor.execute(sql)
 
@@ -376,8 +376,8 @@ class DataBase(object):
 
         try:
             sql = ("UPDATE Door SET doorNum = {}, snsrType = {}, "
-                   "rlseTime = {}, bzzrTime = {}, alrmTime = {} WHERE id = {}"
-                   "".format(door['doorNum'], door['snsrType'], door['rlseTime'],
+                   "unlkTime = {}, bzzrTime = {}, alrmTime = {} WHERE id = {}"
+                   "".format(door['doorNum'], door['snsrType'], door['unlkTime'],
                              door['bzzrTime'], door['alrmTime'], door['id'])
               )
             self.cursor.execute(sql)

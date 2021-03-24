@@ -1238,7 +1238,7 @@ class CrudMngr(genmngr.GenericMngr):
 #--------------------------------------Door------------------------------------------
 
 
-        doorNeedKeys = ('name', 'doorNum', 'controllerId', 'snsrType', 'rlseTime', 'bzzrTime', 'alrmTime', 'zoneId', 'isVisitExit')
+        doorNeedKeys = ('name', 'doorNum', 'controllerId', 'snsrType', 'unlkTime', 'bzzrTime', 'alrmTime', 'zoneId', 'isVisitExit')
 
         @app.route('/api/v1.0/door', methods=['POST'])
         @auth.login_required

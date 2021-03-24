@@ -18,19 +18,24 @@ from config import *
 
 class Door(object):
     '''
-    Door object that contains all the parametter to manage
-    the door and its corresponding methods
+    This object stores parameters of the door.
+    There are some parameters that will be set once the object is
+    created and won't change during the execution like the GPIO line
+    used to lock the door and start the buzzer.
+    In the other hand there are some parameters that can be updated
+    or set to None when a CRUD is received like: doorId, snsrType,
+    unlkTime, bzzrTime and alrmTime.
     '''
 
-    def __init__(self, gpioChip, gpioOutConfig, rlseOutGpio,
-                 bzzrOutGpio, doorId, snsrType, rlseTime,
+    def __init__(self, gpioChip, gpioOutConfig, unlkOutGpio,
+                 bzzrOutGpio, doorId, snsrType, unlkTime,
                  bzzrTime, alrmTime):
 
         #Getting the logger
         self.logger = logging.getLogger('Controller')
 
-        self.rlseLine = gpioChip.get_line(rlseOutGpio)
-        self.rlseLine.request(gpioOutConfig)
+        self.unlkLine = gpioChip.get_line(unlkOutGpio)
+        self.unlkLine.request(gpioOutConfig)
 
         self.bzzrLine = gpioChip.get_line(bzzrOutGpio)
         self.bzzrLine.request(gpioOutConfig)
@@ -38,7 +43,7 @@ class Door(object):
         #The following could be None when the door is not configured yet
         self.doorId = doorId
         self.snsrType = snsrType
-        self.rlseTime = rlseTime
+        self.unlkTime = unlkTime
         self.bzzrTime = bzzrTime
         self.alrmTime = alrmTime
 
@@ -61,11 +66,11 @@ class Door(object):
         self.unlkedBySkd = threading.Event()
 
 
-    def release(self, trueOrFalse):
+    def unlock(self, trueOrFalse):
         '''
-        This method release or unrelase the door. For example the magnet of a door.
+        This method unlock or lock the door.
         '''
-        self.rlseLine.set_value(int(trueOrFalse))
+        self.unlkLine.set_value(int(trueOrFalse))
 
 
     def startBzzr(self, trueOrFalse):
@@ -98,9 +103,9 @@ class Doors(dict):
 
         for paramsDoor in paramsDoors:
             self[paramsDoor['doorNum']] = Door(gpioChip, gpioOutConfig,
-                                               paramsDoor['rlseOut'], paramsDoor['bzzrOut'],
+                                               paramsDoor['unlkOut'], paramsDoor['bzzrOut'],
                                                paramsDoor['doorId'], paramsDoor['snsrType'],
-                                               paramsDoor['rlseTime'], paramsDoor['bzzrTime'],
+                                               paramsDoor['unlkTime'], paramsDoor['bzzrTime'],
                                                paramsDoor['alrmTime']
                                               )
 
@@ -156,11 +161,11 @@ class CleanerDoorMngr(genmngr.GenericMngr):
 
             elapsedTime = int(elapsedTime.total_seconds())
 
-            if  elapsedTime >= self.door.rlseTime:
+            if  elapsedTime >= self.door.unlkTime:
                 #relocking the door if it shouldn't be kept unlocked by schedule
                 if not self.door.unlkedBySkd.is_set():
                     self.logger.debug("Locking door {}.".format(self.door.doorId))
-                    self.door.release(False)
+                    self.door.unlock(False)
                 #Once the door was closed, if somebody opens the door, will be
                 #considered an unpermitted access since the following event wil be cleared
                 self.door.accessPermit.clear()
@@ -171,13 +176,13 @@ class CleanerDoorMngr(genmngr.GenericMngr):
             #sometimes when the buzzer was stopped and the door was not closed yet and in
             #this moment someone passes again, the buzzer was started again and it will never
             #be cleared since the "bzzrStarted" variable was set to "False"
-            #The same could happen with "rlseTime" if it will be lesser than "bzzrTime".
+            #The same could happen with "unlkTime" if it will be lesser than "bzzrTime".
 
             if  elapsedTime >= self.door.bzzrTime:
                 self.logger.debug("Stopping the buzzer on door {}.".format(self.door.doorId))
                 self.door.startBzzr(False)
 
-            if elapsedTime >= self.door.rlseTime and elapsedTime >= self.door.bzzrTime:
+            if elapsedTime >= self.door.unlkTime and elapsedTime >= self.door.bzzrTime:
                 self.logger.debug("Finishing CleanerDoorMngr on door {}".format(self.door.doorId))
                 alive = False
 
@@ -339,7 +344,7 @@ class UnlkDoorSkdMngr(genmngr.GenericMngr):
                             logMsg = 'Door: {} is opened by schedule'.format(doorId)
                             self.logger.debug(logMsg)
                             door.unlkedBySkd.set()
-                            door.release(True)
+                            door.unlock(True)
 
                             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
                             event = {'doorId' : doorId,
@@ -358,7 +363,7 @@ class UnlkDoorSkdMngr(genmngr.GenericMngr):
                             logMsg = 'Door: {} is closed by schedule'.format(doorId)
                             self.logger.debug(logMsg)
                             door.unlkedBySkd.clear()
-                            door.release(False)
+                            door.unlock(False)
 
                             dateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
                             event = {'doorId' : doorId,

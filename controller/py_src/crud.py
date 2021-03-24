@@ -143,7 +143,7 @@ class CrudMngr(genmngr.GenericMngr):
             door = self.doors[doorNum]
             door.doorId = int(doorJson['id'])
             door.snsrType = int(doorJson['snsrType'])
-            door.rlseTime = int(doorJson['rlseTime'])
+            door.unlkTime = int(doorJson['unlkTime'])
             door.bzzrTime = int(doorJson['bzzrTime'])
             door.alrmTime = int(doorJson['alrmTime'])
 
@@ -160,7 +160,7 @@ class CrudMngr(genmngr.GenericMngr):
             door = self.doors[doorNum]
             door.doorId = int(doorJson['id'])
             door.snsrType = int(doorJson['snsrType'])
-            door.rlseTime = int(doorJson['rlseTime'])
+            door.unlkTime = int(doorJson['unlkTime'])
             door.bzzrTime = int(doorJson['bzzrTime'])
             door.alrmTime = int(doorJson['alrmTime'])
 
@@ -178,7 +178,7 @@ class CrudMngr(genmngr.GenericMngr):
             door = self.doors[doorNum]
             door.doorId = None
             door.snsrType = None
-            door.rlseTime = None
+            door.unlkTime = None
             door.bzzrTime = None
             door.alrmTime = None
 

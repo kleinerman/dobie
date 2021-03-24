@@ -41,7 +41,7 @@ cursor.execute('''
         o1In       INTEGER,
         bttnIn     INTEGER,
         stateIn    INTEGER,
-        rlseOut    INTEGER,
+        unlkOut    INTEGER,
         bzzrOut    INTEGER
     )
     '''
@@ -55,7 +55,7 @@ cursor.execute('''
         id        INTEGER PRIMARY KEY,
         doorNum   INTEGER,
         snsrType  BOOLEAN,
-        rlseTime  INTEGER,
+        unlkTime  INTEGER,
         bzzrTime  INTEGER,
         alrmTime  INTEGER,
         FOREIGN KEY(doorNum) REFERENCES HwDoorParms(id) ON DELETE CASCADE

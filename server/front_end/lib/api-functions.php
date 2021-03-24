@@ -725,7 +725,7 @@ function get_door($user,$pass,$id){
 	else return $response->data;
 }
 
-function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime, $snsrtype){
+function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $unlktime, $bzzrtime, $alrmtime, $snsrtype){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->zoneId= $zoneid;
@@ -733,7 +733,7 @@ function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisi
 	$payload_obj->controllerId= $controllerid;
 	$payload_obj->doorNum= $doornum;
 	$payload_obj->isVisitExit= $isvisitexit;
-	$payload_obj->rlseTime= $rlsetime;
+	$payload_obj->unlkTime= $unlktime;
 	$payload_obj->bzzrTime= $bzzrtime;
 	$payload_obj->alrmTime= $alrmtime;
 	$payload_obj->snsrType= $snsrtype;
@@ -743,7 +743,7 @@ function add_door($user, $pass, $zoneid, $name, $controllerid, $doornum, $isvisi
 	return $response;
 }
 
-function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime, $snsrtype){
+function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $unlktime, $bzzrtime, $alrmtime, $snsrtype){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->zoneId= $zoneid;
@@ -751,7 +751,7 @@ function set_door($user, $pass, $id, $zoneid, $name, $controllerid, $doornum, $i
 	$payload_obj->controllerId= $controllerid;
 	$payload_obj->doorNum= $doornum;
 	$payload_obj->isVisitExit= $isvisitexit;
-	$payload_obj->rlseTime= $rlsetime;
+	$payload_obj->unlkTime= $unlktime;
 	$payload_obj->bzzrTime= $bzzrtime;
 	$payload_obj->alrmTime= $alrmtime;
 	$payload_obj->snsrType= $snsrtype;

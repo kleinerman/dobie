@@ -96,7 +96,7 @@ CREATE TABLE `Door` (
     `name` varchar(40) NOT NULL,
     `controllerId` integer NOT NULL,
     `snsrType` boolean NOT NULL, 
-    `rlseTime` integer NOT NULL,
+    `unlkTime` integer NOT NULL,
     `bzzrTime` integer NOT NULL,
     `alrmTime` integer NOT NULL,
     `zoneId` integer NOT NULL,

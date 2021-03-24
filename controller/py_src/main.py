@@ -124,7 +124,7 @@ class Controller(object):
 
     def openDoor(self, doorNum):
         '''
-        This method is called by "procCard" and "procButton" methods to release
+        This method is called by "procCard" and "procButton" methods to unlock
         the door and start the buzzer.
         It also creates a thread to close the door and buzzer
         '''
@@ -133,7 +133,7 @@ class Controller(object):
 
             door = self.doors[doorNum]
             # It would be safer to verify if doorId not None, but I don't want to lose time
-            door.release(True)
+            door.unlock(True)
             self.logger.debug("Releasing the door {}.".format(doorNum))
             door.startBzzr(True)
             self.logger.debug("Starting the buzzer on door {}.".format(doorNum))
@@ -192,7 +192,7 @@ class Controller(object):
 
     def procButton(self, doorNum, side, value):
         '''
-        This method is called each time somebody press the button to release
+        This method is called each time somebody press the button to unlock
         the door
         '''
 

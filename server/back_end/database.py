@@ -2343,10 +2343,10 @@ class DataBase(object):
         #of the dictionary like quote or double quote.
         door = self.escapeDict(door)
 
-        sql = ("INSERT INTO Door(doorNum, name, controllerId, snsrType, rlseTime, bzzrTime, "
+        sql = ("INSERT INTO Door(doorNum, name, controllerId, snsrType, unlkTime, bzzrTime, "
                "alrmTime, zoneId, isVisitExit, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {}, {}, {})"
                "".format(door['doorNum'], door['name'], door['controllerId'], door['snsrType'], 
-                         door['rlseTime'], door['bzzrTime'], door['alrmTime'], 
+                         door['unlkTime'], door['bzzrTime'], door['alrmTime'], 
                          door['zoneId'], door['isVisitExit'], TO_ADD)
               )
 
@@ -2442,7 +2442,7 @@ class DataBase(object):
         try:
             #Getting the parameters that should be modified in the
             #controller before modifying them in central database.
-            sql = ("SELECT doorNum, snsrType, rlseTime, bzzrTime, alrmTime "
+            sql = ("SELECT doorNum, snsrType, unlkTime, bzzrTime, alrmTime "
                    "FROM Door WHERE id = {}".format(door['id'])
                   )
             self.execute(sql)
@@ -2454,7 +2454,7 @@ class DataBase(object):
             #"resStateId" as COMMITED
             if int(door['doorNum']) != oldParams['doorNum'] or \
                int(door['snsrType']) != oldParams['snsrType'] or \
-               int(door['rlseTime']) != oldParams['rlseTime'] or \
+               int(door['unlkTime']) != oldParams['unlkTime'] or \
                int(door['bzzrTime']) != oldParams['bzzrTime'] or \
                int(door['alrmTime']) != oldParams['alrmTime']:
                 resStateId = TO_UPDATE
@@ -2466,10 +2466,10 @@ class DataBase(object):
 
 
             sql = ("UPDATE Door SET doorNum = {}, name = '{}', snsrType = {}, "
-                   "rlseTime = {}, bzzrTime = {}, alrmTime = {}, zoneId = {}, "
+                   "unlkTime = {}, bzzrTime = {}, alrmTime = {}, zoneId = {}, "
                    "isVisitExit = {}, resStateId = {} WHERE id = {}"
                    "".format(door['doorNum'], door['name'], door['snsrType'],
-                             door['rlseTime'], door['bzzrTime'], door['alrmTime'],
+                             door['unlkTime'], door['bzzrTime'], door['alrmTime'],
                              door['zoneId'], door['isVisitExit'], resStateId, door['id'])
                   )
 

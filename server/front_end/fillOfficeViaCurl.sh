@@ -5,8 +5,8 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Oficina"}' http://quebec:5000/api/v1.0/zone
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Ingreso F65", "pssgNum": 1, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 60, "zoneId": 1}' http://quebec:5000/api/v1.0/passage
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Ingreso F66", "pssgNum": 2, "controllerId": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 60, "zoneId": 1}' http://quebec:5000/api/v1.0/passage
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Ingreso F65", "pssgNum": 1, "controllerId": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 60, "zoneId": 1}' http://quebec:5000/api/v1.0/passage
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"description": "Ingreso F66", "pssgNum": 2, "controllerId": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 60, "zoneId": 1}' http://quebec:5000/api/v1.0/passage
 
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Jorge Kleinerman", "identNumber": "29063666", "cardNumber": 4300737, "orgId": 3, "visitedOrgId": null}' http://quebec:5000/api/v1.0/person
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ary Kleinerman", "identNumber": "31058040", "cardNumber": 5326224, "orgId": 3, "visitedOrgId": null}' http://quebec:5000/api/v1.0/person

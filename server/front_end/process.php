@@ -614,12 +614,12 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$controllerid = isset($_POST['controllerid']) ? $_POST['controllerid'] : "";
 				$doornum = isset($_POST['doornum']) ? $_POST['doornum'] : "";
 				$isvisitexit = isset($_POST['isvisitexit']) ? $_POST['isvisitexit'] : "";
-				$rlsetime = isset($_POST['rlsetime']) ? $_POST['rlsetime'] : "";
+				$unlktime = isset($_POST['unlktime']) ? $_POST['unlktime'] : "";
 				$bzzrtime = isset($_POST['bzzrtime']) ? $_POST['bzzrtime'] : "";
 				$alrmtime = isset($_POST['alrmtime']) ? $_POST['alrmtime'] : "";
 				$snsrtype = isset($_POST['snsrtype']) ? $_POST['snsrtype'] : "";
 
-				$doors_rec = add_door($logged->name, $logged->pw, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime, $snsrtype);
+				$doors_rec = add_door($logged->name, $logged->pw, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $unlktime, $bzzrtime, $alrmtime, $snsrtype);
 				//if($doors_rec) array_push($ret,1,"Information saved successfully!");
 				//else array_push($ret,0,"Door could not be added");
 				if($doors_rec->response_status == "201"){
@@ -639,14 +639,14 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$controllerid = isset($_POST['controllerid']) ? $_POST['controllerid'] : "";
 				$doornum = isset($_POST['doornum']) ? $_POST['doornum'] : "";
 				$isvisitexit = isset($_POST['isvisitexit']) ? $_POST['isvisitexit'] : "";
-				$rlsetime = isset($_POST['rlsetime']) ? $_POST['rlsetime'] : "";
+				$unlktime = isset($_POST['unlktime']) ? $_POST['unlktime'] : "";
 				$bzzrtime = isset($_POST['bzzrtime']) ? $_POST['bzzrtime'] : "";
 				$alrmtime = isset($_POST['alrmtime']) ? $_POST['alrmtime'] : "";
 				$snsrtype = isset($_POST['snsrtype']) ? $_POST['snsrtype'] : "";
 
 				if($id=="") array_push($ret,0,"Invalid values sent");
 	    			else {
-					$doors_rec = set_door($logged->name, $logged->pw, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $rlsetime, $bzzrtime, $alrmtime, $snsrtype);
+					$doors_rec = set_door($logged->name, $logged->pw, $id, $zoneid, $name, $controllerid, $doornum, $isvisitexit, $unlktime, $bzzrtime, $alrmtime, $snsrtype);
 
 					if($doors_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"Door could not be updated");
