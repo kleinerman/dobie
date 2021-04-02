@@ -21,6 +21,7 @@
 
 
 extern int exit_flag;
+extern int return_exit;
 extern mqd_t mq;
 extern pthread_mutex_t mq_mutex;
 

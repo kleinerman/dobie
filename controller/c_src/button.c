@@ -34,7 +34,7 @@ int init_button(button_t *button_p,
 
 
 int enable_button(button_t *button_p) {
-    int ret = 0;
+    int ret = RETURN_SUCCESS;
 
     // Getting the GPIO line for the button.
     button_p->b_line = gpiod_chip_get_line(button_p->chip, button_p->gpio_num);
@@ -66,7 +66,13 @@ void *run_button (void *arg_p){
     char q_msg [50];
     int ret;
 
-    enable_button(button_p);
+    // Enable the line checking if it is not used by another process.
+    // If it is used, notify all threads to finish and set the main
+    // returned value as FAILURE.
+    if (RETURN_FAILURE == enable_button(button_p)) {
+        exit_flag = FINISH;
+        return_exit = RETURN_FAILURE;
+    }
 
     while (!exit_flag) {
         // Waiting "event_wait_time" for falling edge events in the line
@@ -83,8 +89,15 @@ void *run_button (void *arg_p){
                 gpiod_line_release(button_p->b_line);
                 // Sleep until bounce finished
                 usleep(BOUNCE_TIME);
-                // Enable the line again
-                enable_button(button_p);
+
+                // Enable the line again checking if it is not used by another process.
+                // If it is used, notify all threads to finish and set the main
+                // returned value as FAILURE.
+                if (RETURN_FAILURE == enable_button(button_p)) {
+                    exit_flag = FINISH;
+                    return_exit = RETURN_FAILURE;
+                }
+
                 // Get the value of the line after bounce finished
                 ret = gpiod_line_get_value(button_p->b_line);
 

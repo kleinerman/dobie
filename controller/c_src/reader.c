@@ -53,7 +53,7 @@ int init_reader(reader_t *reader_p,
 
 
 int enable_reader(reader_t *reader_p) {
-    int ret = 0;
+    int ret = RETURN_SUCCESS;
 
     // Getting two GPIO lines, one for Data 0 and other one for Data 1.
     ret = gpiod_chip_get_lines(reader_p->chip, reader_p->gpio_nums,
@@ -69,8 +69,8 @@ int enable_reader(reader_t *reader_p) {
     // that readers send bits on Data 0 and Data 1.
     ret = gpiod_line_request_bulk_falling_edge_events(&(reader_p->r_lines), CONSUMER);
     if (ret < 0) {
-        sd_journal_print(LOG_ALERT, "Failing to request event notification for Reader of Door: %d\n",
-                         reader_p->door_id);
+        sd_journal_print(LOG_ALERT, "Failing to request event notification for Reader: %d of Door: %d\n",
+                         reader_p->side, reader_p->door_id);
         return RETURN_FAILURE;
     }
     return ret;
@@ -91,7 +91,13 @@ void *run_reader (void *arg_p){
     long long int mask, card_number;
     int ret, gpio_num;
 
-    enable_reader(reader_p);
+    // Enable the line checking if it is not used by another process.
+    // If it is used, notify all threads to finish and set the main
+    // returned value as FAILURE.
+    if (RETURN_FAILURE == enable_reader(reader_p)) {
+        exit_flag = FINISH;
+        return_exit = RETURN_FAILURE;
+    }
 
 
     while (!exit_flag) {
@@ -172,7 +178,7 @@ void *run_reader (void *arg_p){
 
     }
 
-    // When finsih_handler ask to finish setting "exit_flag", before finishing,
+    // When finish_handler ask to finish setting "exit_flag", before finishing,
     // both lines used by the reader are released.
     sd_journal_print(LOG_NOTICE,
                      "Thread of Reader: %d of Door: %d releasing GPIO: %d and GPIO: %d\n",

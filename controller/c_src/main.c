@@ -19,6 +19,7 @@
 
 
 int exit_flag = NO_FINISH;
+int return_exit = RETURN_SUCCESS;
 mqd_t mq;
 pthread_mutex_t mq_mutex;
 
@@ -150,5 +151,11 @@ int main(int argc, char **argv)
         pthread_join(readers_a[i].thread, NULL);
     }
 
-    return RETURN_SUCCESS;
+
+    if (RETURN_FAILURE == return_exit) {
+        sd_journal_print(LOG_ALERT, "Error trying to get some GPIO Lines. Exiting..\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return return_exit;
 }

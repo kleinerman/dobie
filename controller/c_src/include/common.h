@@ -13,7 +13,7 @@
 #define FINISH 1
 #define BOUNCE_TIME 200000
 #define QUEUE_NAME "/ioiface_queue"
-#define MAC "86:03:24:b9:a6:b7"
+#define MAC "b8:27:eb:d9:50:db"
 #define MAC_STR_LEN 18 //MAC=12 chars, ":"=5 chars and "\0" char
 #define SYS_FILE_MAC "/sys/class/net/eth0/address"
 #define CHIP_NAME "gpiochip0"
@@ -21,6 +21,7 @@
 
 
 extern int exit_flag;
+extern int return_exit;
 extern mqd_t mq;
 extern pthread_mutex_t mq_mutex;
 

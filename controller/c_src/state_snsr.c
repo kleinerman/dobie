@@ -34,7 +34,7 @@ int init_state_snsr(state_snsr_t *state_snsr_p,
 
 
 int enable_state_snsr(state_snsr_t *state_snsr_p) {
-    int ret = 0;
+    int ret = RETURN_SUCCESS;
 
     // Getting the GPIO line for the state sensor.
     state_snsr_p->b_line = gpiod_chip_get_line(state_snsr_p->chip, state_snsr_p->gpio_num);
@@ -67,7 +67,14 @@ void *run_state_snsr (void *arg_p){
     int current_state, new_state;
     int ret;
 
-    enable_state_snsr(state_snsr_p);
+    // Enable the line checking if it is not used by another process.
+    // If it is used, notify all threads to finish and set the main
+    // returned value as FAILURE.
+    if (RETURN_FAILURE == enable_state_snsr(state_snsr_p)) {
+        exit_flag = FINISH;
+        return_exit = RETURN_FAILURE;
+    }
+
 
     // Getting the actual state
     // As this is the same hardware of buttons and we want closed == 1 and
@@ -90,8 +97,15 @@ void *run_state_snsr (void *arg_p){
                 gpiod_line_release(state_snsr_p->b_line);
                 // Sleep until bounce finished
                 usleep(BOUNCE_TIME);
-                // Enable the line again
-                enable_state_snsr(state_snsr_p);
+
+                // Enable the line again checking if it is not used by another process.
+                // If it is used, notify all threads to finish and set the main
+                // returned value as FAILURE.
+                if (RETURN_FAILURE == enable_state_snsr(state_snsr_p)) {
+                    exit_flag = FINISH;
+                    return_exit = RETURN_FAILURE;
+                }
+
                 // Get the value of the line after bounce finished
                 new_state = ! gpiod_line_get_value(state_snsr_p->b_line);
 
