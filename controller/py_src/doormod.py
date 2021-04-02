@@ -11,6 +11,7 @@ import queue
 import genmngr
 from msgheaders import *
 from config import *
+import errno
 
 
 
@@ -27,7 +28,7 @@ class Door(object):
     unlkTime, bzzrTime and alrmTime.
     '''
 
-    def __init__(self, gpioChip, gpioOutConfig, unlkOutGpio,
+    def __init__(self, gpioChip, unlkOutGpio,
                  bzzrOutGpio, doorId, snsrType, unlkTime,
                  bzzrTime, alrmTime):
 
@@ -35,10 +36,19 @@ class Door(object):
         self.logger = logging.getLogger('Controller')
 
         self.unlkLine = gpioChip.get_line(unlkOutGpio)
-        self.unlkLine.request(gpioOutConfig)
-
         self.bzzrLine = gpioChip.get_line(bzzrOutGpio)
-        self.bzzrLine.request(gpioOutConfig)
+
+        try:
+            self.unlkLine.request(CONSUMER)
+            self.unlkLine.set_direction_output(False)
+
+            self.bzzrLine.request(CONSUMER)
+            self.bzzrLine.set_direction_output(False)
+
+        except OSError:
+            self.logger.error('Error trying to get GPIO lines for output')
+            sys.exit(errno.EBUSY)
+
 
         #The following could be None when the door is not configured yet
         self.doorId = doorId
@@ -89,25 +99,34 @@ class Doors(dict):
 
     def __init__(self):
 
+        #Getting the logger
+        #self.logger = logging.getLogger('Controller')
+
         #Chip object
-        gpioChip = gpiod.chip(GPIO_CHIP_NAME)
+        self.gpioChip = gpiod.Chip(GPIO_CHIP_NAME, gpiod.Chip.OPEN_BY_NAME)
 
-        #GPIO out config
-        gpioOutConfig = gpiod.line_request()
-        gpioOutConfig.consumer = CONSUMER
-        gpioOutConfig.request_type = gpiod.line_request.DIRECTION_OUTPUT
-
-        #database
+        #Database
         dataBase = database.DataBase(DB_FILE)
-        paramsDoors = dataBase.getParamsDoors()
+        parmsDoors = dataBase.getParmsDoors()
 
-        for paramsDoor in paramsDoors:
-            self[paramsDoor['doorNum']] = Door(gpioChip, gpioOutConfig,
-                                               paramsDoor['unlkOut'], paramsDoor['bzzrOut'],
-                                               paramsDoor['doorId'], paramsDoor['snsrType'],
-                                               paramsDoor['unlkTime'], paramsDoor['bzzrTime'],
-                                               paramsDoor['alrmTime']
+        for parmsDoor in parmsDoors:
+            self[parmsDoor['doorNum']] = Door(self.gpioChip,
+                                               parmsDoor['unlkOut'], parmsDoor['bzzrOut'],
+                                               parmsDoor['doorId'], parmsDoor['snsrType'],
+                                               parmsDoor['unlkTime'], parmsDoor['bzzrTime'],
+                                               parmsDoor['alrmTime']
                                               )
+
+    def __del__(self):
+        '''
+        Close the gpiochip descriptor
+        '''
+        #We can't call logger at this moment since the object logger
+        #doesn't exist at this moment.
+        #self.logger.info("Closing the GPIO Chip.")
+        print("Closing GPIO chip")
+        self.gpioChip.close()
+
 
 
     def getDoorNum(self, doorId):

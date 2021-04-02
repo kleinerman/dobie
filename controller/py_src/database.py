@@ -116,10 +116,10 @@ class DataBase(object):
                )
 
         self.cursor.execute(sql)
-        params = self.cursor.fetchone()
+        parms = self.cursor.fetchone()
 
-        if params:
-            personId, allWeek, startTime, endTime, expireDate = params
+        if parms:
+            personId, allWeek, startTime, endTime, expireDate = parms
             expDateTime = '{} {}'.format(expireDate, endTime)
             nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             nowDate, nowTime = nowDateTime.split()
@@ -143,10 +143,10 @@ class DataBase(object):
                           )
 
                     self.cursor.execute(sql)
-                    params = self.cursor.fetchone()
+                    parms = self.cursor.fetchone()
 
-                    if params:
-                        startTime, endTime = params
+                    if parms:
+                        startTime, endTime = parms
 
                         if startTime <= nowTime <= endTime:
                             return (True, None)
@@ -317,7 +317,7 @@ class DataBase(object):
 
     #---------------------------------------------------------------------------#
 
-    def getParamsDoors(self):
+    def getParmsDoors(self):
         '''
         Get the arguments of doors to call ioiface external program.
         pps = Door Parametters
@@ -330,9 +330,9 @@ class DataBase(object):
               )
 
         self.cursor.execute(sql)
-        paramsDoors = self.cursor.fetchall()
+        parmsDoors = self.cursor.fetchall()
 
-        return paramsDoors
+        return parmsDoors
 
 
 

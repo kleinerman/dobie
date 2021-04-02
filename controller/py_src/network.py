@@ -291,9 +291,9 @@ class NetMngr(genmngr.GenericMngr):
             raise ServerNotConnected
 
         #Getting all link layer parameters of the wired interface of the controller 
-        linkParams = netifaces.ifaddresses(WIRED_IFACE_NAME)[netifaces.AF_LINK]
+        linkParms = netifaces.ifaddresses(WIRED_IFACE_NAME)[netifaces.AF_LINK]
         #Getting the mac parameter 
-        mac = linkParams[0]['addr']
+        mac = linkParms[0]['addr']
         #Removing the ":" from mac and encode the string as bytes
         mac = mac.replace(':','').encode('utf8')
  
