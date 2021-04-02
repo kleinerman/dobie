@@ -376,9 +376,6 @@ class Controller(object):
         #Launching Door Iface binary
         self.ioIface.start()
 
-        #with self.lockDoorsControl:
-        #     self.doorsControl.loadParams()
-
         #Starting the "Event Manager" thread
         self.eventMngr.start()
 

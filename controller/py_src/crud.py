@@ -100,12 +100,6 @@ class CrudMngr(genmngr.GenericMngr):
                     #Calling the corresponding DB method according to the CRUD command received
                     self.crudHndlrs[crudCmd](crudObject)
 
-                    #If the CRUD command do a modification in a door, it is necessary to
-                    #load the door params again in doorsControl object
-                    ## if crudCmd[0] == 'S':
-                    ##    with self.lockDoorsControl:
-                    ##        self.doorsControl.loadParams()
-
                     #If we are at this point of code means that the database method executed
                     #did not throw an exception and therefore we can answer with OK to the server.
                     #Getting the ID from the json to create the response to answer the server.
