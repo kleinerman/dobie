@@ -44,15 +44,16 @@ class IoIface(object):
         gpiosDoors = self.dataBase.getGpiosDoors()
 
         for gpiosDoor in gpiosDoors:
-            doorNum = str(gpiosDoor['id'])
-            iRdrBits = str(gpiosDoor['iWgndBits'])
+            doorNum = gpiosDoor['id']
+            iRdrBits = str(IR_WGND_BITS[doorNum-1])
             i0In = str(gpiosDoor['i0In'])
             i1In = str(gpiosDoor['i1In'])
-            oRdrBits = str(gpiosDoor['oWgndBits'])
+            oRdrBits = str(OR_WGND_BITS[doorNum-1])
             o0In = str(gpiosDoor['o0In'])
             o1In = str(gpiosDoor['o1In'])
             bttnIn = str(gpiosDoor['bttnIn'])
             stateIn = str(gpiosDoor['stateIn'])
+            doorNum = str(doorNum)
             doorArgs = ['--id', doorNum, '--inRdr', iRdrBits, i0In, i1In,
                         '--outRdr', oRdrBits, o0In, o1In, '--bttn', bttnIn,
                         '--state', stateIn

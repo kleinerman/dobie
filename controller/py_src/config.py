@@ -7,14 +7,10 @@ POWEROFF_BIN = 'poweroff'
 
 IOIFACE_BIN = '/opt/dobie/controller/bin/ioiface'
 
-IR_1_WGND_BITS = 26
-OR_1_WGND_BITS = 26
-
-IR_2_WGND_BITS = 26
-OR_2_WGND_BITS = 26
-
-IR_3_WGND_BITS = 26
-OR_3_WGND_BITS = 26
+#Wiegand bits of the input readers [door 1, door 2, door 3]
+IR_WGND_BITS = [34, 26, 26]
+#Wiegand bits of the output readers [door 1, door 2, door 3]
+OR_WGND_BITS = [26, 26, 26]
 
 GPIO_CHIP_NAME = "gpiochip0"
 CONSUMER = "consumer_name"

@@ -13,9 +13,9 @@ cursor.execute('PRAGMA foreign_keys = ON')
 
 #Filling Event Table
 sqlSentence = (f'INSERT INTO HwDoorParms(id, iWgndBits, i0In, i1In, oWgndBits, o0In, o1In, bttnIn, stateIn, unlkOut, bzzrOut) '
-               f'VALUES (1, {IR_1_WGND_BITS}, 26, 21, {OR_1_WGND_BITS}, 19, 20, 25, 24, 27, 14), '
-                      f'(2, {IR_2_WGND_BITS}, 13, 16, {OR_2_WGND_BITS}, 6, 12,  9, 23,  3, 15), '
-                      f'(3, {IR_3_WGND_BITS}, 7, 5, {OR_3_WGND_BITS}, 11,  8, 10, 22, 18, 17)'
+               f'VALUES (1, {IR_WGND_BITS[0]}, 26, 21, {OR_WGND_BITS[0]}, 19, 20, 25, 24, 27, 14), '
+                      f'(2, {IR_WGND_BITS[1]}, 13, 16, {OR_WGND_BITS[1]}, 6, 12,  9, 23,  3, 15), '
+                      f'(3, {IR_WGND_BITS[2]}, 7, 5, {OR_WGND_BITS[2]}, 11,  8, 10, 22, 18, 17)'
               )
 cursor.execute(sqlSentence)
 
