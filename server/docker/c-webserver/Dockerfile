@@ -1,4 +1,4 @@
-FROM arm32v7/nginx:alpine
+FROM arm64v8/nginx:alpine
 
 RUN \
 mkdir /etc/nginx/ssl && \

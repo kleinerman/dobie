@@ -326,7 +326,8 @@ class DataBase(object):
         self.passwd = passwd
         self.dataBase = dataBase
         self.callingMngr = callingMngr
-
+        #The following is initiated by connect() method
+        self.connection = None
 
         self.connect()
 
@@ -339,9 +340,14 @@ class DataBase(object):
         values like quote or double quote.
 
         '''
+
+        #The following situation should never happen
+        if self.connection == None:
+            raise NotReachable
+
         for key, value in dictObj.items():
             if type(value) == str:
-                dictObj[key] = pymysql.escape_string(value)
+                dictObj[key] = self.connection.escape_string(value)
         return dictObj
 
 
@@ -357,8 +363,8 @@ class DataBase(object):
         while True:
             try:
                 self.logger.info('Connecting to database...')
-                self.connection = pymysql.connect(self.host, self.user,
-                                                  self.passwd, self.dataBase,
+                self.connection = pymysql.connect(host = self.host, user = self.user,
+                                                  password = self.passwd, database = self.dataBase,
                                                   connect_timeout = EXIT_CHECK_TIME,
                                                   client_flag = pymysql.constants.CLIENT.FOUND_ROWS)
                                                   #With this client_flag, cursor.rowcount will have
@@ -435,7 +441,7 @@ class DataBase(object):
         sql = "SELECT COUNT(*) FROM Controller WHERE macAddress = '{}'".format(ctrllerMac)
 
         self.execute(sql)
-        #If commit is not present, once adding the controller via REST 
+        #If commit is not present, once adding the controller via REST
         #it is neccesary to restart the server (not sure why)
         #self.connection.commit()
         return self.cursor.fetchone()['COUNT(*)']
@@ -536,7 +542,7 @@ class DataBase(object):
                    "".format(event['eventTypeId'], event['doorId'], event['dateTime'],
                              event['doorLockId'], event['personId'], event['side'],
                              event['allowed'], event['denialCauseId']
-                            ) 
+                            )
 
                   )
             try:
@@ -557,7 +563,7 @@ class DataBase(object):
         instead of coming with the person id, it comes with the card number.
         This was because, sometimes, that person hasn't access on any door
         of this controller, therefore, the controller hasn't the person id.
-        However, the backend may have the person id and report the event 
+        However, the backend may have the person id and report the event
         of that person being denied to enter.
         This method, set "personId" field in the event dictionary and remove
         the "cardNumber" field if the event involves a person.
@@ -601,7 +607,7 @@ class DataBase(object):
 
     def getFmtEvent(self, event):
         '''
-        It receives an event and returns the event formatted adding 
+        It receives an event and returns the event formatted adding
         fields like zone name, door name, organization name, person names and lastName.
         '''
 
@@ -722,12 +728,12 @@ class DataBase(object):
         #void list. To avoid it, if evtsQtty < 1, also "EventError" is raised
         #Also, if startDateTime or endDateTime is None and EventError will be
         #raised.
-        if startEvt < 1 or evtsQtty < 1 or not startDateTime or not endDateTime: 
+        if startEvt < 1 or evtsQtty < 1 or not startDateTime or not endDateTime:
             raise EventError("Error trying to get event list with specified parameters.")
 
         #The startEvt value is substracted one since SQL starts indexing on 0.
         startEvtSql = startEvt - 1
-        
+
         sql = ("SELECT Event.id, Event.eventTypeId, Zone.name AS zoneName, "
                "Door.name AS doorName, Organization.name AS orgName, "
                "CONCAT(Person.names, ' ', Person.lastName) AS personName, "
@@ -777,7 +783,7 @@ class DataBase(object):
                 #method converts them to a format not desired like "Wed, 13 Sep 2017 17:50:00 GMT"
                 #The "GMT" at the end was causing the browser converts it to GMT time.
                 event['dateTime'] = event['dateTime'].strftime("%Y-%m-%d %H:%M")
-                
+
                 #If the person was deleted (resStateId == 5), converting it
                 #to bool 1, otherwise converting it to bool 0.
                 #If not an event involving a person, keep it null
@@ -794,11 +800,11 @@ class DataBase(object):
         except pymysql.err.ProgrammingError as programmingError:
             #This exception can happen when startEvtSql < 0 or evtQtty is < 0
             #This exception is converted to BadRequest in crud.py module
-            #However this would never happen since both parametters are checked 
+            #However this would never happen since both parametters are checked
             #in the first part of the method
             raise EventError("SQL error while trying to get event list.")
 
-        
+
 
 
     def purgeEvents(self, untilDateTime):
@@ -963,7 +969,7 @@ class DataBase(object):
         '''
 
         sql = "DELETE FROM User WHERE id = {}".format(userId)
-        
+
         try:
             self.execute(sql)
             if self.cursor.rowcount < 1:
@@ -1006,7 +1012,7 @@ class DataBase(object):
             setFullName = ", fullName = '{}'".format(user['fullName'])
         except KeyError:
             setFullName = ""
-        
+
         try:
             setRoleId = ", roleId = {}".format(user['roleId'])
         except KeyError:
@@ -1025,7 +1031,7 @@ class DataBase(object):
 
 
         sql = ("UPDATE User SET id = {}{}{}{}{}{}{} WHERE id = {}"
-               "".format(user['id'], setUsername, setPasswdHash, 
+               "".format(user['id'], setUsername, setPasswdHash,
                          setFullName, setRoleId, setLanguage,
                          setActive, user['id'])
               )
@@ -1211,7 +1217,7 @@ class DataBase(object):
             raise OrganizationError('Can not get specified organization')
 
 
-                                             
+
 
     def addOrganization(self, organization):
         '''
@@ -1226,7 +1232,7 @@ class DataBase(object):
         sql = ("INSERT INTO Organization(name, resStateId) VALUES('{}', {})"
                "".format(organization['name'], COMMITTED)
               )
-        
+
         try:
             self.execute(sql)
             return self.cursor.lastrowid
@@ -1308,7 +1314,7 @@ class DataBase(object):
         '''
         Mark the organization that personId belongs to as DELETED if the organization
         is marked as TO_DELETE and there is not more persons in this organization
-        
+
         '''
 
         try:
@@ -1405,7 +1411,7 @@ class DataBase(object):
         Receive a dictionary with zone parametters and save it in DB
         It returns the id of the added zone.
         '''
-        
+
         #Escaping special characters of the input values
         #of the dictionary like quote or double quote.
         zone = self.escapeDict(zone)
@@ -1504,7 +1510,7 @@ class DataBase(object):
         '''
         Return a a dictionary with Door Group data
         '''
-    
+
         sql = ("SELECT * FROM DoorGroup WHERE id = {}"
                "".format(doorGroupId)
               )
@@ -1526,7 +1532,7 @@ class DataBase(object):
 
     def addDoorGroup(self, doorGroup):
         '''
-        Receive a dictionary with Door Group parametters 
+        Receive a dictionary with Door Group parametters
         and save it in DB. It returns the id of the added Door Group.
         '''
 
@@ -1708,7 +1714,7 @@ class DataBase(object):
                "(Person.id = Access.personId) LEFT JOIN DoorGroupDoor "
                "ON (Access.doorId = DoorGroupDoor.doorId) "
                "WHERE {}{}{}{}{}"
-               "".format(visitedOrgFilter, isProviderFilter, doorGroupFilter, 
+               "".format(visitedOrgFilter, isProviderFilter, doorGroupFilter,
                          cardNumberFilter, identNumberFilter)
               )
         try:
@@ -1725,7 +1731,7 @@ class DataBase(object):
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
             raise PersonError('Can not get specified visitors.')
-    
+
 
 
 #--------------------------------Controller Model------------------------------------
@@ -1773,10 +1779,10 @@ class DataBase(object):
                    "ON (Controller.ctrllerModelId = CtrllerModel.id) "
                    "WHERE Controller.id = {}".format(controllerId)
                   )
-            self.execute(sql)      
+            self.execute(sql)
             numOfDoors = self.cursor.fetchone()['numOfDoors']
             totalDoors = list(range(1, numOfDoors+1))
-    
+
             #Creating a list all the used doors of this contoller
             #For example if the door 1 and 3 of the controller was used
             #the list will be usedDoors = [1, 3]
@@ -1786,7 +1792,7 @@ class DataBase(object):
             self.execute(sql)
             usedDoors = self.cursor.fetchall()
             usedDoors = [usedDoor['doorNum'] for usedDoor in usedDoors]
-            
+
             #Creating a list with the availables doors in the controller
             #(the doors not used). Whit the above examples, it will be
             #availDoors = [2]
@@ -1861,7 +1867,7 @@ class DataBase(object):
 
         sql = ("INSERT INTO Controller(name, ctrllerModelId, macAddress) "
                "VALUES('{}', {}, '{}')"
-               "".format(controller['name'], controller['ctrllerModelId'], 
+               "".format(controller['name'], controller['ctrllerModelId'],
                          controller['macAddress'])
               )
 
@@ -1905,11 +1911,11 @@ class DataBase(object):
     def updController(self, controller):
         '''
         Receive a dictionary with controller parametters and update it in DB
-        When updating a controller, the MAC address could be changed. 
+        When updating a controller, the MAC address could be changed.
         In this case, a Person Pending Operation could be in the "PersonPendingOperation"
         table. This situation is very possible when replacing a died controller for a
         new one.
-        For this situation, the new MAC address should be replaced in 
+        For this situation, the new MAC address should be replaced in
         "PersonPendingOperation" table.
         To avoid inconsistency, both tables are locked before modifying them.
         '''
@@ -1935,7 +1941,7 @@ class DataBase(object):
 
             sql = ("UPDATE Controller SET name = '{}', ctrllerModelId = {}, "
                    "macAddress = '{}' WHERE id = {}"
-                   "".format(controller['name'], controller['ctrllerModelId'], 
+                   "".format(controller['name'], controller['ctrllerModelId'],
                              controller['macAddress'], controller['id'])
                   )
 
@@ -1951,7 +1957,7 @@ class DataBase(object):
                   )
 
             self.execute(sql)
-    
+
             self.execute("UNLOCK TABLES")
 
 
@@ -1982,7 +1988,7 @@ class DataBase(object):
         if (controllerId and doorId) or (not controllerId and not doorId):
             self.logger.debug("Incorrect arguments calling getControllerMac method.")
             raise ControllerError('Error getting the controller.')
-            
+
 
         if controllerId:
             sql = ("SELECT macAddress FROM Controller WHERE "
@@ -2010,7 +2016,7 @@ class DataBase(object):
         Return a list of controller MAC addresses receiving the person ID
         to delete.
         '''
-        
+
         sql = ("SELECT macAddress FROM Controller controller JOIN Door door "
                "ON (controller.id = door.controllerId) JOIN Access access "
                "ON (door.id = access.doorId) JOIN Person person "
@@ -2084,7 +2090,7 @@ class DataBase(object):
 
     def reProvController(self, controllerId):
         '''
-        This method is called by CRUD module when it is necessary to 
+        This method is called by CRUD module when it is necessary to
         reprovision an entire controller.
         It sets all doors, unlock door schedules, exception day to unlock door schedule,
         access and limited access in state TO_ADD.
@@ -2126,7 +2132,7 @@ class DataBase(object):
             self.execute(sql)
 
             self.execute("UNLOCK TABLES")
-        
+
 
         except pymysql.err.IntegrityError as integrityError:
             self.execute("UNLOCK TABLES")
@@ -2145,7 +2151,7 @@ class DataBase(object):
         '''
         Set "reachable" and update "lastSeen" date and time of the controller
         which MAC address is received as argument.
-        If the controller wasn't previously alive, returns a dictionary with 
+        If the controller wasn't previously alive, returns a dictionary with
         the controller parametters.
         '''
 
@@ -2179,11 +2185,11 @@ class DataBase(object):
 
     def setCtrllersNotReachable(self):
         '''
-        The current date and time is substracted by the amount of minutes 
+        The current date and time is substracted by the amount of minutes
         "CONSIDER_DIED_MINS" (config parametter).
         If there are controllers which the previous state was "reachable"
         and didn't send keep alive messages in that interval of time, they
-        are returned in the "deadCtrllers" list and they are updated as 
+        are returned in the "deadCtrllers" list and they are updated as
         "not reachables"
         '''
 
@@ -2243,7 +2249,7 @@ class DataBase(object):
 
                 if not zone:
                     raise ZoneNotFound('Zone not found')
-       
+
                 #Get all doors from this zone
                 sql = ("SELECT * FROM Door WHERE zoneId = {}".format(zoneId))
                 self.execute(sql)
@@ -2258,7 +2264,7 @@ class DataBase(object):
                 if not doorGroup:
                     raise DoorGroupNotFound('Door Group not found')
 
-                #Get all doors from this DoorGroup 
+                #Get all doors from this DoorGroup
                 sql = ("SELECT Door.* from Door JOIN DoorGroupDoor "
                        "ON (Door.id = DoorGroupDoor.doorId) "
                        "WHERE DoorGroupDoor.doorGroupId = {}"
@@ -2345,8 +2351,8 @@ class DataBase(object):
 
         sql = ("INSERT INTO Door(doorNum, name, controllerId, snsrType, unlkTime, bzzrTime, "
                "alrmTime, zoneId, isVisitExit, resStateId) VALUES({}, '{}', {}, {}, {}, {}, {}, {}, {}, {})"
-               "".format(door['doorNum'], door['name'], door['controllerId'], door['snsrType'], 
-                         door['unlkTime'], door['bzzrTime'], door['alrmTime'], 
+               "".format(door['doorNum'], door['name'], door['controllerId'], door['snsrType'],
+                         door['unlkTime'], door['bzzrTime'], door['alrmTime'],
                          door['zoneId'], door['isVisitExit'], TO_ADD)
               )
 
@@ -2369,7 +2375,7 @@ class DataBase(object):
         Mark the door in database as COMMITTED if it was previously in TO_ADD or
         TO_UPDATE state or delete it if it was previously in TO_DELETE state
         '''
- 
+
         sql = "SELECT resStateId FROM Door WHERE id = {}".format(doorId)
 
         try:
@@ -2424,7 +2430,7 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.logger.debug(integrityError)
             raise DoorError('Error marking the Door to be deleted.')
-        
+
 
 
 
@@ -2448,7 +2454,7 @@ class DataBase(object):
             self.execute(sql)
             oldParams =  self.cursor.fetchone()
 
-            #If any of the parameters should be modified in the controller, 
+            #If any of the parameters should be modified in the controller,
             #set the "resStateId" as TO_UPDATE to wait the response of the controller.
             #If no parameter should be modified in the controller, set the
             #"resStateId" as COMMITED
@@ -2981,9 +2987,9 @@ class DataBase(object):
         If "includeDeleted" flag is set to False, it will only return all
         the persons not marked as DELETED
         '''
-        
+
         try:
-        
+
             #check if the organization id exist in the database
             sql = ("SELECT * FROM Organization WHERE id='{}'".format(orgId))
             self.execute(sql)
@@ -2991,7 +2997,7 @@ class DataBase(object):
 
             if not organization:
                 raise OrganizationNotFound('Organization not found')
-        
+
             # Get all persons from the organization
             if includeDeleted:
                 sql = "SELECT * FROM Person WHERE orgId = {}".format(orgId)
@@ -3002,7 +3008,7 @@ class DataBase(object):
                       )
             self.execute(sql)
             persons = self.cursor.fetchall()
-        
+
             return persons
 
 
@@ -3088,7 +3094,7 @@ class DataBase(object):
             self.execute(sql)
             row = self.cursor.fetchone()
 
-            #If there is a visitor with this identNumber (row not None) and the 
+            #If there is a visitor with this identNumber (row not None) and the
             #person we are adding is a visitor (person['visitedOrgId'] != 'NULL')
             #we are going to update the existing row instead of adding.
             if row and person['visitedOrgId'] != 'NULL':
@@ -3096,8 +3102,8 @@ class DataBase(object):
 
                 sql = ("UPDATE Person SET names = '{}', lastName = '{}', cardNumber = {}, "
                        "note = '{}', visitedOrgId = {}, isProvider = {}, resStateId = {} "
-                       "WHERE id = {}".format(person['names'], person['lastName'], 
-                                              person['cardNumber'], person['note'], 
+                       "WHERE id = {}".format(person['names'], person['lastName'],
+                                              person['cardNumber'], person['note'],
                                               person['visitedOrgId'], person['isProvider'],
                                               COMMITTED, personId)
                       )
@@ -3108,7 +3114,7 @@ class DataBase(object):
                 sql = ("INSERT INTO Person(names, lastName, identNumber, note, cardNumber, orgId, "
                        "visitedOrgId, isProvider, resStateId) VALUES('{}', '{}', '{}', '{}', {}, {}, {}, {}, {})"
                        "".format(person['names'], person['lastName'], person['identNumber'], person['note'],
-                                 person['cardNumber'], person['orgId'], person['visitedOrgId'], 
+                                 person['cardNumber'], person['orgId'], person['visitedOrgId'],
                                  person['isProvider'], COMMITTED)
 
                      )
@@ -3131,7 +3137,7 @@ class DataBase(object):
         Set person row state in state: TO_DELETE (pending to delete) or
         TO_UPDATE (pending to update).
         Receive personId and operation (TO_DELETE or TO_UPDATE).
-        Return a list of controller MAC addresses where the person should 
+        Return a list of controller MAC addresses where the person should
         be deleted.
         '''
 
@@ -3201,14 +3207,14 @@ class DataBase(object):
             if ctrllerMacs == []:
                 if operation == TO_DELETE:
                     logMsg = ("This person is not present in any controller. "
-                              "Marking it as deleted in central DB." 
+                              "Marking it as deleted in central DB."
                              )
                     self.logger.debug(logMsg)
                     #Setting the "cardNumber" = NULL to be able to use this card in
                     #another future person.
                     #Leaving the "identNumber" stored. In this way, when a person is
-                    #deleted and readded (typically a frequent visitor), with the 
-                    #ON DUPLICATE KEY UPDATE clause of the "addPerson" method, the 
+                    #deleted and readded (typically a frequent visitor), with the
+                    #ON DUPLICATE KEY UPDATE clause of the "addPerson" method, the
                     #same row in the database is used, avoiding duplicate with the same person.
                     sql = ("UPDATE Person SET cardNumber = NULL, resStateId = {} "
                            "WHERE id = {}".format(DELETED, personId)
@@ -3228,7 +3234,7 @@ class DataBase(object):
                     self.execute(sql)
             else:
                 #Adding in PersonPendingOperation table: personId, mac address and pending operation
-                #Each entry on this table will be removed when each controller answer to the delete 
+                #Each entry on this table will be removed when each controller answer to the delete
                 #person message.
                 values = ''
                 for mac in ctrllerMacs:
@@ -3268,7 +3274,7 @@ class DataBase(object):
             self.logger.debug(internalError)
             raise PersonError('Can not add this person: wrong argument')
 
-        
+
 
 
 
@@ -3279,10 +3285,10 @@ class DataBase(object):
         First of all it determines the pendig operation of that person on that controller.
 
         If the operation is TO_DELETE: it deletes all the accesses and limited accesses of
-        this person on the doors managed by this controller. 
+        this person on the doors managed by this controller.
         Then it deletes the entry in "PersonPendingOperation" table which has this person id,
-        this MAC and the corresponding pending operation. 
-        If there is not more entries on "PersonPendingOperation" table with this person and 
+        this MAC and the corresponding pending operation.
+        If there is not more entries on "PersonPendingOperation" table with this person and
         this operation type, it can delete the person definitely from the central database.
         '''
 
@@ -3301,7 +3307,7 @@ class DataBase(object):
                       )
                 self.execute(sql)
 
-                #Deleting all limited accesses of this person on the doors managed by 
+                #Deleting all limited accesses of this person on the doors managed by
                 #this controller
                 sql = ("DELETE FROM LimitedAccess WHERE personId = {} AND doorId IN "
                        "(SELECT door.id FROM Door door JOIN Controller controller ON "
@@ -3310,7 +3316,7 @@ class DataBase(object):
                       )
                 self.execute(sql)
 
-                #Deleting all accesses of this person on the doors managed by 
+                #Deleting all accesses of this person on the doors managed by
                 #this controller
                 sql = ("DELETE FROM Access WHERE personId = {} AND doorId IN "
                        "(SELECT door.id FROM Door door JOIN Controller controller ON "
@@ -3328,8 +3334,8 @@ class DataBase(object):
                       )
                 self.execute(sql)
 
-                #If there is not more entries on "PersonPendingOperation" table with this person and 
-                #this operation type, it can delete the person definitely from the central database.                
+                #If there is not more entries on "PersonPendingOperation" table with this person and
+                #this operation type, it can delete the person definitely from the central database.
                 sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
                        "AND pendingOp = {}".format(personId, TO_DELETE)
                       )
@@ -3339,7 +3345,7 @@ class DataBase(object):
                     #Setting the "cardNumber" = NULL to be able to use this card in
                     #another future person.
                     #Leaving the "identNumber" stored. In this way, when a person is
-                    #deleted and readded (typically a frequent visitor), the same row 
+                    #deleted and readded (typically a frequent visitor), the same row
                     #in the database is used, avoiding duplicate with the same person.
                     sql = ("UPDATE Person SET cardNumber = NULL, resStateId = {} "
                            "WHERE id = {}".format(DELETED, personId)
@@ -3357,9 +3363,9 @@ class DataBase(object):
                       )
                 self.execute(sql)
 
-                #If there is not more entries on "PersonPendingOperation" table with this person and 
-                #this operation type, it can set the person row state as COMMITTED definitely in the 
-                #central database.                
+                #If there is not more entries on "PersonPendingOperation" table with this person and
+                #this operation type, it can set the person row state as COMMITTED definitely in the
+                #central database.
                 sql = ("SELECT COUNT(*) FROM PersonPendingOperation WHERE personId = {} "
                        "AND pendingOp = {}".format(personId, TO_UPDATE)
                       )
@@ -3447,7 +3453,7 @@ class DataBase(object):
             sql = ("UPDATE Person SET names = '{}', lastName = '{}', identNumber = '{}', note = '{}', "
                    "cardNumber = {}, orgId = {}, visitedOrgId = {}, isProvider = {}  WHERE id = {}"
                    "".format(person['names'], person['lastName'], person['identNumber'], person['note'],
-                             person['cardNumber'], person['orgId'], person['visitedOrgId'], person['isProvider'], 
+                             person['cardNumber'], person['orgId'], person['visitedOrgId'], person['isProvider'],
                              person['id'])
                   )
 
@@ -3535,7 +3541,7 @@ class DataBase(object):
 
             if not access['allWeek']:
                 access['liAccesses'] = self.getLiAccesses(access['doorId'], access['personId'])
-                #When the the access is not allWeek access, startTime, endTime, iSide and 
+                #When the the access is not allWeek access, startTime, endTime, iSide and
                 #oSide fields are present in each limitedAccess, so we can remove this
                 #field from access.
                 access.pop('startTime')
@@ -3583,7 +3589,7 @@ class DataBase(object):
                 #If the tables were locked when this exception was raised, they will be unlocked
                 self.execute("UNLOCK TABLES")
                 raise AccessError("Error in arguments received in getAccesses method.")
-        
+
             elif personId:
                 # check if the person id exists in the database
                 sql = ("SELECT * FROM Person WHERE id='{}'".format(personId))
@@ -3640,7 +3646,7 @@ class DataBase(object):
                         access['liAccesses'] = self.getLiAccesses(access['doorId'], personId)
                     else:
                         access['liAccesses'] = self.getLiAccesses(doorId, access['personId'])
-                    #When the the access is not allWeek access, startTime, endTime, iSide and 
+                    #When the the access is not allWeek access, startTime, endTime, iSide and
                     #oSide fields are present in each limitedAccess, so we can remove this
                     #field from access.
                     access.pop('startTime')
@@ -3656,7 +3662,7 @@ class DataBase(object):
             self.execute("UNLOCK TABLES")
             return accesses
 
-        
+
         except TypeError:
             #This exception could be raised by "getLiAccesses" method
             self.execute("UNLOCK TABLES")
@@ -3708,13 +3714,13 @@ class DataBase(object):
 
     def getUncmtAccesses(self, ctrllerMac, resStateId):
         '''
-        This method is an iterator, in each iteration it returns a access not committed 
+        This method is an iterator, in each iteration it returns a access not committed
         with the state "resStateId" from the controller with the MAC address "ctrllerMac".
-        The access also have the card number of the person involved in the access as the 
+        The access also have the card number of the person involved in the access as the
         controller need it to add the person dinamically in its Person table.
         NOTE 1: When this method access to "Access" table, it locks the "Access" and
         "LimitedAccess" table to avoid inconsistency. As this method is an iterator and its
-        execution is interrupted, each time it yields a value, it leave the tables unlocked 
+        execution is interrupted, each time it yields a value, it leave the tables unlocked
         each time it yields a value and re locks them when it continues.
         NOTE 2: As this method is an iterator and every time it yields an access it is
         needed to execute the "UNLOCK TABLES" SQL sentence, the SQL sentence to retrieve
@@ -3750,7 +3756,7 @@ class DataBase(object):
                 access.pop('resStateId')
                 #Time columns in MariaDB are retrieved as timedelta type.
                 #If it is converted to string using str() function, something
-                #like 0:27:00 is got. When it is sent to controller in this way, 
+                #like 0:27:00 is got. When it is sent to controller in this way,
                 #it causes problems when it is compared with times like 09:23.
                 #(For example: '0:00:00' > '09:31' returns True).
                 #For this reason, it should be formatted and sent in the XX:XX format.
@@ -3766,7 +3772,7 @@ class DataBase(object):
                 if access['endTime'] is not None: #Asking if not None because in liaccess this field is None.
                     access['endTime'] = (datetime.datetime.min + access['endTime']).time().strftime('%H:%M')
                 access['expireDate'] = str(access['expireDate'])#.strftime('%Y-%m-%d %H:%M')
-                
+
                 yield access
 
                 sql = ("LOCK TABLES Controller WRITE, "
@@ -3774,7 +3780,7 @@ class DataBase(object):
                        "Access WRITE, LimitedAccess WRITE"
                       )
                 self.execute(sql)
-                
+
                 access = cursor.fetchone()
 
             self.execute("UNLOCK TABLES")
@@ -3921,8 +3927,8 @@ class DataBase(object):
             self.execute(sql)
 
 
-            #The following parameters are got when all limited accesses of a 
-            #person in a door are deleted via access endpoint.            
+            #The following parameters are got when all limited accesses of a
+            #person in a door are deleted via access endpoint.
             sql = ("SELECT allWeek, doorId, personId FROM Access WHERE id = {}"
                    "".format(accessId)
                   )
@@ -3933,11 +3939,11 @@ class DataBase(object):
             doorId = row['doorId']
             personId = row['personId']
 
-            #This can happen when all limited access of a person in a door 
+            #This can happen when all limited access of a person in a door
             #are being deleted via access endpoint.
             #On this situation is better start marking the Limited Access entries
-            #before marking the Access entries because if an error occurs the 
-            #Access entry is not altered and inconsistency is avoided between 
+            #before marking the Access entries because if an error occurs the
+            #Access entry is not altered and inconsistency is avoided between
             #Access and Limited Access table.
             if not allWeek:
 
@@ -4099,12 +4105,12 @@ class DataBase(object):
 
     def getUncmtLiAccesses(self, ctrllerMac, resStateId):
         '''
-        This method is an iterator, in each iteration it returns a limited access not committed 
+        This method is an iterator, in each iteration it returns a limited access not committed
         with the state "resStateId" from the controller with the MAC address "ctrllerMac".
-        The limited access also have the card number of the person involved in the access as the 
+        The limited access also have the card number of the person involved in the access as the
         controller need it to add the person dinamically in its Person table.
         NOTE 1: When this method access to "LimitedAccess" and "Access" table, it locks
-        the "Access" and "LimitedAccess" table to avoid inconsistency. As this method is an 
+        the "Access" and "LimitedAccess" table to avoid inconsistency. As this method is an
         iterator and its execution is interrupted, each time it yields a value, it leave the
         tables unlocked each time it yields a value and re lock them when it continues.
         NOTE 2: As this method is an iterator and every time it yields a limited access it is
@@ -4117,7 +4123,7 @@ class DataBase(object):
         new cursor to maintain the sequence. (The last situation is not happening today)
         '''
 
-        
+
         try:
             sql = ("LOCK TABLES Controller WRITE, "
                    "Door WRITE, Person WRITE, "
@@ -4146,7 +4152,7 @@ class DataBase(object):
                 row = cursorForAccess.fetchone()
 
                 if not row:
-                    #If there are entries in "LimitedAccess" table which doesn't have its corresponding entry in "Access" 
+                    #If there are entries in "LimitedAccess" table which doesn't have its corresponding entry in "Access"
                     #table should be deleted to avoid "crudresender" thread continue trying to resend them.
                     logMsg = 'Removing LimitedAccess entries to solve the inconsistency between Access and LimitedAccess'
                     self.logger.warning(logMsg)
@@ -4169,7 +4175,7 @@ class DataBase(object):
 
                 #Time columns in MariaDB are retrieved as timedelta type.
                 #If it is converted to string using str() function, something
-                #like 0:27:00 is got. When it is sent to controller in this way, 
+                #like 0:27:00 is got. When it is sent to controller in this way,
                 #it causes problems when it is compared with times like 09:23.
                 #(For example: '0:00:00' > '09:31' returns True).
                 #For this reason, it should be formatted and sent in the XX:XX format.
@@ -4213,7 +4219,7 @@ class DataBase(object):
     def addLiAccess(self, liAccess):
         '''
         Receive a dictionary with limited access parametters and save it in DB.
-        In addition to creating an entry in the table "LimitedAccess" it also 
+        In addition to creating an entry in the table "LimitedAccess" it also
         creates an entry in "Access" table with allWeek = False.
         NOTE: The insertion in LimitedAccess table, is using the "ON DUPLICATE KEY UPDATE"
         to avoid complaining when adding a limited access with the same person,
@@ -4221,12 +4227,12 @@ class DataBase(object):
         On this situation, the limited access will be updated.
         This was specially necesary when adding multiple limited accesses to a person
         or a door that already have the same combination (door, person, weekDay).
-        When this didn't work in this way, the limited access never was sent to the 
+        When this didn't work in this way, the limited access never was sent to the
         controller, because a database exception was raised, the confirmation never came
         and the access entry in Access table remains in state TO_ADD or TO_UPDATE.
         In the past the change of the resState in the access entry also was done before
         inserting in LimitedAccess table. Now the change is done after. In this way,
-        if an error ocurs during the insertion on LimitedAccess, the Acces table is not modified. 
+        if an error ocurs during the insertion on LimitedAccess, the Acces table is not modified.
         '''
 
         try:
@@ -4249,7 +4255,7 @@ class DataBase(object):
             #For this reason, a SELECT statement should be executed.
             sql = ("SELECT id FROM LimitedAccess WHERE doorId = {} AND personId = {} AND weekDay = {}"
                    "".format(liAccess['doorId'], liAccess['personId'], liAccess['weekDay'])
-                  )     
+                  )
             self.execute(sql)
             liAccessId = self.cursor.fetchone()['id']
 
@@ -4267,7 +4273,7 @@ class DataBase(object):
                    "endTime, expireDate, resStateId) VALUES({}, {}, FALSE, FALSE, FALSE, NULL, NULL, '{}', {}) "
                    "ON DUPLICATE KEY UPDATE allWeek = FALSE, iSide = FALSE, oSide = FALSE, startTime = NULL, "
                    "endTime = NULL, expireDate = '{}', resStateId = {}"
-                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['expireDate'], 
+                   "".format(liAccess['doorId'], liAccess['personId'], liAccess['expireDate'],
                              TO_ADD, liAccess['expireDate'], TO_ADD)
                   )
             self.execute(sql)
@@ -4318,7 +4324,7 @@ class DataBase(object):
             sql = "LOCK TABLES Access WRITE, LimitedAccess WRITE"
             self.execute(sql)
 
-            #The only thing we should modify in "Access" table is the "expireDate" and 
+            #The only thing we should modify in "Access" table is the "expireDate" and
             #"resStateId" field. To modify the access table, we need "doorId" and "personId"
             sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
                    "".format(liAccess['id'])
@@ -4392,7 +4398,7 @@ class DataBase(object):
                 raise AccessNotFound('Access not found')
 
 
-            #The only thing we should modify in "Access" table is the "resStateId" 
+            #The only thing we should modify in "Access" table is the "resStateId"
             #field. To modify the access table, we need "doorId" and "personId"
             sql = ("SELECT doorId, personId FROM LimitedAccess WHERE id = {}"
                    "".format(liAccessId)
@@ -4530,7 +4536,7 @@ class DataBase(object):
 
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     print("Testing Database")
     dataBase = DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, None)  #Passing None to pass something
 
@@ -4545,5 +4551,3 @@ if __name__ == "__main__":
               )
         dataBase.execute(sql)
         print(dataBase.cursor.fetchone())
-        
-

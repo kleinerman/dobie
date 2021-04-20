@@ -1,4 +1,4 @@
-FROM arm32v7/node:lts-alpine
+FROM arm64v8/node:lts-alpine
 
 WORKDIR /site
 
