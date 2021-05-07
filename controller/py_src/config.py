@@ -8,7 +8,7 @@ POWEROFF_BIN = 'poweroff'
 IOIFACE_BIN = '/opt/dobie/controller/bin/ioiface'
 
 #Wiegand bits of the input readers [door 1, door 2, door 3]
-IR_WGND_BITS = [34, 26, 26]
+IR_WGND_BITS = [26, 26, 26]
 #Wiegand bits of the output readers [door 1, door 2, door 3]
 OR_WGND_BITS = [26, 26, 26]
 

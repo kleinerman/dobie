@@ -163,7 +163,7 @@ void *run_reader (void *arg_p){
             // number, the value should be shifted to the right one position.
             card_number = (card_number & (reader_p->ini_mask_val - 2)) >> 1;
             // Creating the string that is going to be sent to the message queue.
-            sprintf(q_msg, "%d;%d;card=%08d", reader_p->door_id, reader_p->side, card_number);
+            sprintf(q_msg, "%d;%d;card=%08lld", reader_p->door_id, reader_p->side, card_number);
             // As many thread can write at the same time in message queue, it is protected with
             // a mutex. Maybe the same queue is itself protected, but I don't know.
             pthread_mutex_lock(&mq_mutex);
