@@ -383,9 +383,9 @@ $("#access-edit-form").submit(function(){
 						if(isNaN(accessRec.doorId)){
 							parent.$("#accesses-table-container").hide();
 							//unselect door if any
-							parent.$("#doors-select option:selected").prop("selected", false);
+							//parent.$("#doors-select option:selected").prop("selected", false);
 							//hide buttons
-							parent.$("#buttons-row").hide();
+							//parent.$("#buttons-row").hide();
 						} else parent.populateTable("access-table",accessRec.doorId);
 						//close modal
 						parent.$("#modal-edit").modal("hide");
@@ -461,9 +461,9 @@ $("#access-edit-form").submit(function(){
 				if(isNaN(accessRec.doorId)){
 					parent.$("#accesses-table-container").hide();
 					//unselect door if any
-					parent.$("#doors-select option:selected").prop("selected", false);
+					//parent.$("#doors-select option:selected").prop("selected", false);
 					//hide buttons
-					parent.$("#buttons-row").hide();
+					//parent.$("#buttons-row").hide();
 				} else parent.populateTable("access-table",accessRec.doorId);
 				//close modal
 				parent.$("#modal-edit").modal("hide");
