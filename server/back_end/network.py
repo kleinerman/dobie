@@ -39,14 +39,14 @@ class Unblocker(object):
     '''
     This class declares a pipe in its constructor.
     It stores read and write file descriptor as attributes.
-    -The getFd method returns the read file descriptor which is registered to be monitored 
+    -The getFd method returns the read file descriptor which is registered to be monitored
     by poll().
     -The unblock method write a dummy byte (0) to generate a event to wake up the poll()
     -The receive method reads this dummy byte because if it is not read, the next call
-    to poll(), will wake up again(). We are reading more than one byte (ten bytes), 
+    to poll(), will wake up again(). We are reading more than one byte (ten bytes),
     for the case of two consecutives calls generates two wake ups. (Not sure if it has sense)
     '''
-    
+
     def __init__(self):
         self.readPipe, self.writePipe = os.pipe()
 
@@ -59,7 +59,7 @@ class Unblocker(object):
     def receive(self):
         os.read(self.readPipe, 10)
 
-    
+
 
 
 
@@ -71,7 +71,7 @@ class NetMngr(genmngr.GenericMngr):
     '''
     def __init__(self, exitFlag, netToMsgRec, crudReSndr):
 
-        #Invoking the parent class constructor, specifying the thread name, 
+        #Invoking the parent class constructor, specifying the thread name,
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
 
@@ -92,7 +92,7 @@ class NetMngr(genmngr.GenericMngr):
         #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
 
-        #Lock to protect access to "netPoller" 
+        #Lock to protect access to "netPoller"
         self.lockNetPoller = threading.Lock()
 
         #Unblocker object to wake up the thread blocked in poll() call
@@ -132,7 +132,17 @@ class NetMngr(genmngr.GenericMngr):
         #Dictionary to get the socket file descriptor with the MAC address
         self.macConnObjects = {}
 
- 
+
+
+    def isResponse(self, msg):
+        '''
+        It returns True if msg is a response to the controller,
+        otherwise, it returns False
+        '''
+
+        if (int_RSPM & msg[0]) == int_RSPM:
+            return True
+        return False
 
 
     #---------------------------------------------------------------------------#
@@ -141,7 +151,7 @@ class NetMngr(genmngr.GenericMngr):
         '''
         This method is called by the main "run()" method when it receives bytes
         from the server. This happens in POLLIN evnts branch.
-        It process the message and delivers it to the corresponding thread 
+        It process the message and delivers it to the corresponding thread
         according to the headers of the message.
         '''
         #This is a response to an event sent to the server
@@ -170,8 +180,8 @@ class NetMngr(genmngr.GenericMngr):
             #reason, the MAC is inserted in the json dictionary.
             if bytes([msg[1]]) == b'P':
                 index = msg.index(b'}')
-                msg  = (msg[:index] 
-                        + b', "mac": ' + self.fdConnObjects[fd]['mac'].encode('utf8') 
+                msg  = (msg[:index]
+                        + b', "mac": ' + self.fdConnObjects[fd]['mac'].encode('utf8')
                         + msg[index:]
                        )
             self.netToMsgRec.put(msg)
@@ -184,7 +194,7 @@ class NetMngr(genmngr.GenericMngr):
 
         elif msg.startswith(RRRE):
             self.netToCrudReSndr.put(self.fdConnObjects[fd]['mac'])
-            
+
 
 
     #---------------------------------------------------------------------------#
@@ -213,11 +223,20 @@ class NetMngr(genmngr.GenericMngr):
             self.logger.debug('Controller not connected.')
             raise CtrllerDisconnected
 
-        #Everytime a message is sent to the controller, "CrudReSender"
-        #is delayed. This is to avoid "CrudReSender" thread resends CRUDs
-        #when a CRUD message has just been sent to the controller and the
-        #controller didn't answer yet.
-        self.crudReSndr.resetReSendTime()
+        # Everytime a message is sent to the controller, "CrudReSender"
+        # is delayed. This is to avoid "CrudReSender" thread resends
+        # CRUDs when a CRUD message has just been sent to the controller
+        # and the controller didn't answer yet.
+        # This was accomplished reseting the resend time of "CrudReSender"
+        # every time the server sends a message to the controller.
+        # Over the time, we realised that when the server is sending a response
+        # to the controller, the resend time of "crudReSndr" shouldn't reseted.
+        # For example: is very common that the server is all day receiving a
+        # lot of events and sending response to them. If the time to resend CRUDs
+        # is reseted every time a response to event is sent to controllers, CRUDs
+        # that should be resent will never be send.
+        if not self.isResponse(msg):
+            self.crudReSndr.resetReSendTime()
 
         outBufferQue.put(msg)
         with self.lockNetPoller:
@@ -237,7 +256,7 @@ class NetMngr(genmngr.GenericMngr):
         If during the reception, b'' is received, meaning that the controller
         was disconnected, a "CtrllerDisconnected" exception will be thrown.
         When the END byte is received we can return the content of the message
-        
+
         '''
         #if not ctrllerSckt:
         #    raise ControllerNotConnected
@@ -317,9 +336,9 @@ class NetMngr(genmngr.GenericMngr):
                     if SSL_ENABLED:
                         try:
                             ctrllerSckt = self.sslContext.wrap_socket(ctrllerSckt, server_side=True)
-                        #If the controller tries to connect without SSL, the exception "ssl.SSLError" 
+                        #If the controller tries to connect without SSL, the exception "ssl.SSLError"
                         #occurs. Also this exception can be caught with the same "OSError" exception
-                        #but the traceback shows the "ssl.SSLError". Just in case both are caught. 
+                        #but the traceback shows the "ssl.SSLError". Just in case both are caught.
                         #If the backend restarts while the controller is connected, when the controller
                         #tries to reconnect, sometimes SSL handshake fails and "OSError" happens.
                         except (ssl.SSLError, OSError) as sslError:
@@ -346,7 +365,7 @@ class NetMngr(genmngr.GenericMngr):
                         self.fdConnObjects[ctrllerScktFd] = connObjects
 
                         self.macConnObjects[ctrllerMac] = connObjects
-    
+
                         self.netPoller.register(ctrllerSckt, select.POLLIN)
 
 
@@ -398,7 +417,7 @@ class NetMngr(genmngr.GenericMngr):
                     #If the other side sends us two or more message very fast, is very
                     #common to receive more than one message contiguously in a call to recv().
                     #For this reason we should consider the message until the END delimiter
-                    #and store the rest. The rest could be an entire message or a part. 
+                    #and store the rest. The rest could be an entire message or a part.
 
                     #"allBytes" is the previous accumulated bytes that not complete
                     #an entire message plus the new received bytes. When theres is not
@@ -462,7 +481,7 @@ class NetMngr(genmngr.GenericMngr):
                         self.netPoller.modify(ctrllerSckt, select.POLLIN)
 
 
-                #This will happen when the server closes the socket or the 
+                #This will happen when the server closes the socket or the
                 #connection with the server is broken
                 elif pollEvnt & (select.POLLHUP | select.POLLERR | select.POLLNVAL):
                     print('planvll')
@@ -504,11 +523,7 @@ class NetMngr(genmngr.GenericMngr):
 
             #print('MAC-->',self.macConnObjects)
             #print('FD-->',self.fdConnObjects)
-                    
+
 
             #Cheking if Main thread ask as to finish.
             self.checkExit()
-
-
-
-    
