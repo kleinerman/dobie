@@ -584,7 +584,7 @@ class DataBase(object):
                     personId = None
                 event['personId'] = personId
 
-            event.pop('cardNumber')
+            # event.pop('cardNumber')
 
 
         except KeyError:
@@ -656,7 +656,10 @@ class DataBase(object):
                 fmtEvent['visitedOrgName'] = orgAndPerson['visitedOrgName']
 
             else:
-                fmtEvent['personName'] = None
+                if event['cardNumber'] is None:
+                    fmtEvent['personName'] = None
+                else:
+                    fmtEvent['personName'] = 'Card Number: {}'.format(event['cardNumber'])
                 fmtEvent['orgId'] = None
                 fmtEvent['orgName'] = None
                 fmtEvent['visitedOrgId'] = None
