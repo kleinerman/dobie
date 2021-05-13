@@ -1,4 +1,4 @@
-FROM php:7-fpm-alpine
+FROM php:8-fpm-alpine
 
 
 #tzdata is needed to change the timezone

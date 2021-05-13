@@ -1065,7 +1065,7 @@ function add_visit($user,$pass,$names,$lastname,$idnum,$cardnum,$orgid,$expirati
 	return $response;
 }
 
-function set_visit($user,$pass,$id,$names,$lastname,$idnum,$cardnum,$note="",$orgid,$isprov=0){
+function set_visit($user,$pass,$id,$names,$lastname,$idnum,$cardnum,$note="",$orgid="",$isprov=0){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->orgId= 1;
