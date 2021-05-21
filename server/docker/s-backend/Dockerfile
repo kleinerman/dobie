@@ -11,20 +11,36 @@ FROM python:3-slim
 # zlib1g-dev and libjpeg-dev is needed to compile pillow
 # Once compiled the above, cleaning downloaded packages to reduce the image size
 
+# As pip is complaining about installing packages as root,
+# the backend is run and installed in a virtual environment
+# in /dobie-venv.
+# Instead of calling the script activate with #source /dobie-vevn/bin/acitvate,
+# the /dobie-venv directory was added at the begining of the PATH environment
+# variable inside the container. This is the only thing that is needed of the
+# activate script.
+# Then, when the main.py is executed from the docker-compose.yml, as the
+# /dobie-venv directory is first in PATH variable, the python interpreter
+# and all the pip packages of the virtual environment will be used.
+
+
 RUN \
 apt-get -y update && apt-get -y dist-upgrade && \
-apt-get install -y gcc make libffi-dev libssl-dev zlib1g-dev libjpeg-dev && \
-pip install --upgrade pip && \
-pip install --no-cache-dir Flask && \
-pip install --no-cache-dir Flask-HTTPAuth && \
-pip install --no-cache-dir PyMySQL && \
-pip install --no-cache-dir gevent && \
-pip install --no-cache-dir requests && \
-pip install --no-cache-dir pillow && \
-pip install --no-cache-dir pyarmor && \
-apt-get -y purge libssl-dev libffi-dev gcc zlib1g-dev && \
-apt-get -y autoremove && \
-apt-get -y clean && \
+apt-get install -y apt-utils gcc make libffi-dev libssl-dev zlib1g-dev libjpeg-dev && \
 cp /usr/share/zoneinfo/America/Argentina/Cordoba /etc/localtime && \
 echo "America/Argentina/Cordoba" > /etc/timezone
 
+ENV VENV_DIR=/dobie-venv
+RUN python -m venv $VENV_DIR
+ENV PATH="$VENV_DIR/bin:$PATH"
+RUN \
+python -m pip install --upgrade pip && \
+python -m pip install --no-cache-dir Flask && \
+python -m pip install --no-cache-dir Flask-HTTPAuth && \
+python -m pip install --no-cache-dir PyMySQL && \
+python -m pip install --no-cache-dir gevent && \
+python -m pip install --no-cache-dir requests && \
+python -m pip install --no-cache-dir pillow && \
+python -m pip install --no-cache-dir pyarmor && \
+apt-get -y purge libssl-dev libffi-dev gcc zlib1g-dev && \
+apt-get -y autoremove && \
+apt-get -y clean

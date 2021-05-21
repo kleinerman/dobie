@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 services:
 
@@ -11,7 +11,7 @@ services:
       - "9797:9797"
       - "5000:5000"
     volumes:
-      - ../back_end:/opt/dobie-server
+      - ../back_end:/dobie-venv/dobie-server
       - ../certs/ctrller_connection:/var/lib/dobie-certs
       - /var/log/dobie-s:/var/log/dobie-s
       - /var/lib/dobie-pers-imgs:/var/lib/dobie-pers-imgs
@@ -19,7 +19,7 @@ services:
       - dobie-net
     depends_on:
       - database
-    command: python -u /opt/dobie-server/main.py
+    command: python -u /dobie-venv/dobie-server/main.py
     logging:
       driver: "json-file"
       options:
