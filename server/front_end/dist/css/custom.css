@@ -400,3 +400,8 @@ input::-webkit-inner-spin-button {
 	background:#0a0;
 	color:#fff;
 }
+
+/*scrollbars to create door body*/
+#doors-create-modal-body{
+	max-height: 768px;overflow-y:auto;overflow-x:hidden;
+}

@@ -65,7 +65,7 @@ include("footer.php");
 <h4 class="modal-title" id="modal-new-label"><?=get_text("New Door",$lang);?></h4>
 </div>
 <form class="form-horizontal" id="door-new-form" action="#">
-<div class="modal-body">
+<div class="modal-body" id="doors-create-modal-body">
 
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Name",$lang);?>:</label>
