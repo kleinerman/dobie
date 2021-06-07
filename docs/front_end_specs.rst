@@ -2609,7 +2609,7 @@ The following REST method should be sent to the server:
 | Visiting organization combobox should show all the organizations. The **visitedOrgId** field of visitor's JSON should be the ID of the organization selected in this combobox. To get all the organizations, see `Get Organizations`_
 | To fill the combobox **Visit Door Group**, all Door Groups should be retrieved and only the ones which has the field "isForVisit" equal to 1 should be used. To do it, see `Get Door Groups`_.
 | All the doors of the selected Visit Door Group should be retrieved. To do it, see `Get the doors from a Door Group`_.
-| Once we have all the doors, an **All Week Access** should be created for the visitor in each door of the group in both directions (``iSide = 1`` and ``oSide = 1``). The expiration date of the access should be the expiration selected in the pop up. By default it should expires at 23:59 of the current day.
+| Once we have all the doors, an **All Week Access** should be created for the visitor in each door of the Door Group, using the ``iSide`` and ``oSide`` fields retrieved as a door parameters. The expiration date of the access should be the expiration selected in the pop up. By default it should expires at 23:59 of the current day.
 | To give access see: `Add All Week Access`_
 
 
