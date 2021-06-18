@@ -1236,7 +1236,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def getUnCmtCtrllers():
             '''
-            Add a new Controller into the database.
+            Get uncommitted controllers.
             '''
             try:
                 if request.method == 'GET':
@@ -1256,6 +1256,102 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
             except KeyError:
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
+
+
+
+        @app.route('/api/v1.0/controller/<int:controllerId>/forcecommit', methods=['PUT'])
+        @auth.login_required
+        def forceCmtCtrller(controllerId):
+            '''
+            Mark all the CRUDS of the controller as committed although the controller is unreachable .
+            '''
+            try:
+
+                if request.method == 'PUT':
+                    ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
+                    for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_ADD, database.TO_UPDATE, database.TO_DELETE):
+                        self.dataBase.commitDoor(door['id'])
+
+
+                    for unlkDoorSkd in self.dataBase.getUncmtUnlkDoorSkds(ctrllerMac, database.TO_ADD):
+                        self.ctrllerMsger.addUnlkDoorSkd(ctrllerMac, unlkDoorSkd)
+                    for unlkDoorSkd in self.dataBase.getUncmtUnlkDoorSkds(ctrllerMac, database.TO_UPDATE):
+                        unlkDoorSkd.pop('doorId')
+                        self.ctrllerMsger.updUnlkDoorSkd(ctrllerMac, unlkDoorSkd)
+                    for unlkDoorSkd in self.dataBase.getUncmtUnlkDoorSkds(ctrllerMac, database.TO_DELETE):
+                        self.ctrllerMsger.delUnlkDoorSkd(ctrllerMac, unlkDoorSkd['id'])
+                    self.checkExit()
+
+
+                    for excDayUds in self.dataBase.getUncmtExcDayUdss(ctrllerMac, database.TO_ADD):
+                        self.ctrllerMsger.addExcDayUds(ctrllerMac, excDayUds)
+                    for excDayUds in self.dataBase.getUncmtExcDayUdss(ctrllerMac, database.TO_UPDATE):
+                        excDayUds.pop('doorId')
+                        self.ctrllerMsger.updExcDayUds(ctrllerMac, excDayUds)
+                    for excDayUds in self.dataBase.getUncmtExcDayUdss(ctrllerMac, database.TO_DELETE):
+                        self.ctrllerMsger.delExcDayUds(ctrllerMac, excDayUds['id'])
+                    self.checkExit()
+
+
+                    for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD):
+                        self.ctrllerMsger.addAccess(ctrllerMac, access)
+                    for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_UPDATE):
+                        #The following parameters should not be sent when updating an access.
+                        access.pop('doorId')
+                        access.pop('personId')
+                        access.pop('allWeek')
+                        access.pop('cardNumber')
+                        self.ctrllerMsger.updAccess(ctrllerMac, access)
+                    for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_DELETE):
+                        self.ctrllerMsger.delAccess(ctrllerMac, access['id'])
+                    self.checkExit()
+
+
+                    for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD):
+                        self.ctrllerMsger.addLiAccess(ctrllerMac, liAccess)
+                    for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_UPDATE):
+                        #The following parameters should not be sent when updating an access.
+                        liAccess.pop('accessId')
+                        liAccess.pop('doorId')
+                        liAccess.pop('personId')
+                        liAccess.pop('cardNumber')
+                        self.ctrllerMsger.updLiAccess(ctrllerMac, liAccess)
+                    for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_DELETE):
+                        self.ctrllerMsger.delLiAccess(ctrllerMac, liAccess['id'])
+                    self.checkExit()
+
+
+                    #Persons never colud be in state TO_ADD. For this reason,
+                    #only TO_UPDATE or TO_DELETE state is retrieved
+                    for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE):
+                        person.pop('names')
+                        person.pop('lastName')
+                        person.pop('orgId')
+                        person.pop('visitedOrgId')
+                        person.pop('isProvider')
+                        #"updPerson" method receive a list of MAC addresses to update. Because in this case only one
+                        #controller is being updated, a list with only the MAC address of the controller is created.
+                        self.ctrllerMsger.updPerson([ctrllerMac], person)
+                    for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_DELETE):
+                        #"delPerson" method receive a list of MAC addresses to update. Because in this case only one
+                        #controller is being updated, a list with only the MAC address of the controller is created.
+                        self.ctrllerMsger.delPerson([ctrllerMac], person['id'])
+                    self.checkExit()
+
+
+
+
+
+            except database.ControllerError as controllerError:
+                raise ConflictError(str(controllerError))
+            except TypeError:
+                raise BadRequest(('Expecting to find application/json in Content-Type header '
+                                  '- the server could not comply with the request since it is '
+                                  'either malformed or otherwise incorrect. The client is assumed '
+                                  'to be in error'))
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: {}'.format(', '.join(ctrllerNeedKeys)))
+
 
 
 
