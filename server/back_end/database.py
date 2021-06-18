@@ -2044,49 +2044,54 @@ class DataBase(object):
 
 
 
-    def getUncmtCtrllerMacs(self):
+    def getUnCmtCtrllers(self):
         '''
         Return a list of controller MAC addresses of controllers which did not respond
         to crud messages.
         '''
 
-        sql = ("SELECT controller.macAddress FROM Controller controller JOIN Door door "
-               "ON (controller.id = door.controllerId) WHERE door.resStateId IN ({0}, {1}, {2}) "
+        sql = ("SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) WHERE Door.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
-               "(controller.id = door.controllerId) JOIN UnlkDoorSkd unlkDoorSkd ON "
-               "(door.id = unlkDoorSkd.doorId) WHERE unlkDoorSkd.resStateId IN ({0}, {1}, {2}) "
+               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) JOIN UnlkDoorSkd "
+               "ON (Door.id = UnlkDoorSkd.doorId) WHERE UnlkDoorSkd.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
-               "(controller.id = door.controllerId) JOIN ExcDayUds excDayUds ON "
-               "(door.id = excDayUds.doorId) WHERE excDayUds.resStateId IN ({0}, {1}, {2}) "
+               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) JOIN ExcDayUds "
+               "ON (Door.id = ExcDayUds.doorId) WHERE ExcDayUds.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
-               "(controller.id = door.controllerId) JOIN LimitedAccess limitedAccess ON "
-               "(door.id = limitedAccess.doorId) WHERE limitedAccess.resStateId IN ({0}, {1}, {2}) "
+               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) JOIN LimitedAccess "
+               "ON (Door.id = LimitedAccess.doorId) WHERE LimitedAccess.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
-               "(controller.id = door.controllerId) JOIN Access access ON "
-               "(door.id = access.doorId) WHERE access.resStateId IN ({0}, {1}, {2}) "
+               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) JOIN Access "
+               "ON (Door.id = Access.doorId) WHERE Access.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT macAddress FROM PersonPendingOperation"
+               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "FROM Controller JOIN PersonPendingOperation "
+               "ON (Controller.macAddress = PersonPendingOperation.macAddress)"
                "".format(TO_ADD, TO_UPDATE, TO_DELETE)
               )
 
         try:
             self.execute(sql)
-            ctrllerMacsNotComm = self.cursor.fetchall()
-            ctrllerMacsNotComm = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsNotComm]
-            return ctrllerMacsNotComm
-
+            unCmtCtrllers = self.cursor.fetchall()
+            return unCmtCtrllers
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise ControllerError('Error getting MAC addresses of not committed controllers')
+            raise ControllerError('Error getting uncommitted controllers')
 
-        except TypeError:
-            self.logger.debug(internalError)
-            raise ControllerError('Error getting MAC addresses of not committed controllers')
+        except TypeError as typeError:
+            self.logger.debug(typeError)
+            raise ControllerError('Error getting uncommitted controllers')
 
 
 
