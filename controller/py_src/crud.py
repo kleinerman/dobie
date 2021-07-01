@@ -87,8 +87,9 @@ class CrudMngr(genmngr.GenericMngr):
                 self.checkExit()
 
                 if crudMsg == RRP:
+                    self.logger.info('Clearing database to receive the re-provisioning')
                     self.dataBase.clearDatabase()
-                    self.netMngr.sendToServer(RRRE + END)
+                    self.netMngr.sendToServer(RRRP + END)
 
                 else:
 
@@ -177,4 +178,3 @@ class CrudMngr(genmngr.GenericMngr):
             door.alrmTime = None
 
         self.dataBase.delDoor(doorJson)
-

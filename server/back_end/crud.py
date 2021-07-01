@@ -96,8 +96,8 @@ class CrudMngr(genmngr.GenericMngr):
 
         app = Flask(__name__)
         auth = HTTPBasicAuth()
-       
-        
+
+
         ## Error hanlders
         #
         @app.errorhandler(BadRequest)
@@ -109,7 +109,7 @@ class CrudMngr(genmngr.GenericMngr):
         @app.errorhandler(400)
         def badRequest(error):
             response = jsonify ({'status': 'error',
-                                 'error': 'bad request', 
+                                 'error': 'bad request',
                                  'message':'the client sent a request that this server could not understand',
                                  'code':400})
             response.status_code = 400
@@ -133,7 +133,7 @@ class CrudMngr(genmngr.GenericMngr):
         @app.errorhandler(405)
         def methodNotAllowed(error):
             response = jsonify ({'status': 'error',
-                                 'error': 'method not allowed', 
+                                 'error': 'method not allowed',
                                  'message':'The method is not allowed for the requested URL',
                                  'code':405})
             response.status_code = 405
@@ -144,7 +144,7 @@ class CrudMngr(genmngr.GenericMngr):
         def conflictError(error):
             response = jsonify ({'status': 'conflict',
                                  'error': ('The request could not be completed due to a conflict with '
-                                           'the current state of the target resource'), 
+                                           'the current state of the target resource'),
                                  'message': error.message,
                                  'code':409})
             response.status_code = 409
@@ -163,7 +163,7 @@ class CrudMngr(genmngr.GenericMngr):
             response = jsonify ({'status': 'error', 'error': 'Unauthorized access'})
             response.status_code = 403
             return response
- 
+
 
 
         @auth.verify_password
@@ -211,7 +211,7 @@ class CrudMngr(genmngr.GenericMngr):
         @app.route('/api/v1.0/login', methods=['GET'])
         def login():
             '''
-            GET: Return user parametters of the logged user. The role parametter 
+            GET: Return user parametters of the logged user. The role parametter
             is used by the UI to know the options to show.
             '''
             g.user.pop('passwdHash')
@@ -507,7 +507,7 @@ class CrudMngr(genmngr.GenericMngr):
                     organization['uri'] = request.url
                     #organization['uri'] = url_for('Organization', orgId=orgId, _external=True)
                     return jsonify(organization)
-                    
+
                 # Update an organization
                 elif request.method == 'PUT':
                     if orgId == 1:
@@ -527,7 +527,7 @@ class CrudMngr(genmngr.GenericMngr):
                     for person in self.dataBase.getOrgPersons(orgId, includeDeleted=False):
                         ctrllerMacsToDelPrsn = self.dataBase.markPerson(person['id'], database.TO_DELETE)
                         self.ctrllerMsger.delPerson(ctrllerMacsToDelPrsn, person['id'])
-                        
+
                     return jsonify({'status': 'OK', 'message': 'Organization deleted'}), OK
 
             except database.OrganizationNotFound as organizationNotFound:
@@ -536,7 +536,7 @@ class CrudMngr(genmngr.GenericMngr):
                 raise ConflictError(str(organizationError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
-                                  '- the server could not comply with the request since it is '          
+                                  '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
@@ -658,7 +658,7 @@ class CrudMngr(genmngr.GenericMngr):
                 raise ConflictError(str(zoneError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
-                                  '- the server could not comply with the request since it is '          
+                                  '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
@@ -712,10 +712,10 @@ class CrudMngr(genmngr.GenericMngr):
         @app.route('/api/v1.0/doorgroup', methods=['POST', 'GET'])
         @auth.login_required
         def doorGroups():
-            ''' 
+            '''
             Add a new Door Group into the database.
-            '''     
-            try:    
+            '''
+            try:
                 ## For GET method
                 if request.method == 'GET':
                     doorGroups = self.dataBase.getDoorGroups()
@@ -751,7 +751,7 @@ class CrudMngr(genmngr.GenericMngr):
             Retrieve update or delete a Door Group into the database.
             '''
             try:
-    
+
                 if request.method == 'GET':
                     doorGroup = self.dataBase.getDoorGroup(doorGroupId)
                     doorGroup['uri'] = request.url
@@ -816,7 +816,7 @@ class CrudMngr(genmngr.GenericMngr):
         @app.route('/api/v1.0/doorgroup/<int:doorGroupId>/door/<int:doorId>', methods=['PUT', 'DELETE'])
         @auth.login_required
         def doorInDoorGroup(doorGroupId, doorId):
-            ''' 
+            '''
             Add or delete a Door into Door Group.
             '''
             try:
@@ -873,7 +873,7 @@ class CrudMngr(genmngr.GenericMngr):
                         except KeyError:
                             #When the param is not in JSON, saving the param as None. We could use 'NULL'
                             #to avoid changing it in database addPerson method, but if the API user send
-                            #send null as value, we will retrieve it as None. In this way we leave the 
+                            #send null as value, we will retrieve it as None. In this way we leave the
                             #dictionary in the same way when the user of the API send null or don't send
                             #anything.
                             person[param] = None
@@ -897,7 +897,7 @@ class CrudMngr(genmngr.GenericMngr):
                 raise ConflictError(str(personError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
-                                  '- the server could not comply with the request since it is '          
+                                  '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
@@ -934,7 +934,7 @@ class CrudMngr(genmngr.GenericMngr):
                         except KeyError:
                             #When the param is not in JSON, saving the param as None. We could use 'NULL'
                             #to avoid changing it in database addPerson method, but if the API user send
-                            #send null as value, we will retrieve it as None. In this way we leave the 
+                            #send null as value, we will retrieve it as None. In this way we leave the
                             #dictionary in the same way when the user of the API send null or don't send
                             #anything.
                             person[param] = None
@@ -967,7 +967,7 @@ class CrudMngr(genmngr.GenericMngr):
                 raise ConflictError(str(personError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
-                                  '- the server could not comply with the request since it is '          
+                                  '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
@@ -1126,7 +1126,7 @@ class CrudMngr(genmngr.GenericMngr):
                 raise ConflictError(str(controllerError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
-                                  '- the server could not comply with the request since it is '          
+                                  '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
@@ -1155,7 +1155,7 @@ class CrudMngr(genmngr.GenericMngr):
                         controller[param] = request.json[param]
                     self.dataBase.updController(controller)
                     return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
-                
+
                 elif request.method == 'DELETE':
                     self.dataBase.delController(controllerId)
                     return jsonify({'status': 'OK', 'message': 'Controller deleted'}), OK
@@ -1166,7 +1166,7 @@ class CrudMngr(genmngr.GenericMngr):
                 raise ConflictError(str(controllerError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
-                                  '- the server could not comply with the request since it is '          
+                                  '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
@@ -1181,21 +1181,16 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def reProvController(controllerId):
             '''
-            Re provision all CRUD of a controller.
+            Re provision all CRUDs of a controller.
+            This method just send RRP message to the controller.
+            If the controller is not connected, the REST API will answer with 404 Not Found
             '''
             try:
-                self.dataBase.reProvController(controllerId)
                 ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
                 self.ctrllerMsger.requestReProv(ctrllerMac)
-
                 return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
-
             except network.CtrllerDisconnected:
                 raise NotFound("Controller not connected")
-            except database.ControllerNotFound as controllerNotFound:
-                raise NotFound(str(controllerNotFound))
-            except database.ControllerError as controllerError:
-                raise ConflictError(str(controllerError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -1297,8 +1292,8 @@ class CrudMngr(genmngr.GenericMngr):
                     # Create a clean door dictionary with only required door params,
                     # removing unnecessary parameters if the client send them.
                     # Also a KeyError will be raised if the client misses any parameter.
-                    # The client can't modify controllerId when updating door since it is 
-                    # associated with a door but as it is needed to know the controller to 
+                    # The client can't modify controllerId when updating door since it is
+                    # associated with a door but as it is needed to know the controller to
                     # send the message, it is got with the doorId.
                     door = {}
                     door['id'] = doorId
@@ -1328,7 +1323,7 @@ class CrudMngr(genmngr.GenericMngr):
                 raise ConflictError(str(doorError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
-                                  '- the server could not comply with the request since it is '          
+                                  '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
             except KeyError:
@@ -1514,7 +1509,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def modUnlkDoorSkd(unlkDoorSkdId):
             '''
-            Get, update or delete an Unlock Door Schedule into the database and send 
+            Get, update or delete an Unlock Door Schedule into the database and send
             the modification to the appropriate controller.
             '''
             try:
@@ -1701,7 +1696,7 @@ class CrudMngr(genmngr.GenericMngr):
 
                 # Access dictionary modified for the controller database (same server access id)
                 access['id'] = accessId
-        
+
                 #Get the person parameters as a dictionary
                 person = self.dataBase.getPerson(access['personId'])
 
@@ -1742,7 +1737,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def modAccess(accessId):
             '''
-            Get, update or delete an Access into the database and send the 
+            Get, update or delete an Access into the database and send the
             modification to the appropriate controller.
             '''
             try:
@@ -1806,7 +1801,7 @@ class CrudMngr(genmngr.GenericMngr):
 #---------------------------------Limited Access--------------------------------------
 
 
-        addLiAccessNeedKeys = ('doorId', 'personId', 'weekDay', 'iSide', 
+        addLiAccessNeedKeys = ('doorId', 'personId', 'weekDay', 'iSide',
                                'oSide', 'startTime', 'endTime', 'expireDate')
 
         @app.route('/api/v1.0/liaccess', methods=['POST'])
@@ -1930,7 +1925,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def events():
             '''
-            Returns events. This resource receives arguments in the URL that 
+            Returns events. This resource receives arguments in the URL that
             parameterize the list of events returned.
             The events are returned in paginated way.
             '''
@@ -1993,7 +1988,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def purgeEvents():
             '''
-            Deletes events from Event table until "untilDateTime" which is 
+            Deletes events from Event table until "untilDateTime" which is
             receivied as an argument
             Returns a JSON object with the amount of deleted events.
             If no event was deleted, a 404 Not Found will be returned
@@ -2024,15 +2019,15 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def visitors():
             '''
-            Returns visitors. This resource receives arguments in the URL that 
+            Returns visitors. This resource receives arguments in the URL that
             parameterize the list of visitors returned.
             At the moment, the GUI uses this resource in different places:
              -To get the visitors at the moment they are in the building: in this
              situation it can uses "visitedOrgId", "doorGroupId" and "cardNumber"
              arguments and it can ommit any or all of them.
-             -When a visitor enters the building, and it was previously a visitor (he 
-             is in DELETED state but all the data is availabe), to retrieve this data 
-             with the "identNumber" to autofill the "add visitor" screen: in this situation, 
+             -When a visitor enters the building, and it was previously a visitor (he
+             is in DELETED state but all the data is availabe), to retrieve this data
+             with the "identNumber" to autofill the "add visitor" screen: in this situation,
              the GUI only uses "identNumber" argument.
             '''
             try:
@@ -2042,7 +2037,7 @@ class CrudMngr(genmngr.GenericMngr):
                 cardNumber = request.args.get('cardNumber')
                 identNumber = request.args.get('identNumber')
 
-                visitors = self.dataBase.getVisitors(visitedOrgId, isProvider, doorGroupId, 
+                visitors = self.dataBase.getVisitors(visitedOrgId, isProvider, doorGroupId,
                                                      cardNumber, identNumber)
                 return jsonify(visitors)
 
@@ -2060,7 +2055,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 #----------------------------------------Main--------------------------------------------
 
-        self.logger.info('Starting WSGI Server to listen for REST methods..') 
+        self.logger.info('Starting WSGI Server to listen for REST methods..')
 
         http_server = WSGIServer((REST_API_BIND_IP, REST_API_PORT), app)
         http_server.serve_forever()

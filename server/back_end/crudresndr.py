@@ -15,16 +15,16 @@ from msgheaders import *
 class CrudReSndr(genmngr.GenericMngr):
     '''
     This thread has two responsibilities.
-    It periodically check which controllers has some CRUD not yet 
+    It periodically check which controllers has some CRUD not yet
     committed and send to them a RRC (Request to Re Provisioning) message.
     When a controller which now is alive answer to the previous message with a
     RRRE (Ready to Re Provisioning) message, this thread send the not comitted
-    CRUDs to this controller.    
+    CRUDs to this controller.
     '''
 
     def __init__(self, exitFlag):
 
-        #Invoking the parent class constructor, specifying the thread name, 
+        #Invoking the parent class constructor, specifying the thread name,
         #to have a understandable log file.
         super().__init__('CrudReSender', exitFlag)
 
@@ -35,13 +35,15 @@ class CrudReSndr(genmngr.GenericMngr):
 
         #Controller Messanger to resend the corresponding CRUDs.
         #As the "ctrllerMsger" use the only "netMngr" object and the "netMngr" has to
-        #know this object to send the RRRE message. This attribute is setted after 
+        #know this object to send the RRRE message. This attribute is setted after
         #creating this object in the main thread.
-        self.ctrllerMsger = None 
-    
-        #When the network thread receive a RRRE message it put the MAC of
-        #the controller which sends this message in this queue
-        self.netToCrudReSndr = queue.Queue()
+        self.ctrllerMsger = None
+
+        #When the network thread receives a RRRC message it puts the
+        #MAC of the controller which sent this message in this queue.
+        #Also, MsgReceiver thread can put the MAC of the controller
+        #which need to be re-provisioned here.
+        self.toCrudReSndr = queue.Queue()
 
         #Calculating the number of iterations before sending the message to request
         #re provisioning the controller.
@@ -74,15 +76,15 @@ class CrudReSndr(genmngr.GenericMngr):
 
     def run(self):
         '''
-        This is the main method of the thread. Most of the time it is blocked waiting 
+        This is the main method of the thread. Most of the time it is blocked waiting
         for queue messages coming from the "Network" thread.
         The queue message is the MAC address of the controller which need CRUDs to be
         resended.
         When a MAC address is received, this method send all the doors, access,
         limited access and persons CRUDs for this controller in this order to avoid
         inconsistency in the controller database.
-        Also, after "self.ITERATIONS" times, it send a RRRE message to all the 
-        controllers which have uncommitted CRUDs 
+        Also, after "self.ITERATIONS" times, it send a RRRE message to all the
+        controllers which have uncommitted CRUDs
         '''
 
         #First of all, the database should be connected by the execution of this thread
@@ -90,8 +92,8 @@ class CrudReSndr(genmngr.GenericMngr):
 
         while True:
             try:
-                #Blocking until Network thread sends an msg or EXIT_CHECK_TIME expires 
-                ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
+                #Blocking until Network thread sends an msg or EXIT_CHECK_TIME expires
+                ctrllerMac = self.toCrudReSndr.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
 
                 try:
@@ -218,8 +220,3 @@ class CrudReSndr(genmngr.GenericMngr):
                 else:
                     with self.lockIteration:
                         self.iteration +=1
-
-                    
-
-
-
