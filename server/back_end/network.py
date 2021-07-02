@@ -69,7 +69,7 @@ class NetMngr(genmngr.GenericMngr):
     This thread receives the events from the main thread, tries to send them to the server.
     When it doesn't receive confirmation from the server, it stores them in database.
     '''
-    def __init__(self, exitFlag, netToMsgRec, crudReSndr):
+    def __init__(self, exitFlag, toMsgRec, crudReSndr):
 
         #Invoking the parent class constructor, specifying the thread name,
         #to have a understandable log file.
@@ -79,10 +79,10 @@ class NetMngr(genmngr.GenericMngr):
         self.crudReSndr = crudReSndr
 
         #Queue to send messages to crudReSndr thread
-        self.netToCrudReSndr = crudReSndr.netToCrudReSndr
+        self.toCrudReSndr = crudReSndr.toCrudReSndr
 
         #Queue to send message to msgReceiver thread
-        self.netToMsgRec = netToMsgRec
+        self.toMsgRec = toMsgRec
 
         #DataBase object
         #The creation of this object was moved to the run method to avoid
@@ -162,7 +162,7 @@ class NetMngr(genmngr.GenericMngr):
                 self.sendToCtrller(response, scktFd=fd)
             except CtrllerDisconnected:
                 self.logger.warning("Controller not connected to receive the response")
-            self.netToMsgRec.put(msg)
+            self.toMsgRec.put(msg)
 
 
         elif msg.startswith(EVS):
@@ -171,7 +171,7 @@ class NetMngr(genmngr.GenericMngr):
                 self.sendToCtrller(response, scktFd=fd)
             except CtrllerDisconnected:
                 self.logger.warning("Controller not connected to receive the response")
-            self.netToMsgRec.put(msg)
+            self.toMsgRec.put(msg)
 
 
         elif msg.startswith(RCUD):
@@ -184,16 +184,22 @@ class NetMngr(genmngr.GenericMngr):
                         + b', "mac": ' + self.fdConnObjects[fd]['mac'].encode('utf8')
                         + msg[index:]
                        )
-            self.netToMsgRec.put(msg)
+            self.toMsgRec.put(msg)
 
         elif msg.startswith(KAL):
             #When a controller sends a Keep Alive Message, it is necessary to know
             #the MAC, for this reason, it is inserted between the header and the
             #end of the message
-            self.netToMsgRec.put(bytes([msg[0]]) + self.fdConnObjects[fd]['mac'].encode('utf8') + bytes([msg[1]]))
+            self.toMsgRec.put(bytes([msg[0]]) + self.fdConnObjects[fd]['mac'].encode('utf8') + bytes([msg[1]]))
 
-        elif msg.startswith(RRRE):
-            self.netToCrudReSndr.put(self.fdConnObjects[fd]['mac'])
+        elif msg.startswith(RRRC):
+            self.toCrudReSndr.put(self.fdConnObjects[fd]['mac'])
+
+        elif msg.startswith(RRRP):
+            #When a controller sends a response to request reprovision, it is
+            #necessary to know the MAC, for this reason, it is inserted between
+            #the header and the end of the message
+            self.toMsgRec.put(bytes([msg[0]]) + self.fdConnObjects[fd]['mac'].encode('utf8') + bytes([msg[1]]))
 
 
 

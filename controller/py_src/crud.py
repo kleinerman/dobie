@@ -10,6 +10,7 @@ import database
 import queue
 
 import genmngr
+import doormod
 from config import *
 from msgheaders import *
 
@@ -87,8 +88,9 @@ class CrudMngr(genmngr.GenericMngr):
                 self.checkExit()
 
                 if crudMsg == RRP:
+                    self.logger.info('Clearing database to receive the re-provisioning')
                     self.dataBase.clearDatabase()
-                    self.netMngr.sendToServer(RRRE + END)
+                    self.netMngr.sendToServer(RRRP + END)
 
                 else:
 
@@ -134,7 +136,13 @@ class CrudMngr(genmngr.GenericMngr):
         '''
         doorNum = int(doorJson['doorNum'])
         with self.lockDoors:
-            door = self.doors[doorNum]
+            try:
+                door = self.doors[doorNum]
+            except KeyError:
+                # This can happen if the server send an incorrect doorNum.
+                # In this situation, an OK will be sent to the server anyway.
+                self.logger.waring(f"There isn't any door with doorNum: {doorNum}")
+                return
             door.doorId = int(doorJson['id'])
             door.snsrType = int(doorJson['snsrType'])
             door.unlkTime = int(doorJson['unlkTime'])
@@ -151,7 +159,13 @@ class CrudMngr(genmngr.GenericMngr):
         '''
         doorNum = int(doorJson['doorNum'])
         with self.lockDoors:
-            door = self.doors[doorNum]
+            try:
+                door = self.doors[doorNum]
+            except KeyError:
+                # This can happen if the server send an incorrect doorNum.
+                # In this situation, an OK will be sent to the server anyway.
+                self.logger.waring(f"There isn't any door with doorNum: {doorNum}")
+                return
             door.doorId = int(doorJson['id'])
             door.snsrType = int(doorJson['snsrType'])
             door.unlkTime = int(doorJson['unlkTime'])
@@ -168,7 +182,17 @@ class CrudMngr(genmngr.GenericMngr):
         '''
         doorId = int(doorJson['id'])
         with self.lockDoors:
-            doorNum = self.doors.getDoorNum(doorId)
+            try:
+                doorNum = self.doors.getDoorNum(doorId)
+            except doormod.DoorNotConfigured as doorNotConfigured:
+                # This can happen if the server try to delete a door that
+                # never was created. For example: door added, controller not
+                # reachable (pending to add in server), force commit, then the
+                # user try to delete the door in the server.
+                # In this situation, an OK will be sent to the server anyway.
+                self.logger.debug(doorNotConfigured)
+                self.logger.warning("Trying to delete an unconfigured door")
+                return
             door = self.doors[doorNum]
             door.doorId = None
             door.snsrType = None
@@ -177,4 +201,3 @@ class CrudMngr(genmngr.GenericMngr):
             door.alrmTime = None
 
         self.dataBase.delDoor(doorJson)
-

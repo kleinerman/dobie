@@ -1181,21 +1181,16 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def reProvController(controllerId):
             '''
-            Re provision all CRUD of a controller.
+            Re provision all CRUDs of a controller.
+            This method just send RRP message to the controller.
+            If the controller is not connected, the REST API will answer with 404 Not Found
             '''
             try:
-                self.dataBase.reProvController(controllerId)
                 ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
                 self.ctrllerMsger.requestReProv(ctrllerMac)
-
                 return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
-
             except network.CtrllerDisconnected:
                 raise NotFound("Controller not connected")
-            except database.ControllerNotFound as controllerNotFound:
-                raise NotFound(str(controllerNotFound))
-            except database.ControllerError as controllerError:
-                raise ConflictError(str(controllerError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '

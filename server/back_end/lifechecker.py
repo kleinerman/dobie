@@ -8,19 +8,19 @@ import database
 from config import *
 
 
-class lifeChecker(genmngr.GenericMngr):
+class LifeChecker(genmngr.GenericMngr):
     '''
     This thread has two responsibilities.
-    It periodically check which controllers has some CRUD not yet 
+    It periodically check which controllers has some CRUD not yet
     committed and send to them a RRC (Request to Re Provisioning) message.
     When a controller which now is alive answer to the previous message with a
     RRRE (Ready to Re Provisioning) message, this thread send the not comitted
-    CRUDs to this controller.    
+    CRUDs to this controller.
     '''
 
-    def __init__(self, exitFlag, toRtEventQueue):
+    def __init__(self, exitFlag, toRtEvent):
 
-        #Invoking the parent class constructor, specifying the thread name, 
+        #Invoking the parent class constructor, specifying the thread name,
         #to have a understandable log file.
         super().__init__('LifeChecker', exitFlag)
 
@@ -39,7 +39,7 @@ class lifeChecker(genmngr.GenericMngr):
         self.iteration = 0
 
 
-        self.toRtEventQueue = toRtEventQueue
+        self.toRtEvent = toRtEvent
 
 
 
@@ -48,14 +48,14 @@ class lifeChecker(genmngr.GenericMngr):
         '''
         Every CONSIDER_DIED_MINS minutes it checks in database if there are controllers
         which didn't send its corresponding keep alive message.
-        It wakes up every EXIT_CHECK_TIME seconds to see if the main thread ask it to finish. 
+        It wakes up every EXIT_CHECK_TIME seconds to see if the main thread ask it to finish.
         '''
 
         #First of all, the database should be connected by the execution of this thread
         self.dataBase = database.DataBase(DB_HOST, DB_USER, DB_PASSWD, DB_DATABASE, self)
 
         while True:
-            #Blocking until EXIT_CHECK_TIME expires 
+            #Blocking until EXIT_CHECK_TIME expires
             time.sleep(EXIT_CHECK_TIME)
             self.checkExit()
 
@@ -64,14 +64,7 @@ class lifeChecker(genmngr.GenericMngr):
                 self.logger.debug(logMsg)
                 deadCtrllers = self.dataBase.setCtrllersNotReachable()
                 for deadCtrller in deadCtrllers:
-                    self.toRtEventQueue.put(deadCtrller)
+                    self.toRtEvent.put(deadCtrller)
                 self.iteration = 0
             else:
                 self.iteration += 1
-
-
-
-                    
-
-
-

@@ -2096,16 +2096,22 @@ class DataBase(object):
 
 
 
-    def reProvController(self, controllerId):
+    def reProvController(self, ctrllerMac):
         '''
-        This method is called by CRUD module when it is necessary to
-        reprovision an entire controller.
-        It sets all doors, unlock door schedules, exception day to unlock door schedule,
-        access and limited access in state TO_ADD.
-        Receive a dictionary with controller parametters and update it in central DB
-        because MAC address and board model can change.
+        This method is called by Message Receiver thread when it is necessary to
+        re-provision an entire controller and the controller confirms that it have
+        just cleared its DB with RRRP answer.
+        This method sets all doors, unlock door schedules, exception day to unlock
+        door schedule, access and limited access in state TO_ADD.
+        It receives the MAC of the controller.
         '''
         try:
+
+            sql = ("SELECT id FROM Controller WHERE macAddress = '{}'"
+                   "".format(ctrllerMac)
+                  )
+            self.execute(sql)
+            controllerId = self.cursor.fetchone()['id']
 
             sql = ("UPDATE Door SET resStateId = {} WHERE controllerId = {}"
                    "".format(TO_ADD, controllerId)
@@ -2141,6 +2147,8 @@ class DataBase(object):
 
             self.execute("UNLOCK TABLES")
 
+        except KeyError:
+            raise ControllerNotFound(f'Controller not found with MAC: {ctrllerMac}.')
 
         except pymysql.err.IntegrityError as integrityError:
             self.execute("UNLOCK TABLES")

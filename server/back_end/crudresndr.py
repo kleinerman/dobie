@@ -39,9 +39,11 @@ class CrudReSndr(genmngr.GenericMngr):
         #creating this object in the main thread.
         self.ctrllerMsger = None
 
-        #When the network thread receive a RRRE message it put the MAC of
-        #the controller which sends this message in this queue
-        self.netToCrudReSndr = queue.Queue()
+        #When the network thread receives a RRRC message it puts the
+        #MAC of the controller which sent this message in this queue.
+        #Also, MsgReceiver thread can put the MAC of the controller
+        #which need to be re-provisioned here.
+        self.toCrudReSndr = queue.Queue()
 
         #Calculating the number of iterations before sending the message to request
         #re provisioning the controller.
@@ -91,7 +93,7 @@ class CrudReSndr(genmngr.GenericMngr):
         while True:
             try:
                 #Blocking until Network thread sends an msg or EXIT_CHECK_TIME expires
-                ctrllerMac = self.netToCrudReSndr.get(timeout=EXIT_CHECK_TIME)
+                ctrllerMac = self.toCrudReSndr.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
 
                 try:
