@@ -16,6 +16,19 @@ import errno
 
 
 
+class DoorError(Exception):
+
+    def __init__(self, errorMessage):
+        self.errorMessage = errorMessage
+
+    def __str__(self):
+        return self.errorMessage
+
+
+class DoorNotConfigured(DoorError):
+    pass
+
+
 
 class Door(object):
     '''
@@ -139,7 +152,7 @@ class Doors(dict):
             if door.doorId == doorId:
                 return doorNum
 
-        return None
+        raise DoorNotConfigured('Door not configured')
 
 
 class CleanerDoorMngr(genmngr.GenericMngr):
