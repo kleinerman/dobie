@@ -1261,39 +1261,52 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             try:
 
+                # Initiating needReProv flag
+                needReProv = False
                 # Getting the MAC address with the controller id
                 ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
+
                 # Forece committing uncommitted doors on this controller
                 for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_ADD,
                                                         database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitDoor(door['id'])
+                    needReProv = True
+
                 # Force committing uncommited Unlock Door Schedules on this controller
                 for unlkDoorSkd in self.dataBase.getUncmtUnlkDoorSkds(ctrllerMac, database.TO_ADD,
                                                                         database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitUnlkDoorSkd(unlkDoorSkd['id'])
+                    needReProv = True
 
                 # Force committing uncommited Exception Days on this controller
                 for excDayUds in self.dataBase.getUncmtExcDayUdss(ctrllerMac, database.TO_ADD,
                                                                     database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitExcDayUds(excDayUds['id'])
+                    needReProv = True
 
                 # Force committing uncommited Accesses on this controller
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD,
                                                                 database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitAccess(access['id'])
+                    needReProv = True
 
                 # Force committing uncommited Limited Accesses on this controller
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD,
                                                                     database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitLiAccess(liAccess['id'])
+                    needReProv = True
 
                 # Force committing uncommited Persons on this controller
                 # Persons never colud be in state TO_ADD. For this reason, only TO_UPDATE or TO_DELETE is retrieved
                 for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitPerson(person['id'], ctrllerMac)
+                    needReProv = True
 
-                return jsonify({'status': 'OK', 'message': 'Force commit accepted'}), OK
+                if needReProv:
+                    self.dataBase.setCtrllerReProvState(ctrllerMac, True)
+                    return jsonify({'status': 'OK', 'message': 'Force commit accepted'}), OK
 
+                return jsonify({'status': 'OK', 'message': "Any controller wasn't modified"}), OK
 
 
             except (database.DoorError, database.UnlkDoorSkdError, database.ExcDayUdsError,
