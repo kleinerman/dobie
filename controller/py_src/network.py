@@ -265,8 +265,8 @@ class NetMngr(genmngr.GenericMngr):
             except (JSONDecodeError, KeyError):
                 self.logger.warning("Malformed request to open door message received.")
 
-        elif msg.startswith(RRP):
-            self.crudMngr.netToCrud.put(RRP)
+        elif msg.startswith(RRS):
+            self.crudMngr.netToCrud.put(RRS)
 
         elif msg.startswith(RRC):
             self.sendToServer(RRRC + END)

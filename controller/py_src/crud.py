@@ -87,10 +87,10 @@ class CrudMngr(genmngr.GenericMngr):
                 crudMsg = self.netToCrud.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
 
-                if crudMsg == RRP:
+                if crudMsg == RRS:
                     self.logger.info('Clearing database to receive resyncing from server.')
                     self.dataBase.clearDatabase()
-                    self.netMngr.sendToServer(RRRP + END)
+                    self.netMngr.sendToServer(RRRS + END)
 
                 else:
 
