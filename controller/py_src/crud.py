@@ -88,7 +88,7 @@ class CrudMngr(genmngr.GenericMngr):
                 self.checkExit()
 
                 if crudMsg == RRP:
-                    self.logger.info('Clearing database to receive the re-provisioning')
+                    self.logger.info('Clearing database to receive resyncing from server.')
                     self.dataBase.clearDatabase()
                     self.netMngr.sendToServer(RRRP + END)
 

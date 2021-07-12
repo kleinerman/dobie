@@ -10,12 +10,10 @@ from config import *
 
 class LifeChecker(genmngr.GenericMngr):
     '''
-    This thread has two responsibilities.
-    It periodically check which controllers has some CRUD not yet
-    committed and send to them a RRC (Request to Re Provisioning) message.
-    When a controller which now is alive answer to the previous message with a
-    RRRE (Ready to Re Provisioning) message, this thread send the not comitted
-    CRUDs to this controller.
+    This thread checks in database if there are controllers which didn't
+    send its corresponding keep alive message.
+    When it happens, it sends to Real Time Events Thread the MAC of the
+    dead controller.
     '''
 
     def __init__(self, exitFlag, toRtEvent):
@@ -30,15 +28,14 @@ class LifeChecker(genmngr.GenericMngr):
         self.dataBase = None
 
 
-        #Calculating the number of iterations before sending the message to request
-        #re provisioning the controller.
+        #Calculating the number of iterations before doing the check
         self.ITERATIONS = CONSIDER_DIED_MINS * 60 // EXIT_CHECK_TIME
 
         #This is the actual iteration. This value is incremented in each iteration
         #and is initializated to 0.
         self.iteration = 0
 
-
+        #The Queue to cantact the Real Time Event Thread.
         self.toRtEvent = toRtEvent
 
 

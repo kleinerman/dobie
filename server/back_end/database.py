@@ -2096,11 +2096,11 @@ class DataBase(object):
 
 
 
-    def reProvController(self, ctrllerMac):
+    def resyncController(self, ctrllerMac):
         '''
         This method is called by Message Receiver thread when it is necessary to
-        re-provision an entire controller and the controller confirms that it have
-        just cleared its DB with RRRP answer.
+        resync an entire controller and the controller confirms that it have
+        just cleared its DB with RRRS answer.
         This method sets all doors, unlock door schedules, exception day to unlock
         door schedule, access and limited access in state TO_ADD.
         It receives the MAC of the controller.
@@ -2153,11 +2153,11 @@ class DataBase(object):
         except pymysql.err.IntegrityError as integrityError:
             self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
-            raise ControllerError('Error reprovisioning the controller.')
+            raise ControllerError('Error resyncing the controller.')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise ControllerError('Error reprovisioning the controller.')
+            raise ControllerError('Error resyncing the controller.')
 
 
 
@@ -2243,25 +2243,25 @@ class DataBase(object):
 
 
 
-    def setCtrllerReProvState(self, ctrllerMac, needReProv):
+    def setCtrllerResyncState(self, ctrllerMac, needResync):
         '''
         Set a flag in the controller to inidicate if it needs to be
-        re-provisioned. This can be used when a forece commit is used
+        resynced. This can be used when a forece commit is used
         because a controller is offline for long time. In this case,
-        the controller should be marked that need to be re-provisioned.
-        In this way, when it is online again, the user should re-program it
+        the controller should be marked that need to be resynced.
+        In this way, when it is online again, the user should reprogram it
         '''
 
         try:
 
-            sql = ("UPDATE Controller SET needReProv = {} WHERE macAddress = '{}'"
-                   "".format(int(needReProv), ctrllerMac)
+            sql = ("UPDATE Controller SET needResync = {} WHERE macAddress = '{}'"
+                   "".format(int(needResync), ctrllerMac)
                   )
             self.execute(sql)
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise ControllerError('Can not change provisioning state in contoller.')
+            raise ControllerError('Can not change sync state in contoller.')
 
 
 

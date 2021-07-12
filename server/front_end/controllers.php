@@ -26,7 +26,7 @@ include("header.php");
 <div class="col-xs-2 center"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></button></div>
 <div class="col-xs-2 center"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button></div>
 <div class="col-xs-2 center"><button id="rows-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span><span class="hidden-xs"> <?=get_text("Refresh",$lang);?></span></button></div>
-<div class="col-xs-2 center"><button id="rows-reprov" class="btn btn-violet" type="button" data-toggle="modal" data-target="#modal-reprov" disabled><span class="fa fa-redo-alt"></span><span class="hidden-xs"> <?=get_text("Reprogram",$lang);?></span></button></div>
+<div class="col-xs-2 center"><button id="rows-resync" class="btn btn-violet" type="button" data-toggle="modal" data-target="#modal-resync" disabled><span class="fa fa-redo-alt"></span><span class="hidden-xs"> <?=get_text("Resync",$lang);?></span></button></div>
 <div class="col-xs-2 center"><button id="rows-poweroff" class="btn btn-info" type="button" data-toggle="modal" data-target="#modal-poweroff" disabled><span class="fa fa-power-off"></span><span class="hidden-xs"> <?=get_text("Power Off",$lang);?></span></button></div>
 <div class="col-xs-2 center"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button></div>
 </div>
@@ -80,17 +80,17 @@ include("footer.php");
 <!-- /.modal -->
 </div>
 
-<!-- reprov modal -->
-<div class="modal fade" id="modal-reprov" tabindex="-1" role="dialog" aria-hidden="true">
+<!-- resync modal -->
+<div class="modal fade" id="modal-resync" tabindex="-1" role="dialog" aria-hidden="true">
 <div class="modal-dialog">
 <div class="modal-content">
 <div class="modal-body center">
-<?=get_text("Are you sure you want to reprogram this controller",$lang);?>?
+<?=get_text("Are you sure you want to resync this controller",$lang);?>?
 </div>
 <div class="modal-footer center">
-<form class="form-horizontal" id="controller-reprov-form" action="#">
+<form class="form-horizontal" id="controller-resync-form" action="#">
 <button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
-<button type="button" class="btn btn-danger" onclick="$('#modal-reprov').modal('hide');"><?=get_text("Cancel",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-resync').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -252,11 +252,11 @@ function tableClickEvents2(){
 		if($(this).prop("checked")) {
 			$("#rows-table td input[type=checkbox]").prop("checked",true);
 			//$("#rows-del").prop("disabled",false);
-			if($('#rows-table tr td input[type=checkbox]:checked').length == 1) $("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",false);
+			if($('#rows-table tr td input[type=checkbox]:checked').length == 1) $("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",false);
 		} else {
 			$("#rows-table td input[type=checkbox]").prop("checked",false);
 			//no rows selected > disable both
-			$("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",true);
+			$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",true);
 		}
 	})
 	
@@ -266,11 +266,11 @@ function tableClickEvents2(){
 			//if at least 1 row selected > enable delete
 			//$("#rows-del").prop("disabled",false);
 			//enable edit only if 1 row is selected
-			if($('#rows-table tr td input[type=checkbox]:checked').length > 1) $("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",true);
-			else $("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",false);
+			if($('#rows-table tr td input[type=checkbox]:checked').length > 1) $("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",true);
+			else $("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",false);
 		} else {
 			//no rows selected > disable both
-			$("#rows-edit,#rows-del,#rows-reprov,#rows-poweroff").prop("disabled",true);
+			$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",true);
 		}
 	});
 }
@@ -362,18 +362,18 @@ $("#controller-form").submit(function(){
 	return false;
 });
 
-//reprov action
-$("#controller-reprov-form").submit(function(){
+//resync action
+$("#controller-resync-form").submit(function(){
 	var controllerId = $('#rows-table tr td input[type=checkbox]:checked')[0].value;
 	if(!isNaN(controllerId)){
 		$.ajax({
 			type: "POST",
 			url: "process",
-			data: "action=reprov_controller&id=" + controllerId,
+			data: "action=resync_controller&id=" + controllerId,
 			success: function(resp){
 				if(resp[0]=='1'){
 					//close modal
-					$("#modal-reprov").modal("hide");
+					$("#modal-resync").modal("hide");
 					//repopulate table
 					populateTable("rows-table");
 				} else {
@@ -472,7 +472,7 @@ $("#modal-delete").on("shown.bs.modal",function(){
 <?php
 } else {
 	//disable all buttons but the refresh one in case of viewer
-	echo "$('#rows-new,#rows-edit,#rows-reprov,#rows-poweroff,#rows-del').prop('disabled', true);
+	echo "$('#rows-new,#rows-edit,#rows-resync,#rows-poweroff,#rows-del').prop('disabled', true);
 	$('#rows-table input[type=checkbox]').hide();";
 }
 ?>
@@ -481,7 +481,7 @@ $("#modal-delete").on("shown.bs.modal",function(){
 $("#rows-refresh").click(function(){
 	populateTable("rows-table");
 	//disable edit and del buttons
-	$("#rows-del,#rows-edit,#rows-reprov,#rows-poweroff").prop("disabled",1);
+	$("#rows-del,#rows-edit,#rows-resync,#rows-poweroff").prop("disabled",1);
 });
 </script>
 <style>

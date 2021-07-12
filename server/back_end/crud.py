@@ -1177,17 +1177,17 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/controller/<int:controllerId>/reprov', methods=['PUT'])
+        @app.route('/api/v1.0/controller/<int:controllerId>/resync', methods=['PUT'])
         @auth.login_required
-        def reProvController(controllerId):
+        def resyncController(controllerId):
             '''
-            Re provision all CRUDs of a controller.
-            This method just send RRP message to the controller.
+            Resync all CRUDs of a controller.
+            This method just send RRS message to the controller.
             If the controller is not connected, the REST API will answer with 404 Not Found
             '''
             try:
                 ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
-                self.ctrllerMsger.requestReProv(ctrllerMac)
+                self.ctrllerMsger.requestResync(ctrllerMac)
                 return jsonify({'status': 'OK', 'message': 'Controller updated'}), OK
             except network.CtrllerDisconnected:
                 raise NotFound("Controller not connected")
@@ -1261,8 +1261,8 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             try:
 
-                # Initiating needReProv flag
-                needReProv = False
+                # Initiating needResync flag
+                needResync = False
                 # Getting the MAC address with the controller id
                 ctrllerMac = self.dataBase.getControllerMac(controllerId=controllerId)
 
@@ -1270,40 +1270,40 @@ class CrudMngr(genmngr.GenericMngr):
                 for door in self.dataBase.getUncmtDoors(ctrllerMac, database.TO_ADD,
                                                         database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitDoor(door['id'])
-                    needReProv = True
+                    needResync = True
 
                 # Force committing uncommited Unlock Door Schedules on this controller
                 for unlkDoorSkd in self.dataBase.getUncmtUnlkDoorSkds(ctrllerMac, database.TO_ADD,
                                                                         database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitUnlkDoorSkd(unlkDoorSkd['id'])
-                    needReProv = True
+                    needResync = True
 
                 # Force committing uncommited Exception Days on this controller
                 for excDayUds in self.dataBase.getUncmtExcDayUdss(ctrllerMac, database.TO_ADD,
                                                                     database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitExcDayUds(excDayUds['id'])
-                    needReProv = True
+                    needResync = True
 
                 # Force committing uncommited Accesses on this controller
                 for access in self.dataBase.getUncmtAccesses(ctrllerMac, database.TO_ADD,
                                                                 database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitAccess(access['id'])
-                    needReProv = True
+                    needResync = True
 
                 # Force committing uncommited Limited Accesses on this controller
                 for liAccess in self.dataBase.getUncmtLiAccesses(ctrllerMac, database.TO_ADD,
                                                                     database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitLiAccess(liAccess['id'])
-                    needReProv = True
+                    needResync = True
 
                 # Force committing uncommited Persons on this controller
                 # Persons never colud be in state TO_ADD. For this reason, only TO_UPDATE or TO_DELETE is retrieved
                 for person in self.dataBase.getUncmtPersons(ctrllerMac, database.TO_UPDATE, database.TO_DELETE):
                     self.dataBase.commitPerson(person['id'], ctrllerMac)
-                    needReProv = True
+                    needResync = True
 
-                if needReProv:
-                    self.dataBase.setCtrllerReProvState(ctrllerMac, True)
+                if needResync:
+                    self.dataBase.setCtrllerResyncState(ctrllerMac, True)
                     return jsonify({'status': 'OK', 'message': 'Force commit accepted'}), OK
 
                 return jsonify({'status': 'OK', 'message': "Any controller wasn't modified"}), OK
@@ -1427,7 +1427,7 @@ class CrudMngr(genmngr.GenericMngr):
         @auth.login_required
         def openDoor(doorId):
             '''
-            Re provision all CRUD of a controller.
+            Open the door specified by doorId.
             '''
             try:
                 ctrllerMac = self.dataBase.getControllerMac(doorId=doorId)

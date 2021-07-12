@@ -195,8 +195,8 @@ class NetMngr(genmngr.GenericMngr):
         elif msg.startswith(RRRC):
             self.toCrudReSndr.put(self.fdConnObjects[fd]['mac'])
 
-        elif msg.startswith(RRRP):
-            #When a controller sends a response to request reprovision, it is
+        elif msg.startswith(RRRS):
+            #When a controller sends a response to request resync, it is
             #necessary to know the MAC, for this reason, it is inserted between
             #the header and the end of the message
             self.toMsgRec.put(bytes([msg[0]]) + self.fdConnObjects[fd]['mac'].encode('utf8') + bytes([msg[1]]))

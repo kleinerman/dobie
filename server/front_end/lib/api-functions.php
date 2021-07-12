@@ -1137,9 +1137,9 @@ function delete_controller($user,$pass,$id){
 	return $response;
 }
 
-function reprov_controller($user,$pass,$id){
+function resync_controller($user,$pass,$id){
 	global $config;
-	$response=send_request($config->api_fullpath."controller/$id/reprov",$user,$pass,"put");
+	$response=send_request($config->api_fullpath."controller/$id/resync",$user,$pass,"put");
 	if($response->response_status != "200") return false;
 	else return $response->data;
 }

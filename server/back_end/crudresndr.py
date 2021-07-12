@@ -16,9 +16,9 @@ class CrudReSndr(genmngr.GenericMngr):
     '''
     This thread has two responsibilities.
     It periodically check which controllers has some CRUD not yet
-    committed and send to them a RRC (Request to Re Provisioning) message.
+    committed and send to them a RRC (Request Resend CRUD) message.
     When a controller which now is alive answer to the previous message with a
-    RRRE (Ready to Re Provisioning) message, this thread send the not comitted
+    RRRC (Ready to Receive Resended CRUD) message, this thread send the not comitted
     CRUDs to this controller.
     '''
 
@@ -42,11 +42,11 @@ class CrudReSndr(genmngr.GenericMngr):
         #When the network thread receives a RRRC message it puts the
         #MAC of the controller which sent this message in this queue.
         #Also, MsgReceiver thread can put the MAC of the controller
-        #which need to be re-provisioned here.
+        #which need to be resynced here.
         self.toCrudReSndr = queue.Queue()
 
         #Calculating the number of iterations before sending the message to request
-        #re provisioning the controller.
+        #resync the controller.
         self.ITERATIONS = RE_SEND_TIME // EXIT_CHECK_TIME
 
         #This is the actual iteration. This value is incremented in each iteration
@@ -207,13 +207,13 @@ class CrudReSndr(genmngr.GenericMngr):
                     iteration = self.iteration
 
                 if iteration >= self.ITERATIONS:
-                    logMsg = 'Checking if there are controllers which need to be re provisioned.'
+                    logMsg = 'Checking if there are controllers which need to be resynced.'
                     self.logger.debug(logMsg)
                     #Getting the MAC addresses of controllers which has uncommitted CRUDs.
                     unCmtCtrllers = self.dataBase.getUnCmtCtrllers()
                     unCmtCtrllersMacs = [unCmtCtrller['macAddress'] for unCmtCtrller in unCmtCtrllers]
                     if unCmtCtrllersMacs:
-                        logMsg = 'Sending Request Re Provision Message to: {}'.format(', '.join(unCmtCtrllersMacs))
+                        logMsg = 'Sending Request Resync Message to: {}'.format(', '.join(unCmtCtrllersMacs))
                         self.logger.info(logMsg)
                         self.ctrllerMsger.requestReSendCruds(unCmtCtrllersMacs)
                     with self.lockIteration:

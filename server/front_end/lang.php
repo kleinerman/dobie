@@ -676,8 +676,8 @@ $dictionary = array(
 		'es' => 'Modelo de Controlador',
 		'de' => 'Treibermodell'
 	),
-	strtolower('Reprogram') => array(
-		'es' => 'Reprogramar',
+	strtolower('Resync') => array(
+		'es' => 'Resincronizar',
 		'de' => 'neu programmieren'
 	),
 	strtolower('New Controller') => array(
@@ -688,8 +688,8 @@ $dictionary = array(
 		'es' => 'Dirección MAC',
 		'de' => 'MAC Adresse'
 	),
-	strtolower('Are you sure you want to reprogram this controller') => array(
-		'es' => 'Está seguro que quiere reprogramar este controlador',
+	strtolower('Are you sure you want to resync this controller') => array(
+		'es' => 'Está seguro que quiere resincronizar este controlador',
 		'de' => 'Sind Sie sicher, dieser Treiber neu programmieren'
 	),
 	strtolower('Power Off') => array(

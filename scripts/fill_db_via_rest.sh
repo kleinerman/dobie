@@ -54,14 +54,14 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Principal", "doorNum": 1, "controllerId": 1, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Molinete", "doorNum": 2, "controllerId": 1, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Ascensor", "doorNum": 3, "controllerId": 1, "snsrType": 0, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 3, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Principal", "doorNum": 1, "controllerId": 1, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Molinete", "doorNum": 2, "controllerId": 1, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Ascensor", "doorNum": 3, "controllerId": 1, "snsrType": 0, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 3, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 1", "doorNum": 1, "controllerId": 2, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 2", "doorNum": 2, "controllerId": 2, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 3", "doorNum": 3, "controllerId": 2, "snsrType": 1, "rlseTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 3, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 1", "doorNum": 1, "controllerId": 2, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 2", "doorNum": 2, "controllerId": 2, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 3", "doorNum": 3, "controllerId": 2, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 3, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
 
 
 
