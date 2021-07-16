@@ -1227,31 +1227,6 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        @app.route('/api/v1.0/controller/uncommitted', methods=['GET'])
-        @auth.login_required
-        def getUnCmtCtrllers():
-            '''
-            Get uncommitted controllers.
-            '''
-            try:
-
-                unCmtCtrllers = self.dataBase.getUnCmtCtrllers()
-
-                for unCmtCtrller in unCmtCtrllers:
-                    unCmtCtrller['uri'] = url_for('Controller', controllerId=unCmtCtrller['id'], _external=True)
-                return jsonify(unCmtCtrllers)
-
-
-            except database.ControllerError as controllerError:
-                raise ConflictError(str(controllerError))
-            except TypeError:
-                raise BadRequest(('Expecting to find application/json in Content-Type header '
-                                  '- the server could not comply with the request since it is '
-                                  'either malformed or otherwise incorrect. The client is assumed '
-                                  'to be in error'))
-
-
-
 
         @app.route('/api/v1.0/controller/<int:controllerId>/forcecommit', methods=['PUT'])
         @auth.login_required

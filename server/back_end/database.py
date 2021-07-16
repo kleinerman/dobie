@@ -1851,6 +1851,15 @@ class DataBase(object):
         for controllerId in controllerIds:
             controllers.append(self.getController(controllerId))
 
+        unCmtCtrllers = self.getUnCmtCtrllers()
+        unCmtCtrllersIds = [unCmtCtrller['id'] for unCmtCtrller in unCmtCtrllers]
+
+        for controller in controllers:
+            if controller['id'] in unCmtCtrllersIds:
+                controller['allSynced'] = 0 #False
+            else:
+                controller['allSynced'] = 1 #True
+
         return controllers
 
 
@@ -2050,31 +2059,31 @@ class DataBase(object):
         to crud messages.
         '''
 
-        sql = ("SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+        sql = ("SELECT Controller.id, Controller.macAddress "
                "FROM Controller JOIN Door "
                "ON (Controller.id = Door.controllerId) WHERE Door.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "SELECT Controller.id, Controller.macAddress "
                "FROM Controller JOIN Door "
                "ON (Controller.id = Door.controllerId) JOIN UnlkDoorSkd "
                "ON (Door.id = UnlkDoorSkd.doorId) WHERE UnlkDoorSkd.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "SELECT Controller.id, Controller.macAddress "
                "FROM Controller JOIN Door "
                "ON (Controller.id = Door.controllerId) JOIN ExcDayUds "
                "ON (Door.id = ExcDayUds.doorId) WHERE ExcDayUds.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "SELECT Controller.id, Controller.macAddress "
                "FROM Controller JOIN Door "
                "ON (Controller.id = Door.controllerId) JOIN LimitedAccess "
                "ON (Door.id = LimitedAccess.doorId) WHERE LimitedAccess.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "SELECT Controller.id, Controller.macAddress "
                "FROM Controller JOIN Door "
                "ON (Controller.id = Door.controllerId) JOIN Access "
                "ON (Door.id = Access.doorId) WHERE Access.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT Controller.id, Controller.name, Controller.macAddress, Controller.lastSeen "
+               "SELECT Controller.id, Controller.macAddress "
                "FROM Controller JOIN PersonPendingOperation "
                "ON (Controller.macAddress = PersonPendingOperation.macAddress)"
                "".format(TO_ADD, TO_UPDATE, TO_DELETE)
