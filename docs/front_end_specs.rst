@@ -2657,6 +2657,8 @@ To get from the server the current list of controllers, the following REST metho
       "name": "Controladora 1",
       "lastSeen":"2018-07-26 19:33:55",
       "reachable":1,
+      "allSynced":1,
+      "needResync":0,
       "uri": "http://localhost:5000/api/v1.0/controller/1"
     },
     {
@@ -2669,6 +2671,8 @@ To get from the server the current list of controllers, the following REST metho
       "name": "Controladora 2",
       "lastSeen":"2017-07-26 19:33:55",
       "reachable":0,
+      "allSynced":1,
+      "needResync":1,
       "uri": "http://localhost:5000/api/v1.0/controller/2"
     }
     {
@@ -2679,16 +2683,18 @@ To get from the server the current list of controllers, the following REST metho
       "name": "Controladora 2",
       "lastSeen": null,
       "reachable":null,
+      "allSynced":0,
+      "needResync":0,
       "uri": "http://localhost:5000/api/v1.0/controller/2"
     }
   ]
 
 
-Reprogram a controller
-~~~~~~~~~~~~~~~~~~~~~~
+Resync a controller
+~~~~~~~~~~~~~~~~~~~
 
-If a controller is replaced or it losts the doors, persons or/and the accesses, it can be reprovisioned, downloading all the configuration from the server to it.
-From the previous list, the controller to be reprovisioned, should be selected and the reprogram button should be pressed.
+If a controller is replaced or it losts the doors, persons or/and the accesses, it can be resynced, downloading all the configuration from the server to it.
+From the previous list, the controller to be resynced, should be selected and the resync button should be pressed.
 The following method should be sent to the server:
 
 **Method:** PUT
@@ -2697,7 +2703,7 @@ The following method should be sent to the server:
 
 .. code-block::
 
-  http://172.18.0.4:5000/api/v1.0/controller/2/reprov
+  http://172.18.0.4:5000/api/v1.0/controller/2/resync
 
 
 **Response:**
