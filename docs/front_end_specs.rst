@@ -2621,6 +2621,7 @@ This screen is used to add, edit, reprogram or delete the controllers in the sys
 .. image:: images_front_end_specs/controller.png
 
 
+
 Get Controllers
 ~~~~~~~~~~~~~~~~~
 
@@ -2690,10 +2691,19 @@ To get from the server the current list of controllers, the following REST metho
   ]
 
 
+The previous screen should shown as columns the following controller information:
+
+- **Name**: is the name of the controller
+- **MAC**: Mac Address of the controller
+- **Last Seen**: Is the time of the last keep alive message received by the controller.
+- **All Synced**: It indicates if all the data in the controller is synced with the server. In case there is some data in the server in state: "pending to add", "pending to update" or "pending to delete", this field will be: "1".
+- **Need Resync**: When a controller which doens't have all the data synced is consider synced with the button: "Consider Synced", the field "Need Resync" will change to "1" indicating that this controller need a resynchronization using the button: ''Resync"
+
+
 Resync a controller
 ~~~~~~~~~~~~~~~~~~~
 
-If a controller is replaced or it losts the doors, persons or/and the accesses, it can be resynced, downloading all the configuration from the server to it.
+If a controller is replaced or it is not having the last data that there is in the server, it can be resynced with the server.
 From the previous list, the controller to be resynced, should be selected and the resync button should be pressed.
 The following method should be sent to the server:
 
@@ -2708,7 +2718,7 @@ The following method should be sent to the server:
 
 **Response:**
 
-if the response is 200 OK, a message should inform that the reprogramming of the controllers was successful.
+If the response is 200 OK, a message should inform that the reprogramming of the controllers was successful.
 
 .. code-block::
 
@@ -2720,7 +2730,7 @@ if the response is 200 OK, a message should inform that the reprogramming of the
 
 
 
-if the response is 404 NOT FOUND, a message should inform that the reprogramming wasn't successful because the controller is not reachable.
+If the response is 404 NOT FOUND, a message should inform that the reprogramming wasn't successful because the controller is not reachable.
 
 .. code-block::
 
@@ -2730,6 +2740,61 @@ if the response is 404 NOT FOUND, a message should inform that the reprogramming
   Content-Length: 95
   Date: Fri, 27 Jul 2018 19:19:42 GMT
 
+
+Consider a controller synced
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes, a person can change his/her card and of course his/her card number will be changed. In this situation, the server will send to all the controllers in which this person has access, a CRUD message updating the person. If there is a controller that is not reachable, the server will retry periodically to resend the message to this controller. Until the controller doesn't confirm the update of the person, the server will consider this person as a "pending to update". In this situation, the GUI will not allow to change again parameters on this person until all the controllers confirm the previous update.
+It is very often to have a controller unreachable for long time for different reasons. In this situation also is very likely the need to change parameters again in the same person.
+To be able to modify parameters on this person, the controller in this situation should be consider synced. This is a way to make the server think that the unreachable controller confimed the update.
+To do that, the following message should be sent to the server when the controller is selected and the "Consider Synced" button is pressed
+
+**Method:** PUT
+
+**URI:**
+
+.. code-block::
+
+  http://172.18.0.4:5000/api/v1.0/controller/2/forcecommit
+
+
+**Response:**
+
+If the response is 200 OK, a JSON with the field message will come.
+The message could say: "The controller was considered synced" meaning the operation was successful.
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 59
+  Date: Sun, 18 Jul 2021 19:41:11 GMT
+
+  {"message":"The controller was considered synced","status":"OK"}
+
+The message could say: "The controller has everything synced" meaning the operation makes no sense since all data in the controller is already synced.
+
+.. code-block::
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Content-Length: 59
+  Date: Sun, 18 Jul 2021 19:41:11 GMT
+
+  {"message":"The controller has everything synced","status":"OK"}
+
+
+
+If the response is 404 NOT FOUND, it means that the controller ID sent in the URL is not present in the database.
+
+.. code-block::
+
+  HTTP/1.1 404 NOT FOUND
+  Content-Type: application/json
+  Content-Length: 91
+  Date: Sun, 18 Jul 2021 20:07:51 GMT
+
+  {"code":404,"error":"request not found","message":"Controller not found","status":"error"}
 
 
 
