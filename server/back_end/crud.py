@@ -1279,14 +1279,18 @@ class CrudMngr(genmngr.GenericMngr):
 
                 if needResync:
                     self.dataBase.setCtrllerResyncState(ctrllerMac, True)
-                    return jsonify({'status': 'OK', 'message': 'Force commit accepted'}), OK
+                    return jsonify({'status': 'OK', 'message': 'The controller was considered synced'}), OK
 
-                return jsonify({'status': 'OK', 'message': "Any controller wasn't modified"}), OK
+                return jsonify({'status': 'OK', 'message': "The controller has everything synced"}), OK
 
 
             except (database.DoorError, database.UnlkDoorSkdError, database.ExcDayUdsError,
                     database.AccessError, database.PersonError) as unCmtError:
                 raise ConflictError(str(unCmtError))
+
+            except database.ControllerNotFound as controllerNotFound:
+                raise NotFound(str(controllerNotFound))
+
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
