@@ -329,7 +329,7 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' htt
 
 #ReProvisioning Controladora 1
 sleep 4
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller/1/reprov
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller/1/resync
 
 
 
