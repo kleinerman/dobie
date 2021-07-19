@@ -95,7 +95,7 @@ CREATE TABLE `Door` (
     `doorNum` integer NOT NULL,
     `name` varchar(40) NOT NULL,
     `controllerId` integer NOT NULL,
-    `snsrType` boolean NOT NULL, 
+    `snsrType` boolean NOT NULL,
     `unlkTime` integer NOT NULL,
     `bzzrTime` integer NOT NULL,
     `alrmTime` integer NOT NULL,
@@ -123,6 +123,8 @@ CREATE TABLE `DoorGroupDoor` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `doorGroupId` integer NOT NULL,
     `doorId` integer NOT NULL,
+    `iSide` boolean NOT NULL,
+    `oSide` boolean NOT NULL,
     CONSTRAINT `fk_DoorGroupDoor_DoorGroup` FOREIGN KEY (`doorGroupId`) REFERENCES `DoorGroup` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_DoorGroupDoor_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE
 )
@@ -226,7 +228,7 @@ CREATE TABLE `Event` (
     `denialCauseId` integer,
     CONSTRAINT `fk_Event_EventType` FOREIGN KEY (`eventTypeId`) REFERENCES `EventType` (`id`),
     CONSTRAINT `fk_Event_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_Event_DoorLock` FOREIGN KEY (`doorLockId`) REFERENCES `DoorLock` (`id`),    
+    CONSTRAINT `fk_Event_DoorLock` FOREIGN KEY (`doorLockId`) REFERENCES `DoorLock` (`id`),
     CONSTRAINT `fk_Event_Person` FOREIGN KEY (`personId`) REFERENCES `Person` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_Event_DenialCause` FOREIGN KEY (`denialCauseId`) REFERENCES `DenialCause` (`id`)
 
@@ -249,4 +251,3 @@ CREATE UNIQUE INDEX personMacAddressIndex ON PersonPendingOperation (personId, m
 
 
 COMMIT;
-

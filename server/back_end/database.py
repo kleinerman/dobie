@@ -1610,14 +1610,14 @@ class DataBase(object):
 
 
 
-    def addDoorToDoorGroup(self, doorGroupId, doorId):
+    def addDoorToDoorGroup(self, doorGroupId, doorId, iSide, oSide):
         '''
         Create a new row in DoorGroupDoor table with the combination
         doorGroupId, doorId
         '''
 
-        sql = ("INSERT INTO DoorGroupDoor(doorGroupId, doorId) "
-               "VALUES ({}, {})".format(doorGroupId, doorId)
+        sql = ("INSERT INTO DoorGroupDoor(doorGroupId, doorId, iSide, oSide) "
+               "VALUES ({}, {}, {}, {})".format(doorGroupId, doorId, iSide, oSide)
               )
 
         try:
@@ -2234,54 +2234,65 @@ class DataBase(object):
 #----------------------------------Door----------------------------------------
 
 
-    def getDoors(self, zoneId=None, doorGroupId=None):
+    def getDoorsFromZone(self, zoneId):
         '''
-        Return a dictionary with all doors in a Zone or in a Door Group
-        according to the argument received
+        Return a list of dictionaries with all door parameters from a Zone
         '''
 
         try:
-            if not zoneId and not doorGroupId:
-                raise DoorNotFound('getDoors method need zoneId or doorGroupId.')
+            #Check if the zoneId exists in the database
+            sql = ("SELECT * FROM Zone WHERE id = {}".format(zoneId))
+            self.execute(sql)
+            zone = self.cursor.fetchone()
 
-            elif zoneId:
-                #Check if the zoneId exists in the database
-                sql = ("SELECT * FROM Zone WHERE id = {}".format(zoneId))
-                self.execute(sql)
-                zone = self.cursor.fetchone()
+            if not zone:
+                raise ZoneNotFound('Zone not found')
 
-                if not zone:
-                    raise ZoneNotFound('Zone not found')
-
-                #Get all doors from this zone
-                sql = ("SELECT * FROM Door WHERE zoneId = {}".format(zoneId))
-                self.execute(sql)
-                doors = self.cursor.fetchall()
-
-            elif doorGroupId:
-                #Check if the doorGroup exists in database
-                sql = ("SELECT * FROM DoorGroup WHERE id = {}".format(doorGroupId))
-                self.execute(sql)
-                doorGroup = self.cursor.fetchone()
-
-                if not doorGroup:
-                    raise DoorGroupNotFound('Door Group not found')
-
-                #Get all doors from this DoorGroup
-                sql = ("SELECT Door.* from Door JOIN DoorGroupDoor "
-                       "ON (Door.id = DoorGroupDoor.doorId) "
-                       "WHERE DoorGroupDoor.doorGroupId = {}"
-                       "".format(doorGroupId)
-                       )
-                self.execute(sql)
-                doors = self.cursor.fetchall()
+            #Get all doors from this zone
+            sql = ("SELECT * FROM Door WHERE zoneId = {}".format(zoneId))
+            self.execute(sql)
+            doors = self.cursor.fetchall()
 
             return doors
 
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise DoorError('Can not get doors for this zone or doorGroup.')
+            raise DoorError('Can not get doors from this zone.')
+
+
+    def getDoorsFromDoorGroup(self, doorGroupId):
+        '''
+        Return a list of dictionaries with all door parameters from a DoorGroup.
+        In each dictionary is included iSide and oSide as door parameter
+        '''
+
+        try:
+
+            #Check if the doorGroup exists in database
+            sql = ("SELECT * FROM DoorGroup WHERE id = {}".format(doorGroupId))
+            self.execute(sql)
+            doorGroup = self.cursor.fetchone()
+
+            if not doorGroup:
+                raise DoorGroupNotFound('Door Group not found')
+
+            #Get all doors from this DoorGroup
+            sql = ("SELECT Door.*, DoorGroupDoor.iSide, DoorGroupDoor.oSide "
+                "FROM Door JOIN DoorGroupDoor "
+                "ON (Door.id = DoorGroupDoor.doorId) "
+                "WHERE DoorGroupDoor.doorGroupId = {}"
+                "".format(doorGroupId)
+                    )
+            self.execute(sql)
+            doors = self.cursor.fetchall()
+
+            return doors
+
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise DoorError('Can not get doors from this doorGroup.')
 
 
 
