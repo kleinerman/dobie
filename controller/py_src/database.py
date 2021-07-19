@@ -949,7 +949,7 @@ class DataBase(object):
         '''
         Remove all LimitedAccess, Access, Persons, Doors and Events
         This method is called when the controller receive from server
-        RRP message
+        RRS message
         '''
 
         try:

@@ -12,20 +12,20 @@ class RtEventMngr(genmngr.GenericMngr):
     When the "message receiver thread" receives an event from the controller,
     or it receives a "keep alive" message detecting that a controller revives,
     or "life checker" thread detects that a controller died, the event is put
-    in "toRtEventQueue" queue (attribute of this class). 
+    in "toRtEvent" queue (attribute of this class).
     This thread gets the events from the queue and sends them to the events-live.js
     app running in nodejs via REST using a POST method.
     '''
 
     def __init__(self, exitFlag):
 
-        #Invoking the parent class constructor, specifying the thread name, 
+        #Invoking the parent class constructor, specifying the thread name,
         #to have a understandable log file.
         super().__init__('RtEventMngr', exitFlag)
-   
+
         self.nodejsUrl = 'http://{}:{}/readevent'.format(NODEJS_HOST, NODEJS_PORT)
 
-        self.toRtEventQueue = queue.Queue()
+        self.toRtEvent = queue.Queue()
 
 
 
@@ -37,9 +37,9 @@ class RtEventMngr(genmngr.GenericMngr):
 
         while True:
             try:
-                #Blocking until Message Receiver or Life Checker thread sends 
+                #Blocking until Message Receiver or Life Checker thread sends
                 #an event or EXIT_CHECK_TIME expires.
-                event = self.toRtEventQueue.get(timeout=EXIT_CHECK_TIME)
+                event = self.toRtEvent.get(timeout=EXIT_CHECK_TIME)
                 self.checkExit()
 
                 try:
@@ -51,7 +51,3 @@ class RtEventMngr(genmngr.GenericMngr):
             except queue.Empty:
                 #Cheking if Main thread ask as to finish.
                 self.checkExit()
-
-
-
-

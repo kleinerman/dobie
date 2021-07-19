@@ -41,14 +41,14 @@ class Unblocker(object):
     '''
     This class declares a pipe in its constructor.
     It stores read and write file descriptor as attributes.
-    -The getFd method returns the read file descriptor which is registered to be monitored 
+    -The getFd method returns the read file descriptor which is registered to be monitored
     by poll().
     -The unblock method write a dummy byte (0) to generate a event to wake up the poll()
     -The receive method reads this dummy byte because if it is not read, the next call
-    to poll(), will wake up again(). We are reading more than one byte (ten bytes), 
+    to poll(), will wake up again(). We are reading more than one byte (ten bytes),
     for the case of two consecutives calls generates two wake ups. (Not sure if it has sense)
     '''
-    
+
     def __init__(self):
         self.readPipe, self.writePipe = os.pipe()
 
@@ -61,7 +61,7 @@ class Unblocker(object):
     def receive(self):
         os.read(self.readPipe, 10)
 
-    
+
 
 
 
@@ -73,7 +73,7 @@ class NetMngr(genmngr.GenericMngr):
     '''
     def __init__(self, netToEvent, netToReSnd, crudMngr, exitFlag):
 
-        #Invoking the parent class constructor, specifying the thread name, 
+        #Invoking the parent class constructor, specifying the thread name,
         #to have a understandable log file.
         super().__init__('NetMngr', exitFlag)
 
@@ -113,7 +113,7 @@ class NetMngr(genmngr.GenericMngr):
         #Poll Network Object to monitor the sockets
         self.netPoller = select.poll()
 
-        #Lock to protect access to "netPoller" 
+        #Lock to protect access to "netPoller"
         self.lockNetPoller = threading.Lock()
 
         #Unblocker object to wake up the thread blocked in poll() call
@@ -133,7 +133,7 @@ class NetMngr(genmngr.GenericMngr):
 
         #Socket server
         self.srvSock = None
- 
+
         #This is a flag to know when we are connected to server.
         #it is needed an threading.event object because "netMngr",
         #"event" and "reSender" threads can access to it simultaneously
@@ -145,8 +145,8 @@ class NetMngr(genmngr.GenericMngr):
         '''
         The sequence of bytes is stored in a queue, the "netPoller" is modified
         to tell the "netMngr" there is bytes to send and the "netMngr" thread is
-        unblocked from the "poll()" method using the "unblocker" object. 
-        Once this happens, the "netMngr" thread pulls the message from queue and 
+        unblocked from the "poll()" method using the "unblocker" object.
+        Once this happens, the "netMngr" thread pulls the message from queue and
         send them to the server.
         '''
 
@@ -174,8 +174,8 @@ class NetMngr(genmngr.GenericMngr):
                     #(Not sure if this can occur)
                     #ValueError:
                     #This exception happened after to much time without sending nothing
-                    #between server and controller. On this situation, when trying to 
-                    #call self.netPoller.modify(), file descriptor cannot be a negative 
+                    #between server and controller. On this situation, when trying to
+                    #call self.netPoller.modify(), file descriptor cannot be a negative
                     #integer will be the error.
                     self.logger.debug('The socket was closed and POLLNVALL was not captured yet.')
                     #When any of above exception happen, the outBufferQue should be cleaned.
@@ -191,10 +191,10 @@ class NetMngr(genmngr.GenericMngr):
 
     def sendEvent(self, event):
         '''
-        This method is called by the "eventMngr" thread each time it receives 
+        This method is called by the "eventMngr" thread each time it receives
         an event from the "main" thread.
         It receives a dictionary as an event which is converted to a JSON bytes
-        to create the event message to send to the server using "sendToServer()" 
+        to create the event message to send to the server using "sendToServer()"
         method.
         '''
 
@@ -222,7 +222,7 @@ class NetMngr(genmngr.GenericMngr):
             jsonEvent = json.dumps(event).encode('utf8')
             msg += EVS + jsonEvent
         msg += END
-        
+
         self.sendToServer(msg)
 
 
@@ -232,7 +232,7 @@ class NetMngr(genmngr.GenericMngr):
         '''
         This method is called by "run()" method of this thread when it
         receives bytes from the server. This happens in POLLIN evnts branch.
-        It process the message and delivers it to the corresponding thread 
+        It process the message and delivers it to the corresponding thread
         according to the headers of the message.
         '''
 
@@ -265,14 +265,11 @@ class NetMngr(genmngr.GenericMngr):
             except (JSONDecodeError, KeyError):
                 self.logger.warning("Malformed request to open door message received.")
 
-
-
-
-        elif msg.startswith(RRP):
-            self.crudMngr.netToCrud.put(RRP)
+        elif msg.startswith(RRS):
+            self.crudMngr.netToCrud.put(RRS)
 
         elif msg.startswith(RRC):
-            self.sendToServer(RRRE + END)
+            self.sendToServer(RRRC + END)
 
         elif msg.startswith(RPO):
             subprocess.Popen([POWEROFF_BIN])
@@ -290,13 +287,13 @@ class NetMngr(genmngr.GenericMngr):
         if not self.srvSock:
             raise ServerNotConnected
 
-        #Getting all link layer parameters of the wired interface of the controller 
+        #Getting all link layer parameters of the wired interface of the controller
         linkParms = netifaces.ifaddresses(WIRED_IFACE_NAME)[netifaces.AF_LINK]
-        #Getting the mac parameter 
+        #Getting the mac parameter
         mac = linkParms[0]['addr']
         #Removing the ":" from mac and encode the string as bytes
         mac = mac.replace(':','').encode('utf8')
- 
+
         conMsg = CON + mac + END
         self.logger.info('Sending connection message {} to server'.format(conMsg))
         self.srvSock.sendall(conMsg)
@@ -311,8 +308,8 @@ class NetMngr(genmngr.GenericMngr):
 
         if not self.srvSock:
             raise ServerNotConnected
-   
-        completeResp = b'' 
+
+        completeResp = b''
         completed = False
         while not completed:
 
@@ -328,7 +325,7 @@ class NetMngr(genmngr.GenericMngr):
             completeResp += resp
             if completeResp.endswith(END):
                 completed = True
-            
+
         respContent = completeResp.strip(RCON+END)
 
         if respContent != b'OK':
@@ -343,9 +340,9 @@ class NetMngr(genmngr.GenericMngr):
         '''
         This is the main method of the thread.
         When the controller is connected to the server, this method is blocked most of
-        the time in "poll()" method waiting for bytes to go out or incoming bytes from 
+        the time in "poll()" method waiting for bytes to go out or incoming bytes from
         the server or a event produced when the socket is broken or disconnect.
-        When there is no connection to the server, this method tries to reconnect to 
+        When there is no connection to the server, this method tries to reconnect to
         the server every "RECONNECT_TIME"
         '''
 
@@ -411,14 +408,14 @@ class NetMngr(genmngr.GenericMngr):
                             #We should receive bytes until we receive the end of
                             #the message
                             allBytes = self.inBuffer + recBytes
-                            
+
                             try:
                                 while allBytes:
                                     msg = allBytes[:allBytes.index(END)+1]
                                     self.procRecMsg(msg)
                                     allBytes = allBytes[allBytes.index(END)+1:]
                                 self.inBuffer = b''
-                            
+
                             except ValueError:
                                 self.inBuffer = allBytes
 
@@ -442,7 +439,7 @@ class NetMngr(genmngr.GenericMngr):
                                 #No more messages to send in "outBufferQue"
                                 pass
 
-                            #This exception happens when a controller interface used to 
+                            #This exception happens when a controller interface used to
                             #connect the server loses the connection and the controller
                             #try to send a message to it.
                             #This exception should be captured and then, the PULLHUP, PULLERR or PULLNVAL
@@ -458,7 +455,7 @@ class NetMngr(genmngr.GenericMngr):
                                 #In this situation of connection lost, at some point, the "netMngr"
                                 #thread freezes trying to send the event, while the "resender" thread
                                 #continue putting the same event in "outBufferQueue" many times.
-                                #If the "outBufferQueue" is not emptied, when the connection is 
+                                #If the "outBufferQueue" is not emptied, when the connection is
                                 #recovered, this event is sent many times to the server.
                                 self.outBufferQue.queue.clear()
 
@@ -468,7 +465,7 @@ class NetMngr(genmngr.GenericMngr):
                                 self.netPoller.modify(self.srvSock, select.POLLIN)
 
 
-                        #This will happen when the server closes the socket or the 
+                        #This will happen when the server closes the socket or the
                         #connection with the server is broken
                         elif pollEvnt & (select.POLLHUP | select.POLLERR | select.POLLNVAL):
                             self.logger.info('The connection with server was broken.')
@@ -499,5 +496,3 @@ class NetMngr(genmngr.GenericMngr):
             self.checkExit()
             self.logger.info('Reconnecting to server in {} seconds...'.format(RECONNECT_TIME))
             time.sleep(RECONNECT_TIME)
-
-    

@@ -1851,6 +1851,15 @@ class DataBase(object):
         for controllerId in controllerIds:
             controllers.append(self.getController(controllerId))
 
+        unCmtCtrllers = self.getUnCmtCtrllers()
+        unCmtCtrllersIds = [unCmtCtrller['id'] for unCmtCtrller in unCmtCtrllers]
+
+        for controller in controllers:
+            if controller['id'] in unCmtCtrllersIds:
+                controller['allSynced'] = 0 #False
+            else:
+                controller['allSynced'] = 1 #True
+
         return controllers
 
 
@@ -2044,63 +2053,74 @@ class DataBase(object):
 
 
 
-    def getUncmtCtrllerMacs(self):
+    def getUnCmtCtrllers(self):
         '''
         Return a list of controller MAC addresses of controllers which did not respond
         to crud messages.
         '''
 
-        sql = ("SELECT controller.macAddress FROM Controller controller JOIN Door door "
-               "ON (controller.id = door.controllerId) WHERE door.resStateId IN ({0}, {1}, {2}) "
+        sql = ("SELECT Controller.id, Controller.macAddress "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) WHERE Door.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
-               "(controller.id = door.controllerId) JOIN UnlkDoorSkd unlkDoorSkd ON "
-               "(door.id = unlkDoorSkd.doorId) WHERE unlkDoorSkd.resStateId IN ({0}, {1}, {2}) "
+               "SELECT Controller.id, Controller.macAddress "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) JOIN UnlkDoorSkd "
+               "ON (Door.id = UnlkDoorSkd.doorId) WHERE UnlkDoorSkd.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
-               "(controller.id = door.controllerId) JOIN ExcDayUds excDayUds ON "
-               "(door.id = excDayUds.doorId) WHERE excDayUds.resStateId IN ({0}, {1}, {2}) "
+               "SELECT Controller.id, Controller.macAddress "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) JOIN ExcDayUds "
+               "ON (Door.id = ExcDayUds.doorId) WHERE ExcDayUds.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
-               "(controller.id = door.controllerId) JOIN LimitedAccess limitedAccess ON "
-               "(door.id = limitedAccess.doorId) WHERE limitedAccess.resStateId IN ({0}, {1}, {2}) "
+               "SELECT Controller.id, Controller.macAddress "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) JOIN LimitedAccess "
+               "ON (Door.id = LimitedAccess.doorId) WHERE LimitedAccess.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT controller.macAddress FROM Controller controller JOIN Door door ON "
-               "(controller.id = door.controllerId) JOIN Access access ON "
-               "(door.id = access.doorId) WHERE access.resStateId IN ({0}, {1}, {2}) "
+               "SELECT Controller.id, Controller.macAddress "
+               "FROM Controller JOIN Door "
+               "ON (Controller.id = Door.controllerId) JOIN Access "
+               "ON (Door.id = Access.doorId) WHERE Access.resStateId IN ({0}, {1}, {2}) "
                "UNION "
-               "SELECT macAddress FROM PersonPendingOperation"
+               "SELECT Controller.id, Controller.macAddress "
+               "FROM Controller JOIN PersonPendingOperation "
+               "ON (Controller.macAddress = PersonPendingOperation.macAddress)"
                "".format(TO_ADD, TO_UPDATE, TO_DELETE)
               )
 
         try:
             self.execute(sql)
-            ctrllerMacsNotComm = self.cursor.fetchall()
-            ctrllerMacsNotComm = [ctrllerMac['macAddress'] for ctrllerMac in ctrllerMacsNotComm]
-            return ctrllerMacsNotComm
-
+            unCmtCtrllers = self.cursor.fetchall()
+            return unCmtCtrllers
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise ControllerError('Error getting MAC addresses of not committed controllers')
+            raise ControllerError('Error getting uncommitted controllers')
 
-        except TypeError:
-            self.logger.debug(internalError)
-            raise ControllerError('Error getting MAC addresses of not committed controllers')
-
-
+        except TypeError as typeError:
+            self.logger.debug(typeError)
+            raise ControllerError('Error getting uncommitted controllers')
 
 
-    def reProvController(self, controllerId):
+
+
+    def resyncController(self, ctrllerMac):
         '''
-        This method is called by CRUD module when it is necessary to
-        reprovision an entire controller.
-        It sets all doors, unlock door schedules, exception day to unlock door schedule,
-        access and limited access in state TO_ADD.
-        Receive a dictionary with controller parametters and update it in central DB
-        because MAC address and board model can change.
+        This method is called by Message Receiver thread when it is necessary to
+        resync an entire controller and the controller confirms that it have
+        just cleared its DB with RRRS answer.
+        This method sets all doors, unlock door schedules, exception day to unlock
+        door schedule, access and limited access in state TO_ADD.
+        It receives the MAC of the controller.
         '''
         try:
+
+            sql = ("SELECT id FROM Controller WHERE macAddress = '{}'"
+                   "".format(ctrllerMac)
+                  )
+            self.execute(sql)
+            controllerId = self.cursor.fetchone()['id']
 
             sql = ("UPDATE Door SET resStateId = {} WHERE controllerId = {}"
                    "".format(TO_ADD, controllerId)
@@ -2136,15 +2156,17 @@ class DataBase(object):
 
             self.execute("UNLOCK TABLES")
 
+        except KeyError:
+            raise ControllerNotFound(f'Controller not found with MAC: {ctrllerMac}.')
 
         except pymysql.err.IntegrityError as integrityError:
             self.execute("UNLOCK TABLES")
             self.logger.debug(integrityError)
-            raise ControllerError('Error reprovisioning the controller.')
+            raise ControllerError('Error resyncing the controller.')
 
         except pymysql.err.InternalError as internalError:
             self.logger.debug(internalError)
-            raise ControllerError('Error reprovisioning the controller.')
+            raise ControllerError('Error resyncing the controller.')
 
 
 
@@ -2226,6 +2248,30 @@ class DataBase(object):
         except (pymysql.err.IntegrityError, pymysql.err.InternalError) as dbEventError:
             self.logger.debug(dbEventError)
             raise ControllerError('Can not set contollers as not reachable.')
+
+
+
+
+    def setCtrllerResyncState(self, ctrllerMac, needResync):
+        '''
+        Set a flag in the controller to inidicate if it needs to be
+        resynced. This can be used when a forece commit is used
+        because a controller is offline for long time. In this case,
+        the controller should be marked that need to be resynced.
+        In this way, when it is online again, the user should reprogram it
+        '''
+
+        try:
+
+            sql = ("UPDATE Controller SET needResync = {} WHERE macAddress = '{}'"
+                   "".format(int(needResync), ctrllerMac)
+                  )
+            self.execute(sql)
+
+        except pymysql.err.InternalError as internalError:
+            self.logger.debug(internalError)
+            raise ControllerError('Can not change sync state in contoller.')
+
 
 
 
@@ -2319,7 +2365,7 @@ class DataBase(object):
 
 
 
-    def getUncmtDoors(self, ctrllerMac, resStateId):
+    def getUncmtDoors(self, ctrllerMac, *resStateIds):
         '''
         This method is an iterator, in each iteration it returns a door
         not committed with the state "resStateId" from the controller
@@ -2331,11 +2377,13 @@ class DataBase(object):
         to maintain the sequence. (This situation is not happening today)
         '''
         try:
+            #Converting resStates to string and putting them in a list
+            resStateIds = [str(resState) for resState in resStateIds]
             sql = ("SELECT Door.* FROM Door JOIN Controller "
                    "ON (Door.controllerId = Controller.id) "
                    "WHERE Controller.macAddress = '{}' AND "
-                   "resStateId = {}".format(ctrllerMac, resStateId))
-
+                   "resStateId IN ({})".format(ctrllerMac, ', '.join(resStateIds))
+                  )
 
             cursor = self.execUsingNewCursor(sql)
             door = cursor.fetchone()
@@ -2561,7 +2609,7 @@ class DataBase(object):
 
 
 
-    def getUncmtUnlkDoorSkds(self, ctrllerMac, resStateId):
+    def getUncmtUnlkDoorSkds(self, ctrllerMac, *resStateIds):
         '''
         This method is an iterator, in each iteration it returns an Unlock
         door schedule not committed with the state "resStateId" from the
@@ -2573,11 +2621,13 @@ class DataBase(object):
         to maintain the sequence. (This situation is not happening today)
         '''
         try:
+            #Converting resStates to string and putting them in a list
+            resStateIds = [str(resState) for resState in resStateIds]
             sql = ("SELECT UnlkDoorSkd.* FROM UnlkDoorSkd JOIN Door "
                    "ON (UnlkDoorSkd.doorId = Door.id) JOIN Controller "
                    "ON (Door.controllerId = Controller.id) WHERE "
-                   "Controller.macAddress = '{}' AND UnlkDoorSkd.resStateId = {}"
-                   "".format(ctrllerMac, resStateId)
+                   "Controller.macAddress = '{}' AND UnlkDoorSkd.resStateId IN ({})"
+                   "".format(ctrllerMac, ', '.join(resStateIds))
                   )
 
 
@@ -2775,7 +2825,7 @@ class DataBase(object):
 
 
 
-    def getUncmtExcDayUdss(self, ctrllerMac, resStateId):
+    def getUncmtExcDayUdss(self, ctrllerMac, *resStateIds):
         '''
         This method is an iterator, in each iteration it returns an Exception
         Day to Unlock Door by Schedule not committed with the state "resStateId"
@@ -2787,11 +2837,13 @@ class DataBase(object):
         to maintain the sequence. (This situation is not happening today)
         '''
         try:
+            #Converting resStates to string and putting them in a list
+            resStateIds = [str(resState) for resState in resStateIds]
             sql = ("SELECT ExcDayUds.* FROM ExcDayUds JOIN Door "
                    "ON (ExcDayUds.doorId = Door.id) JOIN Controller "
                    "ON (Door.controllerId = Controller.id) WHERE "
-                   "Controller.macAddress = '{}' AND ExcDayUds.resStateId = {}"
-                   "".format(ctrllerMac, resStateId)
+                   "Controller.macAddress = '{}' AND ExcDayUds.resStateId IN ({})"
+                   "".format(ctrllerMac, ', '.join(resStateIds))
                   )
 
 
@@ -3035,7 +3087,7 @@ class DataBase(object):
 
 
 
-    def getUncmtPersons(self, ctrllerMac, resStateId):
+    def getUncmtPersons(self, ctrllerMac, *resStateIds):
         '''
         This method is an iterator, in each iteration it returns a person
         not committed with the state "resStateId" from the controller
@@ -3048,11 +3100,13 @@ class DataBase(object):
         '''
 
         try:
+            #Converting resStates to string and putting them in a list
+            resStateIds = [str(resState) for resState in resStateIds]
             sql = ("SELECT person.* FROM "
                    "Person person JOIN PersonPendingOperation personPendingOperation ON "
                    "(person.id = personPendingOperation.personId) WHERE "
-                   "personPendingOperation.macAddress = '{}' AND personPendingOperation.pendingOp = {}"
-                   "".format(ctrllerMac, resStateId)
+                   "personPendingOperation.macAddress = '{}' AND personPendingOperation.pendingOp IN ({})"
+                   "".format(ctrllerMac, ', '.join(resStateIds))
                   )
 
             cursor = self.execUsingNewCursor(sql)
@@ -3726,7 +3780,7 @@ class DataBase(object):
 
 
 
-    def getUncmtAccesses(self, ctrllerMac, resStateId):
+    def getUncmtAccesses(self, ctrllerMac, *resStateIds):
         '''
         This method is an iterator, in each iteration it returns a access not committed
         with the state "resStateId" from the controller with the MAC address "ctrllerMac".
@@ -3748,6 +3802,8 @@ class DataBase(object):
         '''
 
         try:
+            #Converting resStates to string and putting them in a list
+            resStateIds = [str(resState) for resState in resStateIds]
             sql = ("LOCK TABLES Controller WRITE, "
                    "Door WRITE, Person WRITE, "
                    "Access WRITE, LimitedAccess WRITE"
@@ -3758,8 +3814,8 @@ class DataBase(object):
                    "ON (Access.personId = Person.id) JOIN Door "
                    "ON (Access.doorId = Door.id) JOIN Controller "
                    "ON (Door.controllerId = Controller.id) WHERE Access.allWeek = 1 "
-                   "AND Controller.macAddress = '{}' AND Access.resStateId = {}"
-                   "".format(ctrllerMac, resStateId)
+                   "AND Controller.macAddress = '{}' AND Access.resStateId IN ({})"
+                   "".format(ctrllerMac, ', '.join(resStateIds))
                   )
             cursor = self.execUsingNewCursor(sql)
             access = cursor.fetchone()
@@ -4117,7 +4173,7 @@ class DataBase(object):
 
 
 
-    def getUncmtLiAccesses(self, ctrllerMac, resStateId):
+    def getUncmtLiAccesses(self, ctrllerMac, *resStateIds):
         '''
         This method is an iterator, in each iteration it returns a limited access not committed
         with the state "resStateId" from the controller with the MAC address "ctrllerMac".
@@ -4139,6 +4195,8 @@ class DataBase(object):
 
 
         try:
+            #Converting resStates to string and putting them in a list
+            resStateIds = [str(resState) for resState in resStateIds]
             sql = ("LOCK TABLES Controller WRITE, "
                    "Door WRITE, Person WRITE, "
                    "Access WRITE, LimitedAccess WRITE"
@@ -4149,8 +4207,8 @@ class DataBase(object):
                    "ON (LimitedAccess.personId = Person.id) JOIN Door "
                    "ON (LimitedAccess.doorId = Door.id) JOIN Controller "
                    "ON (Door.controllerId = Controller.id) WHERE "
-                   "Controller.macAddress = '{}' AND LimitedAccess.resStateId = {}"
-                   "".format(ctrllerMac, resStateId)
+                   "Controller.macAddress = '{}' AND LimitedAccess.resStateId IN ({})"
+                   "".format(ctrllerMac, ', '.join(resStateIds))
                   )
             cursorForLiAccess = self.execUsingNewCursor(sql)
             liAccess = cursorForLiAccess.fetchone()

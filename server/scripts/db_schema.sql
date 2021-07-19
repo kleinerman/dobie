@@ -76,6 +76,7 @@ CREATE TABLE `Controller` (
     `ipAddress` varchar(15),
     `lastSeen` datetime,
     `reachable` boolean,
+    `needResync` boolean,
     CONSTRAINT `fk_Controller_CtrllerModel` FOREIGN KEY (`ctrllerModelId`) REFERENCES `CtrllerModel` (`id`)
 )
 ;

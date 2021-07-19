@@ -329,7 +329,7 @@ class Controller(object):
         The network thread sends these messages putting them in the
         same posix ipc queue that the IO Iface use to send messages.
         Instead of sending the "doorNum", it sends the "doorId".
-        Calling "getDoorNum" method of "doorsControl" object, we can
+        Calling "getDoorNum" method of "doors" object, we can
         know the "doorNum" to call "openDoor" method
         Also an event is genarated and sent to "evenMngr" to log this.
         '''

@@ -1032,15 +1032,15 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				else array_push($ret,1,"Information saved successfully!");
 			}
 		break;
-		case "reprov_controller":
+		case "resync_controller":
 			if(!$islogged) array_push($ret,0,"Action needs authentication");
 			else {
 				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
 
-				$controllers_rec = reprov_controller($logged->name, $logged->pw, $id);
+				$controllers_rec = resync_controller($logged->name, $logged->pw, $id);
 
-				if($controllers_rec) array_push($ret,1,"Controller reprogrammed successfully");
-				else array_push($ret,0,"Controller could not be reprogrammed");
+				if($controllers_rec) array_push($ret,1,"Controller resynced successfully");
+				else array_push($ret,0,"Controller could not be resynced");
 			}
 		break;
 		case "poweroff_controller":
