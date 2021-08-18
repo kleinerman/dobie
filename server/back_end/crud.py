@@ -677,7 +677,7 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             try:
 
-                doors = self.dataBase.getDoors(zoneId=zoneId)
+                doors = self.dataBase.getDoorsFromZone(zoneId)
                 for door in doors:
                     door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
                     #All the door will have the same zoneId, this parametter is given by the
@@ -688,8 +688,8 @@ class CrudMngr(genmngr.GenericMngr):
 
             except database.ZoneNotFound as zoneNotFound:
                 raise NotFound(str(zoneNotFound))
-            except database.ZoneError as zoneError:
-                raise ConflictError(str(zoneError))
+            except database.DoorError as doorError:
+                raise ConflictError(str(doorError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -790,7 +790,7 @@ class CrudMngr(genmngr.GenericMngr):
             Returns the doors that belong to a door group
             '''
             try:
-                doors = self.dataBase.getDoors(doorGroupId=doorGroupId)
+                doors = self.dataBase.getDoorsFromDoorGroup(doorGroupId)
 
                 for door in doors:
                     door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
@@ -799,8 +799,8 @@ class CrudMngr(genmngr.GenericMngr):
 
             except database.DoorGroupNotFound as doorGroupNotFound:
                 raise NotFound(str(doorGroupNotFound))
-            except database.DoorGroupError as doorGroupError:
-                raise ConflictError(str(doorGroupError))
+            except database.DoorError as doorError:
+                raise ConflictError(str(doorError))
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
@@ -808,7 +808,6 @@ class CrudMngr(genmngr.GenericMngr):
                                   'to be in error'))
             except KeyError:
                 raise BadRequest('Invalid request. Missing: {}'.format(', '.join(doorGroupNeedKeys)))
-
 
 
 
@@ -821,8 +820,11 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             try:
                 if request.method == 'PUT':
-                    self.dataBase.addDoorToDoorGroup(doorGroupId, doorId)
+                    iSide = request.json['iSide']
+                    oSide = request.json['oSide']
+                    self.dataBase.addDoorToDoorGroup(doorGroupId, doorId, iSide, oSide)
                     return jsonify({'status': 'OK', 'message': 'Door added to Door Group'}), OK
+
                 elif request.method == 'DELETE':
                     self.dataBase.delDoorFromDoorGroup(doorGroupId, doorId)
                     return jsonify({'status': 'OK', 'message': 'Door deleted from Door Group'}), OK
@@ -831,20 +833,13 @@ class CrudMngr(genmngr.GenericMngr):
                 raise ConflictError(str(doorGroupError))
             except database.DoorGroupNotFound as doorGroupNotFound:
                 raise NotFound(str(doorGroupNotFound))
-
-
             except TypeError:
                 raise BadRequest(('Expecting to find application/json in Content-Type header '
                                   '- the server could not comply with the request since it is '
                                   'either malformed or otherwise incorrect. The client is assumed '
                                   'to be in error'))
-
-
-
-
-
-
-
+            except KeyError:
+                raise BadRequest('Invalid request. Missing: iSide, oSide')
 
 
 

@@ -124,6 +124,8 @@ CREATE TABLE `DoorGroupDoor` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `doorGroupId` integer NOT NULL,
     `doorId` integer NOT NULL,
+    `iSide` boolean NOT NULL,
+    `oSide` boolean NOT NULL,
     CONSTRAINT `fk_DoorGroupDoor_DoorGroup` FOREIGN KEY (`doorGroupId`) REFERENCES `DoorGroup` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_DoorGroupDoor_Door` FOREIGN KEY (`doorId`) REFERENCES `Door` (`id`) ON DELETE CASCADE
 )
