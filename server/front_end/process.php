@@ -833,11 +833,11 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
 				$doorids = (isset($_POST['doorids'])) ? $_POST['doorids'] : "";
 				$isvisit = (isset($_POST['isvisit'])) ? $_POST['isvisit'] : 1;
+				$doorsides = (isset($_POST['doorsides'])) ? $_POST['doorsides'] : "";
 
-				if($id=="") array_push($ret,0,"Invalid values sent");
-				//empty name can be considered as a valid scenario
-	    			else {
-					$vdg_rec = set_door_group($logged->name, $logged->pw, $id, $name, $doorids,$isvisit);
+				if($id=="") array_push($ret,0,"Invalid values sent");//empty name can be considered as a valid scenario
+	    		else {
+					$vdg_rec = set_door_group($logged->name, $logged->pw, $id, $name, $doorids, $isvisit, $doorsides);
 
 					if($vdg_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"Door group could not be updated");
@@ -850,8 +850,9 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
 				$doorids = (isset($_POST['doorids'])) ? $_POST['doorids'] : "";
 				$isvisit = (isset($_POST['isvisit'])) ? $_POST['isvisit'] : 1;
+				$doorsides = (isset($_POST['doorsides'])) ? $_POST['doorsides'] : "";
 
-				$vdg_rec = add_door_group($logged->name, $logged->pw, $name, $doorids, $isvisit);
+				$vdg_rec = add_door_group($logged->name, $logged->pw, $name, $doorids, $isvisit, $doorsides);
 				if($vdg_rec) array_push($ret,1,"Information saved successfully!");
 				else array_push($ret,0,"Door group could not be added");
 			}
@@ -1041,6 +1042,17 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 
 				if($controllers_rec) array_push($ret,1,"Controller resynced successfully");
 				else array_push($ret,0,"Controller could not be resynced");
+			}
+		break;
+		case "considersynced_controller":
+			if(!$islogged) array_push($ret,0,"Action needs authentication");
+			else {
+				$id = (isset($_POST['id']) and is_numeric($_POST['id'])) ? $_POST['id'] : "";
+
+				$controllers_rec = considersynced_controller($logged->name, $logged->pw, $id);
+
+				if($controllers_rec) array_push($ret,1,"Controller considered synced successfully");
+				else array_push($ret,0,"Controller could not be considered synced");
 			}
 		break;
 		case "poweroff_controller":

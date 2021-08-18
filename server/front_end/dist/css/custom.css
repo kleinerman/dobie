@@ -405,3 +405,29 @@ input::-webkit-inner-spin-button {
 #doors-create-modal-body{
 	max-height: 768px;overflow-y:auto;overflow-x:hidden;
 }
+
+/*controllers*/
+#buttons-row .buttoncontainer{
+	margin:1%;
+	display:inline-block;
+}
+
+.btn-brown{
+	color: #fff !important;
+	background-color: #B68B52;
+	border-color: #946930;
+}
+
+.btn-brown:hover{
+	background-color: #A57A41;
+}
+
+/*door groups*/
+.color-legend{
+	padding:0px 5px;
+	margin-left:15px;
+}
+
+.side-color{background:#b8ebff}
+.side-color0{background:#fbbe88}
+.side-color1{background:#ffa}
