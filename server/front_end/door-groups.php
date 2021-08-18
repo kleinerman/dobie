@@ -1,4 +1,4 @@
-<?
+<?php
 $leavebodyopen=1;
 $requirerole=2;
 include("header.php");
@@ -83,7 +83,16 @@ include("footer.php");
 </div>
 <div class="select-container-footer">
 <button type="button" class="btn btn-success" id="doors-group-selectall"><?=get_text("Select all",$lang);?></button>
+<br><br>
+
+<div id="direction-container" class="displaytable table_padding margincenter hidden">
+<div class="displayrow">
+<div class="displaycell"><label><?=get_text("Incoming",$lang);?><br><input type="radio" name="side" value="1"></label></div>
+<div class="displaycell"><label><?=get_text("Outgoing",$lang);?><br><input type="radio" name="side" value="0"></label></div>
+<div class="displaycell"><label><?=get_text("Both",$lang);?><br><input type="radio" id="side-both" name="side" value="" checked></label></div>
+</div></div>
 <br>
+
 </div>
 </div>
  
@@ -101,6 +110,12 @@ include("footer.php");
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-group-current-select">
 <select id="doors-group-current-select" class="select-options form-control" name="doors-group-current-select" size="2" multiple></select>
+<br>
+<div class="legend">
+<span class="color-legend side-color1">&nbsp;</span> = <?=get_text("Incoming",$lang);?>
+<span class="color-legend side-color0">&nbsp;</span> = <?=get_text("Outgoing",$lang);?>
+<span class="color-legend side-color">&nbsp;</span> = <?=get_text("Both",$lang);?>
+</div>
 
 <br><br>
 <label><input type="checkbox" name="isvisit" id="isvisit" value="1"> <?=get_text("For Visits",$lang);?></label>
@@ -165,7 +180,7 @@ include("footer.php");
 }
 </style>
 
-<script type="text/javascript">
+<script>
 //init filters
 setFilterAction();
 
@@ -174,6 +189,7 @@ var DoorGroupId;
 var zoneId;
 var arrDoors=[];
 var arrGroupDoors=[];
+var arrGroupDoorsSides=[];
 var editId=0;
 
 //populate select list
@@ -229,14 +245,23 @@ $("#zones-select").change(function(){
 		});
 		//disable add button
 		$("#btn-item-add").prop("disabled",true);
+		//hide direction box
+		$("#direction-container").addClass("hidden");
 	}
 });
 
 //on change door select > enable / disable right arrow button
 $("#doors-select").change(function(){
 	var doorId=$("#doors-select").val();
-	if(doorId!="undefined") $("#btn-item-add").prop("disabled",false);
-	else $("#btn-item-add").prop("disabled",true);
+	if(doorId!="undefined") {
+		$("#btn-item-add").prop("disabled",false);
+		//show direction box
+		$("#direction-container").removeClass("hidden");
+	} else {
+		$("#btn-item-add").prop("disabled",true);
+		//hide direction box
+		$("#direction-container").addClass("hidden");
+	}
 });
 
 //on change current door select > enable / disable right arrow button
@@ -253,6 +278,8 @@ $("#btn-item-add").click(function(){
 	$("#doors-select").val([]);
 	//disable add button
 	$("#btn-item-add").prop("disabled",true);
+	//hide direction box
+	$("#direction-container").addClass("hidden");
 });
 
 //item delete button click action
@@ -269,28 +296,40 @@ $("#btn-item-delete").click(function(){
 $("#doors-group-selectall").click(function(){
 	$('#doors-select option').not('.toadd').not('.todel').not('.toupd').not(":disabled").prop('selected',true);
 	//if no items have been selected, disable add button
-	if($("#doors-select option:selected").length>0) $("#btn-item-add").prop("disabled",false);
+	if($("#doors-select option:selected").length>0) {
+		$("#btn-item-add").prop("disabled",false);
+		//show direction box
+		$("#direction-container").removeClass("hidden");
+	}
 });
 
 //add element from left to right
 function addRight(){
 	var boxOptions=$("#doors-select option:selected");
+	var side = $("input[name=side]:checked").val();
+
 	$.each(boxOptions,function(){
-		elemid=$(this).val();
-		elemname=$(this).html();
+		var elemid=$(this).val();
+		var elemname=$(this).html();
 		//add into new array
 		arrGroupDoors[elemid]=elemname;
 		//remove from old array
 		arrDoors[elemid]="";
+		//add side value
+		arrGroupDoorsSides[elemid]=side;
 		//show in new box
 		if($("#doors-group-current-select option[value='"+elemid+"']").length>0){
 			//toggle if exists
 			$("#doors-group-current-select option[value='"+elemid+"']").show();
 			$("#doors-group-current-select option[value='"+elemid+"']").prop("disabled",false);
+			//set sides
+			$("#doors-group-current-select option[value='"+elemid+"']").attr("data-side",side);
 		} else {
 			//if not, append html
-			$("#doors-group-current-select").append("<option value='"+elemid+"'>"+elemname+"</option>");
+			$("#doors-group-current-select").append("<option value='"+elemid+"' data-side='"+side+"'>"+elemname+"</option>");
 		}
+		//set color
+		$("#doors-group-current-select option[value='"+elemid+"']").removeClass("side-color").removeClass("side-color0").removeClass("side-color1").addClass("side-color"+side);
 		//hide from older box
 		$("#doors-select option[value='"+elemid+"']").hide();
 		$("#doors-select option[value='"+elemid+"']").prop("disabled",true);
@@ -326,12 +365,12 @@ function addLeft(){
 function fillArrayDoors(){
 	arrDoors=[];
 	var boxOptions=document.querySelectorAll("#doors-select option");
+	var doorid,doorname;
 	if(boxOptions.length>0){
-		boxOptionsArr = boxOptions;
-		for(var i=0;i<boxOptionsArr.length;i++){
-			if(boxOptionsArr[i].className==""){
-				var doorid=boxOptionsArr[i].value;
-				var doorname=boxOptionsArr[i].innerHTML;
+		for(var i=0;i<boxOptions.length;i++){
+			if(boxOptions[i].className==""){
+				doorid=boxOptions[i].value;
+				doorname=boxOptions[i].innerHTML;
 				arrDoors[doorid]=doorname;
 			}
 		}
@@ -341,21 +380,24 @@ function fillArrayDoors(){
 //init array door group
 function fillArrayDoorGroup(){
 	arrGroupDoors=[];
+	arrGroupDoorsSides=[];
 	var boxOptions=document.querySelectorAll("#doors-group-current-select option");
+	var doorid,doorname;
 	if(boxOptions.length>0){
-		boxOptionsArr = boxOptions;
-		for(var i=0;i<boxOptionsArr.length;i++){
-			var doorid=boxOptionsArr[i].value;
-			var doorname=boxOptionsArr[i].innerHTML;
+		for(var i=0;i<boxOptions.length;i++){
+			doorid=boxOptions[i].value;
+			doorname=boxOptions[i].innerHTML;
 			arrGroupDoors[doorid]=doorname;
+			arrGroupDoorsSides[doorid]=boxOptions[i].dataset.side;
 		}
 	}
 }
 
 function resetForm(){
-	//empty both arrays
-	arrGroupDoors=[];
+	//empty all arrays
 	arrDoors=[];
+	arrGroupDoors=[];
+	arrGroupDoorsSides=[];
 	//group name
 	$("#door-groups-new-name").val("");
 	//clear all selections
@@ -374,6 +416,10 @@ function resetForm(){
 	$("#modal-new-label").text("<?=get_text("New Door Group",$lang);?>");
 	//hide details
 	$('#select-container-door-groups-details').hide()
+	//hide direction box
+	$("#direction-container").addClass("hidden");
+	//reset default side
+	$("#side-both").click();
 }
 
 //fetch info for new
@@ -414,7 +460,16 @@ $('#door-groups-select-edit').click(function (event){
 							//fill select with door data
 							var doors_values = doors_resp[1];
 							for(var i=0;i<doors_values.length;i++){
-								$("#doors-group-current-select").append("<option value='"+doors_values[i].id+"'>"+doors_values[i].name+"</option>");
+								//convert to side value
+								var side_value="";
+								if(doors_values[i].iSide==1 && doors_values[i].oSide==0){
+									//incoming
+									side_value="1";
+								} else if(doors_values[i].iSide==0 && doors_values[i].oSide==1){
+									//outgoing
+									side_value="0";
+								} //else both
+								$("#doors-group-current-select").append("<option value='"+doors_values[i].id+"' class='side-color"+side_value+"' data-side='"+side_value+"'>"+doors_values[i].name+"</option>");
 							}
 							//fill group door array
 							fillArrayDoorGroup();
@@ -450,18 +505,21 @@ TODO:
 $("#door-groups-new-form").submit(function(){
 
 	var DoorGroupName = $("#door-groups-new-name").val();
-	if(typeof($('#isvisit:checked').val())=="undefined") var DoorGroupIsVisit = 0; else var DoorGroupIsVisit = 1;
+	if(typeof($('#isvisit:checked').val())=="undefined") var DoorGroupIsVisit = 0;
+	else var DoorGroupIsVisit = 1;
 
 	//build door id array with all the values that have a non empty name
 	var DoorGroupDoors = [];
+	var DoorGroupSides = [];
 	for (var k in arrGroupDoors){
 		if (typeof arrGroupDoors[k] !== 'function' && arrGroupDoors[k]!=""){
 			DoorGroupDoors.push(k);
+			DoorGroupSides.push(arrGroupDoorsSides[k]);
 		}
 	}
 	//build action string if its create or edit
-	if(editId!=0 && !isNaN(editId)) action_str = "action=edit_door_group&id=" + editId +"&name=" + DoorGroupName + "&isvisit=" + DoorGroupIsVisit + "&doorids=" + DoorGroupDoors.join("|");//edit
-	else action_str = "action=add_door_group&name=" + DoorGroupName + "&isvisit=" + DoorGroupIsVisit + "&doorids=" + DoorGroupDoors.join("|");//create
+	if(editId!=0 && !isNaN(editId)) action_str = "action=edit_door_group&id=" + editId +"&name=" + DoorGroupName + "&isvisit=" + DoorGroupIsVisit + "&doorids=" + DoorGroupDoors.join("|") + "&doorsides="+DoorGroupSides.join("|");//edit
+	else action_str = "action=add_door_group&name=" + DoorGroupName + "&isvisit=" + DoorGroupIsVisit + "&doorids=" + DoorGroupDoors.join("|") + "&doorsides="+DoorGroupSides.join("|");//create
 
 	$.ajax({
 		type: "POST",

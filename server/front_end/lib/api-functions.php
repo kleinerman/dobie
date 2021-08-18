@@ -922,7 +922,7 @@ function get_door_group($user,$pass,$id){
 }
 
 //create door group and add a list of doorids to it
-function add_door_group($user,$pass,$name,$doorids,$isvisit=1){
+function add_door_group($user,$pass,$name,$doorids,$isvisit=1,$doorsides=""){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->name= $name;
@@ -939,10 +939,12 @@ function add_door_group($user,$pass,$name,$doorids,$isvisit=1){
 			$response->data->id = intval(end($uri_parts));
 		}
 		if(is_numeric($response->data->id)){
-			//explode and build the sent door ids array
+			//explode and build the sent door ids and door sides arrays
+			//assumes both arrays are sequencial, having the same length
 			$sent_doors_arr=explode("|",$doorids);
-			foreach($sent_doors_arr as $sent_door_id){
-				$response2=add_door_door_group($user,$pass,$response->data->id,$sent_door_id);
+			$sent_doors_sides_arr=explode("|",$doorsides);
+			for($i=0;$i<count($sent_doors_arr);$i++){
+				$response2=add_door_door_group($user,$pass,$response->data->id,$sent_doors_arr[$i],$sent_doors_sides_arr[$i]);
 			}
 		}
 		return $response->data;
@@ -950,9 +952,17 @@ function add_door_group($user,$pass,$name,$doorids,$isvisit=1){
 }
 
 //add a door to an existing door group
-function add_door_door_group($user,$pass,$id,$doorid){
+function add_door_door_group($user,$pass,$id,$doorid,$side=""){
 	global $config;
-	$response=send_request($config->api_fullpath."doorgroup/$id/door/$doorid",$user,$pass,"put");
+	$payload_obj = new stdClass();
+
+	//translate side value to iSide/oSide
+	$payload_obj->iSide= 1;
+	$payload_obj->oSide= 1;
+	if($side==="0") $payload_obj->iSide= 0;
+	elseif($side==="1") $payload_obj->oSide= 0;
+
+	$response=send_request($config->api_fullpath."doorgroup/$id/door/$doorid",$user,$pass,"put",json_encode($payload_obj));
 	if($response->response_status != "200") return false;
 	else return $response->data;
 }
@@ -965,31 +975,49 @@ function get_door_group_doors($user,$pass,$id){
 	else return $response->data;
 }
 
-//edit group name
-function set_door_group($user,$pass,$id,$name,$doorids,$isvisit=1){
+//edit door group
+function set_door_group($user,$pass,$id,$name,$doorids,$isvisit=1,$doorsides=""){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->name= $name;
 	$payload_obj->isForVisit= $isvisit;
 	$response=send_request($config->api_fullpath."doorgroup/$id",$user,$pass,"put",json_encode($payload_obj));
 
-	//explode and build the sent door ids array
+	//explode and build the sent door ids and door sides arrays
+	//assumes both arrays are sequencial, having the same length
 	$sent_doors_arr=explode("|",$doorids);
+	$sent_doors_sides_arr=explode("|",$doorsides);
 
 	//get the current group door ids
 	$response2=get_door_group_doors($user,$pass,$id);
 
 	if(($response2 !==false) and is_array($response2)){
 		$current_doors_arr=array();
+		$current_doors_sides_arr=array();
 		//build array of all current ids
-		foreach($response2 as $obj) $current_doors_arr[]=$obj->id;
-
+		for($i=0;$i<count($response2);$i++){
+			$current_doors_arr[]=$response2[$i]->id;
+			//convert oSide and iSide value to single side value for later comparison
+			if($response2[$i]->oSide==1 and $response2[$i]->iSide==0) $current_doors_sides_arr[]="0";//outgoing
+			else if($response2[$i]->oSide==0 and $response2[$i]->iSide==1) $current_doors_sides_arr[]="1";//incoming
+			else $current_doors_sides_arr[]="";//both
+		}
+		
 		//foreach sent ids, check if they are or not already part of the group
-		foreach($sent_doors_arr as $sent_door_id){
-			if(!in_array($sent_door_id,$current_doors_arr)){
+		for($i=0;$i<count($sent_doors_arr);$i++){
+			if(!in_array($sent_doors_arr[$i],$current_doors_arr)){
 				//if not in current > ADD
-				add_door_door_group($user,$pass,$id,$sent_door_id);
-			} //else if in current > SKIP
+				add_door_door_group($user,$pass,$id,$sent_doors_arr[$i],$sent_doors_sides_arr[$i]);
+			} else {
+				//else if in current > check if they have a different side value
+				$current_doors_key = array_search($sent_doors_arr[$i],$current_doors_arr);
+				if($current_doors_sides_arr[$current_doors_key]!=$sent_doors_sides_arr[$i]){
+					//different side value > delete door from group
+					delete_door_door_group($user,$pass,$id,$sent_doors_arr[$i]);
+					//and re add it with the new side value
+					add_door_door_group($user,$pass,$id,$sent_doors_arr[$i],$sent_doors_sides_arr[$i]);
+				} //else current and sent have the same side value
+			}
 		}
 		//foreach current id
 		foreach($current_doors_arr as $current_door_id){
@@ -1056,8 +1084,7 @@ function add_visit($user,$pass,$names,$lastname,$idnum,$cardnum,$orgid,$expirati
 			if($door_group_doors){
 				//for each door id, add allweek access
 				foreach($door_group_doors as $door){
-					//only iside access, NO oside
-					$response2 = add_access_allweek($user,$pass,$door->id,$personid,1,1,"00:00",$expirationhour,$expirationdate);
+					$response2 = add_access_allweek($user,$pass,$door->id,$personid,$door->iSide,$door->oSide,"00:00",$expirationhour,$expirationdate);
 				}
 			} //else no accesses for that door group
 		}
@@ -1144,6 +1171,13 @@ function resync_controller($user,$pass,$id){
 	else return $response->data;
 }
 
+function considersynced_controller($user,$pass,$id){
+	global $config;
+	$response=send_request($config->api_fullpath."controller/$id/forcecommit",$user,$pass,"put");
+	if($response->response_status != "200") return false;
+	else return $response->data;
+}
+
 function poweroff_controller($user,$pass,$id){
 	global $config;
 	$response=send_request($config->api_fullpath."controller/$id/poweroff",$user,$pass,"put");
@@ -1221,7 +1255,7 @@ if($DEBUG){
 	//$res=get_door_accesses("admin","admin",5);
 //	$res=get_zones("admin","admin");
 	//$res=get_zone("admin","admin",1);
-    $res=get_doors("admin","admin",1);
+    //$res=get_doors("admin","admin",1);
 	//$res=get_door("admin","admin",5);
 	//$res=add_access_allweek("admin","admin",3,1,1,1,"08:00:00","18:00:00","9999-12-31 00:00");
 	//$res=edit_access_allweek("admin","admin",19,0,1,"08:00:00","18:00:00","9999-12-31 00:00");
@@ -1283,7 +1317,7 @@ if($DEBUG){
 	//$res=set_excdayuds("admin","admin", 11, 3, "2020-02-20");
     //$res=delete_excdayuds("admin","admin",11);
     //$res=open_door("admin","admin",1);
-
+	//$res=set_door_group("admin","admin",7,"mulo2","1|2|3|4|6",0,"|1|0||0");
 	echo "<pre>";
 	var_dump($res);
 	//echo json_encode($res->data->events[0]);

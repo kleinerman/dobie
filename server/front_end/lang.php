@@ -720,6 +720,18 @@ $dictionary = array(
 		'es' => 'Dirección IP',
 		'de' => 'IP Adresse'
 	),
+	strtolower('All Synced') => array(
+		'es' => 'Todo Sincronizado'
+	),
+	strtolower('Needs Resync') => array(
+		'es' => 'Resinc. Necesaria'
+	),
+	strtolower('Consider Synced') => array(
+		'es' => 'Considerar Sinc.'
+	),
+	strtolower('Are you sure you want to consider this controller synced') => array(
+		'es' => 'Está seguro que quiere considerar este controlador como sincronizado'
+	),
 
 	//zones
 	strtolower('New Zone') => array(
@@ -997,5 +1009,4 @@ $dictionary = array(
 		'de' => 'Keine Ergebnisse'
 	)
 );
-
 ?>

@@ -23,12 +23,15 @@ include("header.php");
 
 <br><br>
 <div class="row" id="buttons-row">
-<div class="col-xs-2 center"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></button></div>
-<div class="col-xs-2 center"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button></div>
-<div class="col-xs-2 center"><button id="rows-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span><span class="hidden-xs"> <?=get_text("Refresh",$lang);?></span></button></div>
-<div class="col-xs-2 center"><button id="rows-resync" class="btn btn-violet" type="button" data-toggle="modal" data-target="#modal-resync" disabled><span class="fa fa-redo-alt"></span><span class="hidden-xs"> <?=get_text("Resync",$lang);?></span></button></div>
-<div class="col-xs-2 center"><button id="rows-poweroff" class="btn btn-info" type="button" data-toggle="modal" data-target="#modal-poweroff" disabled><span class="fa fa-power-off"></span><span class="hidden-xs"> <?=get_text("Power Off",$lang);?></span></button></div>
-<div class="col-xs-2 center"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button></div>
+<div class="col-md-12 center">
+<div class="buttoncontainer"><button id="rows-new" class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-new"><span class="fa fa-plus"></span><span class="hidden-xs"> <?=get_text("Add",$lang);?></button></div>
+<div class="buttoncontainer"><button id="rows-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button></div>
+<div class="buttoncontainer"><button id="rows-refresh" class="btn btn-warning" type="button"><span class="fa fa-sync-alt"></span><span class="hidden-xs"> <?=get_text("Refresh",$lang);?></span></button></div>
+<div class="buttoncontainer"><button id="rows-resync" class="btn btn-violet" type="button" data-toggle="modal" data-target="#modal-resync" disabled><span class="fa fa-redo-alt"></span><span class="hidden-xs"> <?=get_text("Resync",$lang);?></span></button></div>
+<div class="buttoncontainer"><button id="rows-considersynced" class="btn btn-brown" type="button" data-toggle="modal" data-target="#modal-considersynced" disabled><span class="fa fa-check"></span><span class="hidden-xs"> <?=get_text("Consider Synced",$lang);?></span></button></div>
+<div class="buttoncontainer"><button id="rows-poweroff" class="btn btn-info" type="button" data-toggle="modal" data-target="#modal-poweroff" disabled><span class="fa fa-power-off"></span><span class="hidden-xs"> <?=get_text("Power Off",$lang);?></span></button></div>
+<div class="buttoncontainer"><button id="rows-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button></div>
+</div>
 </div>
 
 </div>
@@ -36,7 +39,7 @@ include("header.php");
 
 </div>
 
-<?
+<?php
 include("footer.php");
 ?>
 
@@ -91,6 +94,24 @@ include("footer.php");
 <form class="form-horizontal" id="controller-resync-form" action="#">
 <button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
 <button type="button" class="btn btn-danger" onclick="$('#modal-resync').modal('hide');"><?=get_text("Cancel",$lang);?></button>
+</form>
+</div>
+</div>
+</div>
+<!-- /.modal -->
+</div>
+
+<!-- considersynced modal -->
+<div class="modal fade" id="modal-considersynced" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-body center">
+<?=get_text("Are you sure you want to consider this controller synced",$lang);?>?
+</div>
+<div class="modal-footer center">
+<form class="form-horizontal" id="controller-considersynced-form" action="#">
+<button class="btn btn-success"><?=get_text("Yes",$lang);?></button>
+<button type="button" class="btn btn-danger" onclick="$('#modal-considersynced').modal('hide');"><?=get_text("Cancel",$lang);?></button>
 </form>
 </div>
 </div>
@@ -182,9 +203,9 @@ function populateTable(tableId){
 		success: function(resp){
 			if(resp[0]=='1'){
 				var values = resp[1];
-				console.log(values);
+				//console.log(values);
 				//set table headers
-				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("Name",$lang);?></th><th>MAC</th><th><?=get_text("IP Address",$lang);?></th><th><?=get_text("Last Seen",$lang);?></th><th class=\"center\"><?=get_text("Reachable",$lang);?></th></tr>");
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("Name",$lang);?></th><th>MAC</th><th><?=get_text("IP Address",$lang);?></th><th><?=get_text("Last Seen",$lang);?></th><th class=\"center\"><?=get_text("Reachable",$lang);?></th><th class=\"center\"><?=get_text("All Synced",$lang);?></th><th class=\"center\"><?=get_text("Needs Resync",$lang);?></th></tr>");
 				//populate fields with rec info
 				for(i=0;i<values.length;i++){
 					//show row
@@ -200,9 +221,17 @@ function populateTable(tableId){
 						addZeroPaddingSingle(dateobj.getSeconds());
 					}
 					//pre process reachable icon
-					if(values[i].reachable=="1") reachableStr="<span class=\"fa fa-check\"></span>";
+					var checkStr="<span class=\"fa fa-check\"></span>";
+					var warningStr="<span class=\"fa fa-exclamation-triangle\"></span>";
+					if(values[i].reachable=="1") reachableStr=checkStr;
 					else reachableStr= "";
-					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"controllers[]\" value="+values[i].id+"></td><td>"+values[i].name+"</td><td>"+macStr+"</td><td>"+values[i].ipAddress+"</td><td>"+lastSeenStr+"</td><td class=\"center\">"+reachableStr+"</td></tr>");
+					//pre process allsynced icon
+					if(values[i].allSynced=="1") allsyncedStr=checkStr;
+					else allsyncedStr= "";
+					//pre process needresync icon
+					if(values[i].needResync=="1") needresyncStr=warningStr;
+					else needresyncStr= "";
+					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"controllers[]\" value="+values[i].id+"></td><td>"+values[i].name+"</td><td>"+macStr+"</td><td>"+values[i].ipAddress+"</td><td>"+lastSeenStr+"</td><td class=\"center\">"+reachableStr+"</td><td class=\"center\">"+allsyncedStr+"</td><td class=\"center\">"+needresyncStr+"</td></tr>");
 				}
 				//add trigger events for rows
 				<?php if($logged->roleid<2){?>tableClickEvents2(); <?php } else {?>
@@ -252,11 +281,11 @@ function tableClickEvents2(){
 		if($(this).prop("checked")) {
 			$("#rows-table td input[type=checkbox]").prop("checked",true);
 			//$("#rows-del").prop("disabled",false);
-			if($('#rows-table tr td input[type=checkbox]:checked').length == 1) $("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",false);
+			if($('#rows-table tr td input[type=checkbox]:checked').length == 1) $("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",false);
 		} else {
 			$("#rows-table td input[type=checkbox]").prop("checked",false);
 			//no rows selected > disable both
-			$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",true);
+			$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",true);
 		}
 	})
 	
@@ -266,11 +295,11 @@ function tableClickEvents2(){
 			//if at least 1 row selected > enable delete
 			//$("#rows-del").prop("disabled",false);
 			//enable edit only if 1 row is selected
-			if($('#rows-table tr td input[type=checkbox]:checked').length > 1) $("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",true);
-			else $("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",false);
+			if($('#rows-table tr td input[type=checkbox]:checked').length > 1) $("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",true);
+			else $("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",false);
 		} else {
 			//no rows selected > disable both
-			$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff").prop("disabled",true);
+			$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",true);
 		}
 	});
 }
@@ -342,6 +371,8 @@ $("#controller-form").submit(function(){
 					$("#modal-new").modal("hide");
 					//repopulate table
 					populateTable("rows-table");
+					//disable parametric buttons
+					$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",1);
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -376,6 +407,44 @@ $("#controller-resync-form").submit(function(){
 					$("#modal-resync").modal("hide");
 					//repopulate table
 					populateTable("rows-table");
+					//disable parametric buttons
+					$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",1);
+				} else {
+					//show modal error
+					$('#modal-error .modal-body').text(resp[1]);
+					$("#modal-error").modal("show");
+				}
+			},
+			failure: function(){
+				//show modal error
+				$('#modal-error .modal-body').text("<?=get_text("Operation failed, please try again",$lang);?>");
+				$("#modal-error").modal("show");
+			}
+		});
+	} else {
+		//invalid values sent
+		$('#modal-error .modal-body').text("<?=get_text("Invalid values sent",$lang);?>");
+		$("#modal-error").modal("show");
+	}
+	return false;
+});
+
+//considersynced action
+$("#controller-considersynced-form").submit(function(){
+	var controllerId = $('#rows-table tr td input[type=checkbox]:checked')[0].value;
+	if(!isNaN(controllerId)){
+		$.ajax({
+			type: "POST",
+			url: "process",
+			data: "action=considersynced_controller&id=" + controllerId,
+			success: function(resp){
+				if(resp[0]=='1'){
+					//close modal
+					$("#modal-considersynced").modal("hide");
+					//repopulate table
+					populateTable("rows-table");
+					//disable parametric buttons
+					$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",1);
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -410,6 +479,8 @@ $("#controller-poweroff-form").submit(function(){
 					$("#modal-poweroff").modal("hide");
 					//repopulate table
 					populateTable("rows-table");
+					//disable parametric buttons
+					$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",1);
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -444,6 +515,8 @@ $("#controller-delete-form").submit(function(){
 					$("#modal-delete").modal("hide");
 					//repopulate table
 					populateTable("rows-table");
+					//disable parametric buttons
+					$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",1);
 				} else {
 					//show modal error
 					$('#modal-error .modal-body').text(resp[1]);
@@ -472,7 +545,7 @@ $("#modal-delete").on("shown.bs.modal",function(){
 <?php
 } else {
 	//disable all buttons but the refresh one in case of viewer
-	echo "$('#rows-new,#rows-edit,#rows-resync,#rows-poweroff,#rows-del').prop('disabled', true);
+	echo "$('#rows-new,#rows-edit,#rows-resync,#rows-poweroff,#rows-del,#rows-considersynced').prop('disabled', true);
 	$('#rows-table input[type=checkbox]').hide();";
 }
 ?>
@@ -480,12 +553,9 @@ $("#modal-delete").on("shown.bs.modal",function(){
 //Refresh button > repopulate list
 $("#rows-refresh").click(function(){
 	populateTable("rows-table");
-	//disable edit and del buttons
-	$("#rows-del,#rows-edit,#rows-resync,#rows-poweroff").prop("disabled",1);
+	//disable parametric buttons
+	$("#rows-edit,#rows-del,#rows-resync,#rows-poweroff,#rows-considersynced").prop("disabled",1);
 });
 </script>
-<style>
-
-</style>
 </body>
 </html>
