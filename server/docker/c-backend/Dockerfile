@@ -22,9 +22,14 @@ FROM arm64v8/python:3-slim
 # /dobie-venv directory is first in PATH variable, the python interpreter
 # and all the pip packages of the virtual environment will be used.
 
+# apt-get is used instead of apt since apt warns about not using it for scripts.
+# DEBIAN_FRONTEND=noniteractive is preceding apt-get install command to avoid
+# debconf warns during installation of packages because not having an
+# interactive TERM
+
 RUN \
 apt-get -y update && apt-get -y dist-upgrade && \
-apt-get install -y apt-utils gcc make libffi-dev libssl-dev zlib1g-dev libjpeg-dev && \
+DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils gcc make libffi-dev libssl-dev zlib1g-dev libjpeg-dev && \
 cp /usr/share/zoneinfo/America/Argentina/Cordoba /etc/localtime && \
 echo "America/Argentina/Cordoba" > /etc/timezone
 
