@@ -108,6 +108,10 @@ class DoorGroupNotFound(DoorGroupError):
     '''
     pass
 
+class DoorGroupForbidden(DoorGroupError):
+    '''
+    '''
+    pass
 
 class CtrllerModelError(Exception):
     '''
@@ -939,14 +943,19 @@ class DataBase(object):
         #of the dictionary like quote or double quote.
         user = self.escapeDict(user)
 
+        #Changing None to 'NULL' to write correct SQL syntax below.
+        for param in user:
+            if user[param] is None:
+                user[param] = 'NULL'
+
+
         passwdHash = crypt.crypt(user['passwd'], crypt.METHOD_MD5)
 
-        sql = ("INSERT INTO User(username, passwdHash, fullName, roleId, language, active) "
-               "VALUES('{}', '{}', '{}', {}, '{}', {})"
-               "".format(user['username'], passwdHash, user['fullName'],
-                         user['roleId'], user['language'], user['active'])
+        sql = ("INSERT INTO User(username, passwdHash, fullName, language, active, roleId, orgId) "
+               "VALUES('{}', '{}', '{}', '{}', {}, {}, {})"
+               "".format(user['username'], passwdHash, user['fullName'], user['language'],
+                         user['active'], user['roleId'], user['orgId'])
               )
-
 
         try:
             self.execute(sql)
@@ -1000,6 +1009,11 @@ class DataBase(object):
         #of the dictionary like quote or double quote.
         user = self.escapeDict(user)
 
+        #Changing None to 'NULL' to write correct SQL syntax below.
+        for param in user:
+            if user[param] is None:
+                user[param] = 'NULL'
+
         try:
             setUsername = ", username = '{}'".format(user['username'])
         except KeyError:
@@ -1017,11 +1031,6 @@ class DataBase(object):
             setFullName = ""
 
         try:
-            setRoleId = ", roleId = {}".format(user['roleId'])
-        except KeyError:
-            setRoleId = ""
-
-        try:
             setLanguage = ", language = '{}'".format(user['language'])
         except KeyError:
             setLanguage = ""
@@ -1031,12 +1040,22 @@ class DataBase(object):
         except KeyError:
             setActive = ""
 
+        try:
+            setRoleId = ", roleId = {}".format(user['roleId'])
+        except KeyError:
+            setRoleId = ""
+
+        try:
+            setOrgId = ", orgId = {}".format(user['orgId'])
+        except KeyError:
+            setOrgId = ""
 
 
-        sql = ("UPDATE User SET id = {}{}{}{}{}{}{} WHERE id = {}"
+
+        sql = ("UPDATE User SET id = {}{}{}{}{}{}{}{} WHERE id = {}"
                "".format(user['id'], setUsername, setPasswdHash,
-                         setFullName, setRoleId, setLanguage,
-                         setActive, user['id'])
+                         setFullName, setLanguage, setActive,
+                         setRoleId, setOrgId, user['id'])
               )
 
         try:
@@ -1489,11 +1508,15 @@ class DataBase(object):
 
 
 
-    def getDoorGroups(self):
+    def getDoorGroups(self, orgId):
         '''
         Return a dictionary with all Door Groups
         '''
-        sql = ("SELECT * FROM DoorGroup")
+        if orgId == None:
+            sql = "SELECT * FROM DoorGroup"
+        else:
+            sql = "SELECT * FROM DoorGroup WHERE orgId = {}".format(orgId)
+
         try:
             self.execute(sql)
             doorGroups = self.cursor.fetchall()
@@ -1543,9 +1566,14 @@ class DataBase(object):
         #of the dictionary like quote or double quote.
         doorGroup = self.escapeDict(doorGroup)
 
+        #Changing None to 'NULL' to write correct SQL syntax below.
+        for param in doorGroup:
+            if doorGroup[param] is None:
+               doorGroup[param] = 'NULL'
 
-        sql = ("INSERT INTO DoorGroup(name, isForVisit) VALUES('{}', {})"
-               "".format(doorGroup['name'], doorGroup['isForVisit'])
+
+        sql = ("INSERT INTO DoorGroup(name, isForVisit, orgId) VALUES('{}', {}, {})"
+               "".format(doorGroup['name'], doorGroup['isForVisit'], doorGroup['orgId'])
               )
 
         try:
@@ -1591,8 +1619,13 @@ class DataBase(object):
         #of the dictionary like quote or double quote.
         doorGroup = self.escapeDict(doorGroup)
 
-        sql = ("UPDATE DoorGroup SET name = '{}', isForVisit = {} WHERE id = {}"
-               "".format(doorGroup['name'], doorGroup['isForVisit'], doorGroup['id'])
+        #Changing None to 'NULL' to write correct SQL syntax below.
+        for param in doorGroup:
+            if doorGroup[param] is None:
+               doorGroup[param] = 'NULL'
+
+        sql = ("UPDATE DoorGroup SET name = '{}', isForVisit = {}, orgId = {} WHERE id = {}"
+               "".format(doorGroup['name'], doorGroup['isForVisit'], doorGroup['orgId'], doorGroup['id'])
               )
 
         try:
@@ -2307,29 +2340,33 @@ class DataBase(object):
             raise DoorError('Can not get doors from this zone.')
 
 
-    def getDoorsFromDoorGroup(self, doorGroupId):
+    def getDoorsFromDoorGroup(self, doorGroupId, usrOrgId):
         '''
         Return a list of dictionaries with all door parameters from a DoorGroup.
         In each dictionary is included iSide and oSide as door parameter
         '''
 
         try:
-
             #Check if the doorGroup exists in database
-            sql = ("SELECT * FROM DoorGroup WHERE id = {}".format(doorGroupId))
+            sql = ("SELECT orgId FROM DoorGroup WHERE id = {}".format(doorGroupId))
             self.execute(sql)
-            doorGroup = self.cursor.fetchone()
+            row = self.cursor.fetchone()
 
-            if not doorGroup:
+            if not row:
                 raise DoorGroupNotFound('Door Group not found')
+
+            orgId = row['orgId']
+            if usrOrgId is not None and usrOrgId != orgId:
+                raise DoorGroupForbidden('Door Group Forbidden')
+
 
             #Get all doors from this DoorGroup
             sql = ("SELECT Door.*, DoorGroupDoor.iSide, DoorGroupDoor.oSide "
-                "FROM Door JOIN DoorGroupDoor "
-                "ON (Door.id = DoorGroupDoor.doorId) "
-                "WHERE DoorGroupDoor.doorGroupId = {}"
-                "".format(doorGroupId)
-                    )
+                   "FROM Door JOIN DoorGroupDoor "
+                   "ON (Door.id = DoorGroupDoor.doorId) "
+                   "WHERE DoorGroupDoor.doorGroupId = {}"
+                   "".format(doorGroupId)
+                  )
             self.execute(sql)
             doors = self.cursor.fetchall()
 

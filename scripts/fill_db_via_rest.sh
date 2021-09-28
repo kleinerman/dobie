@@ -47,23 +47,25 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 
 
 
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Este", "isForVisit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Oeste", "isForVisit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Norte", "isForVisit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Sur", "isForVisit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Camino Interno", "isForVisit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+#Adding Door Groups
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Este", "isForVisit": 1, "orgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Oeste", "isForVisit": 1, "orgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Norte", "isForVisit": 1, "orgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Ingreso Visitas Sur", "isForVisit": 1, "orgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Camino Interno", "isForVisit": 0, "orgId": null}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+
+#At this point, a Door Group for an Organization can't be added (orgId != null), since still there isn't any Organization in DB.
+#Trying to do it -> 409 CONFLICT ERROR
 
 
+#Adding doors to controller 1
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Principal", "doorNum": 1, "controllerId": 1, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Molinete", "doorNum": 2, "controllerId": 1, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Ascensor", "doorNum": 3, "controllerId": 1, "snsrType": 0, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 3, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
-
+#Adding doors to controller 2
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 1", "doorNum": 1, "controllerId": 2, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 1, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 2", "doorNum": 2, "controllerId": 2, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 2, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puerta Oficina 3", "doorNum": 3, "controllerId": 2, "snsrType": 1, "unlkTime": 7, "bzzrTime": 3, "alrmTime": 10, "zoneId": 3, "isVisitExit": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/door
-
-
-
 
 
 #Adding Unlock Door Schedules
@@ -74,18 +76,14 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"doorId":
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "weekDay": 1, "startTime": "12:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "weekDay": 7, "startTime": "13:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
 curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd/4
-
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "weekDay": 1, "startTime": "10:45", "endTime": "15:30"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/unlkdoorskd
 
 
 
 #Adding Exception Days to Unlock door by schedule
-
 DATE_NOW=$(date +%Y-%m-%d)
-
 DATE_TOMORROW=$(date --date "tomorrow" +%Y-%m-%d)
 DATE_YESTERDAY=$(date --date "yesterday" +%Y-%m-%d)
-
 
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "excDay": "'$DATE_YESTERDAY'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "excDay": "'$DATE_NOW'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds
@@ -98,11 +96,10 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' htt
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "excDay": "'$DATE_NOW'"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/excdayuds
 
 
-#Adding doors to doorGroups
 
+#Adding doors to doorGroups
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/1/door/2
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/1/door/3
-
 
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/2/door/4
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 0, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/2/door/6
@@ -111,31 +108,29 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 
 #Retrieving all doors from doorGroup 2
 curl -u admin:admin -i -H "Content-Type: application/json" -X GET -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/2/door
 
-sleep 4
+sleep 1
 
 
-#Deleting one door from visitdoorgroup 2
+#Deleting one door from doorgroup 2
 curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/2/door/4
 
+#Adding more doors to different doorgrupos
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/2/door/5
-
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/3/door/1
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/3/door/2
-
-
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/4/door/3
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/4/door/1
 
-#Deleting all previous visitdoorgroup created
+#Deleting a complete Door Group
 curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/4
 
+#Adding more doors to doorgroup 5
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/5/door/1
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/5/door/2
 
 
 
-
-
+#Organizations
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Bonify"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/organization
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"name": "Bonifies Networks"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/organization/2
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Coliter Inc"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/organization
@@ -146,7 +141,26 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": 
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Clavnet Company"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/organization
 
 
-#Static Persons
+#Adding DoorGroups to Organizations
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "pUERTAS Bonifies", "isForVisit": 0, "orgId": 2}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puertas Coliter Inc", "isForVisit": 0, "orgId": 3}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+#Adding another Door Group to same Organization (Bonifies)
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"name": "Puertas Centro Data", "isForVisit": 0, "orgId": 2}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup
+
+
+
+#Adding Doors to previous DoorGroups
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/6/door/1
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/6/door/3
+
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/7/door/5
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"iSide": 1, "oSide": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/7/door/4
+
+
+#Modify one Door Group to simulate a correction (name and orgId)
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"name": "Puertas Bonf. Net.", "isForVisit": 1, "orgId": 2}' http://$BCKND_DOCKER_IP:5000/api/v1.0/doorgroup/6
+
+#Adding Static Persons
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Jorge Emanuel", "lastName": "Kleinerman", "identNumber": "28063146", "note": "nota de prueba", "cardNumber": 5379295, "orgId": 2}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Ary D.", "lastName": "Kleinerman", "identNumber": "21063146", "note": "nota de prueba", "cardNumber": 5300738, "orgId": 2, "visitedOrgId": null, "isProvider": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "German Andres", "lastName": "Fisanotti", "identNumber": "22063146", "note": "nota de prueba", "cardNumber": 9038876, "orgId": 2}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
@@ -165,8 +179,7 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names":
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Sol Maria", "lastName": "Tapia", "identNumber": "23563346", "note": "nota de prueba", "cardNumber": 5300768, "orgId": 7, "visitedOrgId": null, "isProvider": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
 
 
-
-#Some Visitors
+#Adding Some Visitors
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Claudia", "lastName": "Toloza", "identNumber": "11064146", "note": "nota de prueba", "cardNumber": 2163612, "orgId": 1, "visitedOrgId": 2, "isProvider": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Diego", "lastName": "Joner", "identNumber": "25033546", "note": "nota de prueba", "cardNumber": 5327790, "orgId": 1, "visitedOrgId": 2, "isProvider": 1}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names": "Mariana", "lastName": "Turin", "identNumber": "24053646", "note": "nota de prueba", "cardNumber": 5330823, "orgId": 1, "visitedOrgId": 3, "isProvider": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person
@@ -180,9 +193,7 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"names":
 ################# Accesses for static persons ####################
 #Jorge Kleinerman Accesses
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 1, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 1, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 1, "weekDay": 1, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-01-02"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/liaccess
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 1, "weekDay": 2, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-01-02"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/liaccess
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 1, "weekDay": 3, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-01-02"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/liaccess
@@ -190,98 +201,79 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId"
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 1, "weekDay": 5, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-01-02"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/liaccess
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 1, "weekDay": 6, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-01-02"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/liaccess
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 1, "weekDay": 7, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-01-02"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/liaccess
-
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 1, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "personId": 1, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 1, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
-
 
 #Ary Kleinerman Accesses
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 2, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 2, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 2, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 
-
 #German Fisanotti Accesses
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 3, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 3, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 3, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 
 #Lucas Ferre Accesses
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 4, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 4, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 4, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 
-
 #Daniel Costa Accesses
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 5, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 5, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 5, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 
 #Romina Goner Accesses
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 6, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 
-
 #Carlos Navares
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 7, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 7, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 7, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 
 #Lorena Tolares
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 8, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 8, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 8, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 
-
 #Gonzalo Bonatti
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 9, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 9, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 9, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 
 #Mariano Roter
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 10, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 10, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 10, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 
-
 #Mauro Alvarez
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 11, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 11, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 11, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 
 #Monica Llanos
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 12, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 12, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "personId": 12, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 
-
 #Ruben Gonzales
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 13, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 5, "personId": 13, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 6, "personId": 13, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 
 #Ricardo Telurio
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 4, "personId": 14, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 14, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 14, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 
-
 #Ruben Pecamenta
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 15, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 2, "personId": 15, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 3, "personId": 15, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
-
 
 #Sol Tapia
 curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId": 1, "personId": 16, "iSide": 1, "oSide": 1, "startTime": "00:00", "endTime": "23:59", "expireDate": "2025-12-12"}' http://$BCKND_DOCKER_IP:5000/api/v1.0/access
@@ -322,9 +314,9 @@ curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"doorId"
 #Modifying Sol Tapia Values
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"names": "Soledad Rocio", "lastName": "Tapia", "identNumber": "24573247", "note": "nota modificada", "cardNumber": 5300817, "orgId": 7, "visitedOrgId": null, "isProvider": 0}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person/16
 
-
-#Waiting 3 seconds to let database finish de insertion of the accesses of deleted persons
+#Waiting 3 seconds to let database finish de insertion of the accesses and then delete persons
 sleep 3
+
 #Deleting Ruben Pecamenta
 curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/person/15
 
@@ -339,24 +331,24 @@ sleep 4
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{}' http://$BCKND_DOCKER_IP:5000/api/v1.0/controller/1/resync
 
 
-
 #Creating deleting and modifying some system users
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "jcabelo", "passwd": "qwe123qwe", "fullName": "Juan Cabelo", "roleId": 1, "language": "en", "active": 1}' http://localhost:5000/api/v1.0/user
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "rtortoza", "passwd": "qwe123qwe", "fullName": "Ramon Tortoza", "roleId": 2, "language": "en", "active": 1}' http://localhost:5000/api/v1.0/user
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "lcabrera", "passwd": "qwe123qwe", "fullName": "Luis Cabrera", "roleId": 2, "language": "es", "active": 1}' http://localhost:5000/api/v1.0/user
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "jcabelo", "passwd": "qwe123qwe", "fullName": "Juan Cabelo", "roleId": 1, "language": "en", "active": 1, "orgId": null}' http://localhost:5000/api/v1.0/user
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "rtortoza", "passwd": "qwe123qwe", "fullName": "Ramon Tortoza", "roleId": 2, "language": "en", "active": 1, "orgId": null}' http://localhost:5000/api/v1.0/user
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "lcabrera", "passwd": "qwe123qwe", "fullName": "Luis Cabrera", "roleId": 3, "language": "es", "active": 1, "orgId": null}' http://localhost:5000/api/v1.0/user
 curl -u admin:admin -i -H "Content-Type: application/json" -X DELETE -d '{}' http://localhost:5000/api/v1.0/user/4
-curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "asorini", "passwd": "qwe123qwe", "fullName": "Andrea Sorini", "roleId": 3, "language": "en", "active": 1}' http://localhost:5000/api/v1.0/user
-curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"username": "asorini", "passwd": "qwe123", "fullName": "Andrea Sorini", "roleId": 3, "language": "es", "active": 1}' http://localhost:5000/api/v1.0/user/5
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "asorini", "passwd": "qwe123", "fullName": "Andrea Sorini", "roleId": 4, "language": "en", "active": 1, "orgId": 3}' http://localhost:5000/api/v1.0/user
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"username": "asorini", "passwd": "qwe123qwe", "roleId": 4, "language": "es", "active": 1}' http://localhost:5000/api/v1.0/user/5
+curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"username": "asorini", "roleId": 4, "language": "es", "active": 1, "orgId": 5}' http://localhost:5000/api/v1.0/user/5
+curl -u admin:admin -i -H "Content-Type: application/json" -X POST -d '{"username": "jorklein", "passwd": "qwe123qwe", "fullName": "Jor Kleinerman", "roleId": 4, "language": "en", "active": 1, "orgId": 2}' http://localhost:5000/api/v1.0/user
 
+
+#Modifying Admin password
 curl -u admin:admin -i -H "Content-Type: application/json" -X PUT -d '{"passwd": "qwe123qwe"}' http://localhost:5000/api/v1.0/user/1
-
 curl -u admin:qwe123qwe -i -H "Content-Type: application/json" -X PUT -d '{"passwd": "admin"}' http://localhost:5000/api/v1.0/user/1
 
 
 
-
-
-
+#Generating some Events
 DB_DOCKER_IP=$(tr -d '", ' <<< $(docker inspect database | grep '"IPAddress": "1' | gawk '{print $2}'))
 
 DATE_NOW=$(date +%Y-%m-%d\ %H:%M)
@@ -452,5 +444,31 @@ mysql -u dobie_usr -pqwe123qwe -h $DB_DOCKER_IP dobie_db -e "
     insert into Event(eventTypeId, doorId, dateTime, doorLockId, personId, side, allowed, denialCauseId) values(1, 5, '$DATE_7D_AGO=', 1, 7, 1, 0, 3);
 
 
-
                                                  "
+
+echo "User jorklein trying to retrieve persons from his Organization (Allowed)"
+curl -u jorklein:qwe123qwe -i -H "Content-Type: application/json" -X GET -d '{}' http://127.0.0.1:5000/api/v1.0/organization/2/person
+
+echo "User jorklein trying to retrieve persons from another Organization (Forbidden)"
+curl -u jorklein:qwe123qwe -i -H "Content-Type: application/json" -X GET -d '{}' http://127.0.0.1:5000/api/v1.0/organization/5/person
+
+echo "Admin trying to retrieve persons from any Organization (Of course Allowed)"
+curl -u admin:admin -i -H "Content-Type: application/json" -X GET -d '{}' http://127.0.0.1:5000/api/v1.0/organization/3/person
+
+echo "jcabelo (not-org-usr) trying to retrieve persons from any Organization (Of course Allowed)"
+curl -u jcabelo:qwe123qwe -i -H "Content-Type: application/json" -X GET -d '{}' http://127.0.0.1:5000/api/v1.0/organization/3/person
+
+echo "User jorklein trying to retrieve doors from his Organization (Allowed)"
+curl -u jorklein:qwe123qwe -i -H "Content-Type: application/json" -X GET -d '{}' http://127.0.0.1:5000/api/v1.0/doorgroup/6/door
+
+echo "User jorklein trying to retrieve doors from another Organization (Forbiden)"
+curl -u jorklein:qwe123qwe -i -H "Content-Type: application/json" -X GET -d '{}' http://127.0.0.1:5000/api/v1.0/doorgroup/3/door
+
+echo "Admin trying to retrieve from any Organization (Of course Allowed)"
+curl -u admin:admin -i -H "Content-Type: application/json" -X GET -d '{}' http://127.0.0.1:5000/api/v1.0/doorgroup/7/door
+
+echo "rtortoza (not-org-usr) trying to retrieve from any Organization (Of course Allowed)"
+curl -u rtortoza:qwe123qwe -i -H "Content-Type: application/json" -X GET -d '{}' http://127.0.0.1:5000/api/v1.0/doorgroup/7/door
+
+echo "The Organization of org-user jorklein has two Door Groups. Retrieving them..."
+curl -u jorklein:qwe123qwe -i -H "Content-Type: application/json" -X GET -d '{}' http://127.0.0.1:5000/api/v1.0/doorgroup

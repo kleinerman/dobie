@@ -1,30 +1,13 @@
 BEGIN;
 
-
-CREATE TABLE `Role` (
+CREATE TABLE `ResState` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `description` varchar(20) NOT NULL
 )
 ;
 
 
-CREATE TABLE `User` (
-    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    `username` varchar(32) NOT NULL,
-    `passwdHash` varchar(128) NOT NULL,
-    `fullName` varchar(64) NOT NULL,
-    `roleId` integer NOT NULL,
-    `language` varchar(2) NOT NULL,
-    `active` boolean NOT NULL,
-    CONSTRAINT `fk_User_Role` FOREIGN KEY (`roleId`) REFERENCES `Role` (`id`)
-)
-;
--- To avoid having two equal usernames
-CREATE UNIQUE INDEX usernameIndex ON User (username)
-;
-
-
-CREATE TABLE `ResState` (
+CREATE TABLE `Role` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `description` varchar(20) NOT NULL
 )
@@ -36,6 +19,24 @@ CREATE TABLE `Organization` (
     `name` varchar(40) NOT NULL,
     `resStateId` integer NOT NULL
 )
+;
+
+
+CREATE TABLE `User` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `username` varchar(32) NOT NULL,
+    `passwdHash` varchar(128) NOT NULL,
+    `fullName` varchar(64) NOT NULL,
+    `language` varchar(2) NOT NULL,
+    `active` boolean NOT NULL,
+    `roleId` integer NOT NULL,
+    `orgId` integer,
+    CONSTRAINT `fk_User_Role` FOREIGN KEY (`roleId`) REFERENCES `Role` (`id`),
+    CONSTRAINT `fk_User_Organization` FOREIGN KEY (`orgId`) REFERENCES `Organization` (`id`)
+)
+;
+-- To avoid having two equal usernames
+CREATE UNIQUE INDEX usernameIndex ON User (username)
 ;
 
 
@@ -115,7 +116,9 @@ CREATE UNIQUE INDEX CtrllerDoorNumIndex ON Door (controllerId, doorNum)
 CREATE TABLE `DoorGroup` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
     `name` varchar(40) NOT NULL,
-    `isForVisit` boolean NOT NULL
+    `isForVisit` boolean NOT NULL,
+    `orgId` integer,
+    CONSTRAINT `fk_DoorGroup_Organization` FOREIGN KEY (`orgId`) REFERENCES `Organization` (`id`)
 )
 ;
 

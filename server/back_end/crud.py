@@ -36,6 +36,13 @@ class BadRequest(Exception):
         self.status_code = status_code
 
 
+class Forbidden(Exception):
+    def __init__(self, message, status_code=403):
+        Exception.__init__(self)
+        self.message = message
+        self.status_code = status_code
+
+
 class NotFound(Exception):
     def __init__(self, message, status_code=404):
         Exception.__init__(self)
@@ -113,6 +120,13 @@ class CrudMngr(genmngr.GenericMngr):
                                  'message':'the client sent a request that this server could not understand',
                                  'code':400})
             response.status_code = 400
+            return response
+
+
+        @app.errorhandler(Forbidden)
+        def unauthorized(error):
+            response = jsonify ({'status': 'error', 'error': 'Unauthorized access'})
+            response.status_code = error.status_code
             return response
 
 
@@ -220,7 +234,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 
 
-        userNeedKeys = ('username', 'passwd', 'fullName', 'roleId', 'language', 'active')
+        userNeedKeys = ('username', 'passwd', 'fullName', 'language', 'active', 'roleId', 'orgId')
 
         @app.route('/api/v1.0/user', methods=['GET', 'POST'])
         @auth.login_required
@@ -550,6 +564,11 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             GET: Return a list with all persons in the organization
             '''
+            usrOrgId = g.user['orgId']
+
+            if usrOrgId is not None and usrOrgId != orgId:
+                raise Forbidden('Not allowed to see this data')
+
             try:
                 persons = self.dataBase.getOrgPersons(orgId)
 
@@ -707,7 +726,7 @@ class CrudMngr(genmngr.GenericMngr):
 
 #----------------------------------DoorGroup------------------------------------
 
-        doorGroupNeedKeys = ('name', 'isForVisit')
+        doorGroupNeedKeys = ('name', 'isForVisit', 'orgId')
 
         @app.route('/api/v1.0/doorgroup', methods=['POST', 'GET'])
         @auth.login_required
@@ -715,10 +734,11 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             Add a new Door Group into the database.
             '''
+            usrOrgId = g.user['orgId']
             try:
                 ## For GET method
                 if request.method == 'GET':
-                    doorGroups = self.dataBase.getDoorGroups()
+                    doorGroups = self.dataBase.getDoorGroups(usrOrgId)
                     for doorGroup in doorGroups:
                         doorGroup['uri'] = url_for('doorGroup', doorGroupId=doorGroup['id'], _external=True)
                     return jsonify(doorGroups)
@@ -789,8 +809,10 @@ class CrudMngr(genmngr.GenericMngr):
             '''
             Returns the doors that belong to a door group
             '''
+            usrOrgId = g.user['orgId']
+
             try:
-                doors = self.dataBase.getDoorsFromDoorGroup(doorGroupId)
+                doors = self.dataBase.getDoorsFromDoorGroup(doorGroupId, usrOrgId)
 
                 for door in doors:
                     door['uri'] = url_for('modDoor', doorId=door['id'], _external=True)
@@ -799,6 +821,9 @@ class CrudMngr(genmngr.GenericMngr):
 
             except database.DoorGroupNotFound as doorGroupNotFound:
                 raise NotFound(str(doorGroupNotFound))
+            except database.DoorGroupForbidden as doorGroupForbidden:
+                raise Forbidden('Not allowed to see this data')
+
             except database.DoorError as doorError:
                 raise ConflictError(str(doorError))
             except TypeError:
