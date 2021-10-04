@@ -49,7 +49,8 @@ If the field ``active`` is ``0``, the user shouldn't be able to log into the app
 | Users with ``roleId = 1`` (Administrator) will be able to access all the sections of the application.
 | Users with ``roleId = 2`` (Operator) will be able to access all the sections except System Users Section.
 | Users with ``roleId = 3`` (Viewer) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
-|
+| Users with ``roleId = 4`` (Org-Operator) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
+| Users with ``roleId = 5`` (Org-Viewer) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
 
 
 An invalid login will answer with:
@@ -4737,3 +4738,60 @@ Each user will be able to change its password and its full name from the setting
 
 
 .. image:: images_front_end_specs/system_user_settings.png
+
+
+User interface for Org-Users
+----------------------------
+
+This section describes the changes and features that an Org-User can see when they log in the user interface.
+
+
+
+Hiden sections
+~~~~~~~~~~~~~~
+
+The following sections will be hidden for Org-Users:
+
+- Visitors
+- Organizations
+- Controllers
+- Zones
+- Doors (Manage Doors and Door Groups)
+- System Users
+
+
+Events Section
+~~~~~~~~~~~~~~
+
+Live Section
+++++++++++++
+
+| By default, this section will show only the events that belong to the Org-User's organization.
+| When using the filter, the **Organization** and **Zone** filter will not be shown.
+| The Org-User, will be able to filter among the persons of their organization.
+| When filtering the Door, a **Door Group** should be choosen first. Only the Door Groups of this Organization will be available.
+| **Date**, **Time** and **Direction** filters will be available.
+
+
+Search Section
+++++++++++++++
+
+The same criteria used above.
+
+
+Purge Events Section
+++++++++++++++++++++
+
+This section will be hidden for this type of users.
+
+
+.. image:: images_front_end_specs/events_searcher_org_usr.png
+
+
+Persons Section
+~~~~~~~~~~~~~~~
+
+| **Manage Persons** section and **Search Persons** section will not be shown as different sections.
+| Only the persons who belong to the organization will be shown.
+
+.. image:: images_front_end_specs/person_org_usr.png
