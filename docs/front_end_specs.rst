@@ -4076,27 +4076,39 @@ To get from the server the current list of Door Groups, the following REST metho
     {
       "id": 1,
       "name": "Ingreso Este",
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1"
-      "isForVisit": 1
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1",
+      "isForVisit": 1,
+      "orgId": null
 
     },
     {
       "id": 2,
       "name": "Ingreso Oeste",
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/2"
-      "isForVisit": 1
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/2",
+      "isForVisit": 1,
+      "orgId": null
+
     },
     {
       "id": 3,
       "name": "Ingreso Norte",
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
-      "isForVisit": 1
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3",
+      "isForVisit": 1,
+      "orgId": null
+    },
+    {
+      "id": 4,
+      "name": "Bonifies",
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/4",
+      "isForVisit": 0,
+      "orgId": 2
     },
     {
       "id": 5,
-      "name": "Molinetes",
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
-      "isForVisit": 0
+      "name": "Colitier",
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5",
+      "isForVisit": 0,
+      "orgId": 4
     }
   ]
 
@@ -4118,9 +4130,18 @@ The JSON sent in the POST method should have the name and a boolean to indicate 
 
 **JSON**
 
+Example adding a Door Group that doesn't belong to an Organization
+
 .. code-block::
 
-  {"name": "Puertas Front Torre A", "isForVisit": 1}
+  {"name": "Puertas Front Torre A", "isForVisit": 1, "orgId": null}
+
+
+Example adding a Door Group that belong to an Organization
+
+.. code-block::
+
+  {"name": "Puertas Centro Data", "isForVisit": 0, "orgId": 2}
 
 **Response:**
 
@@ -4210,8 +4231,9 @@ Get one Door Group
   {
     "id": 3,
     "name": "Puertas Front Torre B",
-    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
-    "isForVisit": 1
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3",
+    "isForVisit": 1,
+    "orgId": null
   }
 
 
@@ -4286,6 +4308,7 @@ Get the doors from a Door Group
     }
   ]
 
+Note: Although ``iSide`` and ``oSide`` aren't door parameters, they are used when giving access to a visitor in a Door Group.
 
 
 Modify a Door Group
@@ -4307,7 +4330,7 @@ To modify a Door Group the following method should be sent to the server:
 
 .. code-block::
 
-  {"name": "FrontDesk Torre B", "isForVisit": 0}
+  {"name": "FrontDesk Torre B", "isForVisit": 0, "orgId": null}
 
 
 **Response:**
@@ -4428,7 +4451,8 @@ To get from server the current list of system users, the following REST method s
       "id": 1,
       "roleId": 1,
       "uri": "http://localhost:5000/api/v1.0/user/1",
-      "username": "admin"
+      "username": "admin",
+      "orgId": null
     },
     {
       "active": 1,
@@ -4436,7 +4460,8 @@ To get from server the current list of system users, the following REST method s
       "id": 2,
       "roleId": 2,
       "uri": "http://localhost:5000/api/v1.0/user/2",
-      "username": "gfisanotti"
+      "username": "gfisanotti",
+      "orgId": null
     },
     {
       "active": 0,
@@ -4444,12 +4469,42 @@ To get from server the current list of system users, the following REST method s
       "id": 4,
       "roleId": 3,
       "uri": "http://localhost:5000/api/v1.0/user/4",
-      "username": "mgonzales"
+      "username": "mgonzales",
+      "orgId": null
+    },
+    {
+      "active": 1,
+      "fullName": "Luis Cabresi",
+      "id": 5,
+      "roleId": 4,
+      "uri": "http://localhost:5000/api/v1.0/user/5",
+      "username": "lcabresi",
+      "orgId": 2
+    },
+    {
+      "active": 1,
+      "fullName": "Ramon Tolares",
+      "id": 6,
+      "roleId": 4,
+      "uri": "http://localhost:5000/api/v1.0/user/6",
+      "username": "rtolares",
+      "orgId": 3
+    },
+    {
+      "active": 0,
+      "fullName": "Andrea Lombardi",
+      "id": 7,
+      "roleId": 3,
+      "uri": "http://localhost:5000/api/v1.0/user/7",
+      "username": "alombardi",
+      "orgId": 2
     }
   ]
 
 
 **roleId** is a field that indicates the privilegies of the system user in the UI.
+
+**orgId** is the ID of the Organization when the roleId is 4 (org-operator)
 
 To get all possible roles the following method shoud be sent to the server:
 
@@ -4483,6 +4538,14 @@ To get all possible roles the following method shoud be sent to the server:
     {
       "description": "Viewer",
       "id": 3
+    },
+    {
+      "description": "Org-Operator",
+      "id": 4
+    },
+    {
+      "description": "Org-Viewer",
+      "id": 5
     }
   ]
 
@@ -4507,9 +4570,20 @@ The following REST method should be sent to the server:
 
 **JSON**
 
+Example Adding and Administrator:
+
 .. code-block::
 
-  {"username": "mcantini", "passwd": "p4ssw8rd", "fullName": "Marcos Cantini", "roleId": 2, "active": 1}
+  {"username": "jkleiner", "passwd": "qwe123qwe", "fullName": "Jor Klein", "language": "en", "active": 1, "roleId": 1, "orgId": null}
+
+
+Example Adding and Org-Operator:
+
+.. code-block::
+
+
+  {"username": "bonifiesboos", "passwd": "qwe123qwe", "fullName": "Bonifies Boos", "language": "es", "active": 1, "roleId": 4, "orgId": 2}
+
 
 **Response:**
 
@@ -4527,6 +4601,7 @@ The following REST method should be sent to the server:
     "status": "OK",
     "uri": "http://localhost:5000/api/v1.0/user/6"
   }
+
 
 
 Get one System User
@@ -4557,7 +4632,9 @@ Get one System User
     "id": 4,
     "roleId": 3,
     "uri": "http://localhost:5000/api/v1.0/user/4",
-    "username": "mshuar"
+    "username": "mshuar,
+    "language": "en",
+    "orgId": null
   }
 
 
@@ -4584,18 +4661,18 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"username": "msuarez", "passwd": "p4ssw3rd", "fullName": "Marc Shuar", "roleId": 3, "active": 0}
+  {"username": "msuarez", "passwd": "p4ssw3rd", "fullName": "Marc Shuar", "roleId": 3, "active": 0, "language": "es", "orgId": null}
 
 
 
-**Note**: If the user doesn't fill the password field, the JSON shouldn't have this field, and the old password will be kept
+**Note**: If the UI doesn't send some parameters, the old ones will be kept.
 
 
 **JSON**
 
 .. code-block::
 
-  {"username": "msuarez", "fullName": "Marc Shuar", "roleId": 3, "active": 0}
+  {"username": "msuarez", "fullName": "Marc Shuar", "roleId": 3, "active": 0,"language": "es", "orgId": null}
 
 
 
