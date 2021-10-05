@@ -49,8 +49,8 @@ If the field ``active`` is ``0``, the user shouldn't be able to log into the app
 | Users with ``roleId = 1`` (Administrator) will be able to access all the sections of the application.
 | Users with ``roleId = 2`` (Operator) will be able to access all the sections except System Users Section.
 | Users with ``roleId = 3`` (Viewer) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
-| Users with ``roleId = 4`` (Org-Operator) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
-| Users with ``roleId = 5`` (Org-Viewer) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
+| Users with ``roleId = 4`` (Org-Operator) will be able to create, edit and remove People and Accesses of their Organization.
+| Users with ``roleId = 5`` (Org-Viewer) will be able to see People and Accesses of their Organization.
 
 
 An invalid login will answer with:
@@ -4795,3 +4795,33 @@ Persons Section
 | Only the persons who belong to the organization will be shown.
 
 .. image:: images_front_end_specs/person_org_usr.png
+
+
+Access Section
+~~~~~~~~~~~~~~
+
+Person -> Door Section
+++++++++++++++++++++++
+
+With this kind of user, the **Organization** menu will not be shown. Only the persons who belong to this organization will be shown.
+
+.. image:: images_front_end_specs/access_per_pas_org_usr.png
+
+When selecting **Add** or **Edit** button, only it will be possible to select doors from the Door Groups that this Organization has.
+
+
+.. image:: images_front_end_specs/add_access_per_doorgroup.png
+
+
+Door -> Person Section
+++++++++++++++++++++++
+
+With this kind of user, instead of showing the **Zone**, all available **Door Groups** for this user will be shown. Once selected it, the menu **Doors** will be shown with the Doors of this Door Group.
+
+
+.. image:: images_front_end_specs/access_pas_per_org_usr.png
+
+
+When selecting **Add** or **Edit** button, only it will be possible to select persons of the Organization of the Org_Usr logged in.
+
+.. image:: images_front_end_specs/add_access_pas_per_org_usr.png
