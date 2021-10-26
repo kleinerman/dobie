@@ -1,7 +1,7 @@
-<?
+<?php
 $leavebodyopen=1;
 $innerheader=1;
-$requirerole=2;
+$requirerole=array(2,4);
 $include_extra_js=array("clockpicker","datepicker");
 
 //get access ID or create mode
@@ -14,11 +14,9 @@ include("header.php");
 <div id="wrapper" class="container-fluid">
 
 <div class="row">
-<!-- /.col-lg-12 -->
 <div class="col-lg-12">
 <h3 class="page-header" id="page-header"></h3>
 </div>
-<!-- /.col-lg-12 -->
 </div>
 
 <div class="row">
@@ -28,6 +26,8 @@ include("header.php");
 <div class="col-lg-3">
 
 <div>
+<?php if($logged->roleid!=4){ //normal mode
+?>
 <?=get_text("Create access to",$lang);?>:<br>
 <div class="btn-group" data-toggle="buttons">
   <label class="btn btn-primary input-mode-label" data-value="zone">
@@ -66,6 +66,10 @@ include("header.php");
 </div>
 </div>
 
+<?php } else {?>
+<div class="hidden"><input type="radio" class="input-mode-radio" name="input-mode" value="zone" checked></div>
+<?php }?>
+
 <div id="input-mode-door-group" style="display:none">
 <div class="select-container">
 <form action="javascript:void(0)">
@@ -76,11 +80,14 @@ include("header.php");
 </div>
 <div class="select-container-footer">
 <div class="legend left"><span class="vdg-row">&nbsp;&nbsp;&nbsp;&nbsp;</span> = <?=get_text("Visit Door Groups",$lang);?></div>
+<div class="legend left"><span class="bdg-row">&nbsp;&nbsp;&nbsp;&nbsp;</span> = <?=get_text("Belongs to Org.",$lang);?></div>
 <br>
 </div>
 </form>
 </div>
 
+<?php if($logged->roleid!=4){ //normal mode
+?>
 <div class="select-container" id="select-container-door-group-doors" style="display:none">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Doors",$lang);?></div>
@@ -90,6 +97,23 @@ include("header.php");
 <div class="select-container-footer"></div>
 </form>
 </div>
+
+<?php } else { // for org operator, show doors select for the respective door group
+?>
+
+<div class="select-container" id="select-container-doors" style="display:none">
+<form action="javascript:void(0)">
+<div class="select-container-title"><?=get_text("Doors",$lang);?> <button id="doors-select-all" class="btn btn-primary btn-xs" type="button"><?=get_text("Select all",$lang);?></button></div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
+<select id="doors-select" class="select-options select-options-small form-control" name="doors-select" size="2" onchange="updateButtons(this.id)" multiple></select>
+</div>
+<div class="select-container-footer"></div>
+</form>
+</div>
+
+<?php }?>
+
 </div>
 
 </div>
@@ -211,15 +235,17 @@ include("header.php");
 </div>
 <!-- /#wrapper -->
 
-<? include("footer.php"); ?>
+<?php include("footer.php"); ?>
 
-<script type="text/javascript">
+<script>
 //init filters
 setFilterAction();
 setFilterActionTable();
 
-var zoneId;
+var zoneId="";
 
+<?php if($logged->roleid!=4){ //normal mode
+?>
 //populate select list
 populateList("zones-select","zones");
 populateList("door-groups-select","door_groups");
@@ -237,10 +263,10 @@ $(".input-mode-label").click(function(){
 	$("#schedule-container").hide();
 });
 
-//select on change events for zones, doors and door groups
+//select on change events for zones and door groups
 $("#zones-select").change(function(){
 	zoneId=$("#zones-select").val();
-	if(!isNaN(zoneId) && zoneId!="undefined"){
+	if(!isNaN(zoneId) && typeof zoneId!=="undefined"){
 		//populate list
 		populateList("doors-select","doors",zoneId);
 		//show list
@@ -250,16 +276,9 @@ $("#zones-select").change(function(){
 	}
 });
 
-$("#doors-select").change(function(){
-	//enable all doors
-	doorAll=0;
-	//show schedule
-	$("#schedule-container").fadeIn();
-});
-
 $("#door-groups-select").change(function(){
 	doorGroupId=$("#door-groups-select").val();
-	if(!isNaN(doorGroupId) && doorGroupId!="undefined"){
+	if(!isNaN(doorGroupId) && typeof doorGroupId!=="undefined"){
 		//populate list
 		populateList("door-group-doors-select","door_group_doors",doorGroupId);
 		//show list
@@ -267,6 +286,36 @@ $("#door-groups-select").change(function(){
 		//show schedule
 		$("#schedule-container").fadeIn();
 	}
+});
+
+<?php } else { ?>
+//populate door groups
+populateList("door-groups-select","door_groups","","action=get_door_groups&orgId=<?=$logged->orgid?>");
+
+//show door group input mode
+$("#input-mode-door-group").show();
+
+//action for door group select
+$("#door-groups-select").change(function(){
+	doorGroupId=$("#door-groups-select").val();
+	if(!isNaN(doorGroupId) && typeof doorGroupId!=="undefined"){
+		//populate list
+		populateList("doors-select","door_group_doors",doorGroupId);
+		//show list
+		$("#select-container-doors").fadeIn();
+		//show schedule
+		$("#schedule-container").fadeIn();
+	}
+});
+
+<?php } ?>
+
+//select on change events for doors
+$("#doors-select").change(function(){
+	//enable all doors
+	doorAll=0;
+	//show schedule
+	$("#schedule-container").fadeIn();
 });
 
 $("#doors-select-all").click(function(){
@@ -328,7 +377,6 @@ if(!accessId){
 		//init values
 		if(resp[0]=='1'){
 			values = resp[1];
-			//console.log(values);
 			//populate header as Edit Access for Door/Person
 			$("#page-header").html("<?=get_text("Editing",$lang);?> "+ values.personName + " <span class=\"fa fa-arrow-right\"></span> " + values.doorName);
 			//mark checkboxes according to days
@@ -376,7 +424,7 @@ if(!accessId){
 				}
 			}
 			//fill expiration date
-			if(values.expireDate !== "undefined" && values.expireDate!="9999-12-31 00:00"){
+			if(typeof values.expireDate !== "undefined" && values.expireDate!="9999-12-31 00:00"){
 				//check yes
 				$("input[name=expiration][value=1]").prop("checked",true);
 				//fill date
@@ -417,10 +465,11 @@ $("#access-edit-form").submit(function(){
 		} else {
 			//send door group id empty and get door value
 			accessRec.doorGroupId="";
-			if($.isArray($("#doors-select").val())) accessRec.doorId = $("#doors-select").val().join(","); //accessRec.zoneId = parseInt($("#zones-select").val());
+			if($.isArray($("#doors-select").val())) accessRec.doorId = $("#doors-select").val().join(",");
 			else accessRec.doorId = parseInt($("#doors-select").val());
 		}
 		accessRec.personId = personId;
+		accessRec.zoneId= zoneId;
 		// get allWeek
 		var allWeek_check = $("#allWeek_check").prop("checked");
 		if(allWeek_check){
@@ -536,7 +585,6 @@ $("#access-edit-form").submit(function(){
 			if(!error){
 				//populate access table
 				//if all, hide accesses table
-				//if(accessRec.personId=="all") {
 				if(isNaN(accessRec.personId)){
 					parent.$("#accesses-table-container").hide();
 					//unselect person if any

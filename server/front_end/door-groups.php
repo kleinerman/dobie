@@ -26,6 +26,7 @@ include("header.php");
 <button id="door-groups-select-edit" class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-new" disabled><span class="fa fa-pen"></span><span class="hidden-xs"> <?=get_text("Edit",$lang);?></span></button>
 <button id="door-groups-select-del" class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-delete" disabled><span class="fa fa-times"></span><span class="hidden-xs"> <?=get_text("Delete",$lang);?></span></button>
 <div class="legend"><span class="vdg-row">&nbsp;&nbsp;&nbsp;&nbsp;</span> = <?=get_text("Visit Door Groups",$lang);?></div>
+<div class="legend"><span class="bdg-row">&nbsp;&nbsp;&nbsp;&nbsp;</span> = <?=get_text("Belongs to Org.",$lang);?></div>
 </div>
 </form>
 </div>
@@ -118,7 +119,15 @@ include("footer.php");
 </div>
 
 <br><br>
-<label><input type="checkbox" name="isvisit" id="isvisit" value="1"> <?=get_text("For Visits",$lang);?></label>
+<label id="isvisit-container"><input type="checkbox" name="isvisit" id="isvisit" value="1"> <?=get_text("For Visits",$lang);?></label>
+<br>
+
+<div id="belongs-container">
+<label><input type="checkbox" name="doors-group-orgid-check" id="doors-group-orgid-check" value="1"> <?=get_text("Belongs to Org.",$lang);?></label>
+<div id="doors-group-orgid-container">
+<select id="doors-group-orgid" name="doors-group-orgid"></select>
+</div>
+</div>
 
 </div>
 <div class="select-container-footer">
@@ -191,9 +200,37 @@ var arrDoors=[];
 var arrGroupDoors=[];
 var arrGroupDoorsSides=[];
 var editId=0;
+var orgNames=[];
 
 //populate select list
 populateList("door-groups-select","door_groups");
+
+//populate org names array
+$(function(){
+	$.ajax({
+		type: "POST",
+		url: "process",
+		data: "action=get_organizations",
+		success: function(resp){
+			if(resp[0]=='1'){
+				var values = resp[1];
+				//copy values into orgNames array
+				values.forEach(function(item,index){
+					if(item.id>1) orgNames[item.id]=item.name; //without Visitors org
+				});
+			} else {
+				//show modal error
+				$('#modal-error .modal-body').text("<?=get_text("Could not get organization names",$lang);?>");
+				$("#modal-error").modal("show");
+			}
+		},
+		failure: function(){
+			//show modal error
+			$('#modal-error .modal-body').text("<?=get_text("Could not get organization names",$lang);?>");
+			$("#modal-error").modal("show");
+		}
+	});
+});
 
 //onchange action on groups select
 $("#door-groups-select").change(function(){
@@ -234,7 +271,7 @@ $("#door-groups-select").change(function(){
 //onchange action on zones select
 $("#zones-select").change(function(){
 	zoneId=$("#zones-select").val();
-	if(!isNaN(zoneId) && zoneId!="undefined"){
+	if(!isNaN(zoneId) && typeof zoneId!="undefined"){
 		//populate list
 		populateList("doors-select","doors",zoneId);
 		//show list
@@ -253,10 +290,10 @@ $("#zones-select").change(function(){
 //on change door select > enable / disable right arrow button
 $("#doors-select").change(function(){
 	var doorId=$("#doors-select").val();
-	if(doorId!="undefined") {
+	if(typeof doorId!="undefined") {
 		$("#btn-item-add").prop("disabled",false);
 		//show direction box
-		$("#direction-container").removeClass("hidden");
+		if(typeof($('#isvisit:checked').val())!="undefined") $("#direction-container").removeClass("hidden");
 	} else {
 		$("#btn-item-add").prop("disabled",true);
 		//hide direction box
@@ -267,7 +304,7 @@ $("#doors-select").change(function(){
 //on change current door select > enable / disable right arrow button
 $("#doors-group-current-select").change(function(){
 	var groupDoorId=$("#doors-group-current-select").val();
-	if(groupDoorId!="undefined") $("#btn-item-delete").prop("disabled",false);
+	if(typeof groupDoorId!="undefined") $("#btn-item-delete").prop("disabled",false);
 	else $("#btn-item-delete").prop("disabled",true);
 });
 
@@ -299,8 +336,25 @@ $("#doors-group-selectall").click(function(){
 	if($("#doors-select option:selected").length>0) {
 		$("#btn-item-add").prop("disabled",false);
 		//show direction box
-		$("#direction-container").removeClass("hidden");
+		if(typeof($('#isvisit:checked').val())!="undefined") $("#direction-container").removeClass("hidden");
 	}
+});
+
+//toggle isvisit and belongs containers on change
+$("#isvisit").change(function(){
+	if($(this).prop("checked")!=false) {
+		$("#belongs-container").slideUp();
+		//if door selected , show direction options
+		if(typeof ($('#doors-select').val())!=="undefined") $("#direction-container").removeClass("hidden");
+	} else {
+		$("#belongs-container").slideDown();
+		//if door selected , show direction options
+		$("#direction-container").addClass("hidden");
+	}
+});
+$("#doors-group-orgid-check").change(function(){
+	if($(this).prop("checked")!=false) $("#isvisit-container").slideUp();
+	else $("#isvisit-container").slideDown();
 });
 
 //add element from left to right
@@ -410,6 +464,13 @@ function resetForm(){
 	$("#doors-group-current-select").empty();
 	//clear is visit checkbox
 	$("#isvisit").prop("checked",false);
+	//clear belongs to orgid checkbox
+	$("#doors-group-orgid-check").prop("checked",false);
+	//repopulate belongs to orgid select
+	$('#doors-group-orgid').empty();
+	orgNames.forEach(function(item,index){$('#doors-group-orgid').append("<option value='"+index+"'>"+item+"</option>");});
+	//hide belogs to orgid select
+	$('#doors-group-orgid-container').hide();
 	//clear group id value if edit
 	editId=0;
 	//modal title
@@ -445,11 +506,26 @@ $('#door-groups-select-edit').click(function (event){
 				var values = resp[1];
 				editId=values.id;
 				$('#door-groups-new-name').val(values.name);
+				//show both isvisit and belongs checkbox
+				$("#isvisit-container,#belongs-container").show();
 				//set is visit value
-				if(values.isForVisit==1) $("#isvisit").prop("checked",true);
-				else $("#isvisit").prop("checked",false);
+				if(values.isForVisit==1){
+					$("#isvisit").prop("checked",true);
+					$("#belongs-container").hide();
+				} else $("#isvisit").prop("checked",false);
 				//modal title
 				$("#modal-new-label").text("<?=get_text("Edit Door Group",$lang);?>");
+				//belongs to org if not null > populate the box with the option selected
+				if(values.orgId!=null){
+					$("#isvisit-container").hide();
+					$("#doors-group-orgid-check").prop("checked",true);
+					$('#doors-group-orgid').empty();
+					orgNames.forEach(function(v,k){
+						if(k==values.orgId) $('#doors-group-orgid').append("<option value='"+k+"' selected>"+v+"</option>");
+						else $('#doors-group-orgid').append("<option value='"+k+"'>"+v+"</option>");
+					});
+					$('#doors-group-orgid-container').show();
+				}
 				//fetch group doors
 				$.ajax({
 					type: "POST",
@@ -495,11 +571,13 @@ $('#door-groups-select-edit').click(function (event){
 	});
 });
 
+<?
 /*
 TODO:
 - try to make that when populating the door list, to show all the doors as options that are not yet on the door group select
 - try to make that when removing a door from the door group, to add it to the door select Only if its part of the same
 */
+?>
 
 //new/edit action
 $("#door-groups-new-form").submit(function(){
@@ -507,6 +585,8 @@ $("#door-groups-new-form").submit(function(){
 	var DoorGroupName = $("#door-groups-new-name").val();
 	if(typeof($('#isvisit:checked').val())=="undefined") var DoorGroupIsVisit = 0;
 	else var DoorGroupIsVisit = 1;
+	if(typeof($('#doors-group-orgid-check:checked').val())=="undefined") var DoorGroupOrgId = null;
+	else var DoorGroupOrgId = $("#doors-group-orgid").val();
 
 	//build door id array with all the values that have a non empty name
 	var DoorGroupDoors = [];
@@ -518,8 +598,8 @@ $("#door-groups-new-form").submit(function(){
 		}
 	}
 	//build action string if its create or edit
-	if(editId!=0 && !isNaN(editId)) action_str = "action=edit_door_group&id=" + editId +"&name=" + DoorGroupName + "&isvisit=" + DoorGroupIsVisit + "&doorids=" + DoorGroupDoors.join("|") + "&doorsides="+DoorGroupSides.join("|");//edit
-	else action_str = "action=add_door_group&name=" + DoorGroupName + "&isvisit=" + DoorGroupIsVisit + "&doorids=" + DoorGroupDoors.join("|") + "&doorsides="+DoorGroupSides.join("|");//create
+	if(editId!=0 && !isNaN(editId)) action_str = "action=edit_door_group&id=" + editId +"&name=" + DoorGroupName + "&isvisit=" + DoorGroupIsVisit + "&orgid=" + DoorGroupOrgId + "&doorids=" + DoorGroupDoors.join("|") + "&doorsides="+DoorGroupSides.join("|");//edit
+	else action_str = "action=add_door_group&name=" + DoorGroupName + "&isvisit=" + DoorGroupIsVisit + "&orgid=" + DoorGroupOrgId + "&doorids=" + DoorGroupDoors.join("|") + "&doorsides="+DoorGroupSides.join("|");//create
 
 	$.ajax({
 		type: "POST",
@@ -588,6 +668,15 @@ $("#door-groups-delete-form").submit(function(){
 //focus success button on delete modal shown
 $("#modal-delete").on("shown.bs.modal",function(){
 	$("#door-groups-delete-form .btn-success").focus();
+});
+
+//toggle orgid select when checkbox is checked
+$('#doors-group-orgid-check').change(function(){
+	if(typeof($('#doors-group-orgid-check:checked').val())=="undefined"){
+		$('#doors-group-orgid-container').slideUp();
+	} else {
+		$('#doors-group-orgid-container').slideDown();
+	}
 });
 </script>
 

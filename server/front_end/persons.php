@@ -1,6 +1,6 @@
-<?
+<?php
 $leavebodyopen=1;
-$requirerole=2;
+$requirerole=array(2,4);
 include("header.php");
 ?>
 <div id="page-wrapper">
@@ -14,6 +14,8 @@ include("header.php");
 <div class="row">
 <div class="col-lg-12">
 
+<?php if($logged->roleid!=4){ //Operator mode
+?>
 <div class="select-container valigntop">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Organizations",$lang);?></div>
@@ -26,8 +28,12 @@ include("header.php");
 </div>
 </form>
 </div>
+<?php } else { //Org operator mode: populate orgid
+?>
+<input type="hidden" id="organizations-select" value="<?=$logged->orgid?>">
+<?php } ?>
 
-<div class="select-container valigntop" id="select-container-persons" style="display:none">
+<div class="select-container valigntop" id="select-container-persons">
 <form action="javascript:void(0)">
 <div class="select-container-title"><nobr><?=get_text("Persons",$lang);?> <button class="btn btn-primary btn-xs" id="import-csv-button" data-toggle="modal" data-target="#modal-import"><span class="fa fa-plus"></span> <?=get_text("Import CSV",$lang);?></button> <button class="btn btn-success btn-xs" id="export-csv-button" data-toggle="tooltip" title="Export persons to Excel"><span class="fa fa-download"></span> <?=get_text("Export",$lang);?></button> <span class="fa fa-spinner fa-spin download-throbber-container" style="display:none"></span></nobr></div>
 <div class="select-container-body">
@@ -279,8 +285,12 @@ var organizationId;
 var doChangePhoto=0;
 var localStream="";
 
+<?php if($logged->roleid!=4){?>
 //populate select list
 populateList("organizations-select","organizations");
+
+//hide persons select
+$("#select-container-persons").hide();
 
 $("#organizations-select").change(function(){
 	organizationId=$("#organizations-select").val();
@@ -295,6 +305,14 @@ $("#organizations-select").change(function(){
 		$('#select-container-persons-details').hide();
 	}
 });
+
+<?php } else { ?>
+//populate persons select
+populateList("persons-select","persons",<?=$logged->orgid?>);
+organizationId=<?=$logged->orgid?>;
+//show persons select
+$("#select-container-persons").show();
+<?php }?>
 
 //populate quick details box on person change
 $("#persons-select").change(function(){
@@ -530,7 +548,11 @@ $("#export-csv-button").click(function(){
 		success: function(resp){
 			if(resp[0]=='1'){
 				//console.log(resp[1]);
+				<?php if($logged->roleid!=4){?>
 				organizationName=$("#organizations-select option:selected").html();
+				<?php } else { ?>
+				organizationName="my-organization";
+				<?php }?>
 				//trigger csv
 				downloadCSV(resp[1],organizationName+".csv");
 			} else {

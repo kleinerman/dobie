@@ -24,9 +24,12 @@ if(isset($_POST['username'])){
 			$_SESSION[$config->sesskey."pw"] = $passw_enc;
 			$roleid_enc=$EnDecryptText->Encrypt_Text($user_obj->roleId);
 			$_SESSION[$config->sesskey."rl"] = $roleid_enc;
+			$orgid_enc=$EnDecryptText->Encrypt_Text($user_obj->orgId);
+			$_SESSION[$config->sesskey."or"] = $orgid_enc;
 			$_SESSION[$config->sesskey."lang"] = $user_obj->language;
 			//create cookie
-			setcookie($config->sesskeycookiename, $passw_enc ."|". $roleid_enc ."|".  $username."|".md5($_SERVER["HTTP_USER_AGENT"]) . "|" . $user_obj->language, time() + $config->cookie_lifetime);
+			//cookie should contain encrypt(password)|encrypt(roleid)|username|md5(http_user_agent)|lang|encrypt(orgid)
+			setcookie($config->sesskeycookiename, $passw_enc ."|". $roleid_enc ."|".  $username."|".md5($_SERVER["HTTP_USER_AGENT"]) . "|" . $user_obj->language ."|". $orgid_enc, time() + $config->cookie_lifetime);
 			//redirect to main page
 			header("Location: $home_url");
 			die();

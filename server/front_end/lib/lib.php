@@ -29,6 +29,14 @@ else window.location.href='$url';
 	} else echo "<script>window.location.href='$url';</script>";
 }
 
+function passes_required_role($requiredrole,$loggedrole){
+	//role 2 allows 4 as well as 3 allows 5. role 1 still sees everything
+	$ret=false;
+	if($loggedrole==1) $ret=true;//admin sees everything
+	else if(is_array($requiredrole) and in_array($loggedrole,$requiredrole)) $ret=true;
+	else if(!is_array($requiredrole) and ($requiredrole>=$loggedrole)) $ret=true;
+	return $ret;
+}
 
 //restore login from cookie if existent and if session has expired
 function persistsession(){
@@ -39,13 +47,14 @@ function persistsession(){
 	if(!$has_session and $has_cookie){
 		//perform login from cookie
 		$cookieparts=explode("|",$_COOKIE[$config->sesskeycookiename]);
-		//cookie should contain encrypt(password)|encrypt(roleid)|username|md5(http_user_agent)|lang
-		if(count($cookieparts)==5){
-			$lang= trim($cookieparts[4]);
-			$remoteuseragent= trim($cookieparts[3]);
-			$username= trim($cookieparts[2]);
-			$roleid_enc= trim($cookieparts[1]);
-			$password= trim($cookieparts[0]);
+		//cookie should contain encrypt(password)|encrypt(roleid)|username|md5(http_user_agent)|lang|encrypt(orgid)
+		if(count($cookieparts)==6){
+			$orgid_enc = trim($cookieparts[5]);
+			$lang = trim($cookieparts[4]);
+			$remoteuseragent = trim($cookieparts[3]);
+			$username = trim($cookieparts[2]);
+			$roleid_enc = trim($cookieparts[1]);
+			$password = trim($cookieparts[0]);
 			require_once("EnDecryptText.php");
 			$EnDecryptText = new EnDecryptText();
 			require_once("api-functions.php");
@@ -55,6 +64,7 @@ function persistsession(){
 		      		$_SESSION[$config->sesskey] = $username;
 		      		$_SESSION[$config->sesskey."pw"] = $password;
 		      		$_SESSION[$config->sesskey."rl"] = $roleid_enc;
+					$_SESSION[$config->sesskey."or"] = $orgid_enc;
 		      		$_SESSION[$config->sesskey."lang"] = $lang;
 			} else {
 				//destroy cookies

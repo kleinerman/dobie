@@ -273,6 +273,11 @@ $dictionary = array(
 		'es' => 'Valor inválido para',
 		'de' => 'ungültiger Wert für'
 	),
+	strtolower('Invalid value for: ') => array(
+		'es' => 'Valor inválido para: ',
+		'de' => 'ungültiger Wert für: '
+	),
+
 	strtolower('Organization') => array(
 		'es' => 'Organización',
 		'de' => 'Organisation'
@@ -372,8 +377,11 @@ $dictionary = array(
     strtolower('Visited Org.') => array(
         'es' => 'Visitó a Org.'
     ),
+	strtolower('Events not found') => array(
+        'es' => 'No se encontraron eventos'
+    ),
 
-	//events live
+	//events search
 	strtolower('Reset filter') => array(
 		'es' => 'Limpiar filtro',
 		'de' => 'Filter neu starten'
@@ -381,6 +389,9 @@ $dictionary = array(
 	strtolower('Clear events') => array(
 		'es' => 'Limpiar eventos',
 		'de' => 'Veranstaltungen löschen'
+	),
+	strtolower('Please select a door from one of the available Door Groups') => array(
+		'es' => 'Seleccione una puerta de uno de los Grupos de Puerta disponibles'
 	),
 
 	//events purge
@@ -661,6 +672,9 @@ $dictionary = array(
 	strtolower('Export persons to Excel') => array(
 		'es' => 'Exportar personas a Excel',
 		'de' => 'Personen nach Excel exportieren'
+	),
+	strtolower('Belongs to Org.') => array(
+		'es' => 'Pertenece a Org.'
 	),
 
 	//controllers
@@ -982,7 +996,16 @@ $dictionary = array(
 		'es' => 'Administrador',
 		'de' => 'Administrator'
 	),
-	
+	strtolower('Org-Operator') => array(
+		'es' => 'Operador de Org.'
+	),
+	strtolower('Org-Viewer') => array(
+		'es' => 'Visualizador de Org.'
+	),
+	strtolower('Managed Org.') => array(
+		'es' => 'Maneja Org.'
+	),
+
 	//Search Person
 	strtolower('Last Name Pattern') => array(
 		'es' => 'Patrón Búsqueda de Apellido',
@@ -1009,4 +1032,5 @@ $dictionary = array(
 		'de' => 'Keine Ergebnisse'
 	)
 );
+
 ?>

@@ -1,7 +1,7 @@
-<?
+<?php
 $leavebodyopen=1;
 $innerheader=1;
-$requirerole=2;
+$requirerole=array(2,4);
 $include_extra_js=array("clockpicker","datepicker");
 
 //get access ID or create mode
@@ -14,11 +14,9 @@ include("header.php");
 <div id="wrapper" class="container-fluid">
 
 <div class="row">
-<!-- /.col-lg-12 -->
 <div class="col-lg-12">
 <h3 class="page-header" id="page-header"></h3>
 </div>
-<!-- /.col-lg-12 -->
 </div>
 
 <div class="row">
@@ -27,6 +25,8 @@ include("header.php");
 <!-- left column start -->
 <div class="col-lg-3">
 
+<?php if($logged->roleid!=4){ //normal mode
+?>
 <div class="select-container">
 <div class="select-container-title"><?=get_text("Organizations",$lang);?></div>
 <div class="select-container-body">
@@ -34,8 +34,12 @@ include("header.php");
 <select id="organizations-select" class="select-options select-options-small form-control" name="organizations-select" size="2"></select>
 </div>
 </div>
-
 <br><br>
+
+<?php } else { //Org operator mode: populate orgid
+?>
+<input type="hidden" id="organizations-select" value="<?=$logged->orgid?>">
+<?php } ?>
 
 <div class="select-container" id="select-container-persons" style="display:none">
 <div class="select-container-title"><?=get_text("Person",$lang);?> <button id="persons-select-all" class="btn btn-primary btn-xs" type="button"><?=get_text("Select all",$lang);?></button></div>
@@ -47,7 +51,6 @@ include("header.php");
 </div>
 
 </div>
-
 
 <div class="col-lg-9 center" id="schedule-container" style="display:none">
 <?} else {?>
@@ -164,21 +167,23 @@ include("header.php");
 </div>
 <!-- /#wrapper -->
 
-<? include("footer.php"); ?>
+<?php include("footer.php"); ?>
 
-<script type="text/javascript">
+<script>
 //init filters
 setFilterAction();
 setFilterActionTable();
 
-var organizationId;
+<?php if($logged->roleid!=4){ //Operator mode
+?>
+var organizationId="";
 
 //populate select list
 populateList("organizations-select","organizations");
 
 $("#organizations-select").change(function(){
 	organizationId=$("#organizations-select").val();
-	if(!isNaN(organizationId) && organizationId!="undefined"){
+	if(!isNaN(organizationId) && typeof organizationId!=="undefined"){
 		//populate list
 		populateList("persons-select","persons",organizationId);
 		//show list
@@ -187,6 +192,14 @@ $("#organizations-select").change(function(){
 		$("#schedule-container").hide();
 	}
 });
+
+<?php } else { ?>
+//populate persons select
+populateList("persons-select","persons",<?=$logged->orgid?>);
+organizationId=<?=$logged->orgid?>;
+//show persons select
+$("#select-container-persons").show();
+<?php }?>
 
 $("#persons-select").change(function(){
 	//enable all persons
@@ -302,7 +315,7 @@ if(!accessId){
 				}
 			}
 			//fill expiration date
-			if(values.expireDate !== "undefined" && values.expireDate!="9999-12-31 00:00"){
+			if(typeof values.expireDate !== "undefined" && values.expireDate!="9999-12-31 00:00"){
 				//check yes
 				$("input[name=expiration][value=1]").prop("checked",true);
 				//fill date

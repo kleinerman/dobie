@@ -80,6 +80,12 @@ include("footer.php");
       <select id="user-new-role" name="role" required></select>
  </div>
 </div>
+<div class="form-group" id="user-new-orgid-container">
+ <label class="control-label col-sm-2"><?=get_text("Managed Org.",$lang);?>:</label>
+ <div class="col-sm-10">
+      <select id="user-new-orgid" name="orgid"></select>
+ </div>
+</div>
 <div class="form-group">
  <label class="control-label col-sm-2"><?=get_text("Active",$lang);?>:</label>
  <div class="col-sm-10">
@@ -149,6 +155,7 @@ setFilterAction();
 //init vars
 var editId=0;
 var roleText=[];
+var orgNames=[];
 
 //populate role text array
 $(function(){
@@ -166,12 +173,41 @@ $(function(){
 				roleText[1]="<?=get_text("Administrator",$lang);?>";
 				roleText[2]="<?=get_text("Operator",$lang);?>";
 				roleText[3]="<?=get_text("Viewer",$lang);?>";
+				roleText[4]="<?=get_text("Org-Operator",$lang);?>";
+				roleText[5]="<?=get_text("Org-Viewer",$lang);?>";
 			}
 			populateTable("rows-table");
 		},
 		failure: function(){
 			//show modal error
 			$('#modal-error .modal-body').text("<?=get_text("Could not load roles",$lang);?>");
+			$("#modal-error").modal("show");
+		}
+	});
+});
+
+//populate org names array
+$(function(){
+	$.ajax({
+		type: "POST",
+		url: "process",
+		data: "action=get_organizations",
+		success: function(resp){
+			if(resp[0]=='1'){
+				var values = resp[1];
+				//copy values into orgNames array
+				values.forEach(function(item,index){
+					if(item.id>1) orgNames[item.id]=item.name; //without Visitors org
+				});
+			} else {
+				//show modal error
+				$('#modal-error .modal-body').text("<?=get_text("Could not get organization names",$lang);?>");
+				$("#modal-error").modal("show");
+			}
+		},
+		failure: function(){
+			//show modal error
+			$('#modal-error .modal-body').text("<?=get_text("Could not get organization names",$lang);?>");
 			$("#modal-error").modal("show");
 		}
 	});
@@ -228,13 +264,17 @@ function populateTable(tableId){
 			if(resp[0]=='1'){
 				var values = resp[1];
 				//set table headers
-				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("User name",$lang);?></th><th><?=get_text("Description",$lang);?></th><th><?=get_text("Role",$lang);?></th><th class=\"center\"><?=get_text("Active",$lang);?></th></tr>");
+				$('#'+tableId).append("<tr><th class=\"smallcol\"><input type=\"checkbox\" id=\"rowsAll\" name=\"rowsAll\" value=\"1\"></th><th><?=get_text("User name",$lang);?></th><th><?=get_text("Description",$lang);?></th><th><?=get_text("Role",$lang);?></th><th><?=get_text("Managed Org.",$lang);?></th><th class=\"center\"><?=get_text("Active",$lang);?></th></tr>");
 				//populate fields with rec info
 				for(i=0;i<values.length;i++){
-					//show row
+					//build active str
 					if(values[i].active=="1") activeStr="<span class=\"fa fa-check\"></span>";
 					else activeStr= "";
-					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"users[]\" value="+values[i].id+"></td><td>"+values[i].username+"</td><td>"+values[i].fullName+"</td><td>"+roleText[values[i].roleId]+"</td><td class=\"center\">"+activeStr+"</td></tr>");
+					//build org name str
+					if(values[i].orgId!=null) orgNameStr=orgNames[values[i].orgId];
+					else orgNameStr="";
+					//show row
+					$('#'+tableId).append("<tr><td><input type=\"checkbox\" name=\"users[]\" value="+values[i].id+"></td><td>"+values[i].username+"</td><td>"+values[i].fullName+"</td><td>"+roleText[values[i].roleId]+"</td><td>"+orgNameStr+"</td><td class=\"center\">"+activeStr+"</td></tr>");
 				}
 				//add trigger events for rows
 				tableClickEvents2();
@@ -255,15 +295,19 @@ function resetForm(){
 	//clear text fields
 	$("#user-new-name,#user-new-fullname,#user-new-password,#user-new-cpassword").val("");
 	//unselect options in fixed selects
-	$('#user-new-role').empty();
+	$('#user-new-role,#user-new-orgid').empty();
 	//populate role select
 	roleText.forEach(function(item,index){$('#user-new-role').append("<option value='"+index+"'>"+item+"</option>");});
+	//populate orgid select
+	orgNames.forEach(function(item,index){$('#user-new-orgid').append("<option value='"+index+"'>"+item+"</option>");});
+	//hide orgid select
+	$('#user-new-orgid-container').hide();
 	//clear checkboxes
 	$('#user-new-active').prop("checked",true);
 	//clear id value if edit
 	editId=0;
 	//enable fields in case admin has been editing
-	$('#user-new-name,#user-new-fullname,#user-new-role,#user-new-active').prop("disabled",false);
+	$('#user-new-name,#user-new-fullname,#user-new-role,#user-new-orgid,#user-new-active').prop("disabled",false);
 	//clear placeholder on passw fields
 	$('#user-new-password,#user-new-cpassword').prop("placeholder","");
 	//set passw fields to required
@@ -314,16 +358,24 @@ $("#rows-edit").click(function(){
 					if(k==values.roleId) $('#user-new-role').append("<option value='"+k+"' selected>"+v+"</option>");
 					else $('#user-new-role').append("<option value='"+k+"'>"+v+"</option>");
 				});
+				//select orgid option if not null >populate the box with the option selected
+				if(values.orgId!=null){
+					$('#user-new-orgid').empty();
+					orgNames.forEach(function(v,k){
+						if(k==values.orgId) $('#user-new-orgid').append("<option value='"+k+"' selected>"+v+"</option>");
+						else $('#user-new-orgid').append("<option value='"+k+"'>"+v+"</option>");
+					});
+					$('#user-new-orgid-container').show();
+				}
 				//check active value
 				if(values.active==1) $('#user-new-active').prop("checked",true);
 				else $('#user-new-active').prop("checked",false);
 				//select lang
-				//$('#user-new-lang option['+values.language+']').prop("selected","selected").change();
 				$('#user-new-lang').val(values.language).change();
 
 				//disable fields if editing admin
 				if(userId==1){
-					$('#user-new-name,#user-new-fullname,#user-new-role,#user-new-active').prop("disabled",true);
+					$('#user-new-name,#user-new-fullname,#user-new-role,#user-new-orgid,#user-new-active').prop("disabled",true);
 				}
 				//set placeholder on passw fields
 				$('#user-new-password,#user-new-cpassword').prop("placeholder","****");
@@ -351,6 +403,7 @@ $("#user-new-form").submit(function(){
 	var userPassword = $("#user-new-password").val();
 	var userCPassword = $("#user-new-cpassword").val();
 	var userRole = $('#user-new-role').val();
+	var userOrgId = $('#user-new-orgid').val();
 	var userLang = $('#user-new-lang').val();
 	if(typeof($('#user-new-active:checked').val())=="undefined") {var userActive = 0} else {var userActive = 1}
 	var errorTxt="";
@@ -358,7 +411,7 @@ $("#user-new-form").submit(function(){
 	if(editId!=0 && !isNaN(editId)) action_str="action=edit_user&id=" + editId;
 	else action_str="action=add_user";
 
-	action_str+= "&fullname=" + userFullName + "&username=" + userName + "&password=" + userPassword + "&roleid=" + userRole + "&active=" + userActive + "&lang=" + userLang;
+	action_str+= "&fullname=" + userFullName + "&username=" + userName + "&password=" + userPassword + "&roleid=" + userRole + "&orgid=" + userOrgId + "&active=" + userActive + "&lang=" + userLang;
 
 	if(userPassword!=userCPassword){
 		errorTxt="<?=get_text("Password and confirmation don't match",$lang);?>";
@@ -443,6 +496,15 @@ $("#user-delete-form").submit(function(){
 //focus success button on delete modal shown
 $("#modal-delete").on("shown.bs.modal",function(){
 	$("#user-delete-form .btn-success").focus();
+});
+
+//toggle orgid select only if role selected is org operator or org viewer
+$('#user-new-role').change(function(){
+	if($(this).val() == 4 || $(this).val() == 5){
+		$('#user-new-orgid-container').slideDown();
+	} else {
+		$('#user-new-orgid-container').slideUp();
+	}
 });
 </script>
 </body>

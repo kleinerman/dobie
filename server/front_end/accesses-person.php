@@ -1,6 +1,6 @@
-<?
+<?php
 $leavebodyopen=1;
-$requirerole=2;
+$requirerole=array(2,4);
 include("header.php");
 ?>
 <div id="page-wrapper">
@@ -20,6 +20,8 @@ include("header.php");
 
 <div class="col-lg-3">
 
+<?php if($logged->roleid!=4){ //normal mode
+?>
 <div class="select-container">
 <div class="select-container-title"><?=get_text("Organizations",$lang);?></div>
 <div class="select-container-body">
@@ -27,12 +29,14 @@ include("header.php");
 <select id="organizations-select" class="select-options select-options-small form-control" name="organizations-select" size="2"></select>
 </div>
 </div>
-
 <br><br>
+<?php } else { //Org operator mode: populate orgid
+?>
+<input type="hidden" id="organizations-select" value="<?=$logged->orgid?>">
+<?php } ?>
 
 <div class="select-container" id="select-container-persons" style="display:none">
 <div class="select-container-title">
-<!--<?=get_text("Person",$lang);?> <button id="persons-select-all" class="btn btn-primary btn-xs" type="button" data-toggle="modal" data-target="#modal-edit"><?=get_text("Add to all",$lang);?>...</button>-->
 <?=get_text("Person",$lang);?> <button id="persons-select-all" class="btn btn-primary btn-xs" type="button"><?=get_text("Select all",$lang);?></button>
 </div>
 <div class="select-container-body">
@@ -73,9 +77,7 @@ include("header.php");
 
 </div>
 
-<?
-include("footer.php");
-?>
+<?php include("footer.php"); ?>
 
 <!-- MODALS -->
 <!-- add modal -->
@@ -143,14 +145,36 @@ include("footer.php");
 <!-- /.modal -->
 </div>
 
-<script type="text/javascript">
+<script>
 //init filters
 setFilterAction();
 
+<?php if($logged->roleid!=4){ //Operator mode
+?>
 var organizationId;
-
 //populate select list
 populateList("organizations-select","organizations");
+
+$("#organizations-select").change(function(){
+	organizationId=$("#organizations-select").val();
+	if(!isNaN(organizationId) && typeof organizationId!=="undefined"){
+		//populate list
+		populateList("persons-select","persons",organizationId);
+		//hide accesses table
+		$("#accesses-table-container").hide();
+		//hide buttons
+		$("#buttons-row").hide();
+		//show list
+		$("#select-container-persons").fadeIn();
+	}
+});
+<?php } else { ?>
+//populate persons select
+populateList("persons-select","persons",<?=$logged->orgid?>);
+organizationId=<?=$logged->orgid?>;
+//show persons select
+$("#select-container-persons").show();
+<?php }?>
 
 //populate accesses table
 function populateTable(tableId,personId){
@@ -203,23 +227,9 @@ $(".data-filter-table").keyup(function(){
 	})
 });
 
-$("#organizations-select").change(function(){
-	organizationId=$("#organizations-select").val();
-	if(!isNaN(organizationId) && organizationId!="undefined"){
-		//populate list
-		populateList("persons-select","persons",organizationId);
-		//hide accesses table
-		$("#accesses-table-container").hide();
-		//hide buttons
-		$("#buttons-row").hide();
-		//show list
-		$("#select-container-persons").fadeIn();
-	}
-});
-
 $("#persons-select").change(function(){
 	personId=$("#persons-select").val();
-	if(!isNaN(personId) && personId!="undefined"){
+	if(!isNaN(personId) && typeof personId!=="undefined"){
 		//populate access list
 		populateTable("access-table",personId);
 		//show list
@@ -238,14 +248,8 @@ $("#persons-select").change(function(){
 	}
 });
 
-//Add to all button > open iframe modal
-/*$("#persons-select-all").click(function(){
-	var orgId= $("#organizations-select").val();
-	$("#modal-edit").find('iframe').prop('src','access-edit-person?personid=all&orgid='+orgId);
-});*/
 //send a group of person ids instead
 $("#persons-select-all").click(function(){
-	//$("#modal-edit").find('iframe').prop('src','access-edit-person?personid=all&orgid='+orgId);
 	$('#persons-select option').prop('selected',true)
 	//show buttons
 	$("#buttons-row").fadeIn();
@@ -309,7 +313,7 @@ $("#access-delete-form").submit(function(){
 $("#access-refresh").click(function(){
 	var personId= $("#persons-select").val();
 	//populate access list
-	if(!isNaN(personId) && personId!="undefined") populateTable("access-table",personId);
+	if(!isNaN(personId) && typeof personId!=="undefined") populateTable("access-table",personId);
 });
 
 //focus success button on delete modal shown

@@ -833,11 +833,12 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
 				$doorids = (isset($_POST['doorids'])) ? $_POST['doorids'] : "";
 				$isvisit = (isset($_POST['isvisit'])) ? $_POST['isvisit'] : 1;
+				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? $_POST['orgid'] : "";
 				$doorsides = (isset($_POST['doorsides'])) ? $_POST['doorsides'] : "";
 
 				if($id=="") array_push($ret,0,"Invalid values sent");//empty name can be considered as a valid scenario
 	    		else {
-					$vdg_rec = set_door_group($logged->name, $logged->pw, $id, $name, $doorids, $isvisit, $doorsides);
+					$vdg_rec = set_door_group($logged->name, $logged->pw, $id, $name, $doorids, $isvisit, $orgid, $doorsides);
 
 					if($vdg_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"Door group could not be updated");
@@ -850,9 +851,10 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$name = isset($_POST['name']) ? $_POST['name'] : "";
 				$doorids = (isset($_POST['doorids'])) ? $_POST['doorids'] : "";
 				$isvisit = (isset($_POST['isvisit'])) ? $_POST['isvisit'] : 1;
+				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? $_POST['orgid'] : "";
 				$doorsides = (isset($_POST['doorsides'])) ? $_POST['doorsides'] : "";
 
-				$vdg_rec = add_door_group($logged->name, $logged->pw, $name, $doorids, $isvisit, $doorsides);
+				$vdg_rec = add_door_group($logged->name, $logged->pw, $name, $doorids, $isvisit, $orgid, $doorsides);
 				if($vdg_rec) array_push($ret,1,"Information saved successfully!");
 				else array_push($ret,0,"Door group could not be added");
 			}
@@ -880,7 +882,7 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 					if($vdg_rec){
 						//return record
 						array_push($ret,1,$vdg_rec);
-					} else array_push($ret,0,"Door group doors could not found");
+					} else array_push($ret,0,"Door group doors could not be found");
 				}
 			}
 		break;
@@ -1102,12 +1104,13 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$username = isset($_POST['username']) ? $_POST['username'] : "";
 				$password = isset($_POST['password']) ? $_POST['password'] : "";
 				$roleid = (isset($_POST['roleid']) and is_numeric($_POST['roleid'])) ? $_POST['roleid'] : "";
+				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? $_POST['orgid'] : "";
 				$active = (isset($_POST['active']) and is_numeric($_POST['active'])) ? $_POST['active'] : "";
 				$lang = (isset($_POST['lang'])) ? $_POST['lang'] : "";
 
 				if($id=="") array_push($ret,0,"Invalid values sent");
 	    			else {
-					$users_rec = set_user($logged->name, $logged->pw, $id, $fullname, $username, $password, $roleid, $active, $lang);
+					$users_rec = set_user($logged->name, $logged->pw, $id, $fullname, $username, $password, $roleid, $orgid, $active, $lang);
 
 					if($users_rec) array_push($ret,1,"Information saved successfully!");
 					else array_push($ret,0,"User could not be updated");
@@ -1121,10 +1124,11 @@ if(!empty($_POST) and is_valid_ajax_ref($_SERVER['HTTP_REFERER'])){
 				$username = isset($_POST['username']) ? $_POST['username'] : "";
 				$password = isset($_POST['password']) ? $_POST['password'] : "";
 				$roleid = (isset($_POST['roleid']) and is_numeric($_POST['roleid'])) ? $_POST['roleid'] : "";
+				$orgid = (isset($_POST['orgid']) and is_numeric($_POST['orgid'])) ? $_POST['orgid'] : "";
 				$active = (isset($_POST['active']) and is_numeric($_POST['active'])) ? $_POST['active'] : "";
 				$lang = (isset($_POST['lang'])) ? $_POST['lang'] : "";
 
-				$users_rec = add_user($logged->name, $logged->pw, $fullname, $username, $password, $roleid, $active, $lang);
+				$users_rec = add_user($logged->name, $logged->pw, $fullname, $username, $password, $roleid, $orgid, $active, $lang);
 
 				if($users_rec) array_push($ret,1,"Information saved successfully!");
 				else array_push($ret,0,"User could not be added");

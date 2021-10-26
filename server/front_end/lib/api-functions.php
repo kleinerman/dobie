@@ -922,11 +922,13 @@ function get_door_group($user,$pass,$id){
 }
 
 //create door group and add a list of doorids to it
-function add_door_group($user,$pass,$name,$doorids,$isvisit=1,$doorsides=""){
+function add_door_group($user,$pass,$name,$doorids,$isvisit=1,$orgid="",$doorsides=""){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->name= $name;
 	$payload_obj->isForVisit= $isvisit;
+	if($orgid!="") $payload_obj->orgId= $orgid;
+	else $payload_obj->orgId=null;
 
 	$response=send_request($config->api_fullpath."doorgroup",$user,$pass,"post",json_encode($payload_obj));
 
@@ -976,11 +978,13 @@ function get_door_group_doors($user,$pass,$id){
 }
 
 //edit door group
-function set_door_group($user,$pass,$id,$name,$doorids,$isvisit=1,$doorsides=""){
+function set_door_group($user,$pass,$id,$name,$doorids,$isvisit=1,$orgid="",$doorsides=""){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->name= $name;
 	$payload_obj->isForVisit= $isvisit;
+	if($orgid!="") $payload_obj->orgId= $orgid;
+	else $payload_obj->orgId=null;
 	$response=send_request($config->api_fullpath."doorgroup/$id",$user,$pass,"put",json_encode($payload_obj));
 
 	//explode and build the sent door ids and door sides arrays
@@ -1214,7 +1218,7 @@ function delete_user($user,$pass,$id){
 	else return $response->data;
 }
 
-function set_user($user,$pass,$id,$fullname,$username,$password,$roleid,$active,$userlang="en"){
+function set_user($user,$pass,$id,$fullname,$username,$password,$roleid,$orgid,$active,$userlang="en"){
 	global $config;
 	$payload_obj = new stdClass();
 	if($password!="") $payload_obj->passwd= $password;
@@ -1225,19 +1229,25 @@ function set_user($user,$pass,$id,$fullname,$username,$password,$roleid,$active,
 		$payload_obj->username= $username;
 		$payload_obj->roleId= $roleid;
 		$payload_obj->active= $active;
+		//set orgid only if role is org operator or org viewer > if not, null
+		if($roleid==4 or $roleid==5) $payload_obj->orgId= $orgid;
+		else $payload_obj->orgId=null;
 	}
 	$response=send_request($config->api_fullpath."user/$id",$user,$pass,"put",json_encode($payload_obj));
 	if($response->response_status != "200") return false;
 	else return $response->data;
 }
 
-function add_user($user,$pass,$fullname,$username,$password,$roleid,$active,$userlang="en"){
+function add_user($user,$pass,$fullname,$username,$password,$roleid,$orgid,$active,$userlang="en"){
 	global $config;
 	$payload_obj = new stdClass();
 	$payload_obj->fullName= $fullname;
 	$payload_obj->username= $username;
 	$payload_obj->passwd= $password;
 	$payload_obj->roleId= $roleid;
+	//set orgid only if role is org operator or org viewer > if not, null
+	if($roleid==4 or $roleid==5) $payload_obj->orgId= $orgid;
+	else $payload_obj->orgId=null;
 	$payload_obj->active= $active;
 	$payload_obj->language= $userlang;
 	$response=send_request($config->api_fullpath."user",$user,$pass,"post",json_encode($payload_obj));

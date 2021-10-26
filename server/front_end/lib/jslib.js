@@ -95,9 +95,11 @@ function populateList(selectId,entity,id=0,actionstr="",hlvalue="",newcontroller
 							//show note if visitor and note exists
 							if(entity=="visitors" && item.note && item.note!="") item.name += " ("+truncate_str(item.note,8)+")";
 							//for door groupd, highlight vdg
-							if(entity=="door_groups" && item.isForVisit==1){
-								itemClass=" class='vdg-row'"
+							if(entity=="door_groups"){
+								if(item.isForVisit==1) itemClass=" class='vdg-row'"
+								else if(item.orgId!=null) itemClass=" class='bdg-row'"
 							}
+
 							//show
 							$("#"+selectId).append("<option value='"+item.id+"'"+itemClass+">"+ item.name +"</option>");
 							qValidItems++;

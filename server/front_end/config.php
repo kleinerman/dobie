@@ -59,7 +59,8 @@ if($islogged){
 	$logged->name=$_SESSION[$config->sesskey];
 	$logged->pw=$EnDecryptText->Decrypt_Text($_SESSION[$config->sesskey."pw"]);
 	$logged->roleid=$EnDecryptText->Decrypt_Text($_SESSION[$config->sesskey."rl"]);
-	if($logged->roleid!=1 and $logged->roleid!=2 and $logged->roleid!=3) $logged->roleid=3; //force base roleid in case of decryption unsuccessful (fixing persistsession roleid re encoding)
+	if(isset($_SESSION[$config->sesskey."or"])) $logged->orgid=$EnDecryptText->Decrypt_Text($_SESSION[$config->sesskey."or"]);
+	if($logged->roleid!=1 and $logged->roleid!=2 and $logged->roleid!=3 and $logged->roleid!=4 and $logged->roleid!=5) $logged->roleid=3; //force base roleid in case of decryption unsuccessful (fixing persistsession roleid re encoding)
 	$logged->lang=$_SESSION[$config->sesskey."lang"];
 	$lang=$logged->lang;
 	if($requirelogin){

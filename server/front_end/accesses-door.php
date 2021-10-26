@@ -1,6 +1,6 @@
-<?
+<?php
 $leavebodyopen=1;
-$requirerole=2;
+$requirerole=array(2,4);
 include("header.php");
 ?>
 <div id="page-wrapper">
@@ -20,6 +20,8 @@ include("header.php");
 
 <div class="col-lg-3">
 
+<?php if($logged->roleid!=4){ //normal mode
+?>
 <div class="select-container">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Zone",$lang);?></div>
@@ -32,6 +34,19 @@ include("header.php");
 </div>
 </form>
 </div>
+<?php } else { //Org operator mode: use door group instead
+?>
+<div class="select-container">
+<div class="select-container-title"><?=get_text("Door Groups",$lang);?></div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="door-groups-select">
+<select id="door-groups-select" class="select-options select-options-small form-control" name="door-groups-select" size="2"></select>
+</div>
+<div class="select-container-footer">
+&nbsp;
+</div>
+</div>
+<?php } ?>
 
 <div class="select-container" id="select-container-doors" style="display:none">
 <form action="javascript:void(0)">
@@ -71,14 +86,10 @@ include("header.php");
 <br><br>
 
 </div>
-
+</div>
 </div>
 
-</div>
-
-<?
-include("footer.php");
-?>
+<?php include("footer.php");?>
 
 <!-- MODALS -->
 <!-- add modal -->
@@ -110,7 +121,6 @@ include("footer.php");
 </div>
 </div>
 </div>
-<!-- /.modal -->
 </div>
 
 <!-- delete modal -->
@@ -128,7 +138,6 @@ Are you sure?
 </div>
 </div>
 </div>
-<!-- /.modal -->
 </div>
 
 <!-- error modal -->
@@ -143,17 +152,48 @@ Are you sure?
 </div>
 </div>
 </div>
-<!-- /.modal -->
 </div>
 
-<script type="text/javascript">
+<script>
 //init filters
 setFilterAction();
 
 var zoneId;
 
+<?php if($logged->roleid!=4){ //Operator mode
+?>
 //populate select list
 populateList("zones-select","zones");
+
+$("#zones-select").change(function(){
+	zoneId=$("#zones-select").val();
+	if(!isNaN(zoneId) && zoneId!="undefined"){
+		//populate list
+		populateList("doors-select","doors",zoneId);
+		//hide accesses table
+		$("#accesses-table-container").hide();
+		//hide buttons
+		$("#buttons-row").hide();
+		//show list
+		$("#select-container-doors").fadeIn();
+	}
+});
+
+<?php } else { ?>
+//populate door groups
+populateList("door-groups-select","door_groups","","action=get_door_groups&orgId=<?=$logged->orgid?>");
+
+//action for door group select
+$("#door-groups-select").change(function(){
+	doorGroupId=$("#door-groups-select").val();
+	if(!isNaN(doorGroupId) && doorGroupId!="undefined"){
+		//populate list
+		populateList("doors-select","door_group_doors",doorGroupId);
+		//show list
+		$("#select-container-doors").fadeIn();
+	}
+});
+<?php }?>
 
 //populate accesses table
 function populateTable(tableId,doorId){
@@ -206,20 +246,6 @@ $(".data-filter-table").keyup(function(){
 	})
 });
 
-$("#zones-select").change(function(){
-	zoneId=$("#zones-select").val();
-	if(!isNaN(zoneId) && zoneId!="undefined"){
-		//populate list
-		populateList("doors-select","doors",zoneId);
-		//hide accesses table
-		$("#accesses-table-container").hide();
-		//hide buttons
-		$("#buttons-row").hide();
-		//show list
-		$("#select-container-doors").fadeIn();
-	}
-});
-
 $("#doors-select").change(function(){
 	doorId=$("#doors-select").val();
 	if(!isNaN(doorId) && doorId!="undefined"){
@@ -241,14 +267,8 @@ $("#doors-select").change(function(){
 	}
 });
 
-//Add to all button > open iframe modal
-/*$("#doors-select-all").click(function(){
-	var zoneId= $("#zones-select").val();
-	$("#modal-edit").find('iframe').prop('src','access-edit-door?doorid=all&zoneid='+zoneId);
-});*/
 //send a group of door ids instead
 $("#doors-select-all").click(function(){
-	//$("#modal-edit").find('iframe').prop('src','access-edit-person?personid=all&orgid='+orgId);
 	$('#doors-select option').prop('selected',true)
 	//show buttons
 	$("#buttons-row").fadeIn();
@@ -256,6 +276,8 @@ $("#doors-select-all").click(function(){
 	$("#access-edit,#access-del").prop("disabled",true);
 	//hide accesses table
 	$("#accesses-table-container").hide();
+	//disable refresh
+	$("#access-refresh").prop("disabled",true);
 });
 
 //Add button > open iframe modal

@@ -275,6 +275,10 @@ label.control-label{
 	background:#c5e9f5;
 }
 
+.bdg-row{
+	background:#ffa;
+}
+
 .ui-datepicker{
 	z-index:999999 !important;
 }
@@ -348,7 +352,7 @@ input::-webkit-inner-spin-button {
 
 /*section tweaks */
 #select-container-persons{
-	width:300px;
+	max-width:300px;
 }
 
 /*person and visitor webcam*/

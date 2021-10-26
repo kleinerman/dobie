@@ -1,6 +1,6 @@
-<?
+<?php
 $leavebodyopen=1;
-$requirerole=2;
+$requirerole=array(2,4);
 $include_extra_js=array("clockpicker","datepicker");
 include("header.php");
 ?>
@@ -21,6 +21,8 @@ include("header.php");
 
 <div class="col-lg-4">
 
+<?php if($logged->roleid!=4){ //normal mode
+?>
 <div class="select-container">
 <div class="select-container-title"><?=get_text("Organizations",$lang);?></div>
 <div class="select-container-body">
@@ -28,8 +30,12 @@ include("header.php");
 <select id="organizations-select" class="select-options select-options-small form-control" name="organizations-select" size="2"></select>
 </div>
 </div>
-
 <br><br><br>
+
+<?php } else { //Org operator mode: populate orgid
+?>
+<input type="hidden" id="organizations-select" value="<?=$logged->orgid?>">
+<?php } ?>
 
 <div class="select-container" id="select-container-persons" style="display:none">
 <div class="select-container-title"><?=get_text("Person",$lang);?></div>
@@ -65,6 +71,8 @@ include("header.php");
 
 <div class="col-lg-4">
 
+<?php if($logged->roleid!=4){ //normal mode
+?>
 <div class="select-container">
 <form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Zone",$lang);?></div>
@@ -77,6 +85,19 @@ include("header.php");
 </div>
 </form>
 </div>
+<?php } else { //Org operator mode: use door group instead
+?>
+<div class="select-container">
+<div class="select-container-title"><?=get_text("Door Groups",$lang);?></div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="door-groups-select">
+<select id="door-groups-select" class="select-options select-options-small form-control" name="door-groups-select" size="2"></select>
+</div>
+<div class="select-container-footer">
+&nbsp;
+</div>
+</div>
+<?php } ?>
 
 <div class="select-container" id="select-container-doors" style="display:none">
 <form action="javascript:void(0)">
@@ -231,9 +252,9 @@ include("header.php");
 <!-- /.modal -->
 </div>
 
-<? include("footer.php");?>
+<?php include("footer.php");?>
 
-<script type="text/javascript">
+<script>
 //init filters
 setFilterAction();
 
@@ -244,14 +265,17 @@ var perpage = 15;
 //total event count for download csv action
 var totalEvents=0;
 
-//populate select list
-populateList("organizations-select","organizations",0,"","",0,1);
-populateList("zones-select","zones");
-
 //init clockpicker
 $('.clockpicker').clockpicker();
 //init date picker
 $(".input_date").datepicker({dateFormat: "yy-mm-dd"});
+
+<?php if($logged->roleid!=4){ //Operator mode
+?>
+//populate select list
+populateList("organizations-select","organizations",0,"","",0,1);
+populateList("zones-select","zones");
+isOrgOperator=0;
 
 //action for organization select
 $("#organizations-select").change(function(){
@@ -282,6 +306,28 @@ $("#zones-select").change(function(){
 	}
 });
 
+<?php } else { ?>
+//populate persons select
+populateList("persons-select","persons",<?=$logged->orgid?>);
+organizationId=<?=$logged->orgid?>;
+isOrgOperator=1;
+//show persons select
+$("#select-container-persons").show();
+//populate door groups
+populateList("door-groups-select","door_groups","","action=get_door_groups&orgId="+organizationId);
+
+//action for door group select
+$("#door-groups-select").change(function(){
+	doorGroupId=$("#door-groups-select").val();
+	if(!isNaN(doorGroupId) && doorGroupId!="undefined"){
+		//populate list
+		populateList("doors-select","door_group_doors",doorGroupId);
+		//show list
+		$("#select-container-doors").fadeIn();
+	}
+});
+<?php }?>
+
 //form reset
 $("#events-search-reset").click(function(){
 	location.reload();
@@ -308,7 +354,7 @@ $("#search-download-button").click(function(){
 function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 	var orgId = ($("#organizations-select").val()!==null) ? $("#organizations-select").val() : "";
 	var personId = ($("#persons-select").val()!==null) ? $("#persons-select").val() : "";
-	var zoneId = ($("#zones-select").val()!==null) ? $("#zones-select").val() : "";
+	var zoneId = ($("#zones-select").val()!==null && typeof $("#zones-select").val()!=='undefined') ? $("#zones-select").val() : "";
 	var doorId = ($("#doors-select").val()!==null) ? $("#doors-select").val() : "";
 	var side = $("input[name=side]:checked").val();
 	var startDate = $("#startDate").val();
@@ -325,14 +371,18 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 	if(endDate=="") endDate = "9999-12-31";
 	if(endTime=="") endTime = "00:00";
 
+	//bypass orgid if org operator looks for events of a particular door
+	if(isOrgOperator && doorId!="") orgId="";
+
 	//validate values > show error modal in case of error
 	//send ajax action and show pagination values
-	if(orgId!="" && isNaN(orgId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("organization",$lang));?>";
-	if(visitedOrgId!="" && isNaN(visitedOrgId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("Visiting Organization",$lang));?>";
-	else if(personId!="" && isNaN(personId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("person",$lang));?>";
-	else if(zoneId!="" && isNaN(zoneId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("zone",$lang));?>";
-	else if(doorId!="" && isNaN(doorId)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("door",$lang));?>";
-	else if(side!="" && isNaN(side)) error = "<?=(get_text("Invalid value for",$lang) . "." . get_text("direction",$lang));?>";
+	if(orgId!="" && isNaN(orgId)) error = "<?=(get_text("Invalid value for: ",$lang) . get_text("organization",$lang));?>";
+	if(visitedOrgId!="" && isNaN(visitedOrgId)) error = "<?=(get_text("Invalid value for: ",$lang) . get_text("Visiting Organization",$lang));?>";
+	else if(personId!="" && isNaN(personId)) error = "<?=(get_text("Invalid value for: ",$lang) . get_text("person",$lang));?>";
+	else if(zoneId!="" && isNaN(zoneId)) error = "<?=(get_text("Invalid value for: ",$lang) . get_text("zone",$lang));?>";
+	else if(doorId!="" && isNaN(doorId)) error = "<?=(get_text("Invalid value for: ",$lang) . get_text("door",$lang));?>";
+	else if(side!="" && isNaN(side)) error = "<?=(get_text("Invalid value for: ",$lang) . get_text("direction",$lang));?>";
+	else if(isOrgOperator && doorId=="") error = "<?=get_text("Please select a door from one of the available Door Groups",$lang);?>";//org operator must select a door
 
 	if(error==""){
 		if(downloadCsv){
@@ -366,7 +416,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 				url: "process",
 				data: "action=get_events&orgid=" + orgId + "&personid=" + personId + "&zoneid=" + zoneId + "&doorid=" + doorId + "&side=" + side + "&startdate=" + startDate + "&starttime=" + startTime + "&enddate=" + endDate + "&endtime=" + endTime + "&startevt=" + startEvt + "&evtsqtty=" + evtsQtty + "&visitedorgid=" + visitedOrgId + "&isprov=" + searchIsProv,
 				beforeSend: function(){$("#results-container-inner,#legend-row").hide();$("#pagination-container").html(""); $(".throbber-container").show();},
-				complete: function(resp){/*console.log(resp);*/$(".throbber-container").hide(); $("#results-container-inner").fadeIn()},
+				complete: function(resp){$(".throbber-container").hide(); $("#results-container-inner").fadeIn()},
 				success: function(resp){
 					if(resp[0]=='1'){
 						//populate event table
@@ -380,7 +430,7 @@ function populateEventList(startEvt,evtsQtty,downloadCsv=0){
 						$("#search-download-button").show();
 					} else {
 						//no results
-						$("#results-container-inner").html("<div class='left'>"+resp[1]+"</div>");
+						$("#results-container-inner").html("<div class='left'><?=get_text("Events not found",$lang);?></div>");
 						$("#search-download-button").hide();
 					}
 				},

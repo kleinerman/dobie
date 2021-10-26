@@ -1,4 +1,4 @@
-<?
+<?php
 $leavebodyopen=1;
 include("header.php");
 ?>
@@ -19,6 +19,8 @@ include("header.php");
 
 <div class="col-lg-4">
 
+<?php if($logged->roleid!=4){ //normal mode
+?>
 <div class="select-container">
 <div class="select-container-title"><?=get_text("Organizations",$lang);?></div>
 <div class="select-container-body">
@@ -26,8 +28,11 @@ include("header.php");
 <select id="organizations-select" class="select-options select-options-small form-control" name="organizations-select" size="2"></select>
 </div>
 </div>
-
 <br><br><br>
+<?php } else { //Org operator mode: populate orgid
+?>
+<input type="hidden" id="organizations-select" value="<?=$logged->orgid?>">
+<?php } ?>
 
 <div class="select-container" id="select-container-persons" style="display:none">
 <div class="select-container-title"><?=get_text("Person",$lang);?></div>
@@ -41,8 +46,9 @@ include("header.php");
 
 <div class="col-lg-4">
 
+<?php if($logged->roleid!=4){ //normal mode
+?>
 <div class="select-container">
-<form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Zone",$lang);?></div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="zones-select">
@@ -51,17 +57,27 @@ include("header.php");
 <div class="select-container-footer">
 &nbsp;
 </div>
-</form>
 </div>
+<?php } else { //Org operator mode: use door group instead
+?>
+<div class="select-container">
+<div class="select-container-title"><?=get_text("Door Groups",$lang);?></div>
+<div class="select-container-body">
+<input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="door-groups-select">
+<select id="door-groups-select" class="select-options select-options-small form-control" name="door-groups-select" size="2"></select>
+</div>
+<div class="select-container-footer">
+&nbsp;
+</div>
+</div>
+<?php } ?>
 
 <div class="select-container" id="select-container-doors" style="display:none">
-<form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Doors",$lang);?></div>
 <div class="select-container-body">
 <input type="text" name="filter" placeholder="<?=get_text("Filter options",$lang);?>..." class="form-control data-filter" data-filter="doors-select">
 <select id="doors-select" class="select-options select-options-small form-control" name="doors-select" size="2"></select>
 </div>
-</form>
 </div>
 
 </div>
@@ -69,7 +85,6 @@ include("header.php");
 <div class="col-lg-4 center">
 
 <div class="select-container">
-<form action="javascript:void(0)">
 <div class="select-container-title"><?=get_text("Direction",$lang);?></div>
 <div class="select-container-body left">
 <br>
@@ -77,7 +92,6 @@ include("header.php");
 <label><input type="radio" name="side" value="1"> <?=get_text("Incoming",$lang);?></label><br>
 <label><input type="radio" name="side" value="0"> <?=get_text("Outgoing",$lang);?></label>
 </div>
-</form>
 </div>
 
 <br><br><br>
@@ -194,9 +208,9 @@ include("header.php");
 
 </style>
 
-<? include("footer.php");?>
+<?php include("footer.php");?>
 
-<script type="text/javascript">
+<script>
 //init filters
 setFilterAction();
 
@@ -206,9 +220,12 @@ var filterPersonId="";
 var filterDoorId="";
 var filterSide="";
 
+<?php if($logged->roleid!=4){ //Operator mode
+?>
 //populate select list
 populateList("organizations-select","organizations",0,"","",0,1);
 populateList("zones-select","zones");
+isOrgOperator=0;
 
 //action for organization select
 $("#organizations-select").change(function(){
@@ -232,6 +249,28 @@ $("#zones-select").change(function(){
 	}
 });
 
+<?php } else { ?>
+//populate persons select
+populateList("persons-select","persons",<?=$logged->orgid?>);
+organizationId=<?=$logged->orgid?>;
+isOrgOperator=1;
+//show persons select
+$("#select-container-persons").show();
+//populate door groups
+populateList("door-groups-select","door_groups","","action=get_door_groups&orgId="+organizationId);
+
+//action for door group select
+$("#door-groups-select").change(function(){
+	doorGroupId=$("#door-groups-select").val();
+	if(!isNaN(doorGroupId) && doorGroupId!="undefined"){
+		//populate list
+		populateList("doors-select","door_group_doors",doorGroupId);
+		//show list
+		$("#select-container-doors").fadeIn();
+	}
+});
+<?php }?>
+
 //this is so filter vars are set
 $("#persons-select").change(function(){
 	filterPersonId=$("#persons-select").val();
@@ -252,19 +291,25 @@ $("#events-search-reset").click(function(){
 
 //clear filter
 $("#events-search-reset-filter").click(function(){
+<?php if($logged->roleid!=4){ //Operator mode
+?>
 	organizationId="";
 	zoneId="";
+	//collapse sub menus
+	$("#select-container-doors,#select-container-persons").hide();
+<?php } else { ?>
+	doorGroupId="";
+	//collapse sub menus
+	$("#select-container-doors").hide();
+<?php } ?>
 	filterPersonId="";
 	filterDoorId="";
 	filterSide="";
-	$("#persons-select option:selected,#doors-select option:selected,#zones-select option:selected,#organizations-select option:selected").prop("selected",false);
+	$("#persons-select option:selected,#doors-select option:selected,#zones-select option:selected,#organizations-select option:selected,#door-groups-select option:selected").prop("selected",false);
 	$("input[name=side][value='']").prop("checked",true);
 	//show filter button
 	$("#filter-row").slideUp("fast");
 	$("#search-again-button").show();
-	//collapse sub menus
-	$("#select-container-doors,#select-container-persons").hide();
-	
 });
 
 //add events on live table
@@ -325,7 +370,9 @@ $.getScript(window.location.protocol + "//" + window.location.hostname+":<?=$nod
 			} else {
 				//normal live event case
 				//if filter vars are not set or they match > show
-				if((organizationId=="" || dataParsed.orgId == organizationId)
+				if((organizationId=="" || dataParsed.orgId == organizationId || 
+					(isOrgOperator && filterDoorId!="")
+				)
 				&& (zoneId=="" || dataParsed.zoneId == zoneId)
 				&& (filterPersonId=="" || dataParsed.personId == filterPersonId)
 				&& (filterDoorId=="" || dataParsed.doorId == filterDoorId)

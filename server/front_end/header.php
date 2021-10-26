@@ -7,7 +7,7 @@ if(isset($requirelogin) and $requirelogin and !$islogged) {
 }
 
 //if section role is required
-if($islogged and isset($requirerole) and $requirerole<$logged->roleid){
+if($islogged and isset($requirerole) and !passes_required_role($requirerole,$logged->roleid)){
 	redirect_to($home_url,1);
 }
 
@@ -61,7 +61,7 @@ ob_start('ob_gzhandler');
 <link href="dist/css/bootstrap-clockpicker.min.css" type="text/css" rel="stylesheet" property='stylesheet'>
 <?}?>
 <!-- More Custom CSS -->
-<link href='dist/css/custom.css?v=9' rel='stylesheet' type='text/css'>
+<link href='dist/css/custom.css?v=1' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <?if(!isset($innerheader)){?>
@@ -110,20 +110,23 @@ ob_start('ob_gzhandler');
 <li>
 <a href="events-live"><span class="fa fa-bolt fa-fw"></span> <?=get_text("Live",$lang);?></a>
 </li>
-<?if($logged->roleid<3){?>
+<?if($logged->roleid<3 or $logged->roleid==4 or $logged->roleid==5){?>
 <li>
 <a href="events-search"><span class="fa fa-search fa-fw"></span> <?=get_text("Search",$lang);?></a>
 </li>
 <li>
+<?if($logged->roleid<3){?>
 <a href="events-purge"><span class="fa fa-trash fa-fw"></span><?=get_text("Purge",$lang);?></a>
 </li>
-<?}?>
+<?} }?>
 </ul>
 </li>
+<?if($logged->roleid<4){?>
 <li>
 <a href="visitors"><span class="fa fa-male fa-fw"></span> <?=get_text("Visitors",$lang);?></a>
 </li>
-<?if($logged->roleid<3){?>
+<?}
+if($logged->roleid<3){?>
 <li>
 <a href="organizations"><span class="fa fa-sitemap fa-fw"></span> <?=get_text("Organizations",$lang);?></a>
 </li>
@@ -131,14 +134,15 @@ ob_start('ob_gzhandler');
 <li>
 <a href="#"><span class="fa fa-users fa-fw"></span> <?=get_text("Persons",$lang);?><span class="fa arrow"></span></a>
 <ul class="nav nav-second-level">
-<?if($logged->roleid<3){?>
+<?if($logged->roleid<3 or $logged->roleid==4 or $logged->roleid==5){?>
 <li>
 <a href="persons"><span class="fa fa-users fa-fw"></span> <?=get_text("Manage Persons",$lang);?></a>
 </li>
-<?}?>
+<?} if($logged->roleid<3){?>
 <li>
 <a href="persons-search"><span class="fa fa-search fa-fw"></span> <?=get_text("Search Persons",$lang);?></a>
 </li>
+<?}?>
 </ul>
 </li>
 <?if($logged->roleid<3){
@@ -160,7 +164,8 @@ ob_start('ob_gzhandler');
 <a href="door-groups"><?=get_text("Door Groups",$lang);?></a>
 </li>
 </ul>
-<?	}?>
+<?}	}
+if($logged->roleid<3 or $logged->roleid==4 or $logged->roleid==5){?>
 <li>
 <a href="access"><span class="fa fa-handshake fa-fw"></span> <?=get_text("Accesses",$lang);?><span class="fa arrow"></span></a>
 <ul class="nav nav-second-level">
@@ -172,11 +177,10 @@ ob_start('ob_gzhandler');
 </li>
 </ul>
 </li>
-<?	if($logged->roleid==1){?>
+<?}	if($logged->roleid==1){?>
 <li>
 <a href="system-users"><span class="fa fa-lock fa-fw"></span> <?=get_text("System Users",$lang);?></a>
 </li>
-<?	}?>
 <?}?>
 </ul>
 <div id="event-photo-container"><img src="persons-image" class="hidden"></div>
