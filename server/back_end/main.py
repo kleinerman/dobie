@@ -137,7 +137,7 @@ class BackEndSrvr(object):
             pass
 
         for thread in threading.enumerate():
-            if thread is not threading.currentThread():
+            if thread is not threading.current_thread():
                 thread.join()
 
 

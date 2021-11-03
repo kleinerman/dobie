@@ -36,7 +36,7 @@ REST_API_BIND_IP = '0.0.0.0'
 #file should be modified
 REST_API_PORT = 5000
 
-RE_SEND_TIME = 10
+RE_SEND_TIME = 240
 
 REC_BYTES = 4096
 
