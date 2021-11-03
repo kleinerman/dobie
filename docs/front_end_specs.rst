@@ -49,7 +49,8 @@ If the field ``active`` is ``0``, the user shouldn't be able to log into the app
 | Users with ``roleId = 1`` (Administrator) will be able to access all the sections of the application.
 | Users with ``roleId = 2`` (Operator) will be able to access all the sections except System Users Section.
 | Users with ``roleId = 3`` (Viewer) will be able to access all "Event" subsections and only "Manage Visitors" subsection of "Visitors".
-|
+| Users with ``roleId = 4`` (Org-Operator) will be able to create, edit and remove People and Accesses of their Organization.
+| Users with ``roleId = 5`` (Org-Viewer) will be able to see People and Accesses of their Organization.
 
 
 An invalid login will answer with:
@@ -4076,27 +4077,39 @@ To get from the server the current list of Door Groups, the following REST metho
     {
       "id": 1,
       "name": "Ingreso Este",
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1"
-      "isForVisit": 1
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/1",
+      "isForVisit": 1,
+      "orgId": null
 
     },
     {
       "id": 2,
       "name": "Ingreso Oeste",
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/2"
-      "isForVisit": 1
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/2",
+      "isForVisit": 1,
+      "orgId": null
+
     },
     {
       "id": 3,
       "name": "Ingreso Norte",
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
-      "isForVisit": 1
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3",
+      "isForVisit": 1,
+      "orgId": null
+    },
+    {
+      "id": 4,
+      "name": "Bonifies",
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/4",
+      "isForVisit": 0,
+      "orgId": 2
     },
     {
       "id": 5,
-      "name": "Molinetes",
-      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5"
-      "isForVisit": 0
+      "name": "Colitier",
+      "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/5",
+      "isForVisit": 0,
+      "orgId": 4
     }
   ]
 
@@ -4118,9 +4131,18 @@ The JSON sent in the POST method should have the name and a boolean to indicate 
 
 **JSON**
 
+Example adding a Door Group that doesn't belong to an Organization
+
 .. code-block::
 
-  {"name": "Puertas Front Torre A", "isForVisit": 1}
+  {"name": "Puertas Front Torre A", "isForVisit": 1, "orgId": null}
+
+
+Example adding a Door Group that belong to an Organization
+
+.. code-block::
+
+  {"name": "Puertas Centro Data", "isForVisit": 0, "orgId": 2}
 
 **Response:**
 
@@ -4210,8 +4232,9 @@ Get one Door Group
   {
     "id": 3,
     "name": "Puertas Front Torre B",
-    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3"
-    "isForVisit": 1
+    "uri": "http://172.18.0.4:5000/api/v1.0/visitdoorgroup/3",
+    "isForVisit": 1,
+    "orgId": null
   }
 
 
@@ -4286,6 +4309,7 @@ Get the doors from a Door Group
     }
   ]
 
+Note: Although ``iSide`` and ``oSide`` aren't door parameters, they are used when giving access to a visitor in a Door Group.
 
 
 Modify a Door Group
@@ -4307,7 +4331,7 @@ To modify a Door Group the following method should be sent to the server:
 
 .. code-block::
 
-  {"name": "FrontDesk Torre B", "isForVisit": 0}
+  {"name": "FrontDesk Torre B", "isForVisit": 0, "orgId": null}
 
 
 **Response:**
@@ -4428,7 +4452,8 @@ To get from server the current list of system users, the following REST method s
       "id": 1,
       "roleId": 1,
       "uri": "http://localhost:5000/api/v1.0/user/1",
-      "username": "admin"
+      "username": "admin",
+      "orgId": null
     },
     {
       "active": 1,
@@ -4436,7 +4461,8 @@ To get from server the current list of system users, the following REST method s
       "id": 2,
       "roleId": 2,
       "uri": "http://localhost:5000/api/v1.0/user/2",
-      "username": "gfisanotti"
+      "username": "gfisanotti",
+      "orgId": null
     },
     {
       "active": 0,
@@ -4444,12 +4470,42 @@ To get from server the current list of system users, the following REST method s
       "id": 4,
       "roleId": 3,
       "uri": "http://localhost:5000/api/v1.0/user/4",
-      "username": "mgonzales"
+      "username": "mgonzales",
+      "orgId": null
+    },
+    {
+      "active": 1,
+      "fullName": "Luis Cabresi",
+      "id": 5,
+      "roleId": 4,
+      "uri": "http://localhost:5000/api/v1.0/user/5",
+      "username": "lcabresi",
+      "orgId": 2
+    },
+    {
+      "active": 1,
+      "fullName": "Ramon Tolares",
+      "id": 6,
+      "roleId": 4,
+      "uri": "http://localhost:5000/api/v1.0/user/6",
+      "username": "rtolares",
+      "orgId": 3
+    },
+    {
+      "active": 0,
+      "fullName": "Andrea Lombardi",
+      "id": 7,
+      "roleId": 3,
+      "uri": "http://localhost:5000/api/v1.0/user/7",
+      "username": "alombardi",
+      "orgId": 2
     }
   ]
 
 
 **roleId** is a field that indicates the privilegies of the system user in the UI.
+
+**orgId** is the ID of the Organization when the roleId is 4 (org-operator)
 
 To get all possible roles the following method shoud be sent to the server:
 
@@ -4483,6 +4539,14 @@ To get all possible roles the following method shoud be sent to the server:
     {
       "description": "Viewer",
       "id": 3
+    },
+    {
+      "description": "Org-Operator",
+      "id": 4
+    },
+    {
+      "description": "Org-Viewer",
+      "id": 5
     }
   ]
 
@@ -4507,9 +4571,20 @@ The following REST method should be sent to the server:
 
 **JSON**
 
+Example Adding and Administrator:
+
 .. code-block::
 
-  {"username": "mcantini", "passwd": "p4ssw8rd", "fullName": "Marcos Cantini", "roleId": 2, "active": 1}
+  {"username": "jkleiner", "passwd": "qwe123qwe", "fullName": "Jor Klein", "language": "en", "active": 1, "roleId": 1, "orgId": null}
+
+
+Example Adding and Org-Operator:
+
+.. code-block::
+
+
+  {"username": "bonifiesboos", "passwd": "qwe123qwe", "fullName": "Bonifies Boos", "language": "es", "active": 1, "roleId": 4, "orgId": 2}
+
 
 **Response:**
 
@@ -4527,6 +4602,7 @@ The following REST method should be sent to the server:
     "status": "OK",
     "uri": "http://localhost:5000/api/v1.0/user/6"
   }
+
 
 
 Get one System User
@@ -4557,7 +4633,9 @@ Get one System User
     "id": 4,
     "roleId": 3,
     "uri": "http://localhost:5000/api/v1.0/user/4",
-    "username": "mshuar"
+    "username": "mshuar,
+    "language": "en",
+    "orgId": null
   }
 
 
@@ -4584,18 +4662,18 @@ The following REST method should be sent to the server:
 
 .. code-block::
 
-  {"username": "msuarez", "passwd": "p4ssw3rd", "fullName": "Marc Shuar", "roleId": 3, "active": 0}
+  {"username": "msuarez", "passwd": "p4ssw3rd", "fullName": "Marc Shuar", "roleId": 3, "active": 0, "language": "es", "orgId": null}
 
 
 
-**Note**: If the user doesn't fill the password field, the JSON shouldn't have this field, and the old password will be kept
+**Note**: If the UI doesn't send some parameters, the old ones will be kept.
 
 
 **JSON**
 
 .. code-block::
 
-  {"username": "msuarez", "fullName": "Marc Shuar", "roleId": 3, "active": 0}
+  {"username": "msuarez", "fullName": "Marc Shuar", "roleId": 3, "active": 0,"language": "es", "orgId": null}
 
 
 
@@ -4660,3 +4738,90 @@ Each user will be able to change its password and its full name from the setting
 
 
 .. image:: images_front_end_specs/system_user_settings.png
+
+
+User interface for Org-Users
+----------------------------
+
+This section describes the changes and features that an Org-User can see when they log in the user interface.
+
+
+
+Hiden sections
+~~~~~~~~~~~~~~
+
+The following sections will be hidden for Org-Users:
+
+- Visitors
+- Organizations
+- Controllers
+- Zones
+- Doors (Manage Doors and Door Groups)
+- System Users
+
+
+Events Section
+~~~~~~~~~~~~~~
+
+Live Section
+++++++++++++
+
+| By default, this section will show only the events that belong to the Org-User's organization.
+| When using the filter, the **Organization** and **Zone** filter will not be shown.
+| The Org-User, will be able to filter among the persons of their organization.
+| When filtering the Door, a **Door Group** should be choosen first. Only the Door Groups of this Organization will be available.
+| **Date**, **Time** and **Direction** filters will be available.
+
+
+Search Section
+++++++++++++++
+
+The same criteria used above.
+
+
+Purge Events Section
+++++++++++++++++++++
+
+This section will be hidden for this type of users.
+
+
+.. image:: images_front_end_specs/events_searcher_org_usr.png
+
+
+Persons Section
+~~~~~~~~~~~~~~~
+
+| **Manage Persons** section and **Search Persons** section will not be shown as different sections.
+| Only the persons who belong to the organization will be shown.
+
+.. image:: images_front_end_specs/person_org_usr.png
+
+
+Access Section
+~~~~~~~~~~~~~~
+
+Person -> Door Section
+++++++++++++++++++++++
+
+With this kind of user, the **Organization** menu will not be shown. Only the persons who belong to this organization will be shown.
+
+.. image:: images_front_end_specs/access_per_pas_org_usr.png
+
+When selecting **Add** or **Edit** button, only it will be possible to select doors from the Door Groups that this Organization has.
+
+
+.. image:: images_front_end_specs/add_access_per_doorgroup.png
+
+
+Door -> Person Section
+++++++++++++++++++++++
+
+With this kind of user, instead of showing the **Zone**, all available **Door Groups** for this user will be shown. Once selected it, the menu **Doors** will be shown with the Doors of this Door Group.
+
+
+.. image:: images_front_end_specs/access_pas_per_org_usr.png
+
+
+When selecting **Add** or **Edit** button, only it will be possible to select persons of the Organization of the Org_Usr logged in.
+
+.. image:: images_front_end_specs/add_access_pas_per_org_usr.png
