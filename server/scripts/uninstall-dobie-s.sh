@@ -140,6 +140,7 @@ if $REM_CONTS; then
   sudo docker rmi -f $(docker images -q)
   sudo docker volume rm dobie_database-volume
   sudo docker network rm dobie_dobie-net
+  sudo docker builder prune -a -f
 fi
 
 

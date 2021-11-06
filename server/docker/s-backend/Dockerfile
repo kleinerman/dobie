@@ -38,6 +38,7 @@ RUN python -m venv $VENV_DIR
 ENV PATH="$VENV_DIR/bin:$PATH"
 RUN \
 python -m pip install --upgrade pip && \
+python -m pip install --no-cache-dir wheel && \
 python -m pip install --no-cache-dir Flask && \
 python -m pip install --no-cache-dir Flask-HTTPAuth && \
 python -m pip install --no-cache-dir PyMySQL && \
