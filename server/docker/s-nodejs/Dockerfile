@@ -6,6 +6,7 @@ WORKDIR /site
 #tzdata is needed to change the timezone
 #Once compiled the above, cleaning downloaded packages to reduce the image size
 #fomidable and socket.io are modules needed for the node js app
+#npm itself is upgraded before installing the above packages
 
 RUN \
 apk update && apk upgrade && \

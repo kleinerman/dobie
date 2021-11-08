@@ -491,7 +491,7 @@ if $OBFUS_CODE; then
 
   #Obfuscating the list of files that are in obfuscate.sh script.
   #This is done inside the container.
-  docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/opt/dobie-server --workdir /opt/dobie-server dobie/${IMG_PRFX}backend bash obfuscate.sh
+  docker run --name obfuscater --rm --network dobie_dobie-net -v $(realpath ../back_end):/dobie-venv/dobie-server --workdir /dobie-venv/dobie-server dobie/${IMG_PRFX}backend bash obfuscate.sh
 
   sudo rm -rf ../back_end/__pycache__/ #Remove if the directory exists from a previous installation
   sudo rm -rf ../back_end/pytransform/ #Remove if the directory exists from a previous installation

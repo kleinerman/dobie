@@ -1,5 +1,4 @@
-FROM arm64v8/python:3-slim
-
+FROM arm64v8/python:3.9-slim
 # Flask, Flask-HTTPAuth, requests and gevent are needed for REST API server.
 # PyMySQL is needed for database connection.
 # pillow is needed to check the person images uploaded format and save them
@@ -28,10 +27,11 @@ FROM arm64v8/python:3-slim
 # interactive TERM
 
 RUN \
-apt-get -y update && apt-get -y dist-upgrade && \
+DEBIAN_FRONTEND=noninteractive apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade && \
 DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils gcc make libffi-dev libssl-dev zlib1g-dev libjpeg-dev && \
 cp /usr/share/zoneinfo/America/Argentina/Cordoba /etc/localtime && \
 echo "America/Argentina/Cordoba" > /etc/timezone
+
 
 ENV VENV_DIR=/dobie-venv
 RUN python -m venv $VENV_DIR
